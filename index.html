@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SUtech Transport Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&display=swap">
+<style>
+/* Layout: top role switcher; phone stage + presenter notes for student/driver; sidebar dashboard for admin */
+:root{
+  --bg:#E9EFEE; --surface:#FFFFFF; --surface-2:#F4F7F6; --ink:#13242A; --muted:#58696E; --line:#D3DDDC;
+  --brand:#0D5868; --brand-2:#0A4553; --brand-soft:#DCEBEC; --on-brand:#FFFFFF;
+  --sun:#F0A500; --sun-soft:#FCEFCC; --on-sun:#2A1E00;
+  --ok:#1E8752; --ok-soft:#DDF1E5; --warn:#A8670D; --warn-soft:#FBECD3; --bad:#BE3A2E; --bad-soft:#F8DFDC;
+  --water:#B9D9E4; --land:#EEF1EA; --road:#FFFFFF; --block:#E1E6DE;
+  --shadow:0 18px 50px -20px rgba(13,40,48,.35);
+  --f-display:"Readex Pro","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1518; --surface:#142226; --surface-2:#1A2B30; --ink:#E4EEEE; --muted:#93A6AA; --line:#28393E;
+  --brand:#3FA3B5; --brand-2:#2D8696; --brand-soft:#173A42; --on-brand:#06171B;
+  --sun:#F2B12A; --sun-soft:#3A2E10; --on-sun:#1E1500;
+  --ok:#4CC08A; --ok-soft:#163528; --warn:#E3A848; --warn-soft:#3A2C13; --bad:#EF7A6E; --bad-soft:#3D1F1C;
+  --water:#1D4552; --land:#16242A; --road:#2B3D43; --block:#1C2E33;
+  --shadow:0 18px 50px -20px rgba(0,0,0,.7); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1518; --surface:#142226; --surface-2:#1A2B30; --ink:#E4EEEE; --muted:#93A6AA; --line:#28393E;
+  --brand:#3FA3B5; --brand-2:#2D8696; --brand-soft:#173A42; --on-brand:#06171B;
+  --sun:#F2B12A; --sun-soft:#3A2E10; --on-sun:#1E1500;
+  --ok:#4CC08A; --ok-soft:#163528; --warn:#E3A848; --warn-soft:#3A2C13; --bad:#EF7A6E; --bad-soft:#3D1F1C;
+  --water:#1D4552; --land:#16242A; --road:#2B3D43; --block:#1C2E33;
+  --shadow:0 18px 50px -20px rgba(0,0,0,.7); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+#app{min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.3}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;font-size:17px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--brand);display:grid;place-items:center}
+.brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:12px;color:var(--muted)}
+.roles{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px;margin-inline-start:auto;flex-wrap:wrap}
+.roles button{border:0;background:transparent;padding:7px 16px;border-radius:999px;font-weight:600;color:var(--muted)}
+.roles button[aria-pressed="true"]{background:var(--brand);color:var(--on-brand)}
+.reset{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:13px;color:var(--muted)}
+.mock-tag{font-size:12px;background:var(--sun-soft);color:var(--warn);padding:3px 10px;border-radius:999px;font-weight:600}
+
+/* stage */
+.stage{display:grid;grid-template-columns:minmax(0,392px) minmax(0,340px);justify-content:center;gap:40px;
+  padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.phone{width:100%;height:790px;background:var(--surface);border-radius:44px;border:10px solid #0F1E22;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden;position:relative}
+.p-status{display:flex;justify-content:space-between;padding:10px 22px 4px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.p-head{padding:6px 18px 12px;display:flex;align-items:center;gap:10px}
+.p-head h2{font-size:19px;flex:1}
+.back{border:1px solid var(--line);background:var(--surface);width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
+.p-body{flex:1;overflow-y:auto;padding:4px 16px 18px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.p-body>*{flex-shrink:0}
+.p-nav{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:var(--surface);padding:6px 4px 12px}
+.p-nav.two{grid-template-columns:repeat(2,1fr)}
+.p-nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--muted);padding:6px 0}
+.p-nav button[aria-current="true"]{color:var(--brand)}
+.p-nav svg{width:22px;height:22px}
+
+.notes{align-self:start;position:sticky;top:90px;display:flex;flex-direction:column;gap:14px}
+.notes .eyebrow{font-size:12px;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.notes h3{font-size:22px}
+.notes ul{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px;color:var(--ink)}
+.reqs{display:flex;flex-wrap:wrap;gap:6px}
+.req{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:6px;padding:2px 8px;background:var(--surface);font-variant-numeric:tabular-nums}
+.req.star{border-color:var(--sun);background:var(--sun-soft)}
+.flow{border-top:1px solid var(--line);padding-top:12px;font-size:13px;color:var(--muted)}
+.flow ol{margin:6px 0 0;padding-inline-start:18px}
+
+/* generic bits */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card.soft{background:var(--surface-2)}
+.hero-card{border-radius:18px;padding:16px;background:var(--brand);color:var(--on-brand);display:flex;flex-direction:column;gap:8px}
+.hero-card .muted{color:inherit;opacity:.8}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:600;background:var(--brand);color:var(--on-brand);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.block{width:100%}
+.btn.sun{background:var(--sun);color:var(--on-sun)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:9px}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.bad{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.input,select.input,textarea.input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:11px 12px}
+textarea.input{min-height:84px;resize:vertical}
+.row{display:flex;align-items:center;gap:10px}
+.row.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:10px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.info{background:var(--brand-soft);color:var(--brand)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.live .dot{animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.live .dot{animation:none}}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:600}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;font-weight:600;text-align:center}
+.tile svg{width:24px;height:24px;color:var(--brand)}
+.list{display:flex;flex-direction:column;gap:8px}
+.opt{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;text-align:start;display:flex;flex-direction:column;gap:4px;width:100%}
+.opt[aria-pressed="true"]{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand);background:var(--brand-soft)}
+.seats{height:6px;border-radius:6px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.seats i{display:block;height:100%;background:var(--brand)}
+.seats.full i{background:var(--bad)}
+.stops{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.stops li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;padding:8px 0;position:relative}
+.stops li::before{content:"";position:absolute;inset-inline-start:10px;top:0;bottom:0;width:2px;background:var(--line)}
+.stops li:first-child::before{top:50%} .stops li:last-child::before{bottom:50%}
+.stops .pin{width:14px;height:14px;border-radius:50%;border:3px solid var(--brand);background:var(--surface);z-index:1;margin-inline-start:4px}
+.stops li.sel .pin{background:var(--sun);border-color:var(--sun)}
+.stops li.off{opacity:.5;text-decoration:line-through}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--surface-2);padding:4px;border-radius:12px;border:1px solid var(--line)}
+.seg button{border:0;background:transparent;padding:9px;border-radius:9px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.copy{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:8px 10px;font-weight:600}
+.drop{border:1.5px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer}
+.drop img{max-height:140px;border-radius:10px}
+.drop input{display:none}
+.banner{border-radius:14px;padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.banner.warn{background:var(--warn-soft);color:var(--ink)}
+.banner.info{background:var(--brand-soft)}
+.banner.ok{background:var(--ok-soft)}
+.countdown{font-family:var(--f-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;direction:ltr}
+
+/* digital card */
+.idcard{border-radius:20px;padding:18px;color:#fff;background:
+  radial-gradient(120% 90% at 100% 0%,rgba(240,165,0,.35),transparent 55%),linear-gradient(150deg,#0D5868,#072F38);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px}
+.idcard::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 9px);pointer-events:none}
+.idcard .avatar{width:58px;height:58px;border-radius:14px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-family:var(--f-display);font-size:22px}
+.idcard .holo{position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.22) 45%,transparent 60%);background-size:250% 100%;animation:holo 3.5s linear infinite;pointer-events:none}
+@keyframes holo{from{background-position:120% 0}to{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.idcard .holo{animation:none}}
+.qrbox{background:#fff;border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#13242A}
+.qrbox canvas{width:180px;height:180px;image-rendering:pixelated}
+
+/* map */
+.map{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--land)}
+.map svg{display:block;width:100%;height:auto}
+.map text{font-family:var(--f-body);font-size:10px;fill:var(--muted)}
+.eta{display:flex;align-items:baseline;gap:6px}
+.eta b{font-family:var(--f-display);font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:8px}
+.msg{max-width:85%;padding:9px 12px;border-radius:16px;font-size:14px;white-space:pre-line}
+.msg.bot{background:var(--surface-2);border:1px solid var(--line);align-self:flex-start;border-start-start-radius:4px}
+.msg.me{background:var(--brand);color:var(--on-brand);align-self:flex-end;border-start-end-radius:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600}
+.composer{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface)}
+.composer .input{border-radius:999px}
+.typing{display:inline-flex;gap:3px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pulse 1s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+
+/* admin */
+.admin{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:calc(100vh - 60px)}
+.side{background:var(--surface);border-inline-end:1px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:2px}
+.side .grp{font-size:11.5px;font-weight:600;color:var(--muted);padding:12px 12px 4px;letter-spacing:.03em}
+.side button{border:0;background:none;text-align:start;padding:9px 12px;border-radius:10px;font-weight:600;display:flex;align-items:center;gap:10px;color:var(--ink)}
+.side button svg{width:18px;height:18px;color:var(--muted)}
+.side button[aria-current="true"]{background:var(--brand-soft);color:var(--brand)}
+.side button[aria-current="true"] svg{color:var(--brand)}
+.side .badge{margin-inline-start:auto;background:var(--sun);color:var(--on-sun);font-size:11px;border-radius:999px;padding:0 7px;font-variant-numeric:tabular-nums}
+.main{padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px;min-width:0}
+.main-inner{max-width:1180px;width:100%;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+.ph{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.ph h2{font-size:24px}
+.ph .sp{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--f-display);font-size:28px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel h3{font-size:16px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+.tbl th{background:var(--surface-2);text-align:start;font-weight:600;color:var(--muted);font-size:12.5px;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.num{font-variant-numeric:tabular-nums}
+.bar{display:grid;grid-template-columns:150px 1fr 64px;gap:10px;align-items:center;font-size:13px}
+.bar .track{height:10px;background:var(--surface-2);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar .track i{display:block;height:100%;background:var(--brand);border-radius:6px}
+.bar .track i.hot{background:var(--sun)}
+.chain{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:12px}
+.chain span{padding:2px 8px;border-radius:6px;border:1px solid var(--line);font-weight:600}
+.chain span.done{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.chain span.now{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chain span.rej{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.thumb{width:56px;height:42px;border-radius:8px;object-fit:cover;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-size:10px;color:var(--muted)}
+.linecards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.feed{display:flex;flex-direction:column;gap:10px;font-size:13.5px}
+.feed div{display:flex;gap:10px} .feed time{color:var(--muted);font-variant-numeric:tabular-nums;min-width:44px}
+.modal-bg{position:fixed;inset:0;background:rgba(5,20,24,.5);z-index:50;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border-radius:18px;padding:20px;width:min(460px,100%);display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);max-height:90vh;overflow:auto}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));inset-inline-start:50%;transform:translateX(50%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:600;z-index:60;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+.export-prev{font-size:12.5px}
+
+@media (max-width:900px){
+  .stage{grid-template-columns:minmax(0,420px)}
+  .notes{position:static}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .admin{grid-template-columns:minmax(0,1fr)}
+  .side{flex-direction:row;overflow-x:auto;border-inline-end:0;border-bottom:1px solid var(--line);padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+  .side .grp{display:none}
+  .side button{white-space:nowrap;flex:none}
+}
+@media (max-width:520px){
+  .stage{padding-left:0;padding-right:0;padding-block:0 24px;gap:20px}
+  .phone{border:0;border-radius:0;height:calc(100vh - 110px);min-height:600px;box-shadow:none}
+  .p-status{display:none}
+  .notes{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .bar{grid-template-columns:100px 1fr 54px}
+  .roles{margin-inline-start:0;width:100%}
+  .roles button{flex:1;padding:7px 8px}
+}
+</style>
+</head>
+<body>
+<style>
+.err{color:var(--bad);font-size:13px;font-weight:600}
+.hint{font-size:12.5px;color:var(--muted)}
+.icon-btn{position:relative;border:1px solid var(--line);background:var(--surface);width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.icon-btn .cnt{position:absolute;top:-6px;inset-inline-end:-6px;background:var(--bad);color:#fff;font-size:10.5px;font-weight:700;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px;font-variant-numeric:tabular-nums}
+.notif{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.notif.unread{border-color:var(--brand);background:var(--brand-soft)}
+.notif time{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.scanres{border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;font-weight:600}
+.scanres.ok{background:var(--ok-soft);color:var(--ok)}
+.scanres.bad{background:var(--bad-soft);color:var(--bad)}
+.fawry-code{font-family:var(--f-display);font-size:30px;letter-spacing:.12em;text-align:center;direction:ltr;font-variant-numeric:tabular-nums}
+.seg.three{grid-template-columns:repeat(3,1fr)}
+.seg.four{grid-template-columns:repeat(4,1fr)}
+.seg.four button,.seg.three button{padding:8px 4px;font-size:13px}
+.audit td{font-size:13px}
+</style>
+
+<div id="app" dir="rtl" lang="ar"></div>
+
+<script>
+(function(){
+document.documentElement.setAttribute('dir','rtl');document.documentElement.setAttribute('lang','ar');
+
+/* ---------- icons ---------- */
+const I={
+ home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ map:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',
+ card:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.5 1.7-2 3-2s2.4.5 3 2M14 10h4M14 13h3"/>',
+ bot:'<rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6"/>',
+ route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h7"/>',
+ alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+ msg:'<path d="M4 5h16v11H8l-4 4z"/>',
+ doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',
+ bus:'<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 21v-3M16 21v-3"/><circle cx="8" cy="14.5" r="1"/><circle cx="16" cy="14.5" r="1"/>',
+ grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c.8-3.5 3.6-5 7-5s6.2 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.4 2.2 4 5"/>',
+ money:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 9v.01M18 15v.01"/>',
+ inbox:'<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+ back:'<path d="M9 6l6 6-6 6"/>',
+ cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/>',
+ send:'<path d="M20 4L3 11l7 2 2 7z"/>',
+ swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+ refund:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 8v8M9.5 10.5c0-1 1-1.5 2.5-1.5s2.5.6 2.5 1.6c0 2.4-5 1.2-5 3.6 0 1 1 1.8 2.5 1.8s2.5-.6 2.5-1.5"/>',
+ bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+ out:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+ list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+ check:'<path d="M5 12l5 5 9-10"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ mega:'<path d="M3 10v4h3l7 5V5L6 10z"/><path d="M17 9a4 4 0 0 1 0 6M19.5 6.5a7.5 7.5 0 0 1 0 11"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ heart:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/><path d="M9 11h6M12 8v6"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ org:'<path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6M9 11h.01M15 11h.01"/>',
+ eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+};
+const ic=(n,s)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ${s?`style="width:${s}px;height:${s}px"`:''} aria-hidden="true">${I[n]}</svg>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>Math.round(Number(n)).toLocaleString('en-US')+' ج.م';
+const nowT=()=>new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+const DAY=864e5, TODAY='2026-10-22';
+const FAWRY_FEE=7.5;
+const BUS_TYPES={'ميني باص 14 راكب':14,'ميني باص 28 راكب':28,'باص 33 راكب':33,'باص 50 راكب':50};
+
+/* ---------- mock data ---------- */
+function seed(){
+ return {
+ role:'student', tick:0, busT:{L1:.18,L2:.52,L3:.05,L4:.71}, modal:null,
+ lines:[
+  {id:'L1',busId:'B1',name:'خط السويس – الأربعين',price:4200,bus:'ن ص ق 4821',busType:'ميني باص 28 راكب',cap:28,booked:24,driver:'محمود عبد الرحمن',phone:'0100 234 5678',owner:'الجامعة',
+   stops:[{n:'ميدان الأربعين',t:'6:40'},{n:'شارع الجيش',t:'6:50'},{n:'الكورنيش الجديد',t:'7:00'},{n:'مستشفى السويس العام',t:'7:10'},{n:'بوابة الجامعة',t:'7:35'}]},
+  {id:'L2',busId:'B2',name:'خط الإسماعيلية',price:5600,bus:'س ع م 7310',busType:'باص 50 راكب',cap:50,booked:46,driver:'سيد إبراهيم',phone:'0111 870 4402',owner:'أبو الهول',
+   stops:[{n:'محطة قطار الإسماعيلية',t:'6:15'},{n:'دوران الشيخ زايد',t:'6:25'},{n:'فايد',t:'6:55'},{n:'بوابة الجامعة',t:'7:40'}]},
+  {id:'L3',busId:'B3',name:'خط فيصل – السلام',price:3800,bus:'ر ب ط 2296',busType:'ميني باص 28 راكب',cap:28,booked:28,driver:'أحمد فوزي',phone:'0122 509 1188',owner:'الجامعة',
+   stops:[{n:'حي فيصل',t:'6:50'},{n:'مساكن السلام',t:'7:00'},{n:'سوق الأربعين',t:'7:10'},{n:'بوابة الجامعة',t:'7:30'}]},
+  {id:'L4',busId:'B4',name:'خط العين السخنة',price:6200,bus:'ه و ل 9014',busType:'باص 33 راكب',cap:33,booked:19,driver:'عادل منصور',phone:'0155 330 7720',owner:'أبو الهول',
+   stops:[{n:'منطقة الأدبية',t:'6:20'},{n:'عتاقة',t:'6:45'},{n:'بوابة الجامعة',t:'7:25'}]},
+ ],
+ st:{screen:'login',fetched:false,idErr:'',otpErr:'',otpTries:0,sub:null,lineSel:null,stopSel:null,stopErr:'',pay:'instapay',receipt:null,ref:'',payErr:'',fawry:null,
+   chat:[{who:'bot',t:'أهلًا يا يوسف 👋 أنا مساعد النقل. اسألني عن مواعيد الباص، الاشتراك، الدفع، الاسترداد أو تغيير الخط.'}],typing:false,reqTab:'refund',reqErr:'',cErr:'',
+   notifs:[],departs:[]},
+ buses:[
+  {id:'B1',plate:'ن ص ق 4821',type:'ميني باص 28 راكب',cap:28,owner:'الجامعة',driver:'محمود عبد الرحمن',phone:'0100 234 5678',line:'L1',status:'ok'},
+  {id:'B2',plate:'س ع م 7310',type:'باص 50 راكب',cap:50,owner:'أبو الهول',driver:'سيد إبراهيم',phone:'0111 870 4402',line:'L2',status:'ok'},
+  {id:'B3',plate:'ر ب ط 2296',type:'ميني باص 28 راكب',cap:28,owner:'الجامعة',driver:'أحمد فوزي',phone:'0122 509 1188',line:'L3',status:'ok'},
+  {id:'B4',plate:'ه و ل 9014',type:'باص 33 راكب',cap:33,owner:'أبو الهول',driver:'عادل منصور',phone:'0155 330 7720',line:'L4',status:'ok'},
+  {id:'B5',plate:'ع ف ر 5530',type:'باص 50 راكب',cap:50,owner:'أبو الهول',driver:'رضا عبد العزيز',phone:'0109 441 2290',line:null,status:'ok'},
+  {id:'B6',plate:'ط ي ب 3318',type:'ميني باص 28 راكب',cap:28,owner:'الجامعة',driver:'حسن مرسي',phone:'0127 660 3415',line:null,status:'ok'},
+  {id:'B7',plate:'م ج د 6402',type:'باص 33 راكب',cap:33,owner:'الجامعة',driver:'',phone:'',line:null,status:'repair'},
+ ],
+ departures:[{id:'D-1',time:'13:30',line:'all',cap:28,booked:9,reason:'إلغاء محاضرات الفرقة التانية بعد الضهر',st:'open'}],
+ announcements:[{id:'A-1',at:'07:12',target:'L2',kind:'تأخير',mins:6,text:'زحمة عند دوران فايد',by:'سائق خط الإسماعيلية'}],
+ delays:{L2:{mins:6,reason:'زحمة عند دوران فايد'}},
+ permits:[{id:'M-1',sid:'2023102778',student:'نورهان مجدي',kind:'أولوية كرسي',from:'2026-10-20',to:'2026-11-03',by:'د. سامية – العيادة',st:'active'}],
+ events:[{id:'E-1',name:'التربية العسكرية',date:'2026-10-29',students:140,need:3,buses:['B6'],ah:2,st:'مستني أبو الهول'}],
+ watch:['2022100331'],
+ drv:{screen:'trip',tripOn:false,gps:null,boarded:['مريم خالد حسن','عمر طارق السيد'],lastScan:null,photo:null,vStudent:'',vType:'تدخين داخل الباص',vDesc:'',vErr:''},
+ adm:{page:'overview',q:'',repBy:'line',repLine:'L1'},
+ students:[
+  {id:'2023104587',name:'يوسف أحمد سالم',fac:'تكنولوجيا الصناعة والطاقة',line:'',stop:'',st:'none',assign:null},
+  {id:'2022100331',name:'مريم خالد حسن',fac:'تكنولوجيا الصناعة والطاقة',line:'L1',stop:'الكورنيش الجديد',st:'active',assign:null},
+  {id:'2024101205',name:'عمر طارق السيد',fac:'العلوم الصحية التطبيقية',line:'L1',stop:'شارع الجيش',st:'active',assign:null},
+  {id:'2023102778',name:'نورهان مجدي',fac:'تكنولوجيا الصناعة والطاقة',line:'L1',stop:'ميدان الأربعين',st:'active',assign:null},
+  {id:'2022103090',name:'كريم ياسر عبد الله',fac:'الفنون التطبيقية',line:'L2',stop:'فايد',st:'active',assign:{type:'مؤقت',to:'L4',until:'2026-11-05'}},
+  {id:'2024100412',name:'سلمى إيهاب',fac:'العلوم الصحية التطبيقية',line:'L2',stop:'دوران الشيخ زايد',st:'pending',assign:null},
+  {id:'2023101966',name:'محمد حمدي رشاد',fac:'تكنولوجيا الصناعة والطاقة',line:'L3',stop:'مساكن السلام',st:'active',assign:null},
+  {id:'2022104420',name:'هبة سامي',fac:'الفنون التطبيقية',line:'L1',stop:'شارع الجيش',st:'cancelled',assign:null},
+  {id:'2024103351',name:'زياد وليد',fac:'العلوم الصحية التطبيقية',line:'L4',stop:'عتاقة',st:'active',assign:null},
+ ],
+ payments:[
+  {id:'P-1042',student:'سلمى إيهاب',sid:'2024100412',line:'L2',amount:5600,method:'InstaPay',ref:'IPN58210933',at:'اليوم 10:14',st:'pending',img:null},
+  {id:'P-1040',student:'محمد حمدي رشاد',sid:'2023101966',line:'L3',amount:3800,method:'فوري',ref:'FWR 7731 0442',at:'أمس 18:02',st:'approved',auto:true,img:null},
+  {id:'P-1039',student:'زياد وليد',sid:'2024103351',line:'L4',amount:6200,method:'تحويل بنكي',ref:'BNK-77310',at:'أمس 15:40',st:'approved',img:null},
+ ],
+ requests:[
+  {id:'R-221',type:'استرداد',student:'هبة سامي',sid:'2022104420',detail:'سفر للخارج – الأسبوع 3 من الترم',paid:3800,pct:25,steps:[['ولي الأمر','done'],['إدارة النقل','now'],['المالية','wait']]},
+  {id:'R-219',type:'تغيير خط',student:'كريم ياسر عبد الله',sid:'2022103090',detail:'إلى خط العين السخنة (مؤقت لحد 5 نوفمبر)',steps:[['ولي الأمر','done'],['إدارة النقل','done']]},
+  {id:'R-224',type:'دخول مجسم مشروع',student:'محمد حمدي رشاد',sid:'2023101966',detail:'مجسم مشروع تخرج 120×80 سم يوم الأحد',steps:[['ولي الأمر','done'],['إدارة النقل','now']]},
+ ],
+ violations:[
+  {id:'V-88',student:'عمر طارق السيد',type:'رفض إظهار الكارنيه',desc:'رفض يوري الكارنيه عند الركوب عند نقطة شارع الجيش.',by:'محمود عبد الرحمن (سائق خط السويس)',at:'أمس 06:52',img:null,st:'محالة للأمن'},
+ ],
+ complaints:[
+  {id:'C-57',student:'يوسف أحمد سالم',sid:'2023104587',cat:'تأخير',text:'الباص اتأخر 25 دقيقة يوم الاتنين ومحدش بلغنا.',at:'20 أكتوبر',st:'تم الرد',reply:'اعتذار عن التأخير بسبب عطل مفاجئ. هيتم إرسال إشعار تلقائي من التطبيق عند أي تأخير.'},
+  {id:'C-58',student:'مريم خالد حسن',sid:'2022100331',cat:'التكييف',text:'التكييف في باص خط السويس مش شغال من أسبوع.',at:'21 أكتوبر',st:'جديدة',reply:''},
+ ],
+ feed:[['07:12','باص خط الإسماعيلية وصل فايد متأخر 6 دقائق'],['06:52','مخالفة جديدة من سائق خط السويس'],['06:40','بدأت رحلة الذهاب – خط السويس'],['أمس','المالية وافقت على إيصال زياد وليد']],
+ audit:[['أمس 18:02','فوري (تلقائي)','تأكيد دفع محمد حمدي رشاد – 3,800 ج.م'],['أمس 15:41','المالية: منى عادل','موافقة على إيصال زياد وليد P-1039'],['أمس 09:20','النقل: أ. خالد','إلغاء اشتراك هبة سامي (طلب استرداد R-221)']],
+ seq:{P:1043,R:225,C:59,V:89,A:2,D:2,M:2,E:2,B:8,L:5},
+ };
+}
+let S=seed();
+const L=id=>S.lines.find(l=>l.id===id);
+const ME={id:'2023104587',name:'يوسف أحمد سالم',fac:'كلية تكنولوجيا الصناعة والطاقة',level:'الفرقة الثانية',phone:'010•••••372',initials:'ي س',guardian:'أحمد سالم'};
+const POLICY=[['قبل بداية الترم',0],['الأسبوع 1–2',10],['الأسبوع 3–6',25],['بعد الأسبوع 6',50]];
+const TERM_WEEK=3, POLICY_PCT=25;
+const LIVE=['reserved','pending','active'];
+const sub=()=>S.st.sub;
+const isLive=()=>!!(sub()&&LIVE.includes(sub().status));
+const isActive=()=>!!(sub()&&sub().status==='active');
+const meRow=()=>S.students.find(s=>s.id===ME.id);
+const seatsLeft=l=>l.cap-l.booked;
+const activeStops=l=>l.stops.filter((s,i)=>!s.off&&i<l.stops.length-1);
+const nid=k=>`${k}-${S.seq[k]++}`;
+const B=id=>S.buses.find(b=>b.id===id);
+const permitOf=sid=>S.permits.find(p=>p.sid===sid&&p.st==='active'&&p.to>=TODAY);
+const lineName=id=>id==='all'?'كل الخطوط':(L(id)?.name||'—');
+function applyBus(l,b){Object.assign(l,{busId:b.id,bus:b.plate,busType:b.type,cap:b.cap,driver:b.driver,phone:b.phone,owner:b.owner});b.line=l.id}
+function onLine(lid){return isLive()&&sub().line===lid}
+function announce(o){const a=Object.assign({id:nid('A'),at:nowT()},o);S.announcements.unshift(a);
+ if(a.kind==='تأخير'&&a.mins){(a.target==='all'?S.lines.map(l=>l.id):[a.target]).forEach(id=>S.delays[id]={mins:a.mins,reason:a.text})}
+ feed(`إعلان (${a.kind}) لـ${lineName(a.target)}: ${a.text}`);log(a.by,`نشر إعلان ${a.kind} لـ${lineName(a.target)}`);
+ if(a.target==='all'||onLine(a.target))notify(`${a.kind}${a.mins?' '+a.mins+' دقيقة':''}: ${a.text}`);return a}
+
+function reqState(r){if(r.steps.some(s=>s[1]==='rej'))return['bad','مرفوض'];if(r.steps.every(s=>s[1]==='done'))return['ok','تمت الموافقة'];return['warn','قيد الموافقة']}
+const isOpen=r=>reqState(r)[0]==='warn';
+const myOpen=type=>S.requests.find(r=>r.sid===ME.id&&isOpen(r)&&(!type||r.type===type));
+
+function log(actor,what){S.audit.unshift([nowT(),actor,what])}
+function feed(t){S.feed.unshift([nowT(),t])}
+function notify(t){S.st.notifs.unshift({t,at:nowT(),read:false})}
+function syncMe(o){Object.assign(meRow(),o)}
+
+let toastT;
+function toast(m,kind){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+ t.textContent=m;t.style.background=kind==='bad'?'var(--bad)':'';t.style.color=kind==='bad'?'#fff':'';t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
+
+/* ---------- presenter notes ---------- */
+const NOTES={
+ login:['التسجيل بالرقم الجامعي','الطالب يكتب رقمه الجامعي مرة واحدة، والسيستم يجيب اسمه وكليته وموبايله من قاعدة بيانات الـ Admission.',['الرقم لازم يكون 10 أرقام وموجود في الـ Admission (جرّب رقم غلط)','كود OTP على الموبايل المسجل، و3 محاولات غلط تقفل الدخول مؤقتًا (الكود في الديمو 4821)','PWA: لينك واحد يشتغل على أندرويد وآيفون والكمبيوتر ويتثبت على الشاشة الرئيسية'],['2','3']],
+ home:['الرئيسية','كل اللي الطالب محتاجه في شاشة واحدة: حالة اشتراكه، الباص فين، واختصارات لكل الخدمات.',['حالة الاشتراك: غير مشترك ← محجوز ← قيد المراجعة ← نشط','أي تأخير أو تغيير باص على خطه بيظهر فوق، والوقت المتوقع بيتحسب فيه التأخير','جرس الإشعارات بيجمع كل قرارات الإدارة والمالية وولي الأمر','حجز مكان في رحلة المغادرة الإضافية للمشتركين بس'],['1','18','19']],
+ notifs:['الإشعارات','كل حدث يخص الطالب بيوصله إشعار (Push في الـ PWA).',['موافقة أو رفض الدفع وسببه','قرار ولي الأمر والنقل والمالية في الطلبات','إلغاء نقطة، نقل لخط تاني، رد على شكوى'],['16','20']],
+ lines:['اختيار الخط','الطالب يشوف كل الخطوط بأسعارها والأماكن المتاحة في كل باص.',['اشتراك واحد بس للطالب: لو مشترك أو حاجز، الاختيار بيتقفل ويحوله لطلب تغيير خط','الخط المكتمل بيتقفل تلقائي'],['1','4','7']],
+ line:['تفاصيل الخط والحجز','بيختار النقطة بتاعته ويشوف الميعاد واسم السائق ورقمه ولوحة الباص، وبعدين يحجز.',['النقط الملغاة من الإدارة مش بتظهر للاختيار','الحجز بيمسك الكرسي 24 ساعة وبيتثبت سعره وقت الحجز','لو ما دفعش في الـ 24 ساعة الكرسي بيرجع متاح تلقائي'],['1','3','4']],
+ pay:['الدفع','3 طرق: InstaPay، تحويل بنكي، أو كود فوري.',['InstaPay والبنكي: صورة الإيصال + رقم العملية، والمالية تراجع','رقم العملية ما ينفعش يتكرر (حماية من استخدام نفس الإيصال مرتين)','فوري: كود دفع يتدفع في أي منفذ أو myFawry، والتأكيد بيوصل تلقائي من غير مراجعة'],['6','3']],
+ card:['الكارنيه الرقمي','كارنيه على الموبايل فيه QR بيتغير كل 30 ثانية، فصورة الشاشة ما تنفعش.',['بيتفعل بس بعد تأكيد الدفع، وبيتقفل لو الاشتراك اتلغى أو اترد','المشرف يمسح الـ QR عند الركوب من تطبيق السائق'],['14']],
+ track:['تتبع الباص لايف','موقع الباص بيتحدث كل ثانيتين من موبايل السائق، والطالب يعرف فاضل كام دقيقة على نقطته.',['الأولوية رقم 1 حسب ورقة التيم','إشعار لما الباص يقرب أو يتأخر','الخريطة هنا توضيحية، النسخة الفعلية على خرائط حقيقية'],['18★','16']],
+ complaints:['الشكاوى','الطالب يرفع شكوى بتصنيف، والإدارة ترد عليه من اللوحة ويوصله إشعار.',['ما ينفعش يبعت نفس الشكوى مرتين وهي لسه مفتوحة','كل شكوى ليها حالة: جديدة، تم الرد'],['20']],
+ chat:['المساعد الذكي (شات بوت)','بيرد على أسئلة الطلاب المتكررة من بياناتهم الحقيقية: الباص فين، بكام، إزاي أدفع، سياسة الاسترداد.',['الردود هنا محددة مسبقًا للعرض فقط','النسخة الفعلية: نموذج ذكاء اصطناعي مربوط بسياسات النقل وبيانات الطالب (RAG)','لو السؤال خارج اختصاصه بيحوّل لموظف'],['20','18']],
+ requests:['الطلبات','استرداد، تغيير خط، أو دخول مجسم مشروع، وكلهم بيمشوا في سلسلة موافقات واحدة.',['طلب مفتوح واحد بس في المرة، فالضغط المتكرر ما بيعملش طلبات زيادة','الاسترداد بيتحسب على المبلغ اللي اتدفع فعلًا، مش السعر الحالي','لما الاسترداد يكمل: الكارنيه بيتقفل والكرسي بيرجع متاح'],['5','9','11']],
+ parent:['تطبيق ولي الأمر','ولي الأمر بيوافق أو يرفض طلبات ابنه، ويشوف الباص وهل ابنه ركب.',['أي طلب من الطالب بيبدأ عند ولي الأمر','لو رفض، الطلب بيقف والطالب يوصله إشعار','نفس الـ PWA، الشاشات بتتغير حسب الدور'],['5','9','16']],
+ trip:['تطبيق السائق: الرحلة','السائق يبدأ الرحلة فيبدأ إرسال موقعه، والمشرف يمسح كارنيهات الطلاب عند الركوب.',['السائق يبلغ الطلاب بتأخير أو عطل بضغطة، من غير مكالمات','المسح مش بيشتغل غير والرحلة شغالة','كارنيه ملغى أو منتهي بيطلع أحمر ويتسجل','في الـ PWA الشاشة لازم تفضل مفتوحة أثناء الرحلة (Wake Lock)'],['18★','14','16']],
+ violation:['تطبيق السائق: تسجيل مخالفة','السائق أو المشرف يسجل مخالفة فورًا بصورة، وتوصل لإدارة النقل والأمن.',['اختيار الطالب من اللي ركبوا الرحلة دي بس','لازم وصف أو صورة كدليل','تظهر فورًا في لوحة الإدارة (جرّب)'],['13','17']],
+};
+const FLOW='<div class="flow"><b>سيناريو العرض المقترح</b><ol><li>سجل دخول بالرقم الجامعي</li><li>اختار خط ونقطة واحجز</li><li>ادفع بفوري أو ارفع إيصال InstaPay</li><li>من «الإدارة» وافق على الإيصال</li><li>ارجع للطالب: الكارنيه اتفعل وجالك إشعار</li><li>قدّم طلب استرداد، ووافق عليه من «ولي الأمر» ثم «الإدارة»</li><li>من «الإدارة» ← الإعلانات: ابعت تأخير لخطك وشوفه عند الطالب</li></ol></div>';
+function notes(k){const n=NOTES[k];if(!n)return'';return `<aside class="notes"><div class="eyebrow">ملاحظات للعرض</div><h3>${n[0]}</h3><p style="margin:0">${n[1]}</p><ul>${n[2].map(x=>`<li>${x}</li>`).join('')}</ul><div class="reqs"><span class="muted" style="font-size:12px">بنود ورقة التيم:</span>${n[3].map(r=>`<span class="req${r.includes('★')?' star':''}">${r}</span>`).join('')}</div>${S.role==='student'?FLOW:''}</aside>`}
+
+/* ---------- shell ---------- */
+function pendingAdmin(){return S.payments.filter(p=>p.st==='pending').length+S.requests.filter(r=>{const n=r.steps.find(s=>s[1]==='now');return n&&n[0]!=='ولي الأمر'}).length}
+function render(){
+ const pend=pendingAdmin(), par=S.requests.filter(r=>r.sid===ME.id&&r.steps[0][1]==='now').length;
+ const roles=[['student','الطالب',0],['parent','ولي الأمر',par],['driver','السائق',0],['admin','الإدارة',pend]];
+ const top=`<header class="top"><div class="brand"><div class="brand-mark">${ic('bus',20).replace('currentColor','#fff')}</div><div>نقل SUtech<small>نموذج تفاعلي أولي · PWA</small></div></div>
+ <span class="mock-tag">بيانات تجريبية</span>
+ <nav class="roles" aria-label="اختيار الواجهة">${roles.map(([k,t,c])=>`<button data-act="role" data-v="${k}" aria-pressed="${S.role===k}">${t}${c?` · ${c}`:''}</button>`).join('')}</nav>
+ <button class="reset" data-act="reset">إعادة الديمو</button></header>`;
+ let body='';
+ if(S.role==='student') body=`<main class="stage">${phone(student())}${notes(S.st.screen)}</main>`;
+ else if(S.role==='parent') body=`<main class="stage">${phone(parent())}${notes('parent')}</main>`;
+ else if(S.role==='driver') body=`<main class="stage">${phone(driver())}${notes(S.drv.screen)}</main>`;
+ else body=admin();
+ const ae=document.activeElement, aid=ae&&ae.id, sel=aid&&ae.selectionStart;
+ const sc=document.querySelector('.p-body')?.scrollTop;
+ document.getElementById('app').innerHTML=top+body+(S.modal?modal():'');
+ if(aid){const n=document.getElementById(aid);if(n&&n.tagName!=='BUTTON'){n.focus();try{if(sel!=null)n.setSelectionRange(sel,sel)}catch(e){}}}
+ const pb=document.querySelector('.p-body'); if(pb&&sc!=null&&!render.resetScroll)pb.scrollTop=sc; render.resetScroll=false;
+ after();
+}
+function go(scr){S.st.screen=scr;S.st.reqErr='';S.st.cErr='';render.resetScroll=true;if(scr==='notifs'){render();S.st.notifs.forEach(n=>n.read=true);return}render()}
+function phone(inner){return `<div class="phone"><div class="p-status"><span class="num">${nowT()}</span><span>5G ▮▮▮ 86%</span></div>${inner}</div>`}
+function head(title,back,extra){return `<div class="p-head">${back?`<button class="back" data-act="go" data-v="${back}" aria-label="رجوع">${ic('back',18)}</button>`:''}<h2>${title}</h2>${extra||''}</div>`}
+function nav(cur){const it=[['home','الرئيسية','home'],['track','التتبع','map'],['card','الكارنيه','card'],['chat','المساعد','bot'],['requests','طلباتي','doc']];
+ return `<nav class="p-nav">${it.map(([k,t,i])=>`<button data-act="go" data-v="${k}" aria-current="${cur===k}">${ic(i)}${t}</button>`).join('')}</nav>`}
+const errLine=m=>m?`<div class="err" role="alert">${esc(m)}</div>`:'';
+
+/* ---------- student ---------- */
+function student(){
+ const s=S.st;
+ const unread=s.notifs.filter(n=>!n.read).length;
+ const tools=`<button class="icon-btn" data-act="go" data-v="notifs" aria-label="الإشعارات">${ic('bell',18)}${unread?`<span class="cnt">${unread}</span>`:''}</button><button class="icon-btn" data-act="logout" aria-label="تسجيل خروج">${ic('out',18)}</button>`;
+ switch(s.screen){
+ case 'login': return stLogin();
+ case 'home': return head('أهلًا يا يوسف','',tools)+`<div class="p-body">${stHome()}</div>`+nav('home');
+ case 'notifs': return head('الإشعارات','home')+`<div class="p-body">${stNotifs()}</div>`+nav('');
+ case 'lines': return head('الخطوط والأسعار','home')+`<div class="p-body">${stLines()}</div>`+nav('');
+ case 'line': return head(L(s.lineSel).name,'lines')+`<div class="p-body">${stLine()}</div>`+nav('');
+ case 'pay': return head('الدفع','home')+`<div class="p-body">${stPay()}</div>`+nav('');
+ case 'card': return head('الكارنيه الرقمي')+`<div class="p-body">${stCard()}</div>`+nav('card');
+ case 'track': return head('الباص فين؟')+`<div class="p-body">${stTrack()}</div>`+nav('track');
+ case 'complaints': return head('الشكاوى','home')+`<div class="p-body">${stComplaints()}</div>`+nav('');
+ case 'chat': return head('المساعد الذكي')+stChat()+nav('chat');
+ case 'requests': return head('طلباتي')+`<div class="p-body">${stRequests()}</div>`+nav('requests');
+ }
+}
+function stLogin(){
+ const s=S.st, locked=s.otpTries>=3;
+ return `<div class="p-body" style="justify-content:center;gap:16px;padding-top:24px">
+ <div class="stack" style="align-items:center;text-align:center;gap:6px"><div class="brand-mark" style="width:64px;height:64px;border-radius:18px">${ic('bus',34).replace('currentColor','#fff')}</div>
+ <h2 style="font-size:24px;margin-top:8px">نقل الجامعة</h2><p class="muted" style="margin:0">سجّل مرة واحدة بالرقم الجامعي</p></div>
+ <div class="field"><label for="sid">الرقم الجامعي</label><input id="sid" class="input num" inputmode="numeric" maxlength="10" value="${s.fetched?ME.id:(s.sidVal??ME.id)}" ${s.fetched?'readonly':''} style="direction:ltr;text-align:right;font-size:18px;letter-spacing:.06em">${errLine(s.idErr)}</div>
+ ${!s.fetched?`<button class="btn block" data-act="fetch">تحقق من بياناتي</button><span class="hint" style="text-align:center">للعرض: الرقم الموجود في الـ Admission هو ${ME.id}</span>`:`
+ <div class="card soft stack"><div class="row between"><b>بياناتك من الـ Admission</b><span class="pill ok">${ic('shield',13)} موثّقة</span></div>
+ <dl class="kv"><dt>الاسم</dt><dd>${ME.name}</dd><dt>الكلية</dt><dd>${ME.fac}</dd><dt>الفرقة</dt><dd>${ME.level}</dd><dt>الموبايل</dt><dd class="ltr num">${ME.phone}</dd></dl></div>
+ <div class="field"><label for="otp">كود التحقق اتبعت على موبايلك</label><input id="otp" class="input num" inputmode="numeric" maxlength="7" placeholder="– – – –" ${locked?'disabled':''} style="direction:ltr;text-align:center;font-size:22px;letter-spacing:.4em">${errLine(s.otpErr)}<span class="hint">للعرض: الكود 4821</span></div>
+ <button class="btn block sun" data-act="login" ${locked?'disabled':''}>دخول</button>
+ ${locked?`<button class="btn block ghost sm" data-act="resendOtp">ابعت كود جديد</button>`:''}<button class="btn block ghost sm" data-act="notMe">مش أنا؟ غيّر الرقم</button>`}
+ <div class="banner info" style="font-size:12.5px">${ic('home',16)}<span>تطبيق ويب (PWA): بيتفتح من المتصفح ويتثبت على الشاشة الرئيسية زي أي تطبيق، من غير متجر.</span></div></div>`;
+}
+function stNotifs(){
+ const n=S.st.notifs;
+ return n.length?`<div class="list">${n.map(x=>`<div class="notif ${x.read?'':'unread'}">${ic('bell',18)}<span style="flex:1">${esc(x.t)}</span><time>${x.at}</time></div>`).join('')}</div>`:'<p class="muted" style="margin:0">مفيش إشعارات لسه. أي قرار من المالية أو الإدارة أو ولي الأمر هيظهر هنا.</p>';
+}
+const stopTime=(l,n)=>(l.stops.find(x=>x.n===n)||l.stops[0]).t;
+function subStatus(){
+ const s=sub();
+ if(!isLive()){
+  const prev=s?{refunded:'اشتراكك السابق اترد واتقفل.',cancelled:'اشتراكك السابق اتلغى من إدارة النقل.',expired:'مهلة الحجز السابق خلصت والكرسي رجع متاح.'}[s.status]:'';
+  return `<div class="hero-card"><span class="muted" style="font-size:13px">اشتراك الترم الأول 2026/2027</span><h3 style="font-size:20px">مش مشترك حاليًا</h3><p style="margin:0;opacity:.85">${prev?prev+' ':''}اختار الخط والنقطة الأقرب ليك واحجز مكانك.</p><button class="btn sun" data-act="go" data-v="lines">اختار خطك</button></div>`;}
+ const l=L(s.line);
+ if(s.status==='reserved') return `<div class="hero-card"><div class="row between"><span class="muted" style="font-size:13px">${l.name} · ${esc(s.stop)}</span><span class="pill warn">محجوز</span></div><span>ادفع خلال</span><div class="countdown" id="resCd">23:59:59</div>${s.rejectReason?`<span style="font-size:13px">الإيصال السابق اترفض: ${esc(s.rejectReason)}</span>`:''}<button class="btn sun" data-act="go" data-v="pay">ادفع ${money(s.price)}</button></div>`;
+ if(s.status==='pending') return `<div class="hero-card"><div class="row between"><span class="muted" style="font-size:13px">${l.name} · ${esc(s.stop)}</span><span class="pill warn">قيد المراجعة</span></div><h3 style="font-size:18px">الإيصال عند المالية</h3><p style="margin:0;opacity:.85">هيوصلك إشعار أول ما يتراجع، والكارنيه هيتفعل تلقائي. للعرض: روح «الإدارة» ← مراجعة الإيصالات.</p></div>`;
+ return `<div class="hero-card"><div class="row between"><span class="muted" style="font-size:13px">اشتراك الترم الأول · دفعت ${money(s.paid)}</span><span class="pill ok" style="background:rgba(255,255,255,.9)">${ic('shield',13)} نشط</span></div><h3 style="font-size:20px">${l.name}</h3><span style="opacity:.85">نقطتك: ${esc(s.stop)} · ${stopTime(l,s.stop)} ص</span><div class="row"><button class="btn sun sm" data-act="go" data-v="card">${ic('card',16)} الكارنيه</button><button class="btn sm" style="background:rgba(255,255,255,.15);color:inherit" data-act="go" data-v="track">${ic('map',16)} تتبع الباص</button></div></div>`;
+}
+function stHome(){
+ const lid=isLive()?sub().line:'L1', l=L(lid), dl=S.delays[lid];
+ const anns=S.announcements.filter(a=>a.target==='all'||a.target===lid).slice(0,2);
+ const deps=S.departures.filter(d=>d.st==='open'&&(d.line==='all'||d.line===lid));
+ return `${dl?`<div class="banner warn">${ic('clock',18)}<div><b>${isLive()?'باصك':'باص '+l.name} متأخر حوالي ${dl.mins} دقيقة</b><br>${esc(dl.reason)}. الوقت المتوقع تحت متحسب فيه التأخير.</div></div>`:''}
+ ${subStatus()}
+ <div class="card row between"><div><div class="muted" style="font-size:12.5px">${isLive()?'باصك':'مثال: باص '+l.name}</div><b>${l.bus} · ${l.driver}</b></div><div style="text-align:center"><div class="eta"><b id="homeEta">–</b><span>د</span></div><span class="pill info live" style="font-size:11px"><span class="dot"></span>لايف</span></div></div>
+ <div class="grid3">
+  <button class="tile" data-act="go" data-v="lines">${ic('route')}الخطوط والأسعار</button>
+  <button class="tile" data-act="go" data-v="track">${ic('map')}تتبع الباص</button>
+  <button class="tile" data-act="go" data-v="card">${ic('card')}الكارنيه</button>
+  <button class="tile" data-act="go" data-v="chat">${ic('bot')}المساعد الذكي</button>
+  <button class="tile" data-act="go" data-v="complaints">${ic('msg')}الشكاوى</button>
+  <button class="tile" data-act="go" data-v="requests">${ic('doc')}استرداد / تغيير خط</button>
+ </div>
+ ${deps.map(d=>{const mine=S.st.departs.includes(d.id);return `<div class="card stack" style="gap:8px"><div class="row between"><b>رحلة مغادرة إضافية · ${t12(d.time)}</b><span class="pill ${seatsLeft(d)>0?'info':'bad'} num">متبقي ${Math.max(0,d.cap-d.booked)}</span></div>
+ <span class="muted" style="font-size:13px">النهارده ${d.line==='all'?'لكل الخطوط':'لـ'+L(d.line).name}: ${esc(d.reason)}.</span>
+ ${!isActive()?'<span class="hint">متاحة للمشتركين النشطين بس.</span>':mine?`<div class="row between"><span class="pill ok">${ic('check',13)} محجوزلك مكان</span><button class="btn ghost sm" data-act="depart" data-v="${d.id}">إلغاء الحجز</button></div>`:`<button class="btn sm" data-act="depart" data-v="${d.id}" ${d.booked>=d.cap?'disabled':''}>احجز مكان في رحلة ${t12(d.time)}</button>`}</div>`}).join('')}
+ ${anns.length?`<div class="stack" style="gap:6px"><b>إعلانات خطك</b>${anns.map(a=>`<div class="notif">${ic('mega',18)}<span style="flex:1"><b>${a.kind}${a.mins?' · '+a.mins+' د':''}</b> ${esc(a.text)}<br><span class="muted" style="font-size:12px">${esc(a.by)}</span></span><time>${a.at}</time></div>`).join('')}</div>`:''}`;
+}
+function t12(t){const [h,m]=t.split(':').map(Number);return `${h%12||12}:${String(m).padStart(2,'0')} ${h<12?'ص':'م'}`}
+function stLines(){
+ const live=isLive(), s=sub();
+ return `${live?`<div class="banner warn">${ic('alert',18)}<div><b>${s.status==='active'?'انت مشترك بالفعل':'عندك حجز قائم'} في ${L(s.line).name}</b><br>${s.status==='active'?'مينفعش تعمل اشتراك تاني. لو عايز تغير خطك قدّم طلب تغيير خط.':'كمّل الدفع أو الغي الحجز الأول عشان تختار خط تاني.'}<div class="row" style="margin-top:8px">${s.status==='active'?`<button class="btn sm" data-act="goReq" data-v="change">طلب تغيير خط</button>`:s.status==='reserved'?`<button class="btn sm" data-act="go" data-v="pay">كمّل الدفع</button>`:''}</div></div></div>`:''}
+ <p class="muted" style="margin:0">أسعار الترم الأول 2026/2027 للاشتراكات الجديدة. الخط المكتمل بيتقفل تلقائي.</p><div class="list">${S.lines.map(l=>{const left=seatsLeft(l),full=left<=0,dis=full||live;
+ return `<button class="opt" data-act="pickLine" data-v="${l.id}" ${dis?'disabled style="opacity:.6;cursor:not-allowed"':''}><div class="row between" style="width:100%"><b>${l.name}${live&&s.line===l.id?' (خطك)':''}</b><b class="num">${money(l.price)}</b></div>
+ <span class="muted" style="font-size:13px">${activeStops(l).length} نقط · أول نقطة ${l.stops[0].t} ص · ${l.busType}</span>
+ <div class="seats${full?' full':''}" style="width:100%"><i style="width:${Math.min(100,l.booked/l.cap*100)}%"></i></div>
+ <span style="font-size:12.5px;font-weight:600;color:${full?'var(--bad)':left<=5?'var(--warn)':'var(--ok)'}">${full?'مكتمل':`متبقي ${left} ${left<=10?'أماكن':'مكان'}`}</span></button>`}).join('')}</div>`;
+}
+function stLine(){
+ const l=L(S.st.lineSel),sel=S.st.stopSel,full=seatsLeft(l)<=0,live=isLive();
+ return `<div class="card"><dl class="kv"><dt>السائق</dt><dd>${l.driver}</dd><dt>رقمه</dt><dd class="ltr num">${l.phone}</dd><dt>لوحة الباص</dt><dd>${l.bus}</dd><dt>النوع</dt><dd>${l.busType}</dd><dt>التشغيل</dt><dd>${l.owner}</dd><dt>الأماكن</dt><dd class="num" style="color:${full?'var(--bad)':'inherit'}">${full?'مكتمل':'متبقي '+seatsLeft(l)}</dd></dl></div>
+ <div><b>اختار نقطتك</b><ul class="stops" style="margin-top:6px">${l.stops.map((s,i)=>{const last=i===l.stops.length-1;return `<li class="${sel===s.n?'sel':''} ${s.off?'off':''}"><span class="pin"></span>${last?`<span>${s.n} <span class="muted" style="font-size:12px">(الوصول)</span></span>`:s.off?`<span>${s.n} <span style="font-size:12px">(ملغاة)</span></span>`:`<button data-act="pickStop" data-v="${esc(s.n)}" style="border:0;background:none;text-align:start;padding:0;font-weight:${sel===s.n?700:500}">${s.n}</button>`}<span class="num muted">${s.t} ص</span></li>`}).join('')}</ul></div>
+ <div class="card soft row between"><span>سعر الترم</span><b class="num" style="font-size:18px">${money(l.price)}</b></div>
+ ${errLine(S.st.stopErr)}
+ <button class="btn block" data-act="reserve" ${sel&&!full&&!live?'':'disabled'}>${live?'عندك اشتراك أو حجز بالفعل':full?'الخط مكتمل':sel?'احجز المكان (يتمسك 24 ساعة)':'اختار نقطة الأول'}</button>`;
+}
+function stPay(){
+ const s=sub();
+ if(!s||!LIVE.includes(s.status)) return `<div class="banner info">${ic('alert',18)}<div>مفيش حجز محتاج دفع.</div></div><button class="btn block" data-act="go" data-v="lines">اختار خط</button>`;
+ if(s.status==='pending') return `<div class="banner ok">${ic('check',18)}<div><b>الإيصال اتبعت للمالية</b><br>مش محتاج تبعته تاني. هيوصلك إشعار بالقرار.</div></div>`;
+ if(s.status==='active') return `<div class="banner ok">${ic('check',18)}<div><b>اشتراكك مدفوع ونشط</b><br>دفعت ${money(s.paid)}.</div></div>`;
+ const m=S.st.pay;
+ return `<div class="card soft row between"><div><div class="muted" style="font-size:12.5px">المطلوب (${L(s.line).name})</div><b class="num" style="font-size:22px">${money(s.price)}</b></div><div style="text-align:end"><div class="muted" style="font-size:12.5px">الحجز ينتهي بعد</div><b class="num ltr" id="resCd">23:59:59</b></div></div>
+ ${s.rejectReason?`<div class="banner warn">${ic('alert',18)}<div><b>الإيصال السابق اترفض</b><br>السبب: ${esc(s.rejectReason)}. ارفع إيصال صحيح أو ادفع بفوري.</div></div>`:''}
+ <div class="seg three"><button data-act="payM" data-v="instapay" aria-pressed="${m==='instapay'}">InstaPay</button><button data-act="payM" data-v="bank" aria-pressed="${m==='bank'}">تحويل بنكي</button><button data-act="payM" data-v="fawry" aria-pressed="${m==='fawry'}">فوري</button></div>
+ ${m==='fawry'?payFawry(s):`${m==='instapay'?`<div class="stack"><span class="muted" style="font-size:13px">حوّل على عنوان الدفع ده واكتب رقمك الجامعي في الملاحظات:</span><div class="copy"><span class="ltr">sutech.transport@instapay</span><button class="btn ghost sm" data-act="copy" data-v="sutech.transport@instapay">نسخ</button></div></div>`
+ :`<div class="stack"><span class="muted" style="font-size:13px">حساب إدارة النقل (بيانات تجريبية):</span><div class="copy"><span class="ltr num">EG38 0019 0005 0000 0000 2631 8000 2</span><button class="btn ghost sm" data-act="copy" data-v="EG380019000500000000263180002">نسخ</button></div><span class="muted" style="font-size:13px">البنك الأهلي المصري · فرع السويس</span></div>`}
+ <label class="drop" for="rcpt">${S.st.receipt?`<img src="${S.st.receipt}" alt="صورة الإيصال"><span style="font-size:12.5px">اضغط لتغيير الصورة</span>`:`${ic('cam',28)}<b style="color:var(--ink)">ارفع صورة الإيصال</b><span style="font-size:12.5px">صورة أو سكرين شوت من التطبيق</span>`}<input type="file" id="rcpt" accept="image/*" data-act="rcpt"></label>
+ ${!S.st.receipt?`<button class="btn ghost sm" data-act="sampleReceipt">(للعرض) استخدم إيصال تجريبي</button>`:''}
+ <div class="field"><label for="ref">رقم العملية</label><input id="ref" class="input num" data-bind="ref" value="${esc(S.st.ref)}" placeholder="${m==='instapay'?'مثال: IPN58210944':'مثال: BNK-88120'}" style="direction:ltr;text-align:right"><span class="hint">6 إلى 20 حرف أو رقم. نفس الرقم ما ينفعش يتستخدم مرتين.</span></div>
+ ${errLine(S.st.payErr)}
+ <button class="btn block sun" data-act="sendReceipt">إرسال الإيصال للمالية</button>`}
+ <button class="btn block ghost sm" data-act="askCancelRes">إلغاء الحجز ورجوع الكرسي</button>
+ <button class="btn ghost sm" data-act="expireRes" style="align-self:center">(للعرض) تسريع انتهاء مهلة الـ 24 ساعة</button>`;
+}
+function payFawry(s){
+ const f=S.st.fawry;
+ if(!f) return `<div class="card stack"><b>ادفع بكود فوري</b><span class="muted" style="font-size:13.5px">هنطلعلك كود تدفع بيه في أي منفذ فوري أو من تطبيق myFawry أو محفظتك. التأكيد بيوصل تلقائي من غير ما ترفع إيصال.</span>
+  <dl class="kv num"><dt>قيمة الاشتراك</dt><dd>${money(s.price)}</dd><dt>رسوم خدمة فوري</dt><dd>${FAWRY_FEE} ج.م</dd><dt>الإجمالي</dt><dd>${(s.price+FAWRY_FEE).toLocaleString('en-US')} ج.م</dd></dl>
+  <button class="btn sun" data-act="genFawry">اطلع كود فوري</button></div>`;
+ return `<div class="card stack" style="align-items:stretch"><span class="muted" style="font-size:13px;text-align:center">كود الدفع (صالح لحد نهاية مهلة الحجز)</span><div class="fawry-code">${f.code}</div>
+  <button class="btn ghost sm" data-act="copy" data-v="${f.code.replace(/\s/g,'')}">نسخ الكود</button>
+  <dl class="kv num"><dt>المبلغ المطلوب</dt><dd>${(f.amount+FAWRY_FEE).toLocaleString('en-US')} ج.م</dd><dt>اسم الخدمة</dt><dd>نقل جامعة SUtech</dd></dl>
+  <span class="hint">الكود ده واحد بس للحجز ده. لو دوست تاني مش هيطلع كود جديد.</span>
+  <button class="btn sm" data-act="payFawry">(للعرض) محاكاة الدفع في منفذ فوري</button></div>`;
+}
+function stCard(){
+ const s=sub();
+ if(!isActive()) return `<div class="banner warn">${ic('alert',18)}<div><b>الكارنيه مش مفعّل</b><br>${s&&s.status==='refunded'?'الاشتراك اترد فالكارنيه اتقفل.':s&&s.status==='cancelled'?'الاشتراك اتلغى فالكارنيه اتقفل.':'بيتفعل تلقائي بعد تأكيد الدفع.'}</div></div>${!isLive()?`<button class="btn block" data-act="go" data-v="lines">اشترك دلوقتي</button>`:s.status==='reserved'?`<button class="btn block" data-act="go" data-v="pay">كمّل الدفع</button>`:''}`;
+ const l=L(s.line);
+ return `<div class="idcard"><div class="holo"></div><div class="row between" style="position:relative;z-index:1"><b style="font-family:var(--f-display)">كارنيه النقل · SUtech</b><span style="font-size:12px;opacity:.8">2026/2027 · ت1</span></div>
+ <div class="row" style="gap:14px;position:relative;z-index:1"><div class="avatar">${ME.initials}</div><div><b style="font-size:18px">${ME.name}</b><div style="opacity:.8;font-size:13px" class="num">${ME.id}</div><div style="opacity:.8;font-size:13px">${l.name} · ${esc(s.stop)}</div></div></div>
+ <div class="qrbox" style="position:relative;z-index:1"><canvas id="qr" width="29" height="29" aria-label="كود QR متغير"></canvas><span style="font-size:12.5px;font-weight:600">بيتجدد بعد <span id="qrCd" class="num">30</span> ث</span></div>
+ <div class="row between" style="font-size:12px;opacity:.85;position:relative;z-index:1"><span>صالح حتى 31 يناير 2027</span><span class="num" id="qrTime">${nowT()}</span></div></div>
+ ${permitOf(ME.id)?`<div class="banner ok" style="font-size:13px">${ic('heart',16)}<span>تصريح العيادة: ${permitOf(ME.id).kind} لحد ${permitOf(ME.id).to}. المشرف بيشوفه وقت المسح.</span></div>`:''}
+ ${meRow().assign?`<div class="banner info" style="font-size:13px">${ic('swap',16)}<span>نقل ${meRow().assign.type} إلى ${L(meRow().assign.to).name}${meRow().assign.until?' لحد '+meRow().assign.until:''}</span></div>`:''}
+ <p class="muted" style="font-size:13px;margin:0;text-align:center">اعرض الكود على المشرف عند الركوب. صورة الشاشة مش هتشتغل لأن الكود بيتغير.</p>`;
+}
+function routeGeom(id){
+ const P0='M 30 200 C 80 230, 120 150, 170 160 S 250 120, 300 60';
+ return ({L1:'M 40 250 C 70 220, 70 190, 110 180 S 170 160, 190 130 S 240 90, 300 60',
+  L2:'M 30 40 C 80 60, 120 50, 150 90 S 220 150, 250 170 S 290 200, 300 60',
+  L3:'M 50 270 C 90 260, 120 240, 150 230 S 230 180, 300 60',
+  L4:'M 330 280 C 300 250, 320 210, 290 180 S 270 120, 300 60'})[id]||P0;
+}
+function mapSVG(id){
+ const l=L(id);
+ return `<div class="map"><svg viewBox="0 0 360 300" role="img" aria-label="خريطة توضيحية لمسار ${l.name}">
+  <rect width="360" height="300" fill="var(--land)"/>
+  <path d="M 345 0 C 330 80, 352 160, 336 300 L 360 300 L 360 0 Z" fill="var(--water)"/>
+  <text x="352" y="150" transform="rotate(-90 352 150)" text-anchor="middle">قناة السويس</text>
+  <g fill="var(--block)">${[[20,20,60,30],[100,20,40,40],[170,30,60,25],[30,90,50,40],[120,110,40,30],[220,90,40,40],[60,200,40,25],[150,250,70,30],[240,210,50,40],[200,190,30,20]].map(r=>`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" rx="4"/>`).join('')}</g>
+  <g stroke="var(--road)" stroke-width="7" fill="none" stroke-linecap="round"><path d="M0 160 H330"/><path d="M90 0 V300"/><path d="M0 70 L330 50"/><path d="M200 300 L270 0"/></g>
+  <path id="rt" data-line="${id}" d="${routeGeom(id)}" fill="none" stroke="var(--brand)" stroke-width="4.5" stroke-linecap="round"/>
+  <g id="stopsG"></g>
+  <g id="busG"><circle r="13" fill="var(--sun)" stroke="var(--surface)" stroke-width="3"/><g transform="translate(-8 -8)" stroke="var(--on-sun)" fill="none" stroke-width="1.8" stroke-linecap="round"><svg width="16" height="16" viewBox="0 0 24 24">${I.bus}</svg></g></g>
+  </svg></div>`;
+}
+function myStop(l){return isLive()&&sub().line===l.id?sub().stop:activeStops(l)[Math.min(2,activeStops(l).length-1)]?.n||l.stops[0].n}
+function stTrack(){
+ const id=isLive()?sub().line:'L1',l=L(id),stop=myStop(l);
+ return `${!isLive()?`<div class="banner info" style="font-size:13px">${ic('alert',16)}<span>بتشوف ${l.name} كمثال. بعد الاشتراك هتشوف باصك على طول.</span></div>`:''}
+ <div class="card row between"><div><div class="muted" style="font-size:12.5px">يوصل ${esc(stop)} بعد</div><div class="eta"><b id="trEta">–</b><span>دقيقة</span></div></div>${S.delays[id]?`<span class="pill warn">${ic('clock',13)} متأخر ${S.delays[id].mins} د</span>`:`<span class="pill info live"><span class="dot"></span>في الميعاد</span>`}</div>
+ ${S.delays[id]?`<div class="banner warn" style="font-size:13px">${ic('alert',16)}<span>${esc(S.delays[id].reason)}</span></div>`:''}
+ ${mapSVG(id)}
+ <div class="card"><div class="row between"><div><b>${l.driver}</b><div class="muted num" style="font-size:13px">${l.bus} · <span class="ltr">${l.phone}</span></div></div><button class="btn ghost sm" data-act="copy" data-v="${l.phone}">نسخ الرقم</button></div></div>
+ <div><b>المحطات</b><ul class="stops" style="margin-top:6px">${l.stops.map(s=>`<li class="${stop===s.n?'sel':''} ${s.off?'off':''}"><span class="pin"></span><span>${s.n}</span><span class="num muted">${s.t}</span></li>`).join('')}</ul></div>`;
+}
+function stComplaints(){
+ const mine=S.complaints.filter(c=>c.sid===ME.id);
+ return `<div class="card stack"><b>شكوى جديدة</b>
+ <div class="field"><label for="ccat">التصنيف</label><select id="ccat" class="input"><option>تأخير</option><option>سلوك السائق</option><option>التكييف</option><option>نظافة الباص</option><option>الدفع</option><option>أخرى</option></select></div>
+ <div class="field"><label for="ctext">التفاصيل</label><textarea id="ctext" class="input" placeholder="اكتب اللي حصل، وامتى، وفي أنهي خط (10 حروف على الأقل)"></textarea></div>
+ ${errLine(S.st.cErr)}
+ <button class="btn" data-act="sendComplaint">${ic('send',16)} إرسال</button></div>
+ <b>شكاويك</b><div class="list">${mine.map(c=>`<div class="card stack" style="gap:6px"><div class="row between"><span class="pill info">${esc(c.cat)}</span><span class="pill ${c.st==='تم الرد'?'ok':'warn'}">${c.st}</span></div><span>${esc(c.text)}</span><span class="muted" style="font-size:12px">${c.at} · ${c.id}</span>${c.reply?`<div class="banner ok" style="font-size:13.5px"><div><b>رد إدارة النقل:</b> ${esc(c.reply)}</div></div>`:''}</div>`).join('')}</div>`;
+}
+function stChat(){
+ const s=S.st;
+ return `<div class="p-body" id="chatBody"><div class="banner info" style="font-size:12.5px">${ic('bot',16)}<span>نسخة عرض: الردود محددة مسبقًا. النسخة الفعلية بنموذج ذكاء اصطناعي مربوط ببياناتك وبسياسات النقل.</span></div>
+ <div class="chat">${s.chat.map(m=>`<div class="msg ${m.who}">${esc(m.t)}</div>`).join('')}${s.typing?`<div class="msg bot"><span class="typing"><i></i><i></i><i></i></span></div>`:''}</div>
+ <div class="chips">${['الباص فين دلوقتي؟','الاشتراك بكام؟','أدفع بفوري إزاي؟','لو عايز أسترد فلوسي؟','عايز أغير خطي'].map(q=>`<button class="chip" data-act="ask" data-v="${q}" ${s.typing?'disabled':''}>${q}</button>`).join('')}</div></div>
+ <form class="composer" data-act="chatForm"><input id="chatIn" class="input" placeholder="اكتب سؤالك…" autocomplete="off" maxlength="300"><button class="btn" aria-label="إرسال" ${s.typing?'disabled':''}>${ic('send',18)}</button></form>`;
+}
+function stRequests(){
+ const s=sub(),tab=S.st.reqTab,act=isActive();
+ const mine=S.requests.filter(r=>r.sid===ME.id);
+ const open=myOpen();
+ const blocker=!act?`<div class="banner warn">${ic('alert',18)}<div>الطلبات متاحة بعد ما الاشتراك يبقى نشط.</div></div>`
+  :open?`<div class="banner warn">${ic('alert',18)}<div><b>عندك طلب ${open.type} مفتوح (${open.id})</b><br>مينفعش تقدم طلب جديد لحد ما الطلب ده يخلص، عشان القرارات ما تتعارضش.</div></div>`:'';
+ let form='';
+ if(!blocker){
+  if(tab==='refund'){const paid=s.paid, ded=Math.round(paid*POLICY_PCT/100);
+   form=`<div class="card stack"><b>حساب الاسترداد</b>
+   <dl class="kv num"><dt>اللي دفعته فعلًا</dt><dd>${money(paid)}</dd><dt>إحنا في</dt><dd>الأسبوع ${TERM_WEEK} من الترم</dd><dt>نسبة الخصم</dt><dd style="color:var(--bad)">${POLICY_PCT}% (−${money(ded)})</dd><dt>هيرجعلك</dt><dd style="color:var(--ok);font-size:17px">${money(paid-ded)}</dd></dl>
+   <details><summary class="muted" style="font-size:13px;cursor:pointer">سياسة الخصم (مثال لحد ما توصل السياسة الرسمية)</summary><dl class="kv" style="margin-top:6px;font-size:13px">${POLICY.map(p=>`<dt>${p[0]}</dt><dd>${p[1]}%</dd>`).join('')}</dl></details>
+   <div class="field"><label for="rreason">السبب</label><input id="rreason" class="input" placeholder="مثال: نقل سكن" maxlength="120"></div>
+   ${errLine(S.st.reqErr)}
+   <button class="btn" data-act="reqRefund">قدّم طلب الاسترداد</button><span class="hint">الموافقات: ولي الأمر ← إدارة النقل ← المالية. لما يكمل الكارنيه هيتقفل.</span></div>`;}
+  else if(tab==='change'){const opts=S.lines.filter(l=>l.id!==s.line);
+   form=`<div class="card stack"><div class="field"><label for="cline">الخط الجديد</label><select id="cline" class="input">${opts.map(l=>`<option value="${l.id}" ${seatsLeft(l)<=0?'disabled':''}>${l.name} (${money(l.price)})${seatsLeft(l)<=0?' – مكتمل':''}</option>`).join('')}</select></div>
+   <div class="field"><label for="ctype">نوع التغيير</label><select id="ctype" class="input"><option>دائم</option><option>مؤقت</option><option>يوم واحد</option></select></div>
+   <div class="field"><label for="cuntil">لحد تاريخ (للمؤقت)</label><input id="cuntil" type="date" class="input" min="${TODAY}" value="2026-11-05"></div>
+   <div class="field"><label for="creason">السبب</label><input id="creason" class="input" placeholder="مثال: هبات عند قرايبي الأسبوع ده" maxlength="120"></div>
+   ${errLine(S.st.reqErr)}
+   <button class="btn" data-act="reqChange">قدّم الطلب</button><span class="hint">في التغيير الدائم: لو الخط الجديد أغلى هتدفع الفرق، ولو أرخص الفرق بيرجعلك.</span></div>`;}
+  else form=`<div class="card stack"><b>دخول مجسم مشروع للباص</b><div class="field"><label for="mdate">يوم الدخول</label><input id="mdate" type="date" class="input" min="${TODAY}" value="2026-10-25"></div>
+   <div class="field"><label for="msize">المقاس التقريبي</label><input id="msize" class="input" placeholder="مثال: 100×60 سم" maxlength="40"></div>
+   ${errLine(S.st.reqErr)}<button class="btn" data-act="reqModel">قدّم الطلب</button><span class="hint">الموافقات: ولي الأمر ← إدارة النقل.</span></div>`;
+ }
+ return `<div class="seg three"><button data-act="reqTab" data-v="refund" aria-pressed="${tab==='refund'}">استرداد</button><button data-act="reqTab" data-v="change" aria-pressed="${tab==='change'}">تغيير خط</button><button data-act="reqTab" data-v="model" aria-pressed="${tab==='model'}">مجسم مشروع</button></div>
+ ${blocker||form}
+ <b>طلباتي</b>${mine.length?`<div class="list">${mine.map(reqCard).join('')}</div>`:'<p class="muted" style="margin:0">مفيش طلبات لسه.</p>'}`;
+}
+function chain(steps){return `<div class="chain">${steps.map((s,i)=>`${i?'<span style="border:0;padding:0" class="muted">←</span>':''}<span class="${s[1]}">${s[0]}${s[1]==='done'?' ✓':s[1]==='rej'?' ✕':''}</span>`).join('')}</div>`}
+function reqCard(r){const [c,t]=reqState(r);return `<div class="card stack" style="gap:6px"><div class="row between"><b>${r.type} <span class="muted num" style="font-size:12px;font-weight:500">${r.id}</span></b><span class="pill ${c}">${t}</span></div><span class="muted" style="font-size:13px">${esc(r.detail)}</span>${r.paid?`<span class="num" style="font-size:13px">يرجعلك ${money(r.paid*(1-r.pct/100))}</span>`:''}${chain(r.steps)}</div>`}
+
+/* ---------- chatbot (scripted) ---------- */
+function botReply(q){
+ const s=sub(),l=L(isLive()?s.line:'L1'),stop=myStop(l),eta=etaMin(l.id,stop);
+ const has=(...w)=>w.some(x=>q.includes(x));
+ if(has('فوري'))return `ادخل على «الدفع» واختار فوري، هيطلعلك كود واحد ثابت للحجز بتاعك.\nادفعه في أي منفذ فوري أو من myFawry (فيه رسوم خدمة ${FAWRY_FEE} ج.م)، والاشتراك بيتفعل لوحده من غير إيصال.`;
+ if(has('فين','امتى','وصل','يوصل','متأخر','اتأخر','باص'))return `باص ${l.name} (${l.bus}) دلوقتي على بعد حوالي ${eta} دقيقة من ${stop}.\nتقدر تشوفه على الخريطة من «التتبع»، وهيوصلك إشعار لما يبقى على بعد 5 دقايق.`;
+ if(has('بكام','سعر','اشتراك','تمن'))return 'أسعار الترم الأول للاشتراكات الجديدة:\n'+S.lines.map(x=>`• ${x.name}: ${money(x.price)}${seatsLeft(x)<=0?' (مكتمل)':''}`).join('\n')+'\nالحجز بيتمسك 24 ساعة لحد ما تدفع.'+(isLive()?`\nانت حاجز بسعر ${money(s.price)} وده مش هيتغير.`:'');
+ if(has('ادفع','أدفع','دفع','انستا','InstaPay','instapay','بنك','إيصال'))return 'عندك 3 طرق: InstaPay على sutech.transport@instapay، أو تحويل بنكي، أو كود فوري.\nفي InstaPay والبنكي ارفع صورة الإيصال ورقم العملية، والمالية بتراجعه غالبًا خلال يوم عمل. في فوري التأكيد تلقائي.';
+ if(has('استرد','فلوس','ارجع','إلغاء','الغي'))return `حسب السياسة الحالية (مثال): إحنا في الأسبوع ${TERM_WEEK}، فنسبة الخصم ${POLICY_PCT}%.\n${isActive()?`انت دفعت ${money(s.paid)}، يعني هيرجعلك ${money(s.paid*(1-POLICY_PCT/100))}.`:'ولما اشتراكك يتفعل أقدر أحسبهولك بالظبط.'}\nالطلب بيعدي على ولي الأمر ثم إدارة النقل ثم المالية. تقدر تقدمه من «طلباتي».`;
+ if(has('غير','تغيير','أغير','انقل','خط تاني'))return 'تقدر تطلب تغيير الخط من «طلباتي» ← تغيير خط.\nفيه 3 أنواع: دائم، مؤقت لفترة، أو يوم واحد. لو الخط الجديد سعره أعلى هتدفع الفرق.';
+ if(has('كارنيه','QR','كود'))return 'الكارنيه الرقمي بيظهر في تبويب «الكارنيه» بعد تفعيل الاشتراك. الكود بيتغير كل 30 ثانية، فلازم تفتحه من التطبيق قدام المشرف.';
+ if(has('شكو','مشكلة','السواق','السائق'))return 'آسف إن فيه مشكلة. تقدر ترفع شكوى من الرئيسية ← الشكاوى، وإدارة النقل بترد عليك في التطبيق.';
+ return 'السؤال ده محتاج موظف من إدارة النقل. سجلت طلبك وهيتواصلوا معاك خلال ساعات العمل (9 ص – 3 م).';
+}
+
+/* ---------- parent ---------- */
+function parent(){
+ const s=sub(), reqs=S.requests.filter(r=>r.sid===ME.id), wait=reqs.filter(r=>r.steps[0][1]==='now');
+ const l=isLive()?L(s.line):null, rode=S.drv.boarded.includes(ME.name);
+ return head('أهلًا يا أستاذ '+ME.guardian.split(' ')[0])+`<div class="p-body">
+ <div class="card stack" style="gap:6px"><div class="row between"><b>${ME.name}</b><span class="pill ${isActive()?'ok':isLive()?'warn':'info'}">${isActive()?'مشترك':isLive()?'محجوز / قيد الدفع':'مش مشترك'}</span></div>
+ ${l?`<span class="muted" style="font-size:13px">${l.name} · ${esc(s.stop)}</span>`:''}
+ ${l&&S.delays[l.id]?`<span class="pill warn">${ic('clock',13)} الباص متأخر ${S.delays[l.id].mins} د: ${esc(S.delays[l.id].reason)}</span>`:''}
+ ${isActive()?`<div class="row between"><span>${rode?`<span class="pill ok">${ic('check',13)} ركب الباص النهارده</span>`:`<span class="pill info">لسه ما ركبش</span>`}</span><span class="num muted" style="font-size:13px">الباص بعد <b id="homeEta">–</b> د</span></div>`:''}</div>
+ <b>طلبات محتاجة موافقتك ${wait.length?`(${wait.length})`:''}</b>
+ ${wait.length?wait.map(r=>`<div class="card stack" style="gap:8px"><div class="row between"><b>${r.type}</b><span class="muted num" style="font-size:12px">${r.id}</span></div><span style="font-size:14px">${esc(r.detail)}</span>${r.paid?`<span class="num" style="font-size:13px">المدفوع ${money(r.paid)} · خصم ${r.pct}% · يرجع ${money(r.paid*(1-r.pct/100))}</span>`:''}
+  <div class="row"><button class="btn ok sm" data-act="parOk" data-v="${r.id}" style="flex:1">موافق</button><button class="btn bad sm" data-act="parNo" data-v="${r.id}" style="flex:1">مش موافق</button></div></div>`).join(''):'<p class="muted" style="margin:0">مفيش طلبات مستنية موافقتك. جرّب تقدم طلب من حساب الطالب.</p>'}
+ <b>كل الطلبات</b>${reqs.length?`<div class="list">${reqs.map(reqCard).join('')}</div>`:'<p class="muted" style="margin:0">مفيش.</p>'}</div>
+ <nav class="p-nav two"><button aria-current="true">${ic('home')}الرئيسية</button><button data-act="toast" data-v="تتبع الباص لولي الأمر نفس شاشة الطالب">${ic('map')}التتبع</button></nav>`;
+}
+
+/* ---------- driver ---------- */
+function riders(){const base=S.students.filter(s=>s.line==='L1'&&s.id!==ME.id&&s.st==='active').map(s=>s.name);if(isActive()&&sub().line==='L1')base.unshift(ME.name);return base}
+function driver(){
+ const d=S.drv,l=L('L1');
+ const nv=`<nav class="p-nav two"><button data-act="dgo" data-v="trip" aria-current="${d.screen==='trip'}">${ic('bus')}الرحلة</button><button data-act="dgo" data-v="violation" aria-current="${d.screen==='violation'}">${ic('alert')}مخالفة</button></nav>`;
+ const ls=d.lastScan;
+ if(d.screen==='trip') return head('رحلة الذهاب · '+l.name)+`<div class="p-body">
+  <div class="card row between"><div><b>${l.driver}</b><div class="muted" style="font-size:13px">${l.bus} · ${l.busType}</div></div><span class="pill ${d.tripOn?'ok live':'info'}">${d.tripOn?'<span class="dot"></span>بيبعت الموقع':'متوقف'}</span></div>
+  <button class="btn block ${d.tripOn?'bad':'sun'}" data-act="trip" style="padding:16px;font-size:17px">${d.tripOn?'إنهاء الرحلة':'ابدأ الرحلة'}</button>
+  ${d.tripOn?`<div class="card soft stack" style="gap:4px;font-size:13px"><span class="muted">آخر موقع اتبعت</span><b class="num ltr" id="gps">${d.gps||'29.9668, 32.5498'}</b><span class="muted">كل ثانيتين · الطلاب شايفينك على الخريطة · الشاشة لازم تفضل مفتوحة</span></div>`:`<div class="banner info" style="font-size:13px">${ic('map',16)}<span>أول ما تبدأ الرحلة موقعك هيظهر للطلاب ولإدارة النقل، وتقدر تمسح الكارنيهات.</span></div>`}
+  <div class="card stack" style="gap:8px"><b>بلّغ الطلاب عن تأخير أو مشكلة</b>
+   ${S.delays.L1?`<div class="row between"><span class="pill warn">${ic('clock',13)} متأخر ${S.delays.L1.mins} د · ${esc(S.delays.L1.reason)}</span><button class="btn ghost sm" data-act="clearDelay" data-v="L1">رجعنا للميعاد</button></div>`:''}
+   <div class="row" style="gap:8px"><select id="dReason" class="input" style="flex:2"><option>زحمة مرور</option><option>عطل في الباص</option><option>حادثة على الطريق</option><option>استنينا طلاب متأخرين</option><option>تحويلة في الطريق</option></select><select id="dMins" class="input num" style="flex:1"><option value="5">5 د</option><option value="10" selected>10 د</option><option value="15">15 د</option><option value="30">30 د</option></select></div>
+   <button class="btn sm sun" data-act="drvDelay" ${d.tripOn?'':'disabled'}>${ic('mega',16)} ابعت للطلاب على الخط</button>${d.tripOn?'':'<span class="hint">ابدأ الرحلة الأول.</span>'}</div>
+  <div class="row" style="gap:8px"><button class="btn ghost" data-act="scan" data-v="next" style="flex:1" ${d.tripOn?'':'disabled'}>${ic('scan',18)} امسح كارنيه</button><button class="btn ghost sm" data-act="scan" data-v="bad" ${d.tripOn?'':'disabled'}>(للعرض) كارنيه ملغى</button></div>
+  ${ls?`<div class="scanres ${ls.ok?'ok':'bad'}">${ic(ls.ok?'check':'x',20)}<span>${esc(ls.msg)}</span></div>`:''}
+  <div class="row between"><b>اللي ركبوا (${d.boarded.length} من ${riders().length} مشترك)</b><span class="muted" style="font-size:12.5px">${nowT()}</span></div>
+  <div class="list">${d.boarded.map(n=>`<div class="card row between" style="padding:10px 12px"><span>${n}</span><span class="pill ok">ركب ✓</span></div>`).join('')||'<p class="muted" style="margin:0">لسه محدش ركب.</p>'}</div></div>`+nv;
+ return head('تسجيل مخالفة')+`<div class="p-body">
+  <div class="field"><label for="vStudent">الطالب</label><select id="vStudent" class="input" data-bind="vStudent">${['<option value="">اختار من اللي ركبوا الرحلة</option>',...d.boarded.map(r=>`<option ${d.vStudent===r?'selected':''}>${r}</option>`)].join('')}</select>${d.boarded.length?'':'<span class="hint">محدش ركب لسه. امسح الكارنيهات الأول.</span>'}</div>
+  <div class="field"><label for="vType">نوع المخالفة</label><select id="vType" class="input" data-bind="vType">${['تدخين داخل الباص','تلفيات في الباص','سلوك غير لائق','رفض إظهار الكارنيه','ركوب خط غير مشترك فيه','أخرى'].map(t=>`<option ${d.vType===t?'selected':''}>${t}</option>`).join('')}</select></div>
+  <div class="field"><label for="vDesc">الوصف</label><textarea id="vDesc" class="input" data-bind="vDesc" placeholder="اللي حصل باختصار" maxlength="300">${esc(d.vDesc)}</textarea></div>
+  <label class="drop" for="vPhoto">${d.photo?`<img src="${d.photo}" alt="صورة المخالفة"><span style="font-size:12.5px">اضغط لتغيير الصورة</span>`:`${ic('cam',30)}<b style="color:var(--ink)">صوّر المخالفة</b><span style="font-size:12.5px">صورة أو فيديو قصير</span>`}<input type="file" id="vPhoto" accept="image/*,video/*" data-act="vphoto"></label>
+  <div class="row muted" style="font-size:12.5px">${ic('map',14)} الموقع والوقت بيتسجلوا تلقائي: <span class="num">${nowT()}</span></div>
+  ${errLine(d.vErr)}
+  <button class="btn block" data-act="sendViolation">${ic('send',16)} إرسال لإدارة النقل والأمن</button>
+  <b>اللي سجلته</b><div class="list">${S.violations.filter(v=>v.by.startsWith('محمود')).map(v=>`<div class="card stack" style="gap:4px"><div class="row between"><b>${esc(v.type)}</b><span class="pill warn">${v.st}</span></div><span style="font-size:13px">${esc(v.student)} · <span class="muted">${v.at}</span></span></div>`).join('')}</div></div>`+nv;
+}
+
+/* ---------- admin ---------- */
+const PAGES=[['ops','التشغيل'],['overview','نظرة عامة','grid'],['ann','الإعلانات والتأخيرات','mega'],['departs','رحلات المغادرة','clock'],['lines','الخطوط والنقط','route'],['buses','الباصات والسائقين','bus'],['students','الطلاب والتحويلات','users'],
+ ['fin','المالية والطلبات'],['payments','المدفوعات','money'],['requests','الطلبات والاسترداد','refund'],
+ ['care','المتابعة'],['violations','المخالفات','shield'],['complaints','الشكاوى','inbox'],['reports','التقارير والتصدير','chart'],['audit','سجل العمليات','list'],
+ ['oth','جهات تانية'],['clinic','العيادة','heart'],['sg','مكتب الأمين العام','eye'],['events','باصات الفعاليات','cal'],['ah','بوابة أبو الهول','org']];
+function badgeFor(k){if(k==='ann')return Object.keys(S.delays).length;if(k==='ah')return S.events.filter(e=>e.st==='مستني أبو الهول').length;if(k==='payments')return S.payments.filter(p=>p.st==='pending').length;if(k==='requests')return S.requests.filter(r=>{const n=r.steps.find(s=>s[1]==='now');return n&&n[0]!=='ولي الأمر'}).length;if(k==='violations')return S.violations.filter(v=>v.st==='جديدة').length;if(k==='complaints')return S.complaints.filter(c=>c.st==='جديدة').length;return 0}
+function admin(){
+ const p=S.adm.page;
+ const side=`<nav class="side" aria-label="أقسام لوحة التحكم">${PAGES.map(x=>x.length===2?`<div class="grp">${x[1]}</div>`:`<button data-act="page" data-v="${x[0]}" aria-current="${p===x[0]}">${ic(x[2])}${x[1]}${badgeFor(x[0])?`<span class="badge">${badgeFor(x[0])}</span>`:''}</button>`).join('')}</nav>`;
+ const f={overview:aOverview,lines:aLines,buses:aBuses,students:aStudents,payments:aPayments,requests:aRequests,violations:aViolations,complaints:aComplaints,reports:aReports,audit:aAudit,ann:aAnn,departs:aDeparts,clinic:aClinic,sg:aSG,events:aEvents,ah:aAH}[p];
+ return `<div class="admin">${side}<main class="main"><div class="main-inner">${f()}</div></main></div>`;
+}
+function ph(t,sub,reqs,extra){return `<div class="ph"><div><h2>${t}</h2><span class="muted" style="font-size:13.5px">${sub}</span></div><div class="sp">${extra||''}<div class="reqs" style="align-items:center">${reqs.map(r=>`<span class="req${r.includes('★')?' star':''}">بند ${r}</span>`).join('')}</div></div></div>`}
+function aOverview(){
+ const BASE=1278, active=BASE+S.students.filter(s=>s.st==='active').length;
+ return ph('نظرة عامة','الخميس 22 أكتوبر 2026 · الترم الأول',['18★','12'])+
+ `<div class="kpis"><div class="kpi"><span>مشتركين نشطين</span><b>${active.toLocaleString('en-US')}</b><span style="color:var(--ok)">+38 الأسبوع ده</span></div>
+ <div class="kpi"><span>باصات في الطريق</span><b>${S.lines.length-(S.drv.tripOn?0:1)} / ${S.lines.length}</b><span>${Object.keys(S.delays).length?Object.keys(S.delays).length+' خط متأخر دلوقتي':'كله في الميعاد'}</span></div>
+ <div class="kpi"><span>إيصالات للمراجعة</span><b>${badgeFor('payments')}</b><span>فوري بيتأكد تلقائي</span></div>
+ <div class="kpi"><span>طلبات عند الإدارة</span><b>${badgeFor('requests')}</b><span>استرداد وتغيير خط ومجسمات</span></div></div>
+ <div class="cols"><div class="panel"><div class="row between"><h3>الباصات لايف</h3><span class="pill info live"><span class="dot"></span>تحديث كل ثانيتين</span></div>
+  ${S.lines.map(l=>`<div class="bar"><span>${l.name}</span><div class="track"><i id="lv-${l.id}" class="${S.delays[l.id]?'hot':''}" style="width:${Math.round(S.busT[l.id]*100)}%"></i></div><span class="num muted" id="lvt-${l.id}">${etaMin(l.id,l.stops[l.stops.length-1].n)} د</span></div>`).join('')}
+  <span class="muted" style="font-size:12.5px">الشريط = نسبة المسافة المقطوعة للجامعة. البرتقالي = متأخر عن الجدول.</span></div>
+ <div class="panel"><h3>آخر الأحداث</h3><div class="feed">${S.feed.slice(0,7).map(f=>`<div><time>${f[0]}</time><span>${esc(f[1])}</span></div>`).join('')}</div></div></div>
+ <div class="panel"><h3>نسبة الإشغال حسب الخط</h3>${S.lines.map(l=>{const p=Math.round(l.booked/l.cap*100);return `<div class="bar"><span>${l.name}</span><div class="track"><i class="${p>=95?'hot':''}" style="width:${p}%"></i></div><span class="num">${l.booked}/${l.cap}</span></div>`}).join('')}<span class="muted" style="font-size:12.5px">بيشمل الحجوزات اللي لسه في مهلة الـ 24 ساعة.</span></div>`;
+}
+function aLines(){
+ return ph('الخطوط والنقط','ضيف خط، عدّل السعر، ضيف أو الغي نقطة',['7','4'],`<button class="btn sm" data-act="openLine">${ic('plus',16)} خط جديد</button>`)+
+ `<div class="linecards">${S.lines.map(l=>`<div class="panel"><div class="row between"><h3>${l.name}</h3><span class="pill ${l.owner==='الجامعة'?'info':'warn'}">${l.owner}</span></div>
+  <div class="row" style="gap:8px"><label class="muted" for="price-${l.id}" style="font-size:13px;white-space:nowrap">سعر الترم</label><input id="price-${l.id}" class="input num" style="padding:7px 10px" value="${l.price}" inputmode="numeric"><button class="btn sm" data-act="savePrice" data-v="${l.id}">حفظ</button></div>
+  <ul class="stops">${l.stops.map((s,i)=>{const n=S.students.filter(x=>x.line===l.id&&x.stop===s.n&&x.st==='active').length;return `<li class="${s.off?'off':''}"><span class="pin"></span><span>${s.n} <span class="muted num" style="font-size:12px">${s.t}${n?` · ${n} طالب`:''}</span></span>${i<l.stops.length-1?`<button class="btn ghost sm" data-act="toggleStop" data-v="${l.id}|${i}">${s.off?'تفعيل':'إلغاء'}</button>`:'<span></span>'}</li>`}).join('')}</ul>
+  <div class="row" style="gap:8px"><input id="ns-${l.id}" class="input" style="padding:7px 10px" placeholder="اسم نقطة جديدة" maxlength="40"><input id="nt-${l.id}" class="input num" style="padding:7px 10px;width:80px" placeholder="7:05" maxlength="5"><button class="btn ghost sm" data-act="addStop" data-v="${l.id}">إضافة</button></div>
+  <span class="muted" style="font-size:12.5px">${l.driver} · ${l.bus} · محجوز ${l.booked} من ${l.cap}</span></div>`).join('')}</div>
+  <div class="banner info" style="font-size:13.5px">${ic('alert',16)}<span>تغيير السعر بيسري على الحجوزات الجديدة بس. اللي حجز أو دفع قبل كده سعره متثبت.</span></div>`;
+}
+function aBuses(){
+ const stat=b=>b.status==='repair'?'<span class="pill bad">صيانة</span>':b.line?(b.line==='L1'&&!S.drv.tripOn?'<span class="pill info">جاهز</span>':'<span class="pill ok live"><span class="dot"></span>في الطريق</span>'):evBus(b.id)?'<span class="pill warn">محجوز لفعالية</span>':'<span class="pill info">احتياطي متاح</span>';
+ return ph('الباصات والسائقين','ضيف باص، غيّر السائق أو نوع الباص، واستبدل باص عطلان على خط',['7','22'],`<button class="btn sm" data-act="openBus">${ic('plus',16)} باص جديد</button>`)+
+ `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>اللوحة</th><th>النوع</th><th>السعة</th><th>الخط</th><th>السائق</th><th>الموبايل</th><th>المالك</th><th>الحالة</th><th></th></tr></thead><tbody>
+ ${S.buses.map(b=>{const l=b.line&&L(b.line);return `<tr><td>${b.plate}</td><td>${b.type}</td><td class="num">${b.cap}</td><td>${l?l.name+` <span class="muted num">(${l.booked})</span>`:'<span class="muted">—</span>'}</td><td>${b.driver||'<span class="muted">بدون سائق</span>'}</td><td class="num"><span class="ltr">${b.phone||'—'}</span></td><td>${b.owner}</td><td>${stat(b)}</td>
+ <td><div class="row" style="gap:6px"><button class="btn ghost sm" data-act="openBus" data-v="${b.id}">${ic('edit',14)} تعديل</button>${l?`<button class="btn ghost sm" data-act="openReplace" data-v="${l.id}">${ic('swap',14)} استبدال</button>`:b.status==='repair'?`<button class="btn ghost sm" data-act="busFixed" data-v="${b.id}">رجع من الصيانة</button>`:''}</div></td></tr>`}).join('')}
+ </tbody></table></div>
+ <div class="banner info" style="font-size:13.5px">${ic('alert',16)}<span>الاستبدال بيحوّل طلاب الخط لباص احتياطي سعته تكفيهم، ويبعتلهم اللوحة واسم السائق الجديد. الباص القديم بيروح الصيانة.</span></div>`;
+}
+const evBus=id=>S.events.some(e=>e.st!=='اتلغت'&&e.date>=TODAY&&e.buses.includes(id));
+const spareBuses=()=>S.buses.filter(b=>!b.line&&b.status!=='repair'&&b.driver&&!evBus(b.id));
+function annForm(){return `<div class="panel"><h3>إعلان جديد</h3><div class="row" style="flex-wrap:wrap;gap:10px;align-items:flex-end">
+ <div class="field" style="min-width:170px"><label for="anTarget">لمين</label><select id="anTarget" class="input"><option value="all">كل الخطوط</option>${S.lines.map(l=>`<option value="${l.id}">${l.name}</option>`).join('')}</select></div>
+ <div class="field" style="min-width:140px"><label for="anKind">النوع</label><select id="anKind" class="input"><option>تأخير</option><option>إلغاء رحلة</option><option>تغيير ميعاد</option><option>تنبيه عام</option></select></div>
+ <div class="field" style="width:110px"><label for="anMins">التأخير (د)</label><input id="anMins" class="input num" inputmode="numeric" placeholder="15"></div>
+ <div class="field" style="flex:1;min-width:220px"><label for="anText">الرسالة</label><input id="anText" class="input" maxlength="160" placeholder="مثال: الباص هيتأخر بسبب عطل، وجاي باص بديل"></div>
+ <button class="btn" data-act="sendAnn">${ic('mega',16)} انشر وابعت إشعار</button></div><span class="hint">الإشعار بيوصل لطلاب الخط المختار وأولياء أمورهم. التأخير بيتحسب تلقائي في الوقت المتوقع عند الطلاب.</span></div>`}
+function aAnn(){
+ const dl=Object.entries(S.delays);
+ return ph('الإعلانات والتأخيرات','بلّغ الطلاب بأي تأخير أو إلغاء أو تغيير من غير مكالمات',['16','18★','19'])+annForm()+
+ `<div class="cols"><div class="panel"><h3>تأخيرات شغالة دلوقتي</h3>${dl.length?dl.map(([id,d])=>`<div class="row between"><div><b>${L(id).name}</b><div class="muted" style="font-size:13px">${d.mins} دقيقة · ${esc(d.reason)}</div></div><button class="btn ghost sm" data-act="clearDelay" data-v="${id}">رجع للميعاد</button></div>`).join(''):'<p class="muted" style="margin:0">كل الباصات في الميعاد.</p>'}</div>
+ <div class="panel"><h3>آخر الإعلانات</h3><div class="feed">${S.announcements.slice(0,8).map(a=>`<div><time>${a.at}</time><span><b>${a.kind}${a.mins?' '+a.mins+' د':''}</b> · ${lineName(a.target)}: ${esc(a.text)} <span class="muted">(${esc(a.by)})</span></span></div>`).join('')}</div></div></div>`;
+}
+function aDeparts(){
+ return ph('رحلات المغادرة','اعلن رحلة إضافية خلال اليوم حسب الجدول، والطلاب يحجزوا من التطبيق',['19'])+
+ `<div class="panel"><h3>رحلة جديدة</h3><div class="row" style="flex-wrap:wrap;gap:10px;align-items:flex-end">
+ <div class="field" style="width:130px"><label for="dpTime">الميعاد</label><input id="dpTime" type="time" class="input num" value="14:30" min="08:00" max="20:00"></div>
+ <div class="field" style="min-width:170px"><label for="dpLine">الخط</label><select id="dpLine" class="input"><option value="all">كل الخطوط</option>${S.lines.map(l=>`<option value="${l.id}">${l.name}</option>`).join('')}</select></div>
+ <div class="field" style="min-width:170px"><label for="dpBus">الباص</label><select id="dpBus" class="input">${S.buses.filter(b=>b.status!=='repair'&&b.driver).map(b=>`<option value="${b.id}">${b.plate} · ${b.cap} راكب</option>`).join('')}</select></div>
+ <div class="field" style="flex:1;min-width:200px"><label for="dpReason">السبب</label><input id="dpReason" class="input" maxlength="100" placeholder="مثال: إلغاء محاضرات الفرقة الأولى"></div>
+ <button class="btn" data-act="addDepart">${ic('plus',16)} اعلن الرحلة</button></div></div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الميعاد</th><th>الخط</th><th>السبب</th><th>الحجز</th><th>الحالة</th><th></th></tr></thead><tbody>
+ ${S.departures.map(d=>`<tr><td class="num">${t12(d.time)}</td><td>${lineName(d.line)}</td><td>${esc(d.reason)}</td><td class="num">${d.booked}/${d.cap}</td><td>${d.st==='open'?'<span class="pill ok">مفتوحة</span>':'<span class="pill bad">اتلغت</span>'}</td><td>${d.st==='open'?`<button class="btn bad sm" data-act="askCancelDepart" data-v="${d.id}">إلغاء</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function aClinic(){
+ const act=S.students.filter(s=>s.st==='active');
+ return ph('العيادة','تصريح ركوب للطلاب المرضى أو الظروف الطارئة. سبب الحالة الطبية بيفضل عند العيادة بس.',['15'])+
+ `<div class="panel"><h3>تصريح جديد</h3><div class="row" style="flex-wrap:wrap;gap:10px;align-items:flex-end">
+ <div class="field" style="min-width:200px"><label for="pmStudent">الطالب</label><select id="pmStudent" class="input">${act.map(s=>`<option value="${s.id}">${s.name} · ${s.id}</option>`).join('')}</select></div>
+ <div class="field" style="min-width:170px"><label for="pmKind">نوع التصريح</label><select id="pmKind" class="input"><option>أولوية كرسي</option><option>ركوب مجاني مؤقت</option><option>رحلة مغادرة مبكرة</option><option>ركوب من نقطة أقرب</option></select></div>
+ <div class="field" style="width:150px"><label for="pmFrom">من</label><input id="pmFrom" type="date" class="input" min="${TODAY}" value="${TODAY}"></div>
+ <div class="field" style="width:150px"><label for="pmTo">إلى</label><input id="pmTo" type="date" class="input" min="${TODAY}" value="2026-11-05"></div>
+ <button class="btn" data-act="addPermit">إصدار التصريح</button></div><span class="hint">طالب واحد = تصريح نشط واحد. إدارة النقل والسائق بيشوفوا نوع التصريح ومدته بس.</span></div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الطالب</th><th>التصريح</th><th>من</th><th>إلى</th><th>أصدره</th><th>الحالة</th><th></th></tr></thead><tbody>
+ ${S.permits.map(p=>`<tr><td>${p.student}</td><td>${p.kind}</td><td class="num">${p.from}</td><td class="num">${p.to}</td><td>${p.by}</td><td>${p.st==='active'?'<span class="pill ok">ساري</span>':'<span class="pill info">ملغى</span>'}</td><td>${p.st==='active'?`<button class="btn ghost sm" data-act="revokePermit" data-v="${p.id}">إلغاء</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function aSG(){
+ const rideL1=S.drv.boarded.length;
+ const mock={L2:31,L3:22,L4:14};
+ return ph('مكتب الأمين العام','مين ركب ومين اتأخر، من غير مكالمات',['16','12'])+
+ `<div class="kpis"><div class="kpi"><span>ركبوا النهارده</span><b>${rideL1+31+22+14}</b><span>من المسح عند الركوب</span></div><div class="kpi"><span>خطوط متأخرة</span><b>${Object.keys(S.delays).length}</b><span>${Object.entries(S.delays).map(([k,d])=>L(k).name.split(' ')[1]+' '+d.mins+'د').join('، ')||'كله في الميعاد'}</span></div><div class="kpi"><span>طلاب متابَعين</span><b>${S.watch.length}</b><span>بيوصلك إشعار لما يركبوا</span></div><div class="kpi"><span>مخالفات جديدة</span><b>${S.violations.filter(v=>v.st==='جديدة').length}</b><span>عند إدارة النقل</span></div></div>
+ <div class="cols"><div class="panel"><h3>الركوب حسب الخط</h3>${S.lines.map(l=>{const n=l.id==='L1'?rideL1:(mock[l.id]||0);return `<div class="bar"><span>${l.name}</span><div class="track"><i class="${S.delays[l.id]?'hot':''}" style="width:${Math.min(100,Math.round(n/Math.max(1,l.booked)*100))}%"></i></div><span class="num">${n}/${l.booked}</span></div>`}).join('')}</div>
+ <div class="panel"><h3>طلاب بتتابعهم</h3><div class="row" style="gap:8px"><select id="wSel" class="input">${S.students.filter(s=>!S.watch.includes(s.id)&&s.st==='active').map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select><button class="btn sm" data-act="addWatch">متابعة</button></div>
+ ${S.watch.map(id=>{const s=S.students.find(x=>x.id===id);const rode=S.drv.boarded.includes(s.name);return `<div class="row between"><span>${s.name} <span class="muted" style="font-size:12.5px">${lineName(s.line)}</span></span><div class="row" style="gap:6px">${rode?'<span class="pill ok">ركب ✓</span>':'<span class="pill info">لسه</span>'}<button class="btn ghost sm" data-act="unWatch" data-v="${id}">إلغاء</button></div></div>`}).join('')}</div></div>`;
+}
+function aEvents(){
+ return ph('باصات الفعاليات','احجز باصات للتربية العسكرية وPeak وOpen Day وأي فعالية',['21','22'])+
+ `<div class="panel"><h3>طلب باصات لفعالية</h3><div class="row" style="flex-wrap:wrap;gap:10px;align-items:flex-end">
+ <div class="field" style="min-width:170px"><label for="evName">الفعالية</label><select id="evName" class="input"><option>التربية العسكرية</option><option>Peak</option><option>Open Day</option><option>رحلة علمية</option></select></div>
+ <div class="field" style="width:160px"><label for="evDate">التاريخ</label><input id="evDate" type="date" class="input" min="${TODAY}" value="2026-11-02"></div>
+ <div class="field" style="width:130px"><label for="evN">عدد الطلاب</label><input id="evN" class="input num" inputmode="numeric" value="90"></div>
+ <button class="btn" data-act="addEvent">احسب واحجز</button></div><span class="hint">بنحجز الباصات الاحتياطية بتاعة الجامعة الأول، والباقي بيتطلب من أبو الهول تلقائي. متاح دلوقتي ${spareBuses().length} باص احتياطي.</span></div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الفعالية</th><th>التاريخ</th><th>الطلاب</th><th>الباصات</th><th>الحالة</th><th></th></tr></thead><tbody>
+ ${S.events.map(e=>`<tr><td><b>${e.name}</b><div class="muted num" style="font-size:12px">${e.id}</div></td><td class="num">${e.date}</td><td class="num">${e.students}</td><td>${e.buses.map(id=>B(id).plate).join('، ')||'—'}${e.ah?` <span class="pill warn">+${e.ah} من أبو الهول</span>`:''}</td><td><span class="pill ${e.st==='مؤكدة'?'ok':e.st==='اتلغت'?'bad':'warn'}">${e.st}</span></td><td>${e.st!=='اتلغت'?`<button class="btn bad sm" data-act="cancelEvent" data-v="${e.id}">إلغاء</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function aAH(){
+ const mine=S.buses.filter(b=>b.owner==='أبو الهول'),reqs=S.events.filter(e=>e.ah&&e.st!=='اتلغت');
+ return ph('بوابة أبو الهول','صلاحية محدودة: الشركة بتشوف باصاتها وطلبات التشغيل بس، من غير بيانات الطلاب',['22'])+
+ `<div class="panel"><h3>طلبات تشغيل من إدارة النقل</h3>${reqs.length?reqs.map(e=>`<div class="row between" style="flex-wrap:wrap;gap:8px"><div><b>${e.name}</b> <span class="muted num">${e.date} · ${e.ah} باص 50 راكب</span></div>${e.st==='مستني أبو الهول'?`<div class="row" style="gap:6px"><button class="btn ok sm" data-act="ahOk" data-v="${e.id}">تأكيد التوفير</button><button class="btn bad sm" data-act="ahNo" data-v="${e.id}">مش متاح</button></div>`:`<span class="pill ${e.st==='مؤكدة'?'ok':'bad'}">${e.st}</span>`}</div>`).join(''):'<p class="muted" style="margin:0">مفيش طلبات.</p>'}</div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>اللوحة</th><th>النوع</th><th>الخط</th><th>السائق</th><th>الحالة</th></tr></thead><tbody>${mine.map(b=>`<tr><td>${b.plate}</td><td>${b.type}</td><td>${lineName(b.line)}</td><td>${b.driver||'—'}</td><td>${b.line?'على خط':'احتياطي'}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function stLabel(s){return {active:['ok','نشط'],pending:['warn','قيد المراجعة'],reserved:['warn','محجوز'],cancelled:['bad','ملغى'],refunded:['bad','مسترد'],none:['info','غير مشترك']}[s]}
+function aStudents(){
+ const q=S.adm.q.trim();
+ const rows=S.students.filter(s=>!q||s.name.includes(q)||s.id.includes(q));
+ return ph('الطلاب والتحويلات','انقل طالب لخط تاني بشكل دائم أو مؤقت أو ليوم واحد، أو الغي اشتراك مخالف',['8','10','11'])+
+ `<div class="row" style="max-width:380px"><input id="sq" class="input" data-bind="q" placeholder="ابحث بالاسم أو الرقم الجامعي" value="${esc(S.adm.q)}"></div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>الرقم الجامعي</th><th>الاسم</th><th>الكلية</th><th>الخط</th><th>النقطة</th><th>الحالة</th><th>تحويل</th><th></th></tr></thead><tbody>
+ ${rows.length?rows.map(s=>{const [c,t]=stLabel(s.st);return `<tr><td class="num">${s.id}</td><td>${s.name}</td><td>${s.fac}</td><td>${L(s.line)?.name||'—'}</td><td>${s.stop||'—'}</td><td><span class="pill ${c}">${t}</span></td>
+ <td>${s.assign?`<span class="pill info">${s.assign.type} ← ${L(s.assign.to).name}${s.assign.until?` لحد ${s.assign.until}`:''}</span>`:'<span class="muted">—</span>'}</td>
+ <td><div class="row" style="gap:6px">${s.st==='active'?`<button class="btn ghost sm" data-act="openTransfer" data-v="${s.id}">${ic('swap',14)} نقل</button><button class="btn bad sm" data-act="askCancelSub" data-v="${s.id}">إلغاء</button>`:''}</div></td></tr>`}).join(''):'<tr><td colspan="8" class="muted">مفيش نتايج.</td></tr>'}
+ </tbody></table></div>`;
+}
+function modal(){
+ const m=S.modal;let inner='';
+ if(m.kind==='transfer'){const s=S.students.find(x=>x.id===m.sid);
+  inner=`<h3 id="mt">نقل ${s.name}</h3><span class="muted">الخط الحالي: ${L(s.line).name} · ${s.stop}</span>
+  <div class="field"><label for="tLine">إلى خط</label><select id="tLine" class="input">${S.lines.filter(l=>l.id!==s.line).map(l=>`<option value="${l.id}" ${seatsLeft(l)<=0?'disabled':''}>${l.name}${seatsLeft(l)<=0?' (مكتمل)':` (متبقي ${seatsLeft(l)})`}</option>`).join('')}</select></div>
+  <div class="field"><label for="tType">نوع النقل</label><select id="tType" class="input"><option>دائم</option><option selected>مؤقت</option><option>يومي</option></select></div>
+  <div class="field"><label for="tUntil">لحد تاريخ (للمؤقت)</label><input id="tUntil" type="date" class="input" min="${TODAY}" value="2026-11-15"></div>
+  ${errLine(m.err)}
+  <div class="banner info" style="font-size:13px">الدائم بينقل الكرسي فعلًا من خط لخط. المؤقت واليومي بيحجزوا مكان من غير ما يلغوا الأصلي.</div>
+  <div class="row" style="justify-content:flex-end"><button class="btn ghost" data-act="closeModal">رجوع</button><button class="btn" data-act="doTransfer">تأكيد النقل</button></div>`;}
+ else if(m.kind==='bus'){const b=Object.assign({},m.id?B(m.id):{plate:'',type:'ميني باص 28 راكب',owner:'الجامعة',driver:'',phone:''},m.v||{});
+  inner=`<h3 id="mt">${m.id?'تعديل باص '+b.plate:'باص جديد'}</h3>
+  <div class="field"><label for="bPlate">رقم اللوحة</label><input id="bPlate" class="input" value="${esc(b.plate)}" placeholder="مثال: ن ص ق 4821" maxlength="20"></div>
+  <div class="field"><label for="bType">النوع والسعة</label><select id="bType" class="input">${Object.keys(BUS_TYPES).map(t=>`<option ${b.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+  <div class="field"><label for="bOwner">المالك</label><select id="bOwner" class="input">${['الجامعة','أبو الهول'].map(o=>`<option ${b.owner===o?'selected':''}>${o}</option>`).join('')}</select></div>
+  <div class="field"><label for="bDriver">اسم السائق</label><input id="bDriver" class="input" value="${esc(b.driver)}" maxlength="40"></div>
+  <div class="field"><label for="bPhone">موبايل السائق</label><input id="bPhone" class="input num" value="${esc(b.phone)}" placeholder="01xxxxxxxxx" style="direction:ltr;text-align:right" maxlength="14"></div>
+  ${b.line?`<span class="hint">الباص ده على ${L(b.line).name}، فأي تغيير في السائق أو اللوحة هيوصل كإشعار لطلاب الخط.</span>`:''}
+  ${errLine(m.err)}<div class="row" style="justify-content:flex-end"><button class="btn ghost" data-act="closeModal">رجوع</button><button class="btn" data-act="saveBus">حفظ</button></div>`;}
+ else if(m.kind==='line'){const sp=spareBuses();
+  inner=`<h3 id="mt">خط جديد</h3>
+  <div class="field"><label for="lnName">اسم الخط</label><input id="lnName" class="input" placeholder="مثال: خط الجناين" maxlength="40" value="${esc(m.v?.name||'')}"></div>
+  <div class="field"><label for="lnPrice">سعر الترم (ج.م)</label><input id="lnPrice" class="input num" inputmode="numeric" value="${esc(m.v?.price||'4500')}"></div>
+  <div class="field"><label for="lnBus">الباص</label><select id="lnBus" class="input">${sp.length?sp.map(b=>`<option value="${b.id}">${b.plate} · ${b.type} · ${b.driver}</option>`).join(''):'<option value="">مفيش باص احتياطي، ضيف باص الأول</option>'}</select></div>
+  <div class="field"><label for="lnStops">النقط بالترتيب (كل نقطة في سطر: الاسم - الميعاد)</label><textarea id="lnStops" class="input" placeholder="الجناين - 6:30&#10;الشلوفة - 6:45">${esc(m.v?.stops||'')}</textarea><span class="hint">«بوابة الجامعة» بتتضاف آخر نقطة تلقائي.</span></div>
+  <div class="field"><label for="lnArr">ميعاد الوصول للجامعة</label><input id="lnArr" class="input num" value="${esc(m.v?.arr||'7:30')}" maxlength="5"></div>
+  ${errLine(m.err)}<div class="row" style="justify-content:flex-end"><button class="btn ghost" data-act="closeModal">رجوع</button><button class="btn" data-act="saveLine" ${sp.length?'':'disabled'}>إنشاء الخط</button></div>`;}
+ else if(m.kind==='replace'){const l=L(m.v),sp=spareBuses().filter(b=>b.cap>=l.booked);
+  inner=`<h3 id="mt">استبدال باص ${l.name}</h3><span class="muted">الباص الحالي ${l.bus} · عليه ${l.booked} طالب</span>
+  <div class="field"><label for="rpBus">الباص البديل</label><select id="rpBus" class="input">${sp.length?sp.map(b=>`<option value="${b.id}">${b.plate} · ${b.cap} راكب · ${b.driver}</option>`).join(''):'<option value="">مفيش باص احتياطي سعته تكفي</option>'}</select></div>
+  <div class="field"><label for="rpWhy">السبب</label><select id="rpWhy" class="input"><option>عطل في الباص</option><option>صيانة دورية</option><option>حادثة</option></select></div>
+  ${errLine(m.err)}<div class="row" style="justify-content:flex-end"><button class="btn ghost" data-act="closeModal">رجوع</button><button class="btn" data-act="doReplace" data-v="${l.id}" ${sp.length?'':'disabled'}>استبدال وبلّغ الطلاب</button></div>`;}
+ else if(m.kind==='reject'){
+  inner=`<h3 id="mt">رفض ${m.title}</h3><div class="field"><label for="rjReason">السبب (هيوصل للطالب)</label><select id="rjReason" class="input">${m.reasons.map(r=>`<option>${r}</option>`).join('')}</select></div>
+  <div class="row" style="justify-content:flex-end"><button class="btn ghost" data-act="closeModal">رجوع</button><button class="btn bad" data-act="${m.act}" data-v="${m.v}">تأكيد الرفض</button></div>`;}
+ else {inner=`<h3 id="mt">${m.title}</h3><p style="margin:0">${m.body}</p><div class="row" style="justify-content:flex-end"><button class="btn ghost" data-act="closeModal">رجوع</button><button class="btn ${m.danger?'bad':''}" data-act="${m.act}" data-v="${m.v||''}">${m.ok}</button></div>`;}
+ return `<div class="modal-bg" data-act="closeModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">${inner}</div></div>`;
+}
+function aPayments(){
+ return ph('المدفوعات','إيصالات InstaPay والتحويل البنكي للمراجعة، ومدفوعات فوري المؤكدة تلقائي',['6','3'])+
+ `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>الإيصال</th><th>الطالب</th><th>الخط</th><th>المبلغ</th><th>الطريقة</th><th>رقم العملية</th><th>الوقت</th><th>القرار</th></tr></thead><tbody>
+ ${S.payments.map(p=>`<tr><td>${p.img?`<img class="thumb" src="${p.img}" alt="إيصال">`:`<div class="thumb">${ic(p.method==='فوري'?'check':'doc',18)}</div>`}</td><td>${p.student}<div class="muted num" style="font-size:12px">${p.sid}</div></td><td>${L(p.line).name}</td><td class="num">${money(p.amount)}</td><td>${p.method}</td><td class="num">${esc(p.ref)}</td><td>${p.at}</td>
+ <td>${p.st==='pending'?`<div class="row" style="gap:6px"><button class="btn ok sm" data-act="payOk" data-v="${p.id}">موافقة</button><button class="btn bad sm" data-act="askPayNo" data-v="${p.id}">رفض</button></div>`:p.st==='approved'?`<span class="pill ok">${p.auto?'تأكيد تلقائي':'تمت الموافقة'}</span>`:`<span class="pill bad" title="${esc(p.reason||'')}">مرفوض${p.reason?': '+esc(p.reason):''}</span>`}</td></tr>`).join('')}
+ </tbody></table></div>`;
+}
+function aRequests(){
+ return ph('الطلبات والاسترداد','كل الطلبات في مكان واحد بسلسلة موافقات: ولي الأمر ← إدارة النقل ← المالية',['5','9','11'])+
+ `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>الطلب</th><th>الطالب</th><th>التفاصيل</th><th>المبلغ</th><th>الموافقات</th><th></th></tr></thead><tbody>
+ ${S.requests.map(r=>{const nx=r.steps.find(s=>s[1]==='now');return `<tr><td><b>${r.type}</b><div class="muted num" style="font-size:12px">${r.id}</div></td><td>${r.student}</td><td style="max-width:260px">${esc(r.detail)}</td>
+ <td class="num">${r.paid?`${money(r.paid)}<div style="font-size:12px;color:var(--bad)">خصم ${r.pct}%</div><b style="color:var(--ok)">${money(r.paid*(1-r.pct/100))}</b>`:'—'}</td><td>${chain(r.steps)}</td>
+ <td>${nx?(nx[0]==='ولي الأمر'?'<span class="pill warn">مستني ولي الأمر</span>':`<div class="row" style="gap:6px"><button class="btn ok sm" data-act="reqOk" data-v="${r.id}">موافقة كـ${nx[0]}</button><button class="btn bad sm" data-act="askReqNo" data-v="${r.id}">رفض</button></div>`):(()=>{const [c,t]=reqState(r);return `<span class="pill ${c}">${t}</span>`})()}</td></tr>`}).join('')}
+ </tbody></table></div>`;
+}
+function aViolations(){
+ return ph('المخالفات','المخالفات اللي سجلها السائقين والمشرفين، بتتحال للأمن وشؤون الطلاب',['13','17'])+
+ `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>الدليل</th><th>الطالب</th><th>المخالفة</th><th>الوصف</th><th>سجلها</th><th>الوقت</th><th>الحالة</th></tr></thead><tbody>
+ ${S.violations.map(v=>`<tr><td>${v.img?`<img class="thumb" src="${v.img}" alt="صورة المخالفة">`:`<div class="thumb">${ic('cam',18)}</div>`}</td><td>${esc(v.student)}</td><td><b>${esc(v.type)}</b></td><td style="max-width:260px">${esc(v.desc)}</td><td>${esc(v.by)}</td><td>${v.at}</td>
+ <td>${v.st==='جديدة'?`<div class="row" style="gap:6px"><button class="btn sm" data-act="refer" data-v="${v.id}">إحالة للأمن</button><button class="btn ghost sm" data-act="dismissV" data-v="${v.id}">حفظ بدون إجراء</button></div>`:`<span class="pill ${v.st==='محفوظة'?'info':'warn'}">${v.st}</span>`}</td></tr>`).join('')}
+ </tbody></table></div>`;
+}
+function aComplaints(){
+ return ph('الشكاوى','رد على الطالب ويوصله إشعار في التطبيق',['20'])+
+ `<div class="list">${S.complaints.map(c=>`<div class="panel"><div class="row between"><div class="row"><b>${c.student}</b><span class="pill info">${esc(c.cat)}</span></div><span class="pill ${c.st==='تم الرد'?'ok':'warn'}">${c.st}</span></div><p style="margin:0">${esc(c.text)}</p><span class="muted" style="font-size:12.5px">${c.at} · ${c.id}</span>
+ ${c.reply?`<div class="banner ok" style="font-size:13.5px"><div><b>الرد:</b> ${esc(c.reply)}</div></div>`:`<div class="row" style="gap:8px"><input id="rp-${c.id}" class="input" placeholder="اكتب الرد" maxlength="300"><button class="btn sm" data-act="replyC" data-v="${c.id}">إرسال</button></div>`}</div>`).join('')}</div>`;
+}
+function repRows(){const lid=S.adm.repLine;return S.students.filter(s=>s.line===lid&&['active','pending','reserved'].includes(s.st))}
+function aReports(){
+ const by=S.adm.repBy,lid=S.adm.repLine,l=L(lid),rows=repRows();
+ const byStop=activeStops(l).map(s=>[s,rows.filter(r=>r.stop===s.n).length]);
+ return ph('التقارير والتصدير','صدّر كشوف الطلاب بالخط أو النقطة، وابعت التقارير للمالية والأمن والأمين العام',['12'])+
+ `<div class="panel"><div class="row" style="flex-wrap:wrap;gap:10px">
+ <div class="field" style="min-width:160px"><label for="repBy">التقرير حسب</label><select id="repBy" class="input" data-bind="repBy"><option value="line" ${by==='line'?'selected':''}>الطالب (كشف الخط)</option><option value="stop" ${by==='stop'?'selected':''}>النقطة</option></select></div>
+ <div class="field" style="min-width:200px"><label for="repLine">الخط</label><select id="repLine" class="input" data-bind="repLine">${S.lines.map(x=>`<option value="${x.id}" ${x.id===lid?'selected':''}>${x.name}</option>`).join('')}</select></div>
+ <div class="row" style="margin-inline-start:auto;gap:8px;align-self:flex-end"><button class="btn" data-act="export" data-v="Excel">${ic('doc',16)} Excel</button><button class="btn ghost" data-act="export" data-v="PDF">${ic('doc',16)} PDF</button><button class="btn ghost" data-act="sendReport">إرسال للجهات</button></div></div>
+ <b>معاينة: كشف ${l.name}${by==='stop'?' مجمّع بالنقطة':''} <span class="muted num" style="font-weight:500">(${rows.length} طالب في البيانات التجريبية)</span></b>
+ <div class="tbl-wrap export-prev"><table class="tbl"><thead><tr>${by==='stop'?'<th>النقطة</th><th>الميعاد</th><th>عدد الطلاب</th>':'<th>#</th><th>الرقم الجامعي</th><th>الاسم</th><th>الكلية</th><th>النقطة</th><th>الحالة</th>'}</tr></thead><tbody>
+ ${by==='stop'?byStop.map(([s,n])=>`<tr><td>${s.n}</td><td class="num">${s.t}</td><td class="num">${n}</td></tr>`).join('')
+ :rows.map((s,i)=>`<tr><td class="num">${i+1}</td><td class="num">${s.id}</td><td>${s.name}</td><td>${s.fac}</td><td>${s.stop}</td><td>${stLabel(s.st)[1]}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">مفيش طلاب على الخط ده في البيانات التجريبية.</td></tr>'}
+ </tbody></table></div></div>
+ <div class="kpis"><div class="kpi"><span>إيرادات مؤكدة (الديمو)</span><b>${money(S.payments.filter(p=>p.st==='approved').reduce((a,p)=>a+p.amount,0))}</b><span>من ${S.payments.filter(p=>p.st==='approved').length} عملية</span></div><div class="kpi"><span>متوسط الإشغال</span><b>${Math.round(S.lines.reduce((a,l)=>a+l.booked/l.cap,0)/S.lines.length*100)}%</b><span>كل الخطوط</span></div><div class="kpi"><span>نسبة الالتزام بالمواعيد</span><b>91%</b><span>آخر 30 يوم</span></div><div class="kpi"><span>مخالفات مسجلة</span><b>${S.violations.length}</b><span>منهم ${S.violations.filter(v=>v.st==='جديدة').length} جديدة</span></div></div>`;
+}
+function aAudit(){
+ return ph('سجل العمليات','كل عملية فيها فلوس أو إلغاء أو قرار بتتسجل: مين عملها وامتى. السجل ما بيتمسحش.',['5','10','11'])+
+ `<div class="tbl-wrap"><table class="tbl audit"><thead><tr><th>الوقت</th><th>مين</th><th>العملية</th></tr></thead><tbody>${S.audit.map(a=>`<tr><td class="num">${a[0]}</td><td>${esc(a[1])}</td><td>${esc(a[2])}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* ---------- live sim ---------- */
+function etaMin(id,stopName){
+ const l=L(id),i=Math.max(0,l.stops.findIndex(s=>s.n===stopName)),frac=l.stops.length>1?i/(l.stops.length-1):1;
+ const rem=frac-S.busT[id],dl=S.delays[id]?S.delays[id].mins:0; return (rem<=0?Math.max(1,Math.round((1-S.busT[id])*35)):Math.max(1,Math.round(rem*45)))+dl;
+}
+function placeBus(){
+ const rt=document.getElementById('rt'),bus=document.getElementById('busG');if(!rt||!bus)return;
+ const id=rt.dataset.line,len=rt.getTotalLength(),pt=rt.getPointAtLength(len*S.busT[id]);
+ bus.setAttribute('transform',`translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
+ const g=document.getElementById('stopsG');if(g&&!g.childElementCount){const l=L(id),sel=myStop(l);
+  g.innerHTML=l.stops.map((s,i)=>{const p=rt.getPointAtLength(len*i/(l.stops.length-1));const me=s.n===sel;return `<circle cx="${p.x}" cy="${p.y}" r="${me?7:5}" fill="${me?'var(--sun)':'var(--surface)'}" stroke="var(--brand)" stroke-width="2.5" ${s.off?'opacity=".35"':''}/><text x="${p.x+10}" y="${p.y-8}" style="fill:var(--ink);font-weight:600">${s.n}</text>`}).join('')}
+}
+let qrSeed=Date.now(),qrLeft=30;
+function drawQR(){
+ const c=document.getElementById('qr');if(!c)return;const x=c.getContext('2d'),N=29;let s=qrSeed%2147483647||7;const r=()=>(s=s*48271%2147483647)/2147483647;
+ x.fillStyle='#fff';x.fillRect(0,0,N,N);x.fillStyle='#0B1D22';
+ for(let i=0;i<N;i++)for(let j=0;j<N;j++)if(r()>.52)x.fillRect(i,j,1,1);
+ const fp=(a,b)=>{x.fillStyle='#fff';x.fillRect(a-1,b-1,9,9);x.fillStyle='#0B1D22';x.fillRect(a,b,7,7);x.fillStyle='#fff';x.fillRect(a+1,b+1,5,5);x.fillStyle='#0B1D22';x.fillRect(a+2,b+2,3,3)};
+ fp(0,0);fp(N-7,0);fp(0,N-7);
+}
+function after(){placeBus();drawQR();updLive();const cb=document.getElementById('chatBody');if(cb)cb.scrollTop=cb.scrollHeight}
+function fmtCd(ms){ms=Math.max(0,ms);const h=Math.floor(ms/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);return [h,m,s].map(v=>String(v).padStart(2,'0')).join(':')}
+function updLive(){
+ const id=isLive()?sub().line:'L1',l=L(id),stop=myStop(l);
+ const set=(i,v)=>{const e=document.getElementById(i);if(e)e.textContent=v};
+ set('homeEta',etaMin(id,stop));set('trEta',etaMin(id,stop));
+ if(sub()&&sub().status==='reserved')document.querySelectorAll('#resCd').forEach(e=>e.textContent=fmtCd(sub().reservedAt+DAY-Date.now()));
+ set('qrCd',qrLeft);
+ S.lines.forEach(x=>{const b=document.getElementById('lv-'+x.id);if(b)b.style.width=Math.round(S.busT[x.id]*100)+'%';set('lvt-'+x.id,etaMin(x.id,x.stops[x.stops.length-1].n)+' د')});
+ if(S.drv.tripOn){const t=S.tick;S.drv.gps=(29.9668+t*.00021).toFixed(4)+', '+(32.5498+t*.00013).toFixed(4);set('gps',S.drv.gps)}
+}
+function checkExpiry(){
+ const s=sub();if(s&&s.status==='reserved'&&Date.now()>s.reservedAt+DAY){
+  L(s.line).booked--;s.status='expired';S.st.fawry=null;syncMe({st:'none',line:'',stop:''});
+  notify('مهلة الـ 24 ساعة خلصت من غير دفع، والحجز اتلغى والكرسي رجع متاح.');log('النظام','انتهاء مهلة حجز '+ME.name+' وإرجاع الكرسي');feed('انتهت مهلة حجز '+ME.name);render()}
+}
+setInterval(()=>{
+ S.tick++;
+ for(const k in S.busT){S.busT[k]+=k==='L2'?.0015:.0025;if(S.busT[k]>1)S.busT[k]=0}
+ qrLeft--;if(qrLeft<=0){qrLeft=30;qrSeed=Date.now();drawQR();const t=document.getElementById('qrTime');if(t)t.textContent=nowT()}
+ checkExpiry();placeBus();updLive();
+},1000);
+
+/* ---------- business logic ---------- */
+function releaseSeat(){const s=sub();if(s&&LIVE.includes(s.status))L(s.line).booked=Math.max(0,L(s.line).booked-1)}
+function cancelDeparture(){S.st.departs.forEach(id=>{const d=S.departures.find(x=>x.id===id);if(d)d.booked--});S.st.departs=[]}
+function finalize(r){
+ const me=r.sid===ME.id;
+ if(r.type==='استرداد'){
+  if(me&&isActive()){releaseSeat();cancelDeparture();sub().status='refunded';syncMe({st:'refunded',assign:null});
+   S.drv.boarded=S.drv.boarded.filter(n=>n!==ME.name);notify(`طلب الاسترداد ${r.id} اتقبل نهائيًا. هيتحولك ${money(r.paid*(1-r.pct/100))} والكارنيه اتقفل.`)}
+  else{const st=S.students.find(x=>x.id===r.sid);if(st)st.st='refunded'}
+  log('المالية: منى عادل',`اعتماد استرداد ${r.student} – ${money(r.paid*(1-r.pct/100))} (${r.id})`);
+ } else if(r.type==='تغيير خط'){
+  const to=L(r.to),st=S.students.find(x=>x.id===r.sid);
+  if(r.kind==='دائم'){
+   if(seatsLeft(to)<=0)return 'الخط الجديد اتملى. مينفعش يتنفذ دلوقتي.';
+   if(me&&isActive()){cancelDeparture();L(sub().line).booked--;to.booked++;const diff=to.price-sub().paid;sub().line=to.id;sub().stop=activeStops(to)[0].n;sub().paid=to.price;
+    notify(`طلب تغيير الخط اتقبل. خطك الجديد ${to.name} من نقطة ${sub().stop}. ${diff>0?'مطلوب منك فرق '+money(diff):diff<0?'هيرجعلك فرق '+money(-diff):''}`)}
+   if(st){st.line=to.id;st.stop=activeStops(to)[0].n;st.assign=null}
+  } else {if(st)st.assign={type:r.kind,to:to.id,until:r.until};if(me)notify(`طلب التغيير ${r.kind==='مؤقت'?'المؤقت':'ليوم واحد'} لـ ${to.name} اتقبل.`)}
+  log('النقل: أ. خالد',`تنفيذ تغيير خط ${r.student} إلى ${to.name} (${r.kind})`);
+ } else {if(me)notify(`طلب دخول المجسم ${r.id} اتقبل. اعرض الكارنيه للمشرف يوم ${r.date||''}.`);log('النقل: أ. خالد','موافقة دخول مجسم '+r.student)}
+ return null;
+}
+function newRequest(o){
+ if(!isActive())return 'لازم يكون اشتراكك نشط.';
+ const open=myOpen();if(open)return `عندك طلب ${open.type} مفتوح بالفعل (${open.id}).`;
+ const r=Object.assign({id:nid('R'),student:ME.name,sid:ME.id},o);
+ S.requests.unshift(r);log(ME.name,`تقديم طلب ${r.type} ${r.id}`);feed(`طلب ${r.type} جديد من ${ME.name}`);
+ notify(`طلبك ${r.id} اتبعت لولي الأمر للموافقة.`);return null;
+}
+function sampleReceipt(){
+ const c=document.createElement('canvas');c.width=300;c.height=380;const x=c.getContext('2d');
+ x.fillStyle='#fff';x.fillRect(0,0,300,380);x.fillStyle='#5A2D82';x.fillRect(0,0,300,64);
+ x.fillStyle='#fff';x.font='bold 22px sans-serif';x.textAlign='center';x.fillText('InstaPay',150,42);
+ x.fillStyle='#1E8752';x.beginPath();x.arc(150,110,26,0,7);x.fill();x.strokeStyle='#fff';x.lineWidth=5;x.beginPath();x.moveTo(138,110);x.lineTo(147,119);x.lineTo(163,101);x.stroke();
+ x.fillStyle='#13242A';x.font='bold 26px sans-serif';x.fillText(Number(sub().price).toLocaleString('en-US')+' EGP',150,175);
+ x.font='15px sans-serif';x.fillStyle='#58696E';['To: sutech.transport','Ref: IPN58210944','Note: '+ME.id,'22 Oct 2026  '+nowT()].forEach((t,i)=>x.fillText(t,150,215+i*28));
+ return c.toDataURL('image/png');
+}
+
+/* ---------- actions ---------- */
+const A={
+ role:v=>{S.role=v;S.modal=null;render.resetScroll=true;render()},
+ reset:()=>{S=seed();qrLeft=30;toast('رجعنا لأول الديمو');render()},
+ go:v=>go(v),
+ goReq:v=>{S.st.reqTab=v;go('requests')},
+ fetch:()=>{const v=document.getElementById('sid').value.trim();S.st.sidVal=v;
+  if(!/^\d{10}$/.test(v)){S.st.idErr='الرقم الجامعي لازم يكون 10 أرقام.';render();return}
+  if(v!==ME.id){S.st.idErr='الرقم ده مش موجود في قاعدة بيانات الـ Admission. راجع شؤون الطلاب.';render();return}
+  S.st.idErr='';S.st.fetched=true;render()},
+ notMe:()=>{Object.assign(S.st,{fetched:false,otpErr:'',otpTries:0,sidVal:''});render()},
+ resendOtp:()=>{S.st.otpTries=0;S.st.otpErr='';toast('اتبعت كود جديد');render()},
+ login:()=>{if(S.st.otpTries>=3)return;const v=document.getElementById('otp').value.replace(/\D/g,'');
+  if(v!=='4821'){S.st.otpTries++;S.st.otpErr=S.st.otpTries>=3?'3 محاولات غلط. اطلب كود جديد.':`الكود غلط. فاضل ${3-S.st.otpTries} محاولات.`;render();return}
+  Object.assign(S.st,{otpErr:'',otpTries:0});log(ME.name,'تسجيل دخول');go('home')},
+ logout:()=>{Object.assign(S.st,{fetched:false,otpTries:0,otpErr:''});go('login')},
+ pickLine:v=>{if(isLive()){toast('عندك اشتراك أو حجز بالفعل','bad');return}if(seatsLeft(L(v))<=0){toast('الخط ده مكتمل','bad');return}S.st.lineSel=v;S.st.stopSel=null;S.st.stopErr='';go('line')},
+ pickStop:v=>{const st=L(S.st.lineSel).stops.find(s=>s.n===v);if(!st||st.off)return;S.st.stopSel=v;S.st.stopErr='';render()},
+ reserve:()=>{if(isLive()){toast('عندك اشتراك أو حجز بالفعل','bad');go('home');return}
+  const l=L(S.st.lineSel),st=l.stops.find(s=>s.n===S.st.stopSel);
+  if(!st||st.off){S.st.stopErr='النقطة دي مش متاحة، اختار نقطة تانية.';S.st.stopSel=null;render();return}
+  if(seatsLeft(l)<=0){S.st.stopErr='الخط اتملى حالًا. اختار خط تاني.';render();return}
+  l.booked++;S.st.sub={line:l.id,stop:st.n,status:'reserved',reservedAt:Date.now(),price:l.price,paid:0,rejectReason:''};
+  Object.assign(S.st,{receipt:null,ref:'',payErr:'',fawry:null});syncMe({line:l.id,stop:st.n,st:'reserved',assign:null});
+  log(ME.name,`حجز مكان في ${l.name} بسعر ${money(l.price)}`);feed(`حجز جديد: ${ME.name} – ${l.name}`);toast('اتحجز مكانك لمدة 24 ساعة');go('pay')},
+ askCancelRes:()=>{S.modal={kind:'confirm',title:'إلغاء الحجز؟',body:'الكرسي هيرجع متاح لغيرك، ولو عايز تشترك تاني هتحجز من الأول بالسعر وقتها.',ok:'إلغاء الحجز',act:'cancelRes',danger:true};render()},
+ cancelRes:()=>{S.modal=null;const s=sub();if(!s||s.status!=='reserved'){render();return}
+  releaseSeat();s.status='cancelled';S.st.fawry=null;syncMe({st:'none',line:'',stop:''});log(ME.name,'إلغاء الحجز وإرجاع الكرسي');toast('الحجز اتلغى');go('home')},
+ expireRes:()=>{const s=sub();if(s&&s.status==='reserved'){s.reservedAt=Date.now()-DAY+4000;toast('المهلة هتخلص بعد 4 ثواني')}},
+ payM:v=>{S.st.pay=v;S.st.payErr='';render()},
+ copy:v=>{try{navigator.clipboard.writeText(v).then(()=>toast('اتنسخ'),()=>toast(v))}catch(e){toast(v)}},
+ sampleReceipt:()=>{S.st.receipt=sampleReceipt();if(!S.st.ref)S.st.ref='IPN'+String(Date.now()).slice(-8);render()},
+ sendReceipt:()=>{const s=sub();if(!s||s.status!=='reserved'){toast('الإيصال اتبعت قبل كده');render();return}
+  const ref=S.st.ref.trim().toUpperCase();
+  if(!S.st.receipt){S.st.payErr='ارفع صورة الإيصال.';render();return}
+  if(!/^[A-Z0-9-]{6,20}$/.test(ref)){S.st.payErr='رقم العملية لازم يكون من 6 لـ 20 حرف أو رقم (إنجليزي).';render();return}
+  if(S.payments.some(p=>p.ref.toUpperCase()===ref&&p.st!=='rejected')){S.st.payErr='رقم العملية ده اتستخدم في إيصال تاني قبل كده.';render();return}
+  const l=L(s.line);s.status='pending';s.rejectReason='';S.st.payErr='';S.st.fawry=null;syncMe({st:'pending'});
+  S.payments.unshift({id:nid('P'),student:ME.name,sid:ME.id,line:l.id,amount:s.price,method:S.st.pay==='instapay'?'InstaPay':'تحويل بنكي',ref,at:'الآن '+nowT(),st:'pending',img:S.st.receipt});
+  log(ME.name,`رفع إيصال ${ref} بمبلغ ${money(s.price)}`);feed(`إيصال جديد من ${ME.name} – ${l.name}`);toast('الإيصال وصل للمالية');go('home')},
+ genFawry:()=>{const s=sub();if(!s||s.status!=='reserved')return;if(!S.st.fawry){S.st.fawry={code:String(Math.floor(1e8+Math.random()*9e8)).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'),amount:s.price};log(ME.name,'إنشاء كود فوري '+S.st.fawry.code)}render()},
+ payFawry:()=>{const s=sub(),f=S.st.fawry;if(!s||s.status!=='reserved'||!f){render();return}
+  s.status='active';s.paid=f.amount;syncMe({st:'active'});
+  S.payments.unshift({id:nid('P'),student:ME.name,sid:ME.id,line:s.line,amount:f.amount,method:'فوري',ref:'FWR '+f.code,at:'الآن '+nowT(),st:'approved',auto:true,img:null});
+  S.st.fawry=null;notify(`فوري أكد دفع ${money(f.amount)}. اشتراكك اتفعل والكارنيه جاهز.`);log('فوري (تلقائي)',`تأكيد دفع ${ME.name} – ${money(f.amount)}`);feed('دفع فوري مؤكد من '+ME.name);toast('الدفع اتأكد والكارنيه اتفعل');go('card')},
+ reqTab:v=>{S.st.reqTab=v;S.st.reqErr='';render()},
+ reqRefund:()=>{const s=sub();const e=newRequest({type:'استرداد',detail:(document.getElementById('rreason')?.value.trim()||'بدون سبب')+` – الأسبوع ${TERM_WEEK}`,paid:s?.paid,pct:POLICY_PCT,steps:[['ولي الأمر','now'],['إدارة النقل','wait'],['المالية','wait']]});
+  S.st.reqErr=e||'';if(!e)toast('الطلب اتبعت لولي الأمر');render()},
+ reqChange:()=>{const to=L(document.getElementById('cline').value),kind=document.getElementById('ctype').value,until=document.getElementById('cuntil').value,why=document.getElementById('creason').value.trim();
+  if(!to||seatsLeft(to)<=0){S.st.reqErr='الخط ده مكتمل.';render();return}
+  if(kind==='مؤقت'&&(!until||until<TODAY)){S.st.reqErr='اختار تاريخ نهاية صحيح للتغيير المؤقت.';render();return}
+  const diff=kind==='دائم'?to.price-(sub()?.paid||0):0;
+  const e=newRequest({type:'تغيير خط',to:to.id,kind,until:kind==='مؤقت'?until:kind==='يوم واحد'?'النهارده':'',detail:`إلى ${to.name} (${kind}${kind==='مؤقت'?' لحد '+until:''})${diff?` · فرق ${diff>0?'+':''}${money(diff)}`:''}${why?' – '+why:''}`,steps:[['ولي الأمر','now'],['إدارة النقل','wait']]});
+  S.st.reqErr=e||'';if(!e)toast('الطلب اتبعت');render()},
+ reqModel:()=>{const d=document.getElementById('mdate').value,sz=document.getElementById('msize').value.trim();
+  if(!d||d<TODAY){S.st.reqErr='اختار يوم صحيح.';render();return}if(!sz){S.st.reqErr='اكتب المقاس التقريبي.';render();return}
+  const e=newRequest({type:'دخول مجسم مشروع',date:d,detail:`مجسم ${sz} يوم ${d}`,steps:[['ولي الأمر','now'],['إدارة النقل','wait']]});S.st.reqErr=e||'';if(!e)toast('الطلب اتبعت');render()},
+ sendComplaint:()=>{const t=document.getElementById('ctext').value.trim(),cat=document.getElementById('ccat').value;
+  if(t.length<10){S.st.cErr='اكتب تفاصيل أكتر (10 حروف على الأقل).';render();return}
+  if(S.complaints.some(c=>c.sid===ME.id&&c.st==='جديدة'&&c.text===t)){S.st.cErr='الشكوى دي متبعتة بالفعل ولسه مستنية رد.';render();return}
+  S.complaints.unshift({id:nid('C'),student:ME.name,sid:ME.id,cat,text:t,at:'النهارده '+nowT(),st:'جديدة',reply:''});S.st.cErr='';feed('شكوى جديدة من '+ME.name);toast('الشكوى وصلت لإدارة النقل');render()},
+ depart:v=>{if(!isActive())return;const d=S.departures.find(x=>x.id===v);if(!d||d.st!=='open')return;const i=S.st.departs.indexOf(v);
+  if(i>=0){S.st.departs.splice(i,1);d.booked--;toast('اتلغى حجزك في رحلة المغادرة')}
+  else{if(d.line!=='all'&&d.line!==sub().line)return;if(d.booked>=d.cap){toast('الرحلة اتملت','bad');return}S.st.departs.push(v);d.booked++;log(ME.name,'حجز رحلة مغادرة '+t12(d.time));toast('اتحجزلك مكان في رحلة '+t12(d.time))}render()},
+ ask:v=>ask(v),
+ parOk:v=>{const r=S.requests.find(x=>x.id===v);if(!r||r.steps[0][1]!=='now')return;r.steps[0][1]='done';r.steps[1][1]='now';
+  log('ولي الأمر: '+ME.guardian,`موافقة على ${r.type} ${r.id}`);notify(`ولي الأمر وافق على طلبك ${r.id}، واتحول لإدارة النقل.`);toast('موافقتك اتسجلت');render()},
+ parNo:v=>{const r=S.requests.find(x=>x.id===v);if(!r||r.steps[0][1]!=='now')return;r.steps[0][1]='rej';
+  log('ولي الأمر: '+ME.guardian,`رفض ${r.type} ${r.id}`);notify(`ولي الأمر رفض طلبك ${r.id}.`);toast('الطلب اترفض');render()},
+ dgo:v=>{S.drv.screen=v;S.drv.vErr='';render.resetScroll=true;render()},
+ trip:()=>{const d=S.drv;d.tripOn=!d.tripOn;if(!d.tripOn)d.lastScan=null;feed(d.tripOn?'بدأت رحلة الذهاب – خط السويس':'انتهت رحلة خط السويس');log('السائق: محمود عبد الرحمن',d.tripOn?'بدء رحلة':'إنهاء رحلة');toast(d.tripOn?'الرحلة بدأت والموقع بيتبعت':'الرحلة انتهت');render()},
+ scan:v=>{const d=S.drv;if(!d.tripOn){toast('ابدأ الرحلة الأول','bad');return}
+  if(v==='bad'){d.lastScan={ok:false,msg:'هبة سامي · الاشتراك ملغى. ممنوع الركوب، واتسجلت محاولة.'};log('السائق: محمود عبد الرحمن','محاولة ركوب بكارنيه ملغى – هبة سامي');render();return}
+  const left=riders().filter(r=>!d.boarded.includes(r));
+  if(!left.length){d.lastScan={ok:true,msg:'كل المشتركين في الخط ركبوا.'};render();return}
+  const who=left[0],st=S.students.find(x=>x.name===who),pm=st&&permitOf(st.id);
+  d.boarded.push(who);d.lastScan={ok:true,msg:`${who} · كارنيه سليم${pm?' · تصريح عيادة: '+pm.kind:''}`};if(who===ME.name)notify('ركبت باص خط السويس الساعة '+nowT());
+  if(st&&S.watch.includes(st.id))feed(`مكتب الأمين العام: ${who} ركب باص خط السويس`);render()},
+ drvDelay:()=>{if(!S.drv.tripOn){toast('ابدأ الرحلة الأول','bad');return}const reason=document.getElementById('dReason').value,mins=+document.getElementById('dMins').value;
+  const cur=S.delays.L1;if(cur&&cur.mins===mins&&cur.reason===reason){toast('نفس البلاغ متبعت بالفعل');return}
+  announce({target:'L1',kind:'تأخير',mins,text:reason,by:'السائق: محمود عبد الرحمن'});if(reason==='عطل في الباص')feed('⚠ خط السويس محتاج باص بديل (عطل)');toast('البلاغ وصل لطلاب الخط والإدارة');render()},
+ clearDelay:v=>{if(!S.delays[v])return;delete S.delays[v];announce({target:v,kind:'رجوع للميعاد',mins:0,text:'الباص رجع على الجدول',by:S.role==='driver'?'السائق: محمود عبد الرحمن':'النقل: أ. خالد'});toast('اتبلغ الطلاب إن الباص رجع للميعاد');render()},
+ sendViolation:()=>{const d=S.drv;
+  if(!d.vStudent||!d.boarded.includes(d.vStudent)){d.vErr='اختار الطالب من اللي ركبوا.';render();return}
+  if(!d.vDesc.trim()&&!d.photo){d.vErr='لازم وصف أو صورة كدليل.';render();return}
+  S.violations.unshift({id:nid('V'),student:d.vStudent,type:d.vType,desc:d.vDesc.trim()||'—',by:'محمود عبد الرحمن (سائق خط السويس)',at:'الآن '+nowT(),img:d.photo,st:'جديدة'});
+  feed('مخالفة جديدة من سائق خط السويس');log('السائق: محمود عبد الرحمن',`تسجيل مخالفة ${d.vType} – ${d.vStudent}`);Object.assign(d,{vStudent:'',vDesc:'',photo:null,vErr:''});toast('المخالفة وصلت لإدارة النقل والأمن');render()},
+ page:v=>{S.adm.page=v;render.resetScroll=true;render();window.scrollTo(0,0)},
+ savePrice:v=>{const raw=document.getElementById('price-'+v).value.trim(),n=Number(raw);
+  if(!/^\d+$/.test(raw)||n<500||n>50000){toast('السعر لازم يكون رقم صحيح بين 500 و50,000','bad');return}
+  const l=L(v);if(n===l.price){toast('مفيش تغيير');return}log('النقل: أ. خالد',`تغيير سعر ${l.name} من ${money(l.price)} إلى ${money(n)}`);l.price=n;toast('السعر اتحفظ للحجوزات الجديدة بس');render()},
+ toggleStop:v=>{const [id,i]=v.split('|');const l=L(id),s=l.stops[+i];
+  if(!s.off&&activeStops(l).length<=1){toast('لازم يفضل نقطة واحدة على الأقل','bad');return}
+  const affected=S.students.filter(x=>x.line===id&&x.stop===s.n&&x.st==='active');
+  s.off=!s.off;log('النقل: أ. خالد',`${s.off?'إلغاء':'تفعيل'} نقطة ${s.n} – ${l.name}`);
+  if(s.off&&isLive()&&sub().line===id&&sub().stop===s.n)notify(`نقطة ${s.n} اتلغت. من فضلك اطلب تغيير النقطة أو كلم إدارة النقل.`);
+  toast(s.off?`النقطة اتلغت${affected.length?` و${affected.length} طالب وصلهم إشعار`:''}`:'النقطة اتفعلت');render()},
+ addStop:v=>{const n=document.getElementById('ns-'+v).value.trim(),t=document.getElementById('nt-'+v).value.trim(),l=L(v);
+  if(n.length<3){toast('اكتب اسم النقطة','bad');return}if(l.stops.some(s=>s.n===n)){toast('النقطة دي موجودة بالفعل','bad');return}
+  if(!/^\d{1,2}:\d{2}$/.test(t)){toast('اكتب الميعاد بالشكل 7:05','bad');return}
+  l.stops.splice(l.stops.length-1,0,{n,t});log('النقل: أ. خالد',`إضافة نقطة ${n} – ${l.name}`);toast('النقطة اتضافت');render()},
+ openTransfer:v=>{S.modal={kind:'transfer',sid:v};render()},
+ closeModal:()=>{S.modal=null;render()},
+ doTransfer:()=>{const m=S.modal,s=S.students.find(x=>x.id===m.sid),to=L(document.getElementById('tLine').value),type=document.getElementById('tType').value,until=document.getElementById('tUntil').value;
+  if(!to||seatsLeft(to)<=0){m.err='الخط ده مكتمل.';render();return}
+  if(type==='مؤقت'&&(!until||until<TODAY)){m.err='اختار تاريخ نهاية صحيح.';render();return}
+  const me=s.id===ME.id;
+  if(type==='دائم'){L(s.line).booked--;to.booked++;s.line=to.id;s.stop=activeStops(to)[0].n;s.assign=null;if(me){cancelDeparture();sub().line=to.id;sub().stop=s.stop}}
+  else s.assign={type,to:to.id,until:type==='يومي'?'النهارده':until};
+  if(me)notify(`إدارة النقل نقلتك ${type==='دائم'?'بشكل دائم':type==='يومي'?'النهارده':'مؤقتًا لحد '+until} إلى ${to.name}.`);
+  S.modal=null;feed(`نقل ${s.name} إلى ${to.name} (${type})`);log('النقل: أ. خالد',`نقل ${s.name} إلى ${to.name} (${type})`);toast('اتنقل الطالب واتبعتله إشعار');render()},
+ askCancelSub:v=>{const s=S.students.find(x=>x.id===v);S.modal={kind:'confirm',title:'إلغاء اشتراك '+s.name+'؟',body:'الكارنيه هيتقفل فورًا والكرسي هيرجع متاح، والعملية هتتسجل في سجل العمليات. الإلغاء ده للمخالفات (بند 10)، أما طلب الطالب بيمشي في الاسترداد.',ok:'تأكيد الإلغاء',act:'cancelSub',v,danger:true};render()},
+ cancelSub:v=>{S.modal=null;const s=S.students.find(x=>x.id===v);if(!s||s.st!=='active'){render();return}
+  if(s.id===ME.id){releaseSeat();cancelDeparture();sub().status='cancelled';notify('إدارة النقل لغت اشتراكك. راجع المكتب للتفاصيل.')}else L(s.line).booked--;
+  s.st='cancelled';s.assign=null;feed('إلغاء اشتراك '+s.name);log('النقل: أ. خالد','إلغاء اشتراك '+s.name);toast('الاشتراك اتلغى');render()},
+ payOk:v=>approvePay(v),
+ askPayNo:v=>{const p=S.payments.find(x=>x.id===v);S.modal={kind:'reject',title:'إيصال '+p.student,reasons:['الصورة مش واضحة','المبلغ مش مطابق','رقم العملية مش موجود في كشف الحساب','الإيصال لطالب تاني'],act:'payNo',v};render()},
+ payNo:v=>{const reason=document.getElementById('rjReason').value;S.modal=null;const p=S.payments.find(x=>x.id===v);if(!p||p.st!=='pending'){render();return}
+  p.st='rejected';p.reason=reason;const st=S.students.find(x=>x.id===p.sid);if(st)st.st='reserved';
+  if(p.sid===ME.id&&sub()&&sub().status==='pending'){sub().status='reserved';sub().rejectReason=reason;S.st.receipt=null;S.st.ref='';notify(`المالية رفضت الإيصال: ${reason}. ارفع إيصال صحيح قبل ما مهلة الحجز تخلص.`)}
+  log('المالية: منى عادل',`رفض إيصال ${p.student} ${p.id} – ${reason}`);toast('الإيصال اترفض والطالب وصله السبب');render()},
+ reqOk:v=>{const r=S.requests.find(x=>x.id===v);if(!r)return;const i=r.steps.findIndex(s=>s[1]==='now');if(i<0||r.steps[i][0]==='ولي الأمر')return;
+  if(!r.steps[i+1]){const err=finalize(r);if(err){toast(err,'bad');return}}
+  r.steps[i][1]='done';if(r.steps[i+1]){r.steps[i+1][1]='now';if(r.sid===ME.id)notify(`${r.steps[i][0]} وافقت على طلبك ${r.id}، واتحول لـ${r.steps[i+1][0]}.`);log(r.steps[i][0]==='المالية'?'المالية: منى عادل':'النقل: أ. خالد',`موافقة على ${r.type} ${r.id} وتحويله لـ${r.steps[i+1][0]}`)}
+  toast(r.steps[i+1]?`اتحول لـ${r.steps[i+1][0]}`:'الطلب اتقبل نهائيًا واتنفذ');render()},
+ askReqNo:v=>{const r=S.requests.find(x=>x.id===v);S.modal={kind:'reject',title:'طلب '+r.type+' '+r.id,reasons:['مخالف لسياسة الاسترداد','الخط الجديد مفيهوش أماكن','بيانات ناقصة','أخرى'],act:'reqNo',v};render()},
+ reqNo:v=>{const reason=document.getElementById('rjReason').value;S.modal=null;const r=S.requests.find(x=>x.id===v);const s=r&&r.steps.find(s=>s[1]==='now');if(!s||s[0]==='ولي الأمر'){render();return}
+  s[1]='rej';r.reason=reason;if(r.sid===ME.id)notify(`${s[0]} رفضت طلبك ${r.id}: ${reason}.`);log(s[0]==='المالية'?'المالية: منى عادل':'النقل: أ. خالد',`رفض ${r.type} ${r.id} – ${reason}`);toast('الطلب اترفض');render()},
+ refer:v=>{const x=S.violations.find(y=>y.id===v);if(x.st!=='جديدة')return;x.st='محالة للأمن';log('النقل: أ. خالد',`إحالة مخالفة ${x.id} للأمن`);toast('اتحالت للأمن وشؤون الطلاب');render()},
+ dismissV:v=>{const x=S.violations.find(y=>y.id===v);if(x.st!=='جديدة')return;x.st='محفوظة';log('النقل: أ. خالد',`حفظ مخالفة ${x.id} بدون إجراء`);render()},
+ replyC:v=>{const t=document.getElementById('rp-'+v).value.trim();if(t.length<3){toast('اكتب الرد','bad');return}const c=S.complaints.find(x=>x.id===v);if(c.reply)return;c.reply=t;c.st='تم الرد';if(c.sid===ME.id)notify('إدارة النقل ردت على شكوتك '+c.id+'.');toast('الرد وصل للطالب');render()},
+ export:v=>{const n=S.adm.repBy==='stop'?activeStops(L(S.adm.repLine)).length:repRows().length;if(!n){toast('مفيش بيانات للتصدير في الكشف ده','bad');return}log('النقل: أ. خالد',`تصدير ${v} – ${L(S.adm.repLine).name}`);toast(`ملف ${v} اتجهز (${n} صف). في النسخة الفعلية بيتحمل مباشرة.`)},
+ sendReport:()=>{log('النقل: أ. خالد','إرسال تقرير '+L(S.adm.repLine).name+' للمالية والأمن والأمين العام');toast('التقرير اتبعت للمالية والأمن ومكتب الأمين العام')},
+ toast:v=>toast(v),
+ openBus:v=>{S.modal={kind:'bus',id:v||null};render()},
+ saveBus:()=>{const m=S.modal,old=m.id?B(m.id):null,val=i=>document.getElementById(i).value.trim();
+  const plate=val('bPlate'),type=val('bType'),owner=val('bOwner'),driver=val('bDriver'),ph=val('bPhone').replace(/\D/g,'');
+  m.v={plate,type,owner,driver,phone:val('bPhone')};const err=e=>{m.err=e;render()};
+  if(plate.length<5)return err('اكتب رقم اللوحة.');
+  if(S.buses.some(b=>b!==old&&b.plate.replace(/\s/g,'')===plate.replace(/\s/g,'')))return err('اللوحة دي متسجلة على باص تاني.');
+  if((driver||ph)&&(driver.length<3||!/^01\d{9}$/.test(ph)))return err('اكتب اسم السائق وموبايل صحيح (11 رقم يبدأ بـ 01).');
+  const cap=BUS_TYPES[type];
+  if(old&&old.line){const l=L(old.line);if(cap<l.booked)return err(`الخط عليه ${l.booked} طالب، والباص ده سعته ${cap} بس.`);if(!driver)return err('الباص على خط، لازم يكون ليه سائق.')}
+  const phone=ph?ph.replace(/(\d{4})(\d{3})(\d{4})/,'$1 $2 $3'):'';
+  if(old){const changed=old.driver!==driver||old.plate!==plate;Object.assign(old,{plate,type,cap,owner,driver,phone});
+   if(old.line){const l=L(old.line);applyBus(l,old);if(changed)announce({target:l.id,kind:'تغيير بيانات الباص',text:`الباص ${plate} مع السائق ${driver} (${phone})`,by:'النقل: أ. خالد'})}
+   log('النقل: أ. خالد','تعديل بيانات باص '+plate);toast('اتحفظت بيانات الباص')}
+  else{S.buses.push({id:nid('B'),plate,type,cap,owner,driver,phone,line:null,status:'ok'});log('النقل: أ. خالد','إضافة باص '+plate);toast('الباص اتضاف كاحتياطي، تقدر تحطه على خط')}
+  S.modal=null;render()},
+ busFixed:v=>{const b=B(v);if(b.status!=='repair')return;b.status='ok';log('النقل: أ. خالد',`رجوع باص ${b.plate} من الصيانة`);toast(b.driver?'الباص رجع احتياطي متاح':'الباص رجع، بس محتاج سائق قبل ما يتحط على خط');render()},
+ openLine:()=>{S.modal={kind:'line'};render()},
+ saveLine:()=>{const m=S.modal,val=i=>document.getElementById(i).value.trim();
+  const v={name:val('lnName'),price:val('lnPrice'),stops:document.getElementById('lnStops').value,arr:val('lnArr')};m.v=v;
+  const err=e=>{m.err=e;render()};
+  if(v.name.length<3)return err('اكتب اسم الخط.');
+  if(S.lines.some(l=>l.name===v.name))return err('فيه خط بنفس الاسم.');
+  const price=Number(v.price);if(!/^\d+$/.test(v.price)||price<500||price>50000)return err('السعر لازم يكون رقم صحيح بين 500 و50,000.');
+  const b=B(val('lnBus'));if(!b||b.line||!spareBuses().includes(b))return err('اختار باص احتياطي متاح.');
+  const rows=v.stops.split('\n').map(x=>x.trim()).filter(Boolean),stops=[];
+  for(const r of rows){const mm=r.match(/^(.+?)\s*[-–]\s*(\d{1,2}:\d{2})$/);if(!mm)return err(`السطر «${r}» لازم يبقى بالشكل: الاسم - 6:30`);if(stops.some(s=>s.n===mm[1]))return err('فيه نقطة متكررة: '+mm[1]);stops.push({n:mm[1],t:mm[2]})}
+  if(!stops.length)return err('ضيف نقطة واحدة على الأقل.');
+  if(!/^\d{1,2}:\d{2}$/.test(v.arr))return err('ميعاد الوصول بالشكل 7:30.');
+  const l={id:'L'+S.seq.L++,name:v.name,price,booked:0,stops:[...stops,{n:'بوابة الجامعة',t:v.arr}]};applyBus(l,b);S.lines.push(l);S.busT[l.id]=0;
+  log('النقل: أ. خالد',`إنشاء ${l.name} بسعر ${money(price)} على باص ${b.plate}`);feed('خط جديد: '+l.name);S.modal=null;toast('الخط اتضاف وظاهر للطلاب دلوقتي');render()},
+ openReplace:v=>{S.modal={kind:'replace',v};render()},
+ doReplace:v=>{const l=L(v),nb=B(document.getElementById('rpBus').value),why=document.getElementById('rpWhy').value;
+  if(!nb||!spareBuses().includes(nb)||nb.cap<l.booked){S.modal.err='اختار باص متاح سعته تكفي.';render();return}
+  const old=B(l.busId);old.line=null;old.status='repair';applyBus(l,nb);
+  announce({target:l.id,kind:'تغيير باص',text:`بسبب ${why}، الباص النهارده ${nb.plate} مع السائق ${nb.driver} (${nb.phone})`,by:'النقل: أ. خالد'});
+  S.modal=null;toast('الباص اتبدل والطلاب وصلهم إشعار');render()},
+ sendAnn:()=>{const val=i=>document.getElementById(i).value.trim();const target=val('anTarget'),kind=val('anKind'),text=val('anText'),mr=val('anMins');
+  let mins=0;if(kind==='تأخير'){mins=Number(mr);if(!/^\d+$/.test(mr)||mins<1||mins>180){toast('اكتب مدة التأخير بالدقايق (1–180)','bad');return}}
+  if(text.length<5){toast('اكتب الرسالة (5 حروف على الأقل)','bad');return}
+  const last=S.announcements[0];if(last&&last.target===target&&last.kind===kind&&last.text===text){toast('الإعلان ده لسه منشور','bad');return}
+  announce({target,kind,mins,text,by:'النقل: أ. خالد'});toast(`الإعلان اتنشر لـ${lineName(target)}`);render()},
+ addDepart:()=>{const val=i=>document.getElementById(i).value.trim();const time=val('dpTime'),line=val('dpLine'),b=B(val('dpBus')),reason=val('dpReason');
+  if(!/^\d{2}:\d{2}$/.test(time)||time<'08:00'||time>'20:00'){toast('الميعاد لازم يكون بين 8 الصبح و8 بالليل','bad');return}
+  if(reason.length<3){toast('اكتب سبب الرحلة','bad');return}
+  if(S.departures.some(d=>d.st==='open'&&d.time===time&&d.line===line)){toast('فيه رحلة بنفس الميعاد والخط','bad');return}
+  if(S.departures.some(d=>d.st==='open'&&d.time===time&&d.bus===b.id)){toast('الباص ده عليه رحلة تانية في نفس الميعاد','bad');return}
+  const d={id:nid('D'),time,line,cap:b.cap,booked:0,bus:b.id,reason,st:'open'};S.departures.push(d);
+  announce({target:line,kind:'رحلة مغادرة',text:`رحلة إضافية ${t12(time)}: ${reason}. احجز من التطبيق.`,by:'النقل: أ. خالد'});toast('الرحلة اتعلنت');render()},
+ askCancelDepart:v=>{const d=S.departures.find(x=>x.id===v);S.modal={kind:'confirm',title:'إلغاء رحلة '+t12(d.time)+'؟',body:`فيه ${d.booked} طالب حاجزين، وهيوصلهم إشعار بالإلغاء.`,ok:'إلغاء الرحلة',act:'cancelDepart',v,danger:true};render()},
+ cancelDepart:v=>{S.modal=null;const d=S.departures.find(x=>x.id===v);if(!d||d.st!=='open'){render();return}d.st='cancelled';
+  const i=S.st.departs.indexOf(v);if(i>=0)S.st.departs.splice(i,1);
+  announce({target:d.line,kind:'إلغاء رحلة',text:`رحلة المغادرة ${t12(d.time)} اتلغت`,by:'النقل: أ. خالد'});toast('الرحلة اتلغت');render()},
+ addPermit:()=>{const val=i=>document.getElementById(i).value;const sid=val('pmStudent'),kind=val('pmKind'),from=val('pmFrom'),to=val('pmTo');const s=S.students.find(x=>x.id===sid);
+  if(!s){toast('اختار طالب','bad');return}if(!from||!to||from<TODAY||to<from){toast('التواريخ مش صحيحة','bad');return}
+  if(permitOf(sid)){toast(s.name+' عنده تصريح ساري بالفعل','bad');return}
+  S.permits.unshift({id:nid('M'),sid,student:s.name,kind,from,to,by:'د. سامية – العيادة',st:'active'});log('العيادة: د. سامية',`تصريح ${kind} لـ${s.name} من ${from} لـ${to}`);
+  if(sid===ME.id)notify(`العيادة أصدرتلك تصريح: ${kind} لحد ${to}.`);toast('التصريح اتصدر ووصل لإدارة النقل والسائق');render()},
+ revokePermit:v=>{const p=S.permits.find(x=>x.id===v);if(p.st!=='active')return;p.st='revoked';log('العيادة: د. سامية','إلغاء تصريح '+p.student);if(p.sid===ME.id)notify('تصريح العيادة بتاعك اتلغى.');render()},
+ addWatch:()=>{const id=document.getElementById('wSel').value;if(!id||S.watch.includes(id))return;S.watch.push(id);toast('هيوصلك إشعار لما يركب');render()},
+ unWatch:v=>{S.watch=S.watch.filter(x=>x!==v);render()},
+ addEvent:()=>{const name=document.getElementById('evName').value,date=document.getElementById('evDate').value,nr=document.getElementById('evN').value.trim(),n=Number(nr);
+  if(!date||date<TODAY){toast('اختار تاريخ صحيح','bad');return}if(!/^\d+$/.test(nr)||n<1||n>2000){toast('عدد الطلاب مش صحيح','bad');return}
+  if(S.events.some(e=>e.st!=='اتلغت'&&e.name===name&&e.date===date)){toast('الفعالية دي محجوزة بالفعل في نفس اليوم','bad');return}
+  const pool=spareBuses().sort((a,b)=>(a.owner==='الجامعة'?0:1)-(b.owner==='الجامعة'?0:1)),got=[];let capSum=0;
+  for(const b of pool){if(capSum>=n)break;got.push(b.id);capSum+=b.cap}
+  const rem=Math.max(0,n-capSum),ah=Math.ceil(rem/50);
+  S.events.unshift({id:nid('E'),name,date,students:n,need:got.length+ah,buses:got,ah,st:ah?'مستني أبو الهول':'مؤكدة'});
+  log('النقل: أ. خالد',`حجز باصات ${name} ${date} (${got.length} احتياطي${ah?' + '+ah+' من أبو الهول':''})`);toast(ah?`اتحجز ${got.length} باص، و${ah} اتطلبوا من أبو الهول`:'الباصات اتحجزت');render()},
+ cancelEvent:v=>{const e=S.events.find(x=>x.id===v);if(e.st==='اتلغت')return;e.st='اتلغت';log('النقل: أ. خالد','إلغاء حجز باصات '+e.name);toast('الحجز اتلغى والباصات رجعت احتياطي');render()},
+ ahOk:v=>{const e=S.events.find(x=>x.id===v);if(e.st!=='مستني أبو الهول')return;e.st='مؤكدة';log('أبو الهول',`تأكيد توفير ${e.ah} باص لـ${e.name}`);feed(`أبو الهول أكدت باصات ${e.name}`);toast('اتأكد');render()},
+ ahNo:v=>{const e=S.events.find(x=>x.id===v);if(e.st!=='مستني أبو الهول')return;e.st='أبو الهول اعتذرت';log('أبو الهول',`اعتذار عن ${e.name}`);feed(`أبو الهول اعتذرت عن باصات ${e.name}`);render()},
+};
+function approvePay(id){const p=S.payments.find(x=>x.id===id);if(!p||p.st!=='pending')return;p.st='approved';
+ const stu=S.students.find(s=>s.id===p.sid);if(stu)stu.st='active';
+ if(p.sid===ME.id&&sub()&&sub().status==='pending'){sub().status='active';sub().paid=p.amount;notify(`المالية أكدت دفع ${money(p.amount)}. اشتراكك اتفعل والكارنيه جاهز.`)}
+ feed(`المالية وافقت على إيصال ${p.student}`);log('المالية: منى عادل',`موافقة على إيصال ${p.student} ${p.id} – ${money(p.amount)}`);toast('تمت الموافقة على الإيصال');render()}
+function ask(q){q=q.trim();if(!q||S.st.typing)return;S.st.chat.push({who:'me',t:q});S.st.typing=true;render();
+ setTimeout(()=>{S.st.typing=false;S.st.chat.push({who:'bot',t:botReply(q)});if(S.role==='student'&&S.st.screen==='chat')render()},900)}
+
+/* ---------- events (with double-click guard) ---------- */
+let lastAct={k:'',t:0};
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-act]');if(!el)return;
+ if(el.classList.contains('modal-bg')&&e.target!==el)return;
+ if(el.tagName==='INPUT'||el.tagName==='FORM'||el.disabled)return;
+ const k=el.dataset.act+'|'+(el.dataset.v||''),now=Date.now();
+ const f=A[el.dataset.act];if(!f)return;e.preventDefault();
+ if(k===lastAct.k&&now-lastAct.t<700&&!['go','role','page','reqTab','payM','dgo','copy'].includes(el.dataset.act))return;
+ lastAct={k,t:now};f(el.dataset.v);
+});
+document.addEventListener('submit',e=>{if(e.target.dataset.act==='chatForm'){e.preventDefault();const i=document.getElementById('chatIn');const v=i.value;if(S.st.typing)return;i.value='';ask(v)}});
+document.addEventListener('input',e=>{const b=e.target.dataset.bind;if(!b)return;
+ if(b==='ref')S.st.ref=e.target.value;
+ else if(b==='q'){S.adm.q=e.target.value;render()}
+ else if(b==='vDesc')S.drv.vDesc=e.target.value;});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.bind==='repBy'||t.dataset.bind==='repLine'){S.adm[t.dataset.bind]=t.value;render();return}
+ if(t.dataset.bind==='vStudent'||t.dataset.bind==='vType'){S.drv[t.dataset.bind]=t.value;S.drv.vErr='';return}
+ if(t.type==='file'&&t.files[0]){const f=t.files[0];if(f.size>15e6){toast('الملف كبير، الحد 15 ميجا','bad');return}
+  const r=new FileReader();r.onload=()=>{if(t.dataset.act==='rcpt'){if(!f.type.startsWith('image/')){toast('ارفع صورة','bad');return}S.st.receipt=r.result;S.st.payErr=''}else S.drv.photo=f.type.startsWith('image/')?r.result:null;render()};r.readAsDataURL(f)}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.modal){S.modal=null;render()}});
+render();
+})();
+</script>
+
+</body>
+</html>
