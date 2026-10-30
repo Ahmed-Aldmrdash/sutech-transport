@@ -8,3 +8,12 @@ export const API_PREFIX = "/api/v1";
 export const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "";
 
 export const isMockMode = API_MODE === "mock";
+
+/**
+ * Where students send InstaPay / bank transfers. Finance must confirm the real values before launch;
+ * the defaults are demo placeholders and only show in mock mode.
+ */
+export const PAYMENT_DETAILS = {
+  instapay: process.env.NEXT_PUBLIC_INSTAPAY_ADDRESS ?? (isMockMode ? "sutech.transport@instapay" : ""),
+  bank: process.env.NEXT_PUBLIC_BANK_ACCOUNT ?? (isMockMode ? "0000 0000 0000 0000" : ""),
+};

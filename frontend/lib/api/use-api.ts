@@ -97,3 +97,24 @@ export function useMutation<TArgs extends unknown[], TResult>(
 
   return { run, pending, error, reset: useCallback(() => setError(null), []) };
 }
+
+/** Two queries as one, so a screen shows a single skeleton or error for both. */
+export function combineQueries<A, B>(a: QueryState<A>, b: QueryState<B>): QueryState<[A, B]> {
+  return {
+    data: a.data !== undefined && b.data !== undefined ? [a.data, b.data] : undefined,
+    error: a.error ?? b.error,
+    loading: a.loading || b.loading,
+    reload: () => {
+      a.reload();
+      b.reload();
+    },
+  };
+}
+
+/** Re-reads a query every `ms` while the screen is open (ETAs between live events). */
+export function usePolling(reload: () => void, ms: number): void {
+  useEffect(() => {
+    const id = setInterval(reload, ms);
+    return () => clearInterval(id);
+  }, [reload, ms]);
+}

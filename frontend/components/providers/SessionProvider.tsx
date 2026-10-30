@@ -20,18 +20,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<SessionState>({ status: "loading" });
 
   useEffect(() => {
-    if (!readToken()) {
-      setSession({ status: "anonymous" });
-      return;
-    }
-    getMe()
-      .then((user) => setSession({ status: "authenticated", user }))
-      .catch(() => {
-        writeToken(null);
-        setSession({ status: "anonymous" });
-      });
     const expired = () => setSession({ status: "anonymous" });
     window.addEventListener(SESSION_EXPIRED_EVENT, expired);
+    if (!readToken()) setSession({ status: "anonymous" });
+    else
+      getMe()
+        .then((user) => setSession({ status: "authenticated", user }))
+        .catch(() => {
+          writeToken(null);
+          setSession({ status: "anonymous" });
+        });
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expired);
   }, []);
 

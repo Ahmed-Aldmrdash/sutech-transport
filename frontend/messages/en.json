@@ -38,7 +38,9 @@
     "optional": "Optional",
     "search": "Search",
     "export": "Export",
-    "details": "Details"
+    "details": "Details",
+    "forbiddenTitle": "This page isn't available to you",
+    "forbiddenBody": "Your role doesn't include this page. Ask a super admin if you need it."
   },
   "errors": {
     "UNAUTHORIZED": "Please sign in again.",
@@ -99,6 +101,612 @@
       "affairs": "Student affairs & security",
       "secretary": "Secretary general",
       "busCompany": "Abu El Hol bus company"
+    }
+  },
+  "nav": {
+    "main": "Main menu",
+    "openMenu": "Open menu",
+    "home": "Home",
+    "lines": "Lines",
+    "card": "Card",
+    "tracking": "Track",
+    "more": "More",
+    "children": "Children",
+    "approvals": "Approvals",
+    "announcements": "News",
+    "trip": "Trip",
+    "scan": "Scan",
+    "report": "Report",
+    "admin": {
+      "overview": "Overview",
+      "live": "Live map",
+      "sos": "SOS",
+      "attendance": "Attendance",
+      "announcements": "Announcements",
+      "lines": "Lines & stops",
+      "buses": "Buses & drivers",
+      "students": "Students",
+      "departures": "Extra trips",
+      "term": "Term & booking",
+      "payments": "Payments",
+      "requests": "Requests",
+      "violations": "Violations",
+      "complaints": "Complaints",
+      "reports": "Reports",
+      "audit": "Audit log",
+      "clinic": "Clinic",
+      "secretary-general": "Secretary general",
+      "events": "Events",
+      "bus-company": "Bus company",
+      "users": "Users & roles"
+    }
+  },
+  "roles": {
+    "super_admin": "Super admin",
+    "transport_admin": "Transport office",
+    "finance": "Finance",
+    "clinic": "Clinic",
+    "student_affairs": "Student affairs & security",
+    "secretary_general": "Secretary general's office",
+    "bus_company": "Bus company",
+    "driver": "Driver",
+    "supervisor": "Supervisor",
+    "student": "Student",
+    "parent": "Parent"
+  },
+  "status": {
+    "subscription": {
+      "none": "No subscription",
+      "reserved": "Reserved, awaiting payment",
+      "pending_payment": "Receipt under review",
+      "active": "Active",
+      "expired": "Expired",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "attendance": {
+      "skipped": "Reported not going",
+      "unskipped": "Going after all",
+      "boarded": "Boarded the bus",
+      "arrived": "Arrived at university",
+      "checked_out": "Checked out early",
+      "absent": "Absent (didn't board)",
+      "return_boarded": "Boarded the return bus",
+      "return_arrived": "Arrived at their stop"
+    }
+  },
+  "student": {
+    "home": {
+      "greeting": "Welcome",
+      "pinned": "Pinned announcements",
+      "noSubscriptionTitle": "No subscription for {term}",
+      "bookingOpenBody": "Booking is open until {date}. Pick your line and reserve a seat.",
+      "bookNow": "Book a seat",
+      "bookingClosedTitle": "Booking is closed",
+      "bookingClosedBody": "We'll announce here as soon as booking opens.",
+      "nextTermOpens": "Booking for {term} opens on {date}.",
+      "mySubscription": "My subscription · {term}",
+      "line": "Line",
+      "stop": "Stop",
+      "price": "Price",
+      "assignment": {
+        "today": "Today only you ride {line}",
+        "temporary": "Temporarily moved to {line}",
+        "permanent": "Permanently moved to {line}"
+      },
+      "assignmentUntil": "Until {date}",
+      "receiptRejected": "Finance rejected the receipt",
+      "payWithin": "Pay before the hold runs out",
+      "payNow": "Pay now",
+      "underReviewTitle": "Receipt received, under review",
+      "underReviewBody": "Finance is reviewing it. You'll be notified when the subscription is active.",
+      "showCard": "Show my card"
+    },
+    "day": {
+      "busToday": "Today's bus",
+      "trackBus": "Track bus",
+      "timelineTitle": "Your day",
+      "timelineEmpty": "Nothing yet today.",
+      "notGoingTitle": "Not going today?",
+      "notGoingBody": "Let the driver know so they don't wait. Your parent is notified, and it isn't counted as an absence.",
+      "notGoingButton": "I'm not going today",
+      "skippedBody": "You reported you're not going today. Changed your mind? Undo it before the bus passes.",
+      "goingAfterAll": "I'm going after all",
+      "confirmTitle": "Not going today?",
+      "confirmButton": "Yes, not going",
+      "confirmBody": "The driver, supervisor, transport office and your parent will be told.",
+      "skipped": "Reported: not going today",
+      "unskipped": "Done, you're going today"
+    },
+    "departures": {
+      "title": "Extra return trips today",
+      "joined": "Joined",
+      "seats": "{booked} of {capacity} seats",
+      "join": "Join",
+      "leave": "Leave",
+      "full": "Full",
+      "joinedToast": "You joined the trip",
+      "left": "You left the trip"
+    },
+    "lines": {
+      "title": "Lines",
+      "subtitle": "Pick the line nearest you, then your stop.",
+      "empty": "No lines available right now.",
+      "bookingClosed": "Booking is closed. You can browse lines but not book.",
+      "stopsCount": "{count, plural, one {# stop} other {# stops}}",
+      "firstPickup": "First pickup {time}",
+      "full": "Line full",
+      "seatsLeft": "{count, plural, one {# seat left} other {# seats left}}",
+      "operator": {
+        "university": "University bus",
+        "bus_company": "Abu El Hol company"
+      },
+      "back": "Back to lines",
+      "seatsOf": "{left} of {capacity} seats left",
+      "pickStop": "Choose your stop",
+      "destination": "End of line (university)",
+      "stopPaused": "Stop temporarily paused",
+      "alreadyHolding": "You already hold a seat. To switch lines, file a line change request.",
+      "lineFull": "This line is full. Pick another line.",
+      "reserve": "Reserve this seat",
+      "confirmTitle": "Confirm reservation",
+      "confirmReserve": "Reserve",
+      "confirmBody": "You're reserving {line} from {stop} for {price}.",
+      "holdNote": "The seat is held for 24 hours. If you don't pay in time, the hold is released. The price is fixed from now."
+    },
+    "payment": {
+      "title": "Payment",
+      "back": "Back",
+      "pickLineFirst": "Pick a line and reserve first",
+      "summary": "{line} · {stop}",
+      "timeLeft": "Time left:",
+      "rejectedTitle": "Receipt rejected, upload another",
+      "method": "Payment method",
+      "fawry": "Fawry",
+      "instapay": "InstaPay",
+      "bank": "Bank transfer",
+      "fawryBody": "Get a Fawry reference to pay at any Fawry outlet or your banking app. The subscription activates by itself once paid.",
+      "fawryGet": "Get a Fawry code",
+      "fawryCode": "Fawry reference",
+      "fawryExpires": "Valid until {at}",
+      "copy": "Copy code",
+      "copied": "Code copied",
+      "fawryAfter": "After you pay you'll get a notification and your card will be ready.",
+      "simulatePaid": "(Demo) Simulate Fawry payment",
+      "activated": "Subscription activated",
+      "instapayTo": "Send via InstaPay to:",
+      "bankTo": "Transfer to bank account:",
+      "accountFromFinance": "Finance publishes the account details.",
+      "reference": "Transaction reference",
+      "referenceHint": "The number printed on the receipt (letters and digits).",
+      "referenceInvalid": "The reference must be 6–40 English letters or digits.",
+      "receiptImage": "Receipt image",
+      "receiptHint": "JPG, PNG or WEBP, up to 5 MB.",
+      "receiptMissing": "Upload the receipt image.",
+      "receiptTooBig": "The image is larger than 5 MB.",
+      "sendReceipt": "Send receipt",
+      "receiptSent": "Receipt sent to finance",
+      "cancelReservation": "Cancel reservation",
+      "cancelTitle": "Cancel the reservation?",
+      "cancelConfirm": "Cancel reservation",
+      "cancelBody": "The seat goes back to other students. If you book again, you'll pay the price at that time."
+    },
+    "card": {
+      "title": "Digital card",
+      "subtitle": "Show it to the supervisor when you board.",
+      "inactiveTitle": "The card is for active subscribers",
+      "inactiveBody": "Finish booking and payment and your card appears here.",
+      "goHome": "Go home",
+      "cardLabel": "Transport card · {term}",
+      "qrLabel": "Card code for scanning",
+      "refreshesIn": "Code refreshes every 30 s · {seconds}s",
+      "faculty": "Faculty",
+      "level": "Level",
+      "line": "Line",
+      "stop": "Stop",
+      "validUntil": "Valid until {date}",
+      "noScreenshot": "The code changes, so a screenshot won't work."
+    },
+    "more": {
+      "title": "More",
+      "announcements": {
+        "title": "Announcements",
+        "body": "Office news and delays"
+      },
+      "requests": {
+        "title": "Requests",
+        "body": "Refund, line change, project model, guardian"
+      },
+      "complaints": {
+        "title": "Complaints",
+        "body": "File a complaint and follow the reply"
+      },
+      "chat": {
+        "title": "Assistant",
+        "body": "Ask about transport, booking and payment"
+      },
+      "payment": {
+        "title": "Payment",
+        "body": "Pay with Fawry or upload a receipt"
+      },
+      "settings": {
+        "title": "Settings",
+        "body": "Language, theme and notifications"
+      }
+    }
+  },
+  "tracking": {
+    "title": "Track the bus",
+    "state": {
+      "not_started": "Trip not started yet",
+      "in_progress": "On the way",
+      "ended": "Trip ended"
+    },
+    "etaToStop": "Bus reaches your stop in {minutes, plural, =0 {under a minute} one {# min} other {# min}}",
+    "etaToHome": "You reach your stop in {minutes, plural, =0 {under a minute} one {# min} other {# min}}",
+    "leavesAt": "The bus passes {stop} at {time}",
+    "endedBody": "This trip is over. See you on the next one.",
+    "delayed": "The bus is running about {minutes} min late",
+    "bus": "Bus",
+    "driver": "Driver",
+    "nextStop": "Next stop",
+    "lastFix": "Last update",
+    "mapLabel": "Map of {line} and the bus position",
+    "stops": "Stops",
+    "myStop": "Your stop",
+    "inactiveTitle": "Tracking is for active subscribers",
+    "inactiveBody": "Once your subscription is active you can track the bus live.",
+    "goHome": "Go home"
+  },
+  "announcements": {
+    "title": "Announcements",
+    "subtitle": "Everything the office sent to your line and to everyone.",
+    "empty": "No announcements yet.",
+    "ended": "Over",
+    "pinned": "Pinned",
+    "kind": {
+      "official": "Official",
+      "delay": "Delay",
+      "bus_change": "Bus change",
+      "time_change": "Time change",
+      "back_on_schedule": "Back on schedule",
+      "trip_cancelled": "Trip cancelled",
+      "extra_departure": "Extra trip"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAll": "Mark all read",
+    "empty": "No notifications.",
+    "unread": "New:"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "name": "Name",
+    "role": "Role",
+    "identifier": "Account number",
+    "faculty": "Faculty",
+    "level": "Level",
+    "guardian": "Guardian",
+    "phone": "Phone",
+    "display": "Display & language",
+    "language": "Language",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "signOut": "Sign out",
+    "guardianTitle": "Guardian details",
+    "guardianBody": "Guardian details can't be edited here. File a request and the transport office reviews it with student affairs.",
+    "guardianRequest": "Request a guardian change",
+    "preferences": {
+      "title": "Notifications",
+      "saved": "Saved",
+      "alwaysOn": "Safety alerts (SOS, early check-out, absence) are always sent.",
+      "bus_near_stop": {
+        "label": "Bus near my stop",
+        "description": "About 10 minutes before"
+      },
+      "delays": {
+        "label": "Delays and time changes",
+        "description": "On your line only"
+      },
+      "official": {
+        "label": "Official announcements",
+        "description": "From the transport office"
+      }
+    }
+  },
+  "requests": {
+    "title": "Requests",
+    "subtitle": "One open request at a time.",
+    "new": "New request",
+    "oneOpen": "You have an open request. You can file another once it's closed.",
+    "empty": "No requests.",
+    "emptyBody": "Ask for a refund, a line change, a project model trip, or a guardian change.",
+    "sent": "Request sent",
+    "type": {
+      "refund": "Refund",
+      "line_change": "Line change",
+      "project_model": "Project model transport",
+      "guardian_change": "Guardian change"
+    },
+    "status": {
+      "open": "Open",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "actor": {
+      "parent": "Parent",
+      "transport": "Transport office",
+      "finance": "Finance"
+    },
+    "stepState": {
+      "done": "approved",
+      "current": "reviewing now",
+      "waiting": "waiting",
+      "rejected": "rejected"
+    },
+    "steps": "Approval steps",
+    "paid": "Paid",
+    "week": "Week",
+    "weekValue": "Week {week} · {percent}% deduction",
+    "refundAmount": "To refund",
+    "toLine": "To line",
+    "kind": "Kind",
+    "temporaryUntil": "Temporary until {date}",
+    "kinds": {
+      "temporary": "Temporary",
+      "permanent": "Permanent"
+    },
+    "date": "Date",
+    "size": "Model size",
+    "field": "Change",
+    "fields": {
+      "phone": "Phone number",
+      "name": "Name",
+      "both": "Name and phone"
+    },
+    "rejectedBecause": "Reason for rejection",
+    "policy": {
+      "title": "Refund policy",
+      "when": "When",
+      "deduction": "Deduction",
+      "beforeStart": "Before term starts",
+      "fromWeek": "Week {from} onward",
+      "weeks": "Weeks {from}–{to}",
+      "now": "now",
+      "noRefund": "No refund"
+    },
+    "form": {
+      "type": "Request type",
+      "types": {
+        "refund": "Refund",
+        "line_change": "Line change",
+        "project_model": "Project model transport",
+        "guardian_change": "Guardian change"
+      },
+      "onlyGuardian": "Other requests are for active subscribers only.",
+      "refundEstimate": "You'd get back about {amount}",
+      "refundNote": "We're in week {week}, with a {percent}% deduction. Finance confirms the final amount.",
+      "toLine": "New line",
+      "chooseLine": "Choose a line",
+      "full": "full",
+      "kind": "Kind",
+      "temporary": "Temporary, until a date",
+      "permanent": "Permanent",
+      "until": "Until",
+      "date": "Transport date",
+      "size": "Model size",
+      "sizeHint": "For example: 1 m × 0.5 m",
+      "field": "What to change",
+      "fieldHint": "The new details are verified with student affairs first.",
+      "fields": {
+        "phone": "Phone number",
+        "name": "Name",
+        "both": "Name and phone"
+      },
+      "reason": "Reason",
+      "invalid": "Fill in the details and a reason (at least 3 characters).",
+      "submit": "Send request"
+    }
+  },
+  "complaints": {
+    "title": "Complaints",
+    "subtitle": "The transport office answers every complaint.",
+    "category": "Category",
+    "categories": {
+      "delay": "Delay",
+      "driver": "Driver",
+      "cleanliness": "Cleanliness",
+      "air_conditioning": "Air conditioning",
+      "payment": "Payment",
+      "other": "Other"
+    },
+    "text": "Your complaint",
+    "textHint": "Say when and where it happened, at least 10 characters.",
+    "tooShort": "Too short. Write at least 10 characters.",
+    "submit": "Send complaint",
+    "sent": "Complaint sent",
+    "mine": "My complaints",
+    "empty": "No complaints.",
+    "status": {
+      "new": "Awaiting reply",
+      "answered": "Answered"
+    },
+    "reply": "Transport office reply"
+  },
+  "chat": {
+    "title": "Assistant",
+    "subtitle": "Answers about transport, booking and payment.",
+    "hello": "Hi! Ask me anything about the buses.",
+    "suggestions": {
+      "howToPay": "How do I pay?",
+      "refund": "What's the refund policy?",
+      "whereIsBus": "Where's the bus?",
+      "notGoing": "What if I'm not going?"
+    },
+    "you": "You",
+    "assistant": "Assistant",
+    "thinking": "Thinking…",
+    "placeholder": "Type your question",
+    "send": "Send",
+    "disclaimer": "The assistant can make mistakes. Official decisions come from the transport office."
+  },
+  "crew": {
+    "reportTitle": "Report",
+    "reportSubtitle": "Report a delay or a violation.",
+    "trip": {
+      "state": {
+        "not_started": "Not started",
+        "in_progress": "In progress",
+        "ended": "Ended"
+      },
+      "outbound": "To university",
+      "return": "Return",
+      "direction": "Trip direction",
+      "startedAt": "started {time}",
+      "endedAt": "ended {time}",
+      "delay": "Reported delay: {minutes} min",
+      "supervisorNote": "The driver starts and ends the trip. You scan the students' cards.",
+      "scan": "Scan a card",
+      "start": "Start trip",
+      "started": "Trip started",
+      "end": "End trip",
+      "endTitle": "End the trip?",
+      "endConfirm": "End trip",
+      "ended": "Trip ended",
+      "endBodyOutbound": "{count, plural, =0 {Every student is accounted for.} one {# unscanned student will be marked absent and their parent notified.} other {# unscanned students will be marked absent and their parents notified.}} Students on board are marked as arrived.",
+      "endBodyReturn": "Students on board are marked as home.",
+      "riders": "{count, plural, one {# rider} other {# riders}} on this line"
+    },
+    "riders": {
+      "empty": "No subscribed students on this line.",
+      "priority": "Priority seat (clinic permit)",
+      "state": {
+        "waiting": "Waiting",
+        "boarded": "On board",
+        "checked_out": "Checked out",
+        "absent": "Absent",
+        "skipped": "Not going"
+      }
+    },
+    "scan": {
+      "title": "Scan card",
+      "back": "Back to trip",
+      "notStarted": "Start the trip before scanning.",
+      "action": "Scan type",
+      "board": "Boarding",
+      "checkout": "Mid-trip check-out",
+      "checkoutWarning": "The parent is notified immediately; the university isn't responsible after the student leaves.",
+      "reason": "Reason",
+      "reasons": {
+        "illness": "Feeling ill",
+        "family_reason": "Family reason",
+        "got_off_near_home": "Got off near home",
+        "other": "Other"
+      },
+      "camera": "Camera",
+      "cameraDenied": "Camera access is blocked. Allow it in the browser settings, or type the student ID below.",
+      "cameraUnsupported": "This browser can't read QR codes with the camera. Type the student ID below.",
+      "boarded": "Boarded at {stop}",
+      "checkedOut": "Checked out; parent notified",
+      "manual": "Or type the student ID",
+      "manualHint": "9 digits, if the camera can't read the code.",
+      "confirmBoard": "Record boarding",
+      "confirmCheckout": "Record check-out"
+    },
+    "delay": {
+      "title": "Report a delay",
+      "onlyRunning": "Delays can only be reported during a trip.",
+      "minutes": "Minutes",
+      "invalid": "1 to 180 minutes",
+      "reason": "Reason",
+      "reasons": {
+        "traffic": "Traffic",
+        "breakdown": "Bus breakdown",
+        "weather": "Weather",
+        "checkpoint": "Checkpoint",
+        "other": "Other"
+      },
+      "send": "Send delay",
+      "sent": "Riders and parents notified"
+    },
+    "violation": {
+      "title": "Report a violation",
+      "studentId": "Student ID",
+      "invalidId": "Student ID is 9 digits",
+      "type": "Violation type",
+      "types": {
+        "smoking": "Smoking",
+        "refused_card": "Refused to show card",
+        "damage": "Damage",
+        "misconduct": "Misconduct",
+        "other": "Other"
+      },
+      "description": "What happened",
+      "invalidText": "Describe what happened (at least 10 characters).",
+      "photo": "Photo",
+      "photoHint": "Optional, up to 5 MB.",
+      "invalidPhoto": "Must be an image under 5 MB.",
+      "send": "Send report",
+      "sent": "Report sent to student affairs"
+    },
+    "sos": {
+      "button": "Emergency SOS",
+      "openStatus": "SOS open",
+      "title": "Emergency report",
+      "body": "The transport office gets this at once with the bus position. In immediate danger call the ambulance (123) first.",
+      "kind": "Emergency type",
+      "kinds": {
+        "medical": "Medical",
+        "bus_issue": "Bus problem",
+        "accident": "Accident"
+      },
+      "note": "Details",
+      "noteHint": "Optional: who, and what happened.",
+      "cancel": "Back",
+      "send": "Send SOS",
+      "statusTitle": "Emergency report",
+      "back": "Back to trip",
+      "noneOpen": "No open emergency report.",
+      "status": {
+        "new": "SOS sent",
+        "acknowledged": "The office has seen it",
+        "closed": "Closed"
+      },
+      "waitingOffice": "Waiting for the transport office to confirm. Stay with the students.",
+      "officeOnIt": "The office is handling it. Updates appear here.",
+      "ambulance": "Ambulance requested",
+      "replacement": "Replacement bus on the way: {plate}",
+      "emergencyNumbers": "Ambulance 123 · Police 122 · Fire 180"
+    }
+  },
+  "parent": {
+    "title": "My children",
+    "chooseChild": "Choose child",
+    "noChildren": "No children linked to this account.",
+    "noChildrenBody": "Ask the transport office to link your account to the student ID.",
+    "line": "Line",
+    "stop": "Stop",
+    "transferred": "temporary transfer",
+    "trackBus": "Track the bus",
+    "today": "Today",
+    "todayEmpty": "Nothing yet today.",
+    "notSubscribed": "Not subscribed to transport this term.",
+    "trackingTitle": "Track the bus",
+    "approvals": {
+      "title": "Approvals",
+      "subtitle": "Refund and line change requests start with your approval.",
+      "nothingWaiting": "Nothing is waiting for your approval.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "Approved and sent to the transport office",
+      "rejected": "Request rejected",
+      "rejectTitle": "Reject the request?",
+      "reason": "Reason (optional)",
+      "history": "Earlier requests"
     }
   }
 }

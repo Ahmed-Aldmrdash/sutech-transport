@@ -45,3 +45,11 @@ export function daysUntil(dateOnly: string, now: Date = new Date()): number {
   const target = new Date(`${dateOnly}T00:00:00Z`).getTime();
   return Math.round((target - today) / 86_400_000);
 }
+
+/** A daily timetable slot ("07:15", Cairo) as "7:15 ص" / "7:15 am". */
+export function formatClock(clock: string, locale: string): string {
+  const [hours = 0, minutes = 0] = clock.split(":").map(Number);
+  return new Intl.DateTimeFormat(intlLocale(locale), { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" }).format(
+    new Date(Date.UTC(2000, 0, 1, hours, minutes)),
+  );
+}
