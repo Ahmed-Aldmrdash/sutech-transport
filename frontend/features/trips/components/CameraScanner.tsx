@@ -24,7 +24,7 @@ function detectorClass(): DetectorConstructor | null {
 export function CameraScanner({ onCode, paused }: { onCode: (code: string) => void; paused: boolean }) {
   const t = useTranslations("crew.scan");
   const video = useRef<HTMLVideoElement>(null);
-  const [problem, setProblem] = useState<"unsupported" | "denied" | null>(() => (typeof window !== "undefined" && !detectorClass() ? "unsupported" : null));
+  const [problem, setProblem] = useState<"unsupported" | "denied" | null>(null);
   const callback = useRef(onCode);
   callback.current = onCode;
   const pausedRef = useRef(paused);

@@ -3,6 +3,9 @@ import { addDays, cairoIso, minutesAgo, today } from "./clock";
 import type { Db, LineRow, StopRow, SubscriptionRow, UserRow } from "./db";
 import { both } from "./localized";
 
+/** Bump when the seed or row shapes change, so browsers drop an old saved demo database. */
+export const DB_VERSION = 2;
+
 /*
  * Demo data. Students and the parent use the team's real names and university IDs (agreed with Ahmed);
  * no real phone numbers or emails anywhere. Staff accounts use the role names from the clickable demo.
@@ -151,7 +154,7 @@ export function buildSeed(): Db {
     staff("U-3", Role.Finance, "منى عادل", "finance"),
     staff("U-4", Role.Clinic, "د. سامية", "clinic"),
     staff("U-5", Role.StudentAffairs, "أ. هشام", "affairs"),
-    staff("U-6", Role.SecretaryGeneral, "مكتب الأمين العام", "sg"),
+    staff("U-6", Role.SecretaryGeneral, "مكتب الأمين العام", "secretary"),
     staff("U-7", Role.BusCompany, "شركة أبو الهول", "abulhoul"),
     staff("D-1", Role.Driver, "محمود عبد الرحمن", "driver", "L1"),
     staff("D-2", Role.Supervisor, "مشرف خط السويس", "supervisor", "L1"),
@@ -194,7 +197,7 @@ export function buildSeed(): Db {
   });
 
   return {
-    version: 1,
+    version: DB_VERSION,
     seeded_on: day,
     seq: { SUB: 20, P: 1043, R: 225, C: 59, V: 89, A: 3, AS: 3, N: 10, D: 2, M: 2, E: 2, B: 8, L: 5, S: 4, U: 8, ST: 30 },
     users,

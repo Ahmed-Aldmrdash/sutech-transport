@@ -46,7 +46,7 @@ export function ApprovalsScreen() {
                   showStudent
                   actions={
                     <div className="flex gap-2">
-                      <Button size="sm" variant="ghost" className="text-danger" onClick={() => setRejecting(request)}>
+                      <Button size="sm" variant="dangerGhost" onClick={() => setRejecting(request)}>
                         {t("reject")}
                       </Button>
                       <Button size="sm" loading={decide.pending} onClick={async () => (await decide.run(request.id, true)) && toast(t("approved"))}>

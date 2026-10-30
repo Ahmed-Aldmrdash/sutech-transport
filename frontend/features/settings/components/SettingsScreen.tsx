@@ -10,6 +10,8 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { Button } from "@/components/ui/Button";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Segmented } from "@/components/ui/Segmented";
+import { isMockMode } from "@/lib/config";
+import { DemoReset } from "./DemoReset";
 
 /** Account, language, theme and sign-out for every role; `children` adds role-specific sections. */
 export function SettingsScreen({ children }: { children?: ReactNode }) {
@@ -55,7 +57,8 @@ export function SettingsScreen({ children }: { children?: ReactNode }) {
           </div>
         </Card>
         {children}
-        <Button variant="secondary" className="text-danger" icon={<LogOut className="flip-rtl size-4" aria-hidden />} onClick={() => void signOut()}>
+        {isMockMode && <DemoReset />}
+        <Button variant="dangerOutline" icon={<LogOut className="flip-rtl size-4" aria-hidden />} onClick={() => void signOut()}>
           {t("signOut")}
         </Button>
       </div>

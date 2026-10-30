@@ -74,7 +74,7 @@ export function PaymentScreen() {
                 ]}
               />
               <Card>{method === PaymentMethod.Fawry ? <FawryPanel /> : <ReceiptForm key={method} method={method} />}</Card>
-              <Button variant="ghost" className="text-danger" onClick={() => setConfirm(true)}>
+              <Button variant="dangerGhost" onClick={() => setConfirm(true)}>
                 {t("cancelReservation")}
               </Button>
               <ConfirmDialog

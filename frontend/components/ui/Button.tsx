@@ -2,13 +2,15 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "teal";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "dangerGhost" | "dangerOutline" | "teal";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-brand text-on-brand hover:bg-brand-deep",
   secondary: "bg-surface-raised text-brand border border-line-strong hover:bg-brand-soft",
   ghost: "bg-transparent text-ink hover:bg-brand-soft",
   danger: "bg-danger text-on-danger hover:opacity-90",
+  dangerGhost: "bg-transparent text-danger hover:bg-danger-soft",
+  dangerOutline: "bg-surface-raised text-danger border border-line-strong hover:bg-danger-soft",
   teal: "bg-teal text-on-teal hover:opacity-90",
 };
 

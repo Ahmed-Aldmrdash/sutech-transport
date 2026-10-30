@@ -16,6 +16,7 @@ export function ConfirmDialog({
   danger = false,
   pending = false,
   error,
+  confirmDisabled = false,
 }: {
   open: boolean;
   title: string;
@@ -26,6 +27,7 @@ export function ConfirmDialog({
   danger?: boolean;
   pending?: boolean;
   error?: string;
+  confirmDisabled?: boolean;
 }) {
   const t = useTranslations("common");
   return (
@@ -39,7 +41,7 @@ export function ConfirmDialog({
           <Button variant="ghost" onClick={onClose} disabled={pending}>
             {t("cancel")}
           </Button>
-          <Button variant={danger ? "danger" : "primary"} onClick={onConfirm} loading={pending}>
+          <Button variant={danger ? "danger" : "primary"} onClick={onConfirm} loading={pending} disabled={confirmDisabled}>
             {confirmLabel}
           </Button>
         </>

@@ -53,3 +53,32 @@ export function formatClock(clock: string, locale: string): string {
     new Date(Date.UTC(2000, 0, 1, hours, minutes)),
   );
 }
+
+/** Minutes Cairo is ahead of UTC at an instant (120 in winter, 180 in summer time). */
+function cairoOffsetMinutes(at: Date): number {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: CAIRO_TIME_ZONE,
+      hourCycle: "h23",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+      .formatToParts(at)
+      .map((part) => [part.type, part.value]),
+  );
+  const asUtc = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute));
+  return Math.round((asUtc - Math.floor(at.getTime() / 60_000) * 60_000) / 60_000);
+}
+
+/** A datetime-local value typed in Cairo time ("2026-11-02T08:30") as an ISO UTC instant. */
+export function cairoLocalToIso(local: string): string {
+  const [date = "", time = "00:00"] = local.split("T");
+  const [year, month, day] = date.split("-").map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
+  const guess = Date.UTC(year!, month! - 1, day!, hours!, minutes!);
+  const offset = cairoOffsetMinutes(new Date(guess - cairoOffsetMinutes(new Date(guess)) * 60_000));
+  return new Date(guess - offset * 60_000).toISOString();
+}

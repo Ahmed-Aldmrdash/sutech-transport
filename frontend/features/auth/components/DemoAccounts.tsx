@@ -14,7 +14,7 @@ const ACCOUNTS = [
   { identifier: "finance", key: "finance" },
   { identifier: "clinic", key: "clinic" },
   { identifier: "affairs", key: "affairs" },
-  { identifier: "sg", key: "secretary" },
+  { identifier: "secretary", key: "secretary" },
   { identifier: "abulhoul", key: "busCompany" },
 ] as const;
 

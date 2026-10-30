@@ -1,6 +1,6 @@
 import type { Role } from "@/features/auth/roles";
 import type { Localized } from "./localized";
-import { buildSeed } from "./seed";
+import { DB_VERSION, buildSeed } from "./seed";
 
 /* The mock server's tables. Shapes are internal; handlers turn rows into contract responses. */
 
@@ -281,7 +281,7 @@ export interface Db {
   feed: { at: string; text: Localized }[];
 }
 
-export const DB_VERSION = 1;
+export { DB_VERSION };
 const STORAGE_KEY = "sutech.mock-db";
 
 let db: Db | null = null;
