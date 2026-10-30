@@ -10,32 +10,32 @@
 <style>
 /* Layout: top role switcher; phone stage + presenter notes for student/driver; sidebar dashboard for admin */
 :root{
-  --bg:#F7F7F7; --surface:#FFFFFF; --surface-2:#F2F1F4; --ink:#141416; --muted:#6B6E75; --line:#E7E7E7;
-  --brand:#58286E; --brand-2:#2F103D; --brand-soft:#F3EBF7; --on-brand:#FFFFFF;
-  --sun:#B4472E; --sun-soft:#FBEAE5; --on-sun:#FFFFFF;
-  --teal:#257988; --teal-soft:#E3F1F3; --coral:#CF644B;
-  --ok:#1D7348; --ok-soft:#E6F4EC; --warn:#94530A; --warn-soft:#FDF1E0; --bad:#D71921; --bad-soft:#FDE8E9;
-  --water:#D6EBEE; --land:#F3F3F1; --road:#FFFFFF; --block:#E6E5E9;
+  --bg:#F7F7F7; --surface:#FFFFFF; --surface-2:#F9F9F9; --ink:#1F1A24; --muted:#6D6E6F; --line:#E7E7E7;
+  --brand:#58286E; --brand-2:#2F103D; --brand-soft:#F3EEF6; --on-brand:#FFFFFF;
+  --sun:#B4472E; --sun-soft:#FDF0EC; --on-sun:#FFFFFF;
+  --teal:#257988; --teal-soft:#E9F3F5; --coral:#CF644B;
+  --ok:#176B41; --ok-soft:#DDF1E5; --warn:#855108; --warn-soft:#FBECD3; --bad:#C62828; --bad-soft:#F9E0E0;
+  --water:#BFDDE2; --land:#EEF1EC; --road:#FFFFFF; --block:#E2E5DE;
   --shadow:0 4px 20px rgba(0,0,0,.1);
   --f-display:"Montserrat","Tajawal",system-ui,sans-serif;
   --f-body:"Tajawal","Montserrat",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F0C12; --surface:#17131B; --surface-2:#211B26; --ink:#F5F2F7; --muted:#A59DAD; --line:#3A3340;
-  --brand:#C39AD6; --brand-2:#A583B6; --brand-soft:#2E1F38; --on-brand:#141117;
-  --sun:#EC8F77; --sun-soft:#3A1F18; --on-sun:#141117;
-  --teal:#6CC0CD; --teal-soft:#14313A; --coral:#EC8F77;
-  --ok:#63CF95; --ok-soft:#11301F; --warn:#F0B45C; --warn-soft:#352510; --bad:#FF7A7E; --bad-soft:#3A1416;
-  --water:#14313A; --land:#1A1620; --road:#2E2834; --block:#221D28;
-  --shadow:0 4px 20px rgba(0,0,0,.45); color-scheme:dark}}
+  --bg:#16101A; --surface:#211A26; --surface-2:#2A2230; --ink:#F3F1F5; --muted:#A7A3AD; --line:#362E3C;
+  --brand:#A583B6; --brand-2:#BFA1CE; --brand-soft:#33243D; --on-brand:#16101A;
+  --sun:#F1AE9F; --sun-soft:#3A221C; --on-sun:#16101A;
+  --teal:#7AB8C0; --teal-soft:#173339; --coral:#E69583;
+  --ok:#4CC08A; --ok-soft:#173826; --warn:#E3A848; --warn-soft:#3A2C12; --bad:#EF7A6E; --bad-soft:#3D1F1C;
+  --water:#1E3940; --land:#1C1820; --road:#2E2734; --block:#241E29;
+  --shadow:0 4px 20px rgba(0,0,0,.40); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0F0C12; --surface:#17131B; --surface-2:#211B26; --ink:#F5F2F7; --muted:#A59DAD; --line:#3A3340;
-  --brand:#C39AD6; --brand-2:#A583B6; --brand-soft:#2E1F38; --on-brand:#141117;
-  --sun:#EC8F77; --sun-soft:#3A1F18; --on-sun:#141117;
-  --teal:#6CC0CD; --teal-soft:#14313A; --coral:#EC8F77;
-  --ok:#63CF95; --ok-soft:#11301F; --warn:#F0B45C; --warn-soft:#352510; --bad:#FF7A7E; --bad-soft:#3A1416;
-  --water:#14313A; --land:#1A1620; --road:#2E2834; --block:#221D28;
-  --shadow:0 4px 20px rgba(0,0,0,.45); color-scheme:dark}
+  --bg:#16101A; --surface:#211A26; --surface-2:#2A2230; --ink:#F3F1F5; --muted:#A7A3AD; --line:#362E3C;
+  --brand:#A583B6; --brand-2:#BFA1CE; --brand-soft:#33243D; --on-brand:#16101A;
+  --sun:#F1AE9F; --sun-soft:#3A221C; --on-sun:#16101A;
+  --teal:#7AB8C0; --teal-soft:#173339; --coral:#E69583;
+  --ok:#4CC08A; --ok-soft:#173826; --warn:#E3A848; --warn-soft:#3A2C12; --bad:#EF7A6E; --bad-soft:#3D1F1C;
+  --water:#1E3940; --land:#1C1820; --road:#2E2734; --block:#241E29;
+  --shadow:0 4px 20px rgba(0,0,0,.40); color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
@@ -254,7 +254,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
 .err{color:var(--bad);font-size:13px;font-weight:600}
 .hint{font-size:12.5px;color:var(--muted)}
 .icon-btn{position:relative;border:1px solid var(--line);background:var(--surface);width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
-.icon-btn .cnt{position:absolute;top:-6px;inset-inline-end:-6px;background:var(--bad);color:#fff;font-size:10.5px;font-weight:700;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px;font-variant-numeric:tabular-nums}
+.icon-btn .cnt{position:absolute;top:-6px;inset-inline-end:-6px;background:var(--bad);color:var(--on-brand);font-size:10.5px;font-weight:700;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px;font-variant-numeric:tabular-nums}
 .notif{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .notif.unread{border-color:var(--brand);background:var(--brand-soft)}
 .notif time{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -435,7 +435,7 @@ function syncMe(o){Object.assign(meRow(),o)}
 
 let toastT;
 function toast(m,kind){let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}
- t.textContent=m;t.style.background=kind==='bad'?'var(--bad)':'';t.style.color=kind==='bad'?'#fff':'';t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
+ t.textContent=m;t.style.background=kind==='bad'?'var(--bad)':'';t.style.color=kind==='bad'?'var(--on-brand)':'';t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
 
 /* ---------- presenter notes ---------- */
 const NOTES={
@@ -462,7 +462,7 @@ function pendingAdmin(){return S.payments.filter(p=>p.st==='pending').length+S.r
 function render(){
  const pend=pendingAdmin(), par=S.requests.filter(r=>r.sid===ME.id&&r.steps[0][1]==='now').length;
  const roles=[['student','الطالب',0],['parent','ولي الأمر',par],['driver','السائق',0],['admin','الإدارة',pend]];
- const top=`<header class="top"><div class="brand"><div class="brand-mark">${ic('bus',20).replace('currentColor','#fff')}</div><div>نقل SUtech<small>نموذج تفاعلي أولي · PWA</small></div></div>
+ const top=`<header class="top"><div class="brand"><div class="brand-mark">${ic('bus',20).replace('currentColor','var(--on-brand)')}</div><div>نقل SUtech<small>نموذج تفاعلي أولي · PWA</small></div></div>
  <span class="mock-tag">بيانات تجريبية</span>
  <nav class="roles" aria-label="اختيار الواجهة">${roles.map(([k,t,c])=>`<button data-act="role" data-v="${k}" aria-pressed="${S.role===k}">${t}${c?` · ${c}`:''}</button>`).join('')}</nav>
  <button class="reset" data-act="lang" data-notr lang="${LANG==='en'?'ar':'en'}">${LANG==='en'?'عربي':'English'}</button>
@@ -528,7 +528,7 @@ function student(){
 function stLogin(){
  const s=S.st, locked=s.otpTries>=3;
  return `<div class="p-body" style="justify-content:center;gap:16px;padding-top:24px">
- <div class="stack" style="align-items:center;text-align:center;gap:6px"><div class="brand-mark" style="width:64px;height:64px;border-radius:18px">${ic('bus',34).replace('currentColor','#fff')}</div>
+ <div class="stack" style="align-items:center;text-align:center;gap:6px"><div class="brand-mark" style="width:64px;height:64px;border-radius:18px">${ic('bus',34).replace('currentColor','var(--on-brand)')}</div>
  <h2 style="font-size:24px;margin-top:8px">نقل الجامعة</h2><p class="muted" style="margin:0">سجّل مرة واحدة بالرقم الجامعي</p></div>
  <div class="field"><label for="sid">الرقم الجامعي</label><input id="sid" class="input num" inputmode="numeric" maxlength="9" value="${s.fetched?ME.id:(s.sidVal??ME.id)}" ${s.fetched?'readonly':''} style="direction:ltr;text-align:right;font-size:18px;letter-spacing:.06em">${errLine(s.idErr)}</div>
  ${!s.fetched?`<button class="btn block" data-act="fetch">تحقق من بياناتي</button><span class="hint" style="text-align:center">للعرض: الرقم الموجود في الـ Admission هو ${ME.id}</span>`:`
