@@ -3777,6 +3777,23 @@
                         "additionalProperties": false
                       }
                     },
+                    "path": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    },
                     "riders_boarded": {
                       "type": "integer",
                       "minimum": 0,
@@ -3816,6 +3833,7 @@
                     "delay_minutes",
                     "next_stop_name",
                     "stops",
+                    "path",
                     "riders_boarded",
                     "riders_total",
                     "my_stop_id",
@@ -4019,6 +4037,23 @@
                         "additionalProperties": false
                       }
                     },
+                    "path": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 2,
+                        "maxItems": 2
+                      }
+                    },
                     "riders_boarded": {
                       "type": "integer",
                       "minimum": 0,
@@ -4058,6 +4093,7 @@
                     "delay_minutes",
                     "next_stop_name",
                     "stops",
+                    "path",
                     "riders_boarded",
                     "riders_total",
                     "my_stop_id",
@@ -4255,6 +4291,23 @@
                           "additionalProperties": false
                         }
                       },
+                      "path": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 2,
+                          "maxItems": 2
+                        }
+                      },
                       "riders_boarded": {
                         "type": "integer",
                         "minimum": 0,
@@ -4278,6 +4331,7 @@
                       "delay_minutes",
                       "next_stop_name",
                       "stops",
+                      "path",
                       "riders_boarded",
                       "riders_total"
                     ],

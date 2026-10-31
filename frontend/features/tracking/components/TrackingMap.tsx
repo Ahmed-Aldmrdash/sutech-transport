@@ -30,20 +30,25 @@ export default function TrackingMap({
   label,
   className,
 }: {
-  line: Pick<LiveLine, "stops">;
+  line: Pick<LiveLine, "stops"> & Partial<Pick<LiveLine, "path">>;
   position: BusPosition | null;
   myStopId?: string;
   label: string;
   /** Overrides the default height (e.g. a taller map on laptops). */
   className?: string;
 }) {
-  const points = useMemo(() => line.stops.map((stop) => [stop.lat, stop.lng] as [number, number]), [line.stops]);
+  // The route follows the roads when the server sends a path; otherwise it is drawn stop to stop.
+  const points = useMemo(
+    () => (line.path && line.path.length > 1 ? line.path : line.stops.map((stop) => [stop.lat, stop.lng] as [number, number])),
+    [line.path, line.stops],
+  );
   return (
     <div role="img" aria-label={label} className={cn("h-64 overflow-hidden rounded-card border border-line sm:h-80", className)}>
       <MapContainer center={points[0] ?? [30.0, 31.5]} zoom={11} scrollWheelZoom={false} className="h-full w-full" attributionControl>
         <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <FitToRoute points={points} />
-        <Polyline positions={points} pathOptions={{ color: "#58286E", weight: 4, opacity: 0.7 }} />
+        <Polyline positions={points} pathOptions={{ color: "#ffffff", weight: 8, opacity: 0.9 }} />
+        <Polyline positions={points} pathOptions={{ color: "#58286E", weight: 5, opacity: 0.9 }} />
         {line.stops.map((stop) => (
           <CircleMarker
             key={stop.id}

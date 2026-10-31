@@ -3,7 +3,7 @@ import { today } from "./clock";
 import type { AnnouncementRow, Db, LineRow, SubscriptionRow, TripRow, UserRow } from "./db";
 import { type Ctx, bookedSeats, currentSubscription, lineCapacity, ridingLine, studentName, targetName } from "./helpers";
 import { tx } from "./localized";
-import { etaMinutes, positionAt, progressOfStop, tripFor } from "./route";
+import { etaMinutes, linePath, positionAt, progressOfStop, tripFor } from "./route";
 
 /* Rows → contract responses (snake_case, piasters, ISO UTC, text in the caller's language). */
 
@@ -172,6 +172,7 @@ export function liveLineView(db: Db, lineId: string, ctx: Ctx, myStopId?: string
       lng: stop.lng,
       passed: running && index < point.nextIndex,
     })),
+    path: linePath(line, trip.direction),
     riders_boarded: boarded,
     riders_total: riders.length,
   };

@@ -36,6 +36,8 @@ export const LiveLine = z.object({
   delay_minutes: z.number().int().nonnegative(),
   next_stop_name: z.string().nullable(),
   stops: z.array(TrackedStop),
+  /** [lat, lng] points of the route along the roads, in this trip's direction (straight stop-to-stop if unknown). */
+  path: z.array(z.tuple([z.number(), z.number()])),
   riders_boarded: z.number().int().nonnegative(),
   riders_total: z.number().int().nonnegative(),
 });
