@@ -10,7 +10,7 @@ export function Card({ as: Tag = "section", raised = false, className, ...rest }
   return (
     <Tag
       className={cn(
-        "rounded-card border border-line bg-surface-raised p-4",
+        "rounded-card border border-line bg-surface-raised p-4 lg:p-5",
         raised && "border-transparent shadow-card",
         className,
       )}

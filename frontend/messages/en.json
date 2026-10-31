@@ -101,7 +101,17 @@
       "affairs": "Student affairs & security",
       "secretary": "Secretary general",
       "busCompany": "Abu El Hol bus company"
-    }
+    },
+    "hero": {
+      "eyebrow": "ElSewedy University of Technology",
+      "title": "Your campus transport in one place",
+      "body": "Book your seat, track the bus live and show your pass to the driver from your phone.",
+      "f1": "Book and pay in the app",
+      "f2": "Follow the bus on the map, live",
+      "f3": "A QR pass that changes every 30 seconds",
+      "slogan": "Access the Future"
+    },
+    "demoToggle": "Demo accounts"
   },
   "nav": {
     "main": "Main menu",
