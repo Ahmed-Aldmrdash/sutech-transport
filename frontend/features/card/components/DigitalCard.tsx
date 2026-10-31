@@ -48,7 +48,7 @@ function CardFace({ card, reload }: { card: Card; reload: () => void }) {
 
   return (
     <div className="mx-auto flex max-w-sm flex-col overflow-hidden rounded-lg bg-surface-raised shadow-card">
-      <div className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-purple-100),var(--color-brand-deep))] px-5 py-5 text-on-brand">
+      <div className="relative overflow-hidden bg-[image:var(--grad-brand)] px-5 py-5 text-white">
         <div aria-hidden className="absolute inset-0 bg-[url('/brand/pattern.svg')]" />
         <div className="relative flex items-start justify-between gap-3">
           <div className="min-w-0">

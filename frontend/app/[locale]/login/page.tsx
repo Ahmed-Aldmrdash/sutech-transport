@@ -23,7 +23,7 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
   return (
     <main className="min-h-dvh bg-surface lg:grid lg:h-dvh lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       {/* Brand panel: a short band on phones, the full side of the screen on laptops. */}
-      <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-purple-100),var(--color-brand-deep))] text-on-brand">
+      <section className="relative overflow-hidden bg-[image:var(--grad-brand)] text-white">
         <div aria-hidden className="absolute inset-0 bg-[url('/brand/pattern.svg')] opacity-90" />
         <div className="relative mx-auto flex max-w-md flex-col px-5 pt-5 pb-20 lg:h-full lg:max-w-xl lg:px-12 lg:py-10">
           <div className="flex items-center justify-between">
@@ -35,10 +35,10 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
           </div>
           <div className="mt-8 lg:my-auto">
             <p className="label-caps text-[12px] font-semibold text-purple-20">{t("hero.eyebrow")}</p>
-            <h1 className="mt-2 text-[28px] leading-9 font-extrabold text-on-brand lg:text-[40px] lg:leading-[48px]">
+            <h1 className="mt-2 text-[28px] leading-9 font-extrabold text-white lg:text-[40px] lg:leading-[48px]">
               {t("hero.title")}
             </h1>
-            <p className="mt-3 max-w-md text-[16px] leading-7 text-on-brand/80">{t("hero.body")}</p>
+            <p className="mt-3 max-w-md text-[16px] leading-7 text-white/80">{t("hero.body")}</p>
             <ul className="mt-8 hidden flex-col gap-3 lg:flex">
               {features.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-3 text-[15px] font-semibold">
@@ -50,7 +50,7 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
               ))}
             </ul>
           </div>
-          <p className="mt-10 hidden w-fit text-[13px] font-semibold tracking-[3px] text-on-brand/60 uppercase lg:block" dir="ltr">
+          <p className="mt-10 hidden w-fit text-[13px] font-semibold tracking-[3px] text-white/60 uppercase lg:block" dir="ltr">
             {t("hero.slogan")}
           </p>
         </div>

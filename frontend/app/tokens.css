@@ -47,6 +47,8 @@
   --map-road: #ffffff;
   --map-block: #e2e5de;
   --purple-100: #58286e;
+  /* Brand surfaces (login panel, home banner, card) stay deep purple with white text in both themes. */
+  --grad-brand: linear-gradient(120deg, #58286e 0%, #2f103d 100%);
   --purple-80: #724686;
   --purple-60: #8c659e;
   --purple-40: #a583b6;

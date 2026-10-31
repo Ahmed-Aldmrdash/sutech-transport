@@ -26,19 +26,19 @@ export function StudentHome() {
   ];
   return (
     <div className="flex flex-col gap-5 lg:gap-6">
-      <section className="relative overflow-hidden rounded-lg bg-[linear-gradient(120deg,var(--color-purple-100),var(--color-brand-deep))] p-5 text-on-brand lg:p-7">
+      <section className="relative overflow-hidden rounded-lg bg-[image:var(--grad-brand)] p-5 text-white lg:p-7">
         <div aria-hidden className="absolute inset-0 bg-[url('/brand/pattern.svg')]" />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-on-brand/75">{t("greeting")}</p>
-            <h1 className="text-[24px] leading-8 font-extrabold text-on-brand lg:text-[30px] lg:leading-10">{me.name}</h1>
+            <p className="text-white/75">{t("greeting")}</p>
+            <h1 className="text-[24px] leading-8 font-extrabold text-white lg:text-[30px] lg:leading-10">{me.name}</h1>
           </div>
           <ul className="flex gap-2">
             {shortcuts.map(({ href, icon: Icon, label }) => (
               <li key={href}>
                 <Link
                   href={href}
-                  className="flex min-h-11 items-center gap-2 rounded-md bg-white/12 px-3 text-[14px] font-bold text-on-brand hover:bg-white/20"
+                  className="flex min-h-11 items-center gap-2 rounded-md bg-white/12 px-3 text-[14px] font-bold text-white hover:bg-white/20"
                 >
                   <Icon className="size-4" aria-hidden />
                   {label}

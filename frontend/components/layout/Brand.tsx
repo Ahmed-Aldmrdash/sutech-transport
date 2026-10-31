@@ -16,7 +16,7 @@ export function Brand({ inverse = false, className }: { inverse?: boolean; class
           <Image src="/brand/sutech-mark-white.svg" alt="" width={36} height={36} className="hidden size-9 dark:block" />
         </>
       )}
-      <span className={cn("text-[17px] leading-5 font-extrabold", inverse ? "text-on-brand" : "text-ink-strong")} dir="ltr">
+      <span className={cn("text-[17px] leading-5 font-extrabold", inverse ? "text-white" : "text-ink-strong")} dir="ltr">
         SUtech <span className={inverse ? "opacity-80" : "text-teal"}>Transport</span>
       </span>
     </span>
