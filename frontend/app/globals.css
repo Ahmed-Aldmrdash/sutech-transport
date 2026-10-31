@@ -1,0 +1,84 @@
+@import "./tokens.css";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 26px;
+    -webkit-font-smoothing: antialiased;
+  }
+  [dir="rtl"] body {
+    font-family: var(--font-arabic);
+    font-size: 17px;
+    line-height: 28px;
+  }
+  h1,
+  h2,
+  h3 {
+    color: var(--ink-strong);
+    font-weight: 800;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button,
+  [role="button"],
+  select,
+  input[type="checkbox"],
+  input[type="radio"] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  .label-caps:where(:lang(en)) {
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .flip-rtl:where([dir="rtl"] *) {
+    transform: scaleX(-1);
+  }
+}
+
+@keyframes sut-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--teal) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+.live-dot {
+  animation: sut-pulse 1.6s ease-out infinite;
+}
+@keyframes sut-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--skeleton) 25%, var(--skeleton-hi) 50%, var(--skeleton) 75%);
+  background-size: 200% 100%;
+  animation: sut-shimmer 1.4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot,
+  .skeleton {
+    animation: none;
+  }
+  * {
+    transition-duration: 0ms !important;
+  }
+}
