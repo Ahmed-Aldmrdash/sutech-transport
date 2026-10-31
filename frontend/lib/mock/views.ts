@@ -148,7 +148,11 @@ export function liveLineView(db: Db, lineId: string, ctx: Ctx, myStopId?: string
   const point = positionAt(line, trip.progress, trip.direction);
   const ordered = trip.direction === "outbound" ? line.stops.filter((s) => s.active) : [...line.stops.filter((s) => s.active)].reverse();
   const riders = db.subscriptions.filter((row) => row.status === "active" && ridingLine(db, row) === lineId);
-  const boarded = Object.values(trip.riders).filter((rider) => rider.state === "boarded").length;
+  // Simulated lines have no crew scanning cards, so riders count as boarded once the bus has passed their stop;
+  // otherwise a moving bus would show "0 boarded".
+  const boarded = trip.simulated
+    ? riders.filter((row) => running && progressOfStop(line, row.stop_id, trip.direction) <= trip.progress).length
+    : Object.values(trip.riders).filter((rider) => rider.state === "boarded").length;
   const base = {
     line_id: lineId,
     line_name: ctx.t(line.name),

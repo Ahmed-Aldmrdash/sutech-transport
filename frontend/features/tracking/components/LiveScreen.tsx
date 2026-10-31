@@ -47,7 +47,8 @@ export function LiveScreen() {
                         <Pill tone={line.state === TripState.InProgress ? "teal" : "neutral"}>{tt(`state.${line.state}`)}</Pill>
                       </span>
                       <span className="text-[13px] text-ink-muted">
-                        <bdi>{line.bus_plate ?? "—"}</bdi> · {t("riders", { boarded: line.riders_boarded, total: line.riders_total })}
+                        <bdi>{line.bus_plate ?? "—"}</bdi>
+                        {line.riders_total > 0 && <> · {t("riders", { boarded: line.riders_boarded, total: line.riders_total })}</>}
                       </span>
                       {line.delay_minutes > 0 && <Pill tone="warning">{tt("delayed", { minutes: line.delay_minutes })}</Pill>}
                     </button>

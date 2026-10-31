@@ -20,11 +20,11 @@ export function StudentMore() {
   return (
     <>
       <PageHeader title={t("title")} />
-      <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-card border border-line bg-surface-raised">
+      <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-card border border-line bg-surface-raised lg:grid lg:grid-cols-2 lg:gap-4 lg:divide-y-0 lg:overflow-visible lg:border-0 lg:bg-transparent">
         {ITEMS.map(({ href, key, icon: Icon }) => (
           <li key={href}>
-            <Link href={href} className="flex min-h-16 items-center gap-3 px-4 hover:bg-surface-alt">
-              <span className="grid size-10 place-items-center rounded-md bg-brand-soft text-brand">
+            <Link href={href} className="flex min-h-16 items-center gap-3 px-4 hover:bg-surface-alt lg:min-h-24 lg:rounded-card lg:border lg:border-line lg:bg-surface-raised lg:px-5 lg:hover:border-brand">
+              <span className="grid size-10 shrink-0 place-items-center rounded-md bg-brand-soft text-brand lg:size-12">
                 <Icon className="size-5" aria-hidden />
               </span>
               <span className="min-w-0 flex-1">

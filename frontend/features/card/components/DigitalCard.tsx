@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import { QrCode, RefreshCw, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -47,12 +48,18 @@ function CardFace({ card, reload }: { card: Card; reload: () => void }) {
 
   return (
     <div className="mx-auto flex max-w-sm flex-col overflow-hidden rounded-lg bg-surface-raised shadow-card">
-      <div className="bg-brand-deep px-5 py-4 text-on-brand">
-        <p className="label-caps text-[12px] opacity-80">{t("cardLabel", { term: card.term_name })}</p>
-        <p className="mt-1 text-[22px] leading-7 font-extrabold">{card.name}</p>
-        <p className="num mt-0.5 text-[15px] opacity-90" dir="ltr">
-          {card.student_id}
-        </p>
+      <div className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-purple-100),var(--color-brand-deep))] px-5 py-5 text-on-brand">
+        <div aria-hidden className="absolute inset-0 bg-[url('/brand/pattern.svg')]" />
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="label-caps text-[12px] text-purple-20">{t("cardLabel", { term: card.term_name })}</p>
+            <p className="mt-1 text-[22px] leading-7 font-extrabold">{card.name}</p>
+            <p className="num mt-0.5 text-[15px] opacity-90" dir="ltr">
+              {card.student_id}
+            </p>
+          </div>
+          <Image src="/brand/sutech-mark-white.svg" alt="" width={40} height={40} className="size-10 shrink-0" />
+        </div>
       </div>
       <div className="flex flex-col gap-4 p-5">
         <QrImage value={card.qr_token} label={t("qrLabel")} />
