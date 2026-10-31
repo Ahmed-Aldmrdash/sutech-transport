@@ -4,7 +4,7 @@ import type { Db, LineRow, StopRow, SubscriptionRow, UserRow } from "./db";
 import { both } from "./localized";
 
 /** Bump when the seed or row shapes change, so browsers drop an old saved demo database. */
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 /*
  * Demo data. Students and the parent use the team's real names and university IDs (agreed with Ahmed);
@@ -17,7 +17,8 @@ const FACULTY_CYBER = both("الأمن السيبراني", "Cybersecurity");
 const LEVEL_2 = both("الفرقة الثانية", "Year 2");
 const LEVEL_3 = both("الفرقة الثالثة", "Year 3");
 
-const GATE = { lat: 30.0405, lng: 32.493 };
+/** SUTech campus, Cairo–Ismailia road, 10th of Ramadan (from the university's own Google Maps link). */
+export const GATE = { lat: 30.23319, lng: 31.70602 };
 
 function stop(id: string, ar: string, en: string, time: string, lat: number, lng: number): StopRow {
   return { id, name: both(ar, en), time, active: true, is_destination: false, lat, lng };
@@ -38,7 +39,7 @@ const LINES: LineRow[] = [
       stop("L1-S2", "شارع الجيش", "El Geish Street", "06:50", 29.9792, 32.5268),
       stop("L1-S3", "الكورنيش الجديد", "New Corniche", "07:00", 29.9661, 32.5502),
       stop("L1-S4", "مستشفى السويس العام", "Suez General Hospital", "07:10", 29.9921, 32.5297),
-      gate("L1-S5", "07:35"),
+      gate("L1-S5", "08:25"),
     ],
   },
   {
@@ -50,7 +51,7 @@ const LINES: LineRow[] = [
       stop("L2-S1", "محطة قطار الإسماعيلية", "Ismailia train station", "06:15", 30.5965, 32.2715),
       stop("L2-S2", "دوران الشيخ زايد", "El Sheikh Zayed roundabout", "06:25", 30.5831, 32.2894),
       stop("L2-S3", "فايد", "Fayed", "06:55", 30.3245, 32.2988),
-      gate("L2-S4", "07:40"),
+      gate("L2-S4", "08:00"),
     ],
   },
   {
@@ -62,7 +63,7 @@ const LINES: LineRow[] = [
       stop("L3-S1", "حي فيصل", "Faisal district", "06:50", 29.9857, 32.5203),
       stop("L3-S2", "مساكن السلام", "El Salam housing", "07:00", 29.9958, 32.5101),
       stop("L3-S3", "سوق الأربعين", "El Arbaeen market", "07:10", 29.9731, 32.5401),
-      gate("L3-S4", "07:30"),
+      gate("L3-S4", "08:25"),
     ],
   },
   {
@@ -73,7 +74,7 @@ const LINES: LineRow[] = [
     stops: [
       stop("L4-S1", "منطقة الأدبية", "El Adabiya", "06:20", 29.8794, 32.4681),
       stop("L4-S2", "عتاقة", "Ataqa", "06:45", 29.9302, 32.4198),
-      gate("L4-S3", "07:25"),
+      gate("L4-S3", "08:15"),
     ],
   },
 ];

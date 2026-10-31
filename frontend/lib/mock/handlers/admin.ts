@@ -24,6 +24,7 @@ import {
   studentName,
 } from "../helpers";
 import { both, tx } from "../localized";
+import { GATE } from "../seed";
 import { lineView, subscriptionView } from "../views";
 import { studentDayStatus } from "./day";
 import { activateSubscription } from "./student";
@@ -236,7 +237,7 @@ export const adminHandlers: Handlers = {
       bus_id: input.bus_id,
       stops: [
         ...input.stops.map((stop, index) => ({ id: `${id}-S${index + 1}`, name: stop.name, time: stop.time, active: true, is_destination: false, lat: 29.98 + index * 0.01, lng: 32.52 - index * 0.008 })),
-        { id: `${id}-S${input.stops.length + 1}`, name: both("بوابة الجامعة", "University gate"), time: "07:40", active: true, is_destination: true, lat: 30.0405, lng: 32.493 },
+        { id: `${id}-S${input.stops.length + 1}`, name: both("بوابة الجامعة", "University gate"), time: "08:00", active: true, is_destination: true, ...GATE },
       ],
     };
     ctx.db.lines.push(line);
