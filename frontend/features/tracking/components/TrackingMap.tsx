@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo } from "react";
 import L from "leaflet";
 import { CircleMarker, MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap } from "react-leaflet";
+import { cn } from "@/lib/cn";
 import type { BusPosition, LiveLine } from "../schema";
 
 const BUS_ICON = L.divIcon({
@@ -27,15 +28,18 @@ export default function TrackingMap({
   position,
   myStopId,
   label,
+  className,
 }: {
   line: Pick<LiveLine, "stops">;
   position: BusPosition | null;
   myStopId?: string;
   label: string;
+  /** Overrides the default height (e.g. a taller map on laptops). */
+  className?: string;
 }) {
   const points = useMemo(() => line.stops.map((stop) => [stop.lat, stop.lng] as [number, number]), [line.stops]);
   return (
-    <div role="img" aria-label={label} className="h-64 overflow-hidden rounded-card border border-line sm:h-80">
+    <div role="img" aria-label={label} className={cn("h-64 overflow-hidden rounded-card border border-line sm:h-80", className)}>
       <MapContainer center={points[0] ?? [30.0, 31.5]} zoom={11} scrollWheelZoom={false} className="h-full w-full" attributionControl>
         <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <FitToRoute points={points} />

@@ -8,11 +8,13 @@ import { Button } from "./Button";
 
 export function EmptyState({ title, children, icon, action }: { title: string; children?: ReactNode; icon?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-card border border-dashed border-line-strong bg-surface-alt px-4 py-8 text-center">
-      <span className="text-ink-muted">{icon ?? <Inbox className="size-8" aria-hidden />}</span>
-      <p className="font-bold text-ink-strong">{title}</p>
+    <div className="flex flex-col items-center gap-2 rounded-card border border-line bg-surface-raised px-5 py-10 text-center">
+      <span className="mb-2 grid size-24 place-items-center rounded-full bg-brand-soft text-brand [&_svg]:size-10 [&_svg]:stroke-[1.75]">
+        {icon ?? <Inbox aria-hidden />}
+      </span>
+      <p className="text-[20px] leading-7 font-extrabold text-ink-strong">{title}</p>
       {children && <div className="max-w-sm text-[15px] text-ink-muted">{children}</div>}
-      {action}
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }
@@ -21,9 +23,11 @@ export function ErrorState({ error, onRetry }: { error: ApiError; onRetry?: () =
   const t = useTranslations("common");
   const message = useErrorMessage(error);
   return (
-    <div role="alert" className="flex flex-col items-center gap-3 rounded-card border border-danger-soft bg-danger-soft px-4 py-8 text-center">
-      <CloudOff className="size-8 text-danger" aria-hidden />
-      <p className="font-bold text-ink-strong">{t("errorTitle")}</p>
+    <div role="alert" className="flex flex-col items-center gap-2 rounded-card border border-line bg-surface-raised px-5 py-10 text-center">
+      <span className="mb-2 grid size-24 place-items-center rounded-full bg-danger-soft text-danger">
+        <CloudOff className="size-10 stroke-[1.75]" aria-hidden />
+      </span>
+      <p className="text-[20px] leading-7 font-extrabold text-ink-strong">{t("errorTitle")}</p>
       <p className="max-w-sm text-[15px] text-ink">{message}</p>
       {onRetry && (
         <Button variant="secondary" size="sm" onClick={onRetry}>

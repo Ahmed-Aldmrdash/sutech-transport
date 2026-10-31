@@ -1,12 +1,12 @@
 "use client";
 
+import { MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Async } from "@/components/ui/Async";
-import { Banner } from "@/components/ui/Banner";
-import { Link } from "@/i18n/navigation";
 import { ErrorCode } from "@/lib/api/errors";
 import { useApi, usePolling } from "@/lib/api/use-api";
+import { SubscribersOnly } from "@/features/subscriptions/components/SubscribersOnly";
 import { getMyTracking } from "../api";
 import { TrackingView } from "./TrackingView";
 
@@ -20,9 +20,7 @@ export function MyTrackingScreen() {
     <>
       <PageHeader title={t("title")} />
       {query.error?.code === ErrorCode.SubscriptionRequired ? (
-        <Banner tone="warning" title={t("inactiveTitle")} action={<Link href="/student" className="font-bold underline">{t("goHome")}</Link>}>
-          {t("inactiveBody")}
-        </Banner>
+        <SubscribersOnly icon={<MapPin aria-hidden />} title={t("inactiveTitle")} body={t("inactiveBody")} />
       ) : (
         <Async query={query}>{(data) => <TrackingView data={data} />}</Async>
       )}

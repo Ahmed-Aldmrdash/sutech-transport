@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { RefreshCw, ShieldCheck } from "lucide-react";
+import { QrCode, RefreshCw, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Async } from "@/components/ui/Async";
-import { Banner } from "@/components/ui/Banner";
-import { Link } from "@/i18n/navigation";
 import { useApi } from "@/lib/api/use-api";
 import { ErrorCode } from "@/lib/api/errors";
 import { formatDate } from "@/lib/time";
 import { useNow } from "@/lib/use-now";
+import { SubscribersOnly } from "@/features/subscriptions/components/SubscribersOnly";
 import { getMyCard } from "../api";
 import type { DigitalCard as Card } from "../schema";
 import { QrImage } from "./QrImage";
@@ -26,9 +25,7 @@ export function DigitalCard() {
     <>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       {notSubscribed ? (
-        <Banner tone="warning" title={t("inactiveTitle")} action={<Link href="/student" className="font-bold underline">{t("goHome")}</Link>}>
-          {t("inactiveBody")}
-        </Banner>
+        <SubscribersOnly icon={<QrCode aria-hidden />} title={t("inactiveTitle")} body={t("inactiveBody")} />
       ) : (
         <Async query={query}>{(card) => <CardFace card={card} reload={query.reload} />}</Async>
       )}
