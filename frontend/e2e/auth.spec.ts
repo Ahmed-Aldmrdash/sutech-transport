@@ -245,6 +245,10 @@ test.describe("session", () => {
   test("a signed-in user opening sign-in goes home", async ({ page }) => {
     await signIn(page, "TRN-1001");
     await expect(page).toHaveURL(/\/en\/admin$/);
+    // The server redirects before any HTML, so Back to the sign-in page never shows the form.
+    const response = await page.request.get("/en/login?reason=signed-out", { maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    expect(response.headers()["location"]).toMatch(/\/en\/admin$/);
     await page.goto("/en/login");
     await expect(page).toHaveURL(/\/en\/admin$/);
     await page.goto("/en");

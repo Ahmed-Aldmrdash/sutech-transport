@@ -11,6 +11,7 @@ import { useRouter } from "@/i18n/navigation";
 import { SignInReason, landingPathFor } from "../access";
 import { SessionStatus } from "../session/session-store";
 import { useSession } from "../session/use-session";
+import { FullPageLoader } from "./full-page-loader";
 import { LoginBrandPanel } from "./login-brand-panel";
 import { LoginForm } from "./login-form";
 import type { SavedCodeStep } from "./login-step-storage";
@@ -35,6 +36,11 @@ export function LoginScreen({ next, reason, savedCodeStep }: LoginScreenProps) {
       router.replace(landingPathFor(session.session.user.role, next));
     }
   }, [session, next, router]);
+
+  // Signed in (e.g. Back from the home page): never show the form, just go home.
+  if (session.status === SessionStatus.SignedIn) {
+    return <FullPageLoader label={t("session.checking")} />;
+  }
 
   return (
     <div className="grid min-h-dvh bg-surface desktop:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">

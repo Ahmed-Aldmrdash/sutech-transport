@@ -4,6 +4,12 @@ import type { Role } from "@/lib/auth/roles";
 /** Where the sign-in screen lives (without the locale prefix). */
 export const LOGIN_PATH = "/login";
 
+/**
+ * Holds only the signed-in role (no token), so the server can send a signed-in user straight
+ * from the sign-in page to their home without first showing the form. Lives as long as the session.
+ */
+export const SESSION_ROLE_COOKIE = "sut_session_role";
+
 /** Why the user is on the sign-in screen, shown as a notice there. */
 export const SignInReason = {
   Expired: "expired",

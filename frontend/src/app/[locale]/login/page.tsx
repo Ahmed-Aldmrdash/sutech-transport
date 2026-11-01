@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { SignInReason, safeNextPath } from "@/features/auth/access";
+import {
+  SESSION_ROLE_COOKIE,
+  SignInReason,
+  landingPathFor,
+  safeNextPath,
+} from "@/features/auth/access";
 import { LoginScreen } from "@/features/auth/components/login-screen";
 import {
   LOGIN_STEP_COOKIE,
   parseSavedCodeStep,
 } from "@/features/auth/components/login-step-storage";
+import { redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import { isRole } from "@/lib/auth/roles";
 
 type Props = PageProps<"/[locale]/login">;
 
@@ -28,10 +35,19 @@ export default async function LoginPage({ params, searchParams }: Props) {
   setRequestLocale(locale as Locale);
   const query = await searchParams;
   const reason = single(query.reason);
-  const savedCodeStep = parseSavedCodeStep((await cookies()).get(LOGIN_STEP_COOKIE)?.value);
+  const next = safeNextPath(single(query.next));
+  const cookieStore = await cookies();
+
+  // Already signed in (e.g. the Back button lands here): go home without showing the form.
+  const signedInRole = cookieStore.get(SESSION_ROLE_COOKIE)?.value;
+  if (isRole(signedInRole)) {
+    redirect({ href: landingPathFor(signedInRole, next), locale: locale as Locale });
+  }
+
+  const savedCodeStep = parseSavedCodeStep(cookieStore.get(LOGIN_STEP_COOKIE)?.value);
   return (
     <LoginScreen
-      next={safeNextPath(single(query.next))}
+      next={next}
       reason={reason && REASONS.includes(reason) ? (reason as SignInReason) : null}
       savedCodeStep={savedCodeStep}
     />

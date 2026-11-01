@@ -1,9 +1,10 @@
 import { setUnauthorizedHandler } from "@/lib/api/client";
 import { tokenStore } from "@/lib/api/token-store";
 import { storedSessionSchema, type Session, type User } from "../schema";
-import { SignInReason } from "../access";
+import { SESSION_ROLE_COOKIE, SignInReason } from "../access";
 
 export const SESSION_STORAGE_KEY = "sut.session";
+const MS_PER_SECOND = 1000;
 
 export const SessionStatus = {
   /** On the server and during hydration: the browser's storage hasn't been read yet. */
@@ -47,8 +48,18 @@ export function isExpired(session: Session, now = Date.now()): boolean {
   return Date.parse(session.expires_at) <= now;
 }
 
+function writeRoleCookie(session: Session | null): void {
+  if (typeof document === "undefined") return;
+  const maxAge = session
+    ? Math.max(0, Math.floor((Date.parse(session.expires_at) - Date.now()) / MS_PER_SECOND))
+    : 0;
+  const value = session ? session.user.role : "";
+  document.cookie = `${SESSION_ROLE_COOKIE}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+}
+
 function apply(next: SessionState): void {
   state = next;
+  writeRoleCookie(next.status === SessionStatus.SignedIn ? next.session : null);
   tokenStore.set(next.status === SessionStatus.SignedIn ? next.session.token : null);
   listeners.forEach((listener) => listener());
 }
