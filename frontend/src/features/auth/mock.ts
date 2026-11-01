@@ -25,8 +25,50 @@ interface Challenge {
   sentAt: number;
 }
 
-const challenges = new Map<string, Challenge>();
-const lockedUntil = new Map<string, number>();
+/**
+ * A Map kept in sessionStorage, so a reload or a language switch (a full page load) doesn't
+ * make the mock server forget a code it just sent, as a real server wouldn't.
+ */
+class SessionBackedMap<V> extends Map<string, V> {
+  constructor(private readonly storageKey: string) {
+    super();
+    try {
+      const saved = window.sessionStorage.getItem(storageKey);
+      if (saved)
+        for (const [key, value] of JSON.parse(saved) as [string, V][]) super.set(key, value);
+    } catch {
+      // No storage (tests, private mode): memory only.
+    }
+  }
+
+  private save(): void {
+    try {
+      window.sessionStorage.setItem(this.storageKey, JSON.stringify([...this.entries()]));
+    } catch {
+      // Memory only.
+    }
+  }
+
+  override set(key: string, value: V): this {
+    super.set(key, value);
+    this.save();
+    return this;
+  }
+
+  override delete(key: string): boolean {
+    const removed = super.delete(key);
+    this.save();
+    return removed;
+  }
+
+  override clear(): void {
+    super.clear();
+    this.save();
+  }
+}
+
+const challenges = new SessionBackedMap<Challenge>("sut.mock.otp-challenges");
+const lockedUntil = new SessionBackedMap<number>("sut.mock.otp-locks");
 const revokedTokens = new Set<string>();
 
 function throwIfLocked(identifier: string, now: number) {
@@ -111,6 +153,7 @@ registerMock(loginEndpoint, ({ body }) => {
   }
   if (body.code !== challenge.code) {
     challenge.attemptsLeft -= 1;
+    challenges.set(key, challenge);
     if (challenge.attemptsLeft <= 0) {
       challenges.delete(key);
       lockedUntil.set(key, now + MOCK_OTP_RULES.lockSeconds * MS_PER_SECOND);

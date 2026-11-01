@@ -108,6 +108,30 @@ test.describe("sign-in", () => {
     await expect(page.getByText("Too many wrong codes.", { exact: false })).toBeVisible();
   });
 
+  test("keeps the code step when the language, theme or page changes", async ({ page }) => {
+    await page.goto("/en/login");
+    await requestCode(page, "240102791");
+    const code = await shownCode(page);
+
+    await page
+      .getByRole("button", { name: /Appearance/ })
+      .filter({ visible: true })
+      .click();
+    await expect(page.getByRole("heading", { name: "Enter the code" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Switch to Arabic" }).filter({ visible: true }).click();
+    await expect(page).toHaveURL(/\/ar\/login$/);
+    await expect(page.getByRole("heading", { name: "اكتب الكود" })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "اكتب الكود" })).toBeVisible();
+    await page.getByLabel("كود الدخول").fill(code);
+    await expect(page).toHaveURL(/\/ar\/student$/);
+
+    await page.goto("/ar/login?reason=signed-out");
+    await expect(page).toHaveURL(/\/ar\/student$/);
+  });
+
   test("lets the user go back and use a different ID", async ({ page }) => {
     await page.goto("/en/login");
     await requestCode(page, "240102791");
