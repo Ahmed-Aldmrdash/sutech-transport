@@ -20,12 +20,16 @@ test.describe("language and direction", () => {
   });
 
   test("switches to English on the same page and back", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/ar/preview/student/card");
     await page.getByRole("button", { name: "Switch to English" }).click();
     await expect(page).toHaveURL(/\/en\/preview\/student\/card$/);
     await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await page.getByRole("button", { name: "Switch to Arabic" }).click();
     await expect(page).toHaveURL(/\/ar\/preview\/student\/card$/);
+    expect(errors).toEqual([]);
   });
 });
 

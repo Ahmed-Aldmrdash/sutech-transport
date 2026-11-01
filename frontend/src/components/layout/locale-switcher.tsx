@@ -2,14 +2,18 @@
 
 import { Languages } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useTransition } from "react";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { useState } from "react";
+import { getPathname, usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
 
 const OTHER_LOCALE: Record<Locale, Locale> = { ar: "en", en: "ar" };
 
-/** Switches between Arabic and English on the same page. */
+/**
+ * Switches between Arabic and English on the same page.
+ * It does a full page load on purpose: each language has its own root layout (lang, dir,
+ * fonts), and a full load lets the theme boot script run again so the page never flashes.
+ */
 export function LocaleSwitcher({
   className,
   onBrand = false,
@@ -19,24 +23,23 @@ export function LocaleSwitcher({
 }) {
   const t = useTranslations("common");
   const locale = useLocale();
-  const router = useRouter();
   const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
+  const [isSwitching, setIsSwitching] = useState(false);
   const target = OTHER_LOCALE[locale];
 
   function switchLocale() {
-    // Read at click time (not useSearchParams) so pages stay statically renderable.
-    const query = window.location.search.slice(1);
-    startTransition(() => {
-      router.replace(query ? `${pathname}?${query}` : pathname, { locale: target, scroll: false });
-    });
+    setIsSwitching(true);
+    const { search, hash } = window.location;
+    // A full load is intended here (see above), so the client-router rule doesn't apply.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.assign(`${getPathname({ href: pathname, locale: target })}${search}${hash}`);
   }
 
   return (
     <button
       type="button"
       onClick={switchLocale}
-      disabled={isPending}
+      disabled={isSwitching}
       lang={target}
       aria-label={t("switchLanguage")}
       className={cn(
