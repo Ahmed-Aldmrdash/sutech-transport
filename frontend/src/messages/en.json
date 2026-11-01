@@ -1,0 +1,286 @@
+{
+  "app": {
+    "name": "SUtech Transportation",
+    "shortName": "SUtech Transport",
+    "tagline": "Transportation",
+    "description": "Book your seat, pay, track your bus and follow every trip at SUTech.",
+    "slogan": "Access the Future"
+  },
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "more": "More",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "mainNavigation": "Main navigation",
+    "quickNavigation": "Quick navigation",
+    "skipToContent": "Skip to content",
+    "signOut": "Sign out",
+    "switchLanguage": "Switch to Arabic",
+    "otherLanguageName": "العربية",
+    "optional": "(optional)",
+    "backHome": "Back to home"
+  },
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Device",
+    "toggle": "Appearance: {current}. Switch to {next}"
+  },
+  "roles": {
+    "super_admin": "Super admin",
+    "transport": "Transportation office",
+    "finance": "Finance",
+    "clinic": "Clinic",
+    "student_affairs": "Student affairs / Security",
+    "secretary_general": "Secretary General",
+    "bus_company": "Abu El Hol bus company",
+    "driver": "Driver",
+    "supervisor": "Bus supervisor",
+    "student": "Student",
+    "parent": "Parent"
+  },
+  "nav": {
+    "groups": {
+      "main": "Main",
+      "account": "My account",
+      "operations": "Operations",
+      "finance": "Finance",
+      "followUp": "Follow-up",
+      "otherParties": "Other offices",
+      "system": "System"
+    },
+    "items": {
+      "home": "Home",
+      "lines": "Lines & booking",
+      "card": "My card",
+      "tracking": "Track my bus",
+      "announcements": "Announcements",
+      "notifications": "Notifications",
+      "notGoingToday": "Not going today",
+      "attendanceHistory": "My trips",
+      "requests": "Requests",
+      "complaints": "Complaints",
+      "assistant": "Assistant",
+      "settings": "Settings",
+      "childDay": "Today's trip",
+      "approvals": "Approvals",
+      "trip": "Trip",
+      "scan": "Scan card",
+      "passengers": "Passengers",
+      "reportDelay": "Report delay",
+      "violations": "Violations",
+      "overview": "Overview",
+      "liveTracking": "Live tracking",
+      "emergencies": "Emergencies",
+      "attendance": "Attendance",
+      "busesDrivers": "Buses & drivers",
+      "students": "Students",
+      "departures": "Departure trips",
+      "payments": "Payments",
+      "refunds": "Requests & refunds",
+      "reports": "Reports",
+      "auditLog": "Activity log",
+      "clinic": "Clinic",
+      "secretaryGeneral": "Secretary General",
+      "events": "Event buses",
+      "busCompany": "Bus company portal",
+      "users": "Users & permissions"
+    },
+    "short": {
+      "notifications": "Alerts",
+      "childDay": "Today",
+      "attendanceHistory": "Trips",
+      "liveTracking": "Tracking",
+      "busCompany": "Portal",
+      "secretaryGeneral": "Office",
+      "reportDelay": "Delay",
+      "passengers": "Riders"
+    }
+  },
+  "errors": {
+    "retry": "Try again",
+    "network": {
+      "title": "No connection",
+      "description": "Check your internet and try again. Nothing you entered was lost."
+    },
+    "forbidden": {
+      "title": "Not allowed",
+      "description": "Your account can't open this page. If you need it, contact the Transportation office."
+    },
+    "notFound": {
+      "title": "Not found",
+      "description": "This item doesn't exist or was removed."
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "description": "We couldn't load this. Try again in a moment."
+    },
+    "pageNotFound": {
+      "title": "Page not found",
+      "description": "The link may be old or mistyped."
+    },
+    "offline": {
+      "title": "You're offline",
+      "description": "This page isn't saved on your phone yet. Connect to the internet and it will open."
+    }
+  },
+  "home": {
+    "title": "Your bus, on time.",
+    "lead": "One app for students, parents, drivers and every university office.",
+    "foundationTitle": "Phase 0: the foundation",
+    "foundationBody": "Design system, Arabic and English, light and dark, app frames for laptop and phone, and the data layer the server will plug into. Sign-in arrives in phase 1.",
+    "openGallery": "Open the component gallery",
+    "previewTitle": "Preview each role's frame",
+    "previewBody": "Every role gets its own menu and sees only its own pages. Open any of them on a laptop and on a phone."
+  },
+  "preview": {
+    "title": "Frame preview",
+    "sampleUser": "Mariam Hassan",
+    "pageComing": "This page is built in a later phase",
+    "pageComingBody": "The frame, menu and permissions are ready. The page content comes with its phase.",
+    "dashboardTitle": "Sample content",
+    "dashboardBody": "Placeholder numbers to check spacing and layout at every screen size.",
+    "kpiStudents": "Active subscribers",
+    "kpiBuses": "Buses on the road",
+    "kpiOnTime": "On time today",
+    "kpiOfSeats": "of {total} seats",
+    "kpiOfBuses": "of {total} buses",
+    "tableCaption": "Sample list of lines",
+    "colLine": "Line",
+    "colBus": "Bus",
+    "colRiders": "Riders",
+    "colStatus": "Status",
+    "statusOnTime": "On time",
+    "statusLate": "{minutes} min late",
+    "statusNotStarted": "Not started",
+    "lineName": "Line {number}"
+  },
+  "gallery": {
+    "title": "Component gallery",
+    "description": "Every base component in both languages and both themes. Use these, never one-off styles.",
+    "devOnly": "Only available in mock mode",
+    "sections": {
+      "colors": "Colours",
+      "type": "Type",
+      "buttons": "Buttons",
+      "forms": "Forms",
+      "cards": "Cards and numbers",
+      "status": "Status and alerts",
+      "lists": "Lists",
+      "tables": "Tables",
+      "overlays": "Dialogs and toasts",
+      "states": "Empty, error and loading",
+      "api": "Data layer"
+    },
+    "colorsNote": "Tokens from the design system. Coral is for accents only; red is for errors and SOS only.",
+    "typeSample": "The bus left Abbas El Akkad stop 4 minutes ago.",
+    "buttons": {
+      "book": "Book a seat",
+      "details": "View details",
+      "cancelBooking": "Cancel booking",
+      "skip": "Skip",
+      "saving": "Saving",
+      "small": "Small",
+      "disabled": "Disabled",
+      "notifications": "Notifications"
+    },
+    "forms": {
+      "studentId": "University ID",
+      "studentIdHint": "9 digits, as on your university card",
+      "phone": "Mobile number",
+      "phoneError": "Enter an 11-digit number that starts with 01.",
+      "line": "Line",
+      "linePlaceholder": "Choose a line",
+      "note": "Note",
+      "notePlaceholder": "Anything the office should know",
+      "agree": "I agree to the transport rules",
+      "agreeHint": "You can read them in Settings.",
+      "direction": "Direction",
+      "outbound": "To the university",
+      "return": "Back home",
+      "notifyParent": "Notify my parent",
+      "notifyParentHint": "When you board, arrive and leave the bus.",
+      "submit": "Send request"
+    },
+    "cards": {
+      "nextBus": "Next bus",
+      "nextBusBody": "Line 3 · Nasr City. Arrives at your stop in",
+      "minutes": "{count} min",
+      "live": "Live",
+      "subscription": "Subscription",
+      "subscriptionBody": "Active until 31 January 2027.",
+      "seats": "Seats left",
+      "amountDue": "Amount due"
+    },
+    "status": {
+      "active": "Active",
+      "pending": "Pending review",
+      "onTime": "On time",
+      "delayed": "Delayed",
+      "absent": "Absent",
+      "draft": "Draft",
+      "infoTitle": "Booking opens on 1 February",
+      "infoBody": "You'll get a notification the moment it opens.",
+      "successTitle": "Payment confirmed",
+      "successBody": "Your digital card is ready.",
+      "warningTitle": "Line 3 is running 10 minutes late",
+      "warningBody": "Reported by the driver at 07:12.",
+      "dangerTitle": "Receipt rejected",
+      "dangerBody": "The reference number is already used. Upload the right receipt."
+    },
+    "lists": {
+      "announcementTitle": "Booking for spring term is open",
+      "announcementBody": "Transportation office · 2 hours ago",
+      "paymentTitle": "Fawry payment",
+      "paymentBody": "Reference 8837 2210",
+      "settingsTitle": "Language",
+      "settingsBody": "Arabic"
+    },
+    "tables": {
+      "showLoading": "Show loading",
+      "showEmpty": "Show empty",
+      "emptyTitle": "No lines yet",
+      "emptyBody": "Add the first line to start taking bookings."
+    },
+    "overlays": {
+      "openDialog": "Open dialog",
+      "openConfirm": "Open confirmation",
+      "dialogTitle": "Change your stop",
+      "dialogBody": "Your new stop applies from tomorrow's trip.",
+      "confirmTitle": "Cancel your booking?",
+      "confirmBody": "Your seat goes to the next student on the waiting list. This can't be undone.",
+      "confirmAction": "Cancel booking",
+      "keep": "Keep booking",
+      "toastSuccess": "Show success toast",
+      "toastError": "Show error toast",
+      "toastInfo": "Show info toast",
+      "toastSuccessTitle": "Saved",
+      "toastSuccessBody": "Your stop was changed.",
+      "toastErrorTitle": "Couldn't save",
+      "toastErrorBody": "Check your connection and try again.",
+      "toastInfoTitle": "Bus is 5 minutes away"
+    },
+    "states": {
+      "emptyTitle": "No notifications",
+      "emptyBody": "When the bus is near or a request is answered, you'll see it here.",
+      "emptyAction": "Open settings",
+      "skeleton": "Loading placeholder"
+    },
+    "api": {
+      "body": "Calls GET /api/v1/health through the same client the real server will use. In mock mode it is answered in the browser; the response is still checked against its schema.",
+      "mode": "Mode",
+      "status": "Server status",
+      "version": "Version",
+      "serverTime": "Server time (Cairo)",
+      "reload": "Call again",
+      "simulateError": "Simulate no connection"
+    }
+  }
+}

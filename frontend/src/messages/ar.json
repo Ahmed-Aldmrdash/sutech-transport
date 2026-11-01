@@ -1,0 +1,286 @@
+{
+  "app": {
+    "name": "مواصلات SUtech",
+    "shortName": "مواصلات SUtech",
+    "tagline": "النقل الجامعي",
+    "description": "احجز مكانك، وادفع، وتابع الباص، واعرف كل رحلة في جامعة SUTech.",
+    "slogan": "Access the Future"
+  },
+  "common": {
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "save": "حفظ",
+    "retry": "جرّب تاني",
+    "loading": "بيحمّل…",
+    "more": "المزيد",
+    "menu": "القائمة",
+    "openMenu": "افتح القائمة",
+    "closeMenu": "اقفل القائمة",
+    "mainNavigation": "القائمة الرئيسية",
+    "quickNavigation": "تنقل سريع",
+    "skipToContent": "روح للمحتوى",
+    "signOut": "تسجيل الخروج",
+    "switchLanguage": "Switch to English",
+    "otherLanguageName": "English",
+    "optional": "(اختياري)",
+    "backHome": "ارجع للرئيسية"
+  },
+  "theme": {
+    "label": "المظهر",
+    "light": "فاتح",
+    "dark": "غامق",
+    "system": "زي الجهاز",
+    "toggle": "المظهر: {current}. غيّره لـ {next}"
+  },
+  "roles": {
+    "super_admin": "سوبر أدمن",
+    "transport": "إدارة النقل",
+    "finance": "المالية",
+    "clinic": "العيادة",
+    "student_affairs": "شؤون الطلاب / الأمن",
+    "secretary_general": "الأمين العام",
+    "bus_company": "شركة أبو الهول",
+    "driver": "سواق",
+    "supervisor": "مشرف الباص",
+    "student": "طالب",
+    "parent": "ولي أمر"
+  },
+  "nav": {
+    "groups": {
+      "main": "الأساسي",
+      "account": "حسابي",
+      "operations": "التشغيل",
+      "finance": "المالية",
+      "followUp": "المتابعة",
+      "otherParties": "جهات تانية",
+      "system": "النظام"
+    },
+    "items": {
+      "home": "الرئيسية",
+      "lines": "الخطوط والحجز",
+      "card": "الكارنيه",
+      "tracking": "تتبع الباص",
+      "announcements": "الإعلانات",
+      "notifications": "الإشعارات",
+      "notGoingToday": "مش هروح النهارده",
+      "attendanceHistory": "رحلاتي",
+      "requests": "الطلبات",
+      "complaints": "الشكاوى",
+      "assistant": "المساعد",
+      "settings": "الإعدادات",
+      "childDay": "رحلة النهارده",
+      "approvals": "الموافقات",
+      "trip": "الرحلة",
+      "scan": "امسح الكارنيه",
+      "passengers": "الركاب",
+      "reportDelay": "بلّغ عن تأخير",
+      "violations": "المخالفات",
+      "overview": "نظرة عامة",
+      "liveTracking": "التتبع لايف",
+      "emergencies": "الطوارئ",
+      "attendance": "الحضور والغياب",
+      "busesDrivers": "الباصات والسواقين",
+      "students": "الطلاب",
+      "departures": "رحلات المغادرة",
+      "payments": "المدفوعات",
+      "refunds": "الطلبات والاسترداد",
+      "reports": "التقارير",
+      "auditLog": "سجل العمليات",
+      "clinic": "العيادة",
+      "secretaryGeneral": "الأمين العام",
+      "events": "باصات الفعاليات",
+      "busCompany": "بوابة شركة الباصات",
+      "users": "المستخدمين والصلاحيات"
+    },
+    "short": {
+      "notifications": "الإشعارات",
+      "childDay": "النهارده",
+      "attendanceHistory": "رحلاتي",
+      "liveTracking": "التتبع",
+      "busCompany": "البوابة",
+      "secretaryGeneral": "المكتب",
+      "reportDelay": "تأخير",
+      "passengers": "الركاب"
+    }
+  },
+  "errors": {
+    "retry": "جرّب تاني",
+    "network": {
+      "title": "مفيش اتصال",
+      "description": "اتأكد من النت وجرّب تاني. اللي كتبته ماضاعش."
+    },
+    "forbidden": {
+      "title": "مش مسموح",
+      "description": "حسابك ماينفعش يفتح الصفحة دي. لو محتاجها كلّم إدارة النقل."
+    },
+    "notFound": {
+      "title": "مش موجود",
+      "description": "العنصر ده مش موجود أو اتشال."
+    },
+    "generic": {
+      "title": "حصلت مشكلة",
+      "description": "ماقدرناش نحمّل ده. جرّب تاني كمان شوية."
+    },
+    "pageNotFound": {
+      "title": "الصفحة مش موجودة",
+      "description": "ممكن اللينك قديم أو مكتوب غلط."
+    },
+    "offline": {
+      "title": "إنت أوفلاين",
+      "description": "الصفحة دي لسه مش متسجلة على موبايلك. اتصل بالنت وهتفتح."
+    }
+  },
+  "home": {
+    "title": "باصك في ميعاده.",
+    "lead": "تطبيق واحد للطلاب وأولياء الأمور والسواقين وكل مكاتب الجامعة.",
+    "foundationTitle": "المرحلة 0: الأساس",
+    "foundationBody": "الديزاين سيستم، والعربي والإنجليزي، والفاتح والغامق، وهيكل التطبيق للابتوب والموبايل، وطبقة الداتا اللي السيرفر هيتركب عليها. تسجيل الدخول جاي في المرحلة 1.",
+    "openGallery": "افتح معرض المكونات",
+    "previewTitle": "شوف هيكل كل دور",
+    "previewBody": "كل دور ليه قايمته وبيشوف صفحاته بس. افتح أي واحد على اللابتوب وعلى الموبايل."
+  },
+  "preview": {
+    "title": "معاينة الهيكل",
+    "sampleUser": "مريم حسن",
+    "pageComing": "الصفحة دي هتتبني في مرحلة جاية",
+    "pageComingBody": "الهيكل والقايمة والصلاحيات جاهزين. محتوى الصفحة جاي مع مرحلته.",
+    "dashboardTitle": "محتوى تجريبي",
+    "dashboardBody": "أرقام مؤقتة عشان نتأكد من المسافات والترتيب على كل المقاسات.",
+    "kpiStudents": "المشتركين النشطين",
+    "kpiBuses": "الباصات في الطريق",
+    "kpiOnTime": "في الميعاد النهارده",
+    "kpiOfSeats": "من {total} كرسي",
+    "kpiOfBuses": "من {total} باص",
+    "tableCaption": "ليستة خطوط تجريبية",
+    "colLine": "الخط",
+    "colBus": "الباص",
+    "colRiders": "الركاب",
+    "colStatus": "الحالة",
+    "statusOnTime": "في الميعاد",
+    "statusLate": "متأخر {minutes} دقيقة",
+    "statusNotStarted": "لسه مابدأش",
+    "lineName": "خط {number}"
+  },
+  "gallery": {
+    "title": "معرض المكونات",
+    "description": "كل المكونات الأساسية باللغتين وبالمظهرين. استخدم دول بس، من غير تصميمات على جنب.",
+    "devOnly": "متاح في وضع الداتا الوهمية بس",
+    "sections": {
+      "colors": "الألوان",
+      "type": "الخطوط",
+      "buttons": "الزراير",
+      "forms": "الفورمز",
+      "cards": "الكروت والأرقام",
+      "status": "الحالات والتنبيهات",
+      "lists": "الليستات",
+      "tables": "الجداول",
+      "overlays": "النوافذ والإشعارات",
+      "states": "فاضي، وخطأ، وبيحمّل",
+      "api": "طبقة الداتا"
+    },
+    "colorsNote": "الألوان من الديزاين سيستم. الكورال للتفاصيل الصغيرة بس، والأحمر للأخطاء والـ SOS بس.",
+    "typeSample": "الباص اتحرك من محطة عباس العقاد من 4 دقايق.",
+    "buttons": {
+      "book": "احجز مكانك",
+      "details": "شوف التفاصيل",
+      "cancelBooking": "الغي الحجز",
+      "skip": "تخطّي",
+      "saving": "بيحفظ",
+      "small": "صغير",
+      "disabled": "مقفول",
+      "notifications": "الإشعارات"
+    },
+    "forms": {
+      "studentId": "الرقم الجامعي",
+      "studentIdHint": "9 أرقام، زي ما هو على الكارنيه",
+      "phone": "رقم الموبايل",
+      "phoneError": "اكتب رقم من 11 رقم بيبدأ بـ 01.",
+      "line": "الخط",
+      "linePlaceholder": "اختار الخط",
+      "note": "ملاحظة",
+      "notePlaceholder": "أي حاجة الإدارة محتاجة تعرفها",
+      "agree": "موافق على قواعد النقل",
+      "agreeHint": "تقدر تقراها من الإعدادات.",
+      "direction": "الاتجاه",
+      "outbound": "رايح الجامعة",
+      "return": "راجع البيت",
+      "notifyParent": "بلّغ ولي أمري",
+      "notifyParentHint": "لما تركب وتوصل وتنزل من الباص.",
+      "submit": "ابعت الطلب"
+    },
+    "cards": {
+      "nextBus": "الباص الجاي",
+      "nextBusBody": "خط 3 · مدينة نصر. هيوصل محطتك بعد",
+      "minutes": "{count} دقيقة",
+      "live": "لايف",
+      "subscription": "الاشتراك",
+      "subscriptionBody": "شغال لحد 31 يناير 2027.",
+      "seats": "الكراسي الفاضية",
+      "amountDue": "المطلوب دفعه"
+    },
+    "status": {
+      "active": "شغال",
+      "pending": "تحت المراجعة",
+      "onTime": "في الميعاد",
+      "delayed": "متأخر",
+      "absent": "غايب",
+      "draft": "مسودة",
+      "infoTitle": "الحجز هيفتح يوم 1 فبراير",
+      "infoBody": "هيوصلك إشعار أول ما يفتح.",
+      "successTitle": "الدفع اتأكد",
+      "successBody": "الكارنيه الرقمي بتاعك جاهز.",
+      "warningTitle": "خط 3 متأخر 10 دقايق",
+      "warningBody": "السواق بلّغ الساعة 07:12.",
+      "dangerTitle": "الإيصال اترفض",
+      "dangerBody": "الرقم المرجعي ده مستخدم قبل كده. ارفع الإيصال الصح."
+    },
+    "lists": {
+      "announcementTitle": "حجز الترم التاني فتح",
+      "announcementBody": "إدارة النقل · من ساعتين",
+      "paymentTitle": "دفع فوري",
+      "paymentBody": "رقم مرجعي 8837 2210",
+      "settingsTitle": "اللغة",
+      "settingsBody": "العربي"
+    },
+    "tables": {
+      "showLoading": "اعرض التحميل",
+      "showEmpty": "اعرض فاضي",
+      "emptyTitle": "مفيش خطوط لسه",
+      "emptyBody": "ضيف أول خط عشان الحجز يبدأ."
+    },
+    "overlays": {
+      "openDialog": "افتح نافذة",
+      "openConfirm": "افتح تأكيد",
+      "dialogTitle": "غيّر محطتك",
+      "dialogBody": "المحطة الجديدة هتبدأ من رحلة بكرة.",
+      "confirmTitle": "تلغي الحجز؟",
+      "confirmBody": "مكانك هيروح لأول طالب على قايمة الانتظار. مش هينفع ترجع فيها.",
+      "confirmAction": "الغي الحجز",
+      "keep": "خليه",
+      "toastSuccess": "إشعار نجاح",
+      "toastError": "إشعار خطأ",
+      "toastInfo": "إشعار معلومة",
+      "toastSuccessTitle": "اتحفظ",
+      "toastSuccessBody": "محطتك اتغيرت.",
+      "toastErrorTitle": "ماتحفظش",
+      "toastErrorBody": "اتأكد من النت وجرّب تاني.",
+      "toastInfoTitle": "الباص على بعد 5 دقايق"
+    },
+    "states": {
+      "emptyTitle": "مفيش إشعارات",
+      "emptyBody": "لما الباص يقرّب أو طلبك يترد عليه، هتلاقيه هنا.",
+      "emptyAction": "افتح الإعدادات",
+      "skeleton": "شكل التحميل"
+    },
+    "api": {
+      "body": "بيكلم GET /api/v1/health بنفس الكلاينت اللي السيرفر الحقيقي هيستخدمه. في الوضع الوهمي الرد بيطلع من المتصفح، وبرضه بيتراجع على الـ schema.",
+      "mode": "الوضع",
+      "status": "حالة السيرفر",
+      "version": "النسخة",
+      "serverTime": "وقت السيرفر (القاهرة)",
+      "reload": "اطلب تاني",
+      "simulateError": "جرّب من غير نت"
+    }
+  }
+}

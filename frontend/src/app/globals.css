@@ -1,0 +1,278 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* Dark mode follows the data-theme attribute that ThemeScript sets before first paint. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Map the design tokens (src/styles/tokens.css) onto Tailwind utilities.
+   Only these colours exist: Tailwind's default palette is switched off on purpose. */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-surface: var(--sut-surface);
+  --color-surface-alt: var(--sut-surface-alt);
+  --color-surface-raised: var(--sut-surface-raised);
+  --color-line: var(--sut-line);
+  --color-line-strong: var(--sut-line-strong);
+  --color-ink-strong: var(--sut-ink-strong);
+  --color-ink: var(--sut-ink);
+  --color-ink-muted: var(--sut-ink-muted);
+  --color-brand: var(--sut-brand);
+  --color-brand-deep: var(--sut-brand-deep);
+  --color-brand-soft: var(--sut-brand-soft);
+  --color-on-brand: var(--sut-on-brand);
+  --color-teal: var(--sut-teal);
+  --color-teal-soft: var(--sut-teal-soft);
+  --color-teal-text: var(--sut-teal-text);
+  --color-on-teal: var(--sut-on-teal);
+  --color-coral: var(--sut-coral);
+  --color-coral-text: var(--sut-coral-text);
+  --color-coral-soft: var(--sut-coral-soft);
+  --color-danger: var(--sut-danger);
+  --color-danger-soft: var(--sut-danger-soft);
+  --color-on-danger: var(--sut-on-danger);
+  --color-success: var(--sut-success);
+  --color-success-soft: var(--sut-success-soft);
+  --color-success-text: var(--sut-success-text);
+  --color-warning: var(--sut-warning);
+  --color-warning-soft: var(--sut-warning-soft);
+  --color-warning-text: var(--sut-warning-text);
+  --color-focus: var(--sut-focus);
+  --color-overlay: var(--sut-overlay);
+  --color-glass: var(--sut-glass);
+  --color-skeleton: var(--sut-skeleton);
+  --color-skeleton-hi: var(--sut-skeleton-hi);
+  --color-chart-1: var(--sut-chart-1);
+  --color-chart-2: var(--sut-chart-2);
+  --color-chart-3: var(--sut-chart-3);
+  --color-chart-4: var(--sut-chart-4);
+  --color-chart-5: var(--sut-chart-5);
+  --color-white: #ffffff;
+
+  --font-sans: var(--font-montserrat), var(--font-tajawal), system-ui, sans-serif;
+  --font-arabic: var(--font-tajawal), var(--font-montserrat), system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-sm: var(--sut-radius-sm);
+  --radius-md: var(--sut-radius-md);
+  --radius-card: var(--sut-radius-card);
+  --radius-lg: var(--sut-radius-lg);
+  --radius-pill: var(--sut-radius-pill);
+
+  --shadow-sm: var(--sut-shadow-sm);
+  --shadow-card: var(--sut-shadow-card);
+  --shadow-lg: var(--sut-shadow-lg);
+
+  --spacing-tap: var(--sut-tap-min);
+  --spacing-app-bar: var(--sut-app-bar-height);
+  --spacing-bottom-nav: var(--sut-nav-height);
+  --spacing-sidebar: var(--sut-sidebar-width);
+  --container-content: var(--sut-content-max);
+
+  --z-index-nav: var(--sut-z-nav);
+  --z-index-sheet: var(--sut-z-sheet);
+  --z-index-dialog: var(--sut-z-dialog);
+  --z-index-toast: var(--sut-z-toast);
+
+  --breakpoint-desktop: 64rem;
+}
+
+/* Type scale from the design system. Arabic (:lang(ar)) switches to the ar-* styles:
+   no negative tracking, taller lines, no uppercase. */
+@utility text-display {
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  &:lang(ar) {
+    line-height: 56px;
+    letter-spacing: 0;
+  }
+}
+@utility text-h1 {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  &:lang(ar) {
+    line-height: 40px;
+    letter-spacing: 0;
+  }
+}
+@utility text-h2 {
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  &:lang(ar) {
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+}
+@utility text-h3 {
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+}
+@utility text-body-lg {
+  font-size: 18px;
+  line-height: 28px;
+}
+@utility text-body {
+  font-size: 16px;
+  line-height: 26px;
+  &:lang(ar) {
+    font-size: 17px;
+    line-height: 28px;
+  }
+}
+@utility text-body-sm {
+  font-size: 14px;
+  line-height: 22px;
+  &:lang(ar) {
+    font-size: 15px;
+    line-height: 24px;
+  }
+}
+@utility text-label {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  &:lang(ar) {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+}
+@utility text-caption {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+}
+@utility text-numeric {
+  font-size: 32px;
+  line-height: 36px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  font-variant-numeric: tabular-nums;
+}
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus ring: 2px teal with 2px offset on every control. */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--sut-focus);
+    outline-offset: 2px;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html:lang(ar) {
+    font-family: var(--font-arabic);
+  }
+  html:not(:lang(ar)) {
+    font-family: var(--font-sans);
+  }
+  body {
+    background-color: var(--sut-surface);
+    color: var(--sut-ink);
+    font-size: 16px;
+    line-height: 26px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body:lang(ar) {
+    font-size: 17px;
+    line-height: 28px;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--sut-ink-strong);
+  }
+  :focus-visible {
+    outline: 2px solid var(--sut-focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background-color: var(--sut-brand-soft);
+    color: var(--sut-ink-strong);
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  dialog::backdrop {
+    background-color: var(--sut-overlay);
+  }
+}
+
+/* The live dot pulses; with reduced motion it stays still. */
+@keyframes sut-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sut-teal) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+@keyframes sut-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes sut-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@utility animate-live {
+  animation: sut-pulse 1.6s ease-out infinite;
+}
+@utility animate-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--sut-skeleton) 0%,
+    var(--sut-skeleton-hi) 50%,
+    var(--sut-skeleton) 100%
+  );
+  background-size: 200% 100%;
+  animation: sut-shimmer 1.4s linear infinite;
+}
+@utility animate-toast-in {
+  animation: sut-toast-in 150ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
