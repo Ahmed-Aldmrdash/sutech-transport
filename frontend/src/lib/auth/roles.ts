@@ -4,7 +4,7 @@
  */
 export const Role = {
   SuperAdmin: "super_admin",
-  Transport: "transport",
+  Transport: "transport_admin",
   Finance: "finance",
   Clinic: "clinic",
   StudentAffairs: "student_affairs",

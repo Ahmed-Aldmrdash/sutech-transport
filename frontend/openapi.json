@@ -46,6 +46,393 @@
     }
   },
   "paths": {
+    "/api/v1/auth/otp": {
+      "post": {
+        "operationId": "auth.requestOtp",
+        "summary": "Step 1 of sign-in for every role: texts a one-time code to the account's registered phone. Errors: UNKNOWN_IDENTIFIER (404), ACCOUNT_DISABLED (403), OTP_LOCKED (429), OTP_RATE_LIMITED (429).",
+        "tags": [
+          "auth"
+        ],
+        "x-roles": "public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "masked_destination": {
+                      "type": "string"
+                    },
+                    "name_hint": {
+                      "type": "string"
+                    },
+                    "expires_in_seconds": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "code_length": {
+                      "type": "integer",
+                      "minimum": 4,
+                      "maximum": 6
+                    },
+                    "resend_after_seconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "demo_code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "masked_destination",
+                    "name_hint",
+                    "expires_in_seconds",
+                    "attempts_left",
+                    "code_length",
+                    "resend_after_seconds"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "identifier": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 64
+                  }
+                },
+                "required": [
+                  "identifier"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "auth.login",
+        "summary": "Step 2: the same identifier plus the code. Returns a bearer token that carries the role. Errors: INVALID_OTP (400), OTP_EXPIRED (400), OTP_LOCKED (429).",
+        "tags": [
+          "auth"
+        ],
+        "x-roles": "public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "super_admin",
+                            "transport_admin",
+                            "finance",
+                            "clinic",
+                            "student_affairs",
+                            "secretary_general",
+                            "bus_company",
+                            "driver",
+                            "supervisor",
+                            "student",
+                            "parent"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "identifier": {
+                          "type": "string"
+                        },
+                        "faculty": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "level": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "guardian_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "masked_phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "role",
+                        "name",
+                        "identifier"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "token",
+                    "expires_at",
+                    "user"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "identifier": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 64
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{4,6}$"
+                  }
+                },
+                "required": [
+                  "identifier",
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "auth.logout",
+        "summary": "Revokes the caller's token.",
+        "tags": [
+          "auth"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "finance",
+          "clinic",
+          "student_affairs",
+          "secretary_general",
+          "bus_company",
+          "driver",
+          "supervisor",
+          "student",
+          "parent"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "auth.getMe",
+        "summary": "The signed-in account and its role. 401 when the token has expired or was revoked.",
+        "tags": [
+          "auth"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "finance",
+          "clinic",
+          "student_affairs",
+          "secretary_general",
+          "bus_company",
+          "driver",
+          "supervisor",
+          "student",
+          "parent"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "super_admin",
+                        "transport_admin",
+                        "finance",
+                        "clinic",
+                        "student_affairs",
+                        "secretary_general",
+                        "bus_company",
+                        "driver",
+                        "supervisor",
+                        "student",
+                        "parent"
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "identifier": {
+                      "type": "string"
+                    },
+                    "faculty": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "level": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "guardian_name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "masked_phone": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "role",
+                    "name",
+                    "identifier"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "system.getHealth",

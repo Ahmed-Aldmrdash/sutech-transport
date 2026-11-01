@@ -11,7 +11,7 @@ const OTHER_LOCALE: Record<Locale, Locale> = { ar: "en", en: "ar" };
 
 /**
  * Switches between Arabic and English on the same page.
- * It does a full page load on purpose: each language has its own root layout (lang, dir,
+ * It does a full page load (replacing the history entry) on purpose: each language has its own root layout (lang, dir,
  * fonts), and a full load lets the theme boot script run again so the page never flashes.
  */
 export function LocaleSwitcher({
@@ -31,8 +31,8 @@ export function LocaleSwitcher({
     setIsSwitching(true);
     const { search, hash } = window.location;
     // A full load is intended here (see above), so the client-router rule doesn't apply.
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.assign(`${getPathname({ href: pathname, locale: target })}${search}${hash}`);
+    // replace, not assign: switching language must not add a step to the Back button.
+    window.location.replace(`${getPathname({ href: pathname, locale: target })}${search}${hash}`);
   }
 
   return (

@@ -9,8 +9,10 @@ function keys(value: unknown, prefix = ""): string[] {
   );
 }
 
+/** Argument names, e.g. "{count, plural, =1 {…} other {…}}" → ["count"]. Plural cases may differ. */
 function placeholders(text: string): string[] {
-  return [...text.matchAll(/\{(\w+)/g)].map((match) => match[1] ?? "").sort();
+  const names = [...text.matchAll(/\{([A-Za-z_]\w*)/g)].map((match) => match[1] ?? "");
+  return [...new Set(names)].sort();
 }
 
 function lookup(source: unknown, key: string): string {

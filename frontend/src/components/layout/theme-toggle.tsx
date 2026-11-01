@@ -14,7 +14,10 @@ const ORDER: readonly ThemePreference[] = [
 ];
 const ICON = { light: <Sun />, dark: <Moon />, system: <Monitor /> } as const;
 
-/** One button that cycles light → dark → follow the device. */
+/**
+ * One button with two states: light ↔ dark. Until the user presses it the app follows the
+ * device; "follow the device" can be chosen again from settings (ThemeSegmented).
+ */
 export function ThemeToggle({
   className,
   onBrand = false,
@@ -23,16 +26,17 @@ export function ThemeToggle({
   onBrand?: boolean;
 }) {
   const t = useTranslations("theme");
-  const { preference, setPreference } = useTheme();
-  const next = ORDER[(ORDER.indexOf(preference) + 1) % ORDER.length] ?? ThemePreference.System;
+  const { resolvedTheme, setPreference } = useTheme();
+  const next =
+    resolvedTheme === ThemePreference.Dark ? ThemePreference.Light : ThemePreference.Dark;
 
   return (
     <IconButton
       size="sm"
       variant={onBrand ? "onBrand" : "ghost"}
       className={cn(className)}
-      icon={ICON[preference]}
-      label={t("toggle", { current: t(preference), next: t(next) })}
+      icon={ICON[resolvedTheme]}
+      label={t("toggle", { current: t(resolvedTheme), next: t(next) })}
       onClick={() => setPreference(next)}
     />
   );
