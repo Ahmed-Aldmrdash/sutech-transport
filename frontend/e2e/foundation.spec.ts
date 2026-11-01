@@ -46,6 +46,22 @@ test.describe("theme", () => {
   });
 });
 
+test.describe("theme button", () => {
+  test("switches only between light and dark, starting from the device", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/en/login");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    const toggle = page.getByRole("button", { name: /Appearance/ }).filter({ visible: true });
+    await toggle.click();
+    await expect(html).toHaveAttribute("data-theme", "light");
+    await toggle.click();
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    await toggle.click();
+    await expect(html).toHaveAttribute("data-theme", "light");
+  });
+});
+
 test.describe("pages render cleanly", () => {
   const paths = [
     "/ar/login",

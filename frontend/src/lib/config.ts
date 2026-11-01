@@ -6,7 +6,7 @@ export const ApiMode = {
 } as const;
 export type ApiMode = (typeof ApiMode)[keyof typeof ApiMode];
 
-const DEFAULT_MOCK_LATENCY_MS = 400;
+const DEFAULT_MOCK_LATENCY_MS = 150;
 
 const configSchema = z.object({
   apiMode: z.enum([ApiMode.Mock, ApiMode.Live]).default(ApiMode.Mock),

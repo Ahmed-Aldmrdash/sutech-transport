@@ -25,7 +25,7 @@ async function signIn(page: Page, identifier: string, path = "/en/login") {
   await page.getByLabel("One-time code").fill(await shownCode(page));
 }
 
-/** Mock answers take ~400ms; let the home page's own session check finish before editing. */
+/** Mock answers take ~150ms; let the home page's own session check finish before editing. */
 const SESSION_CHECK_SETTLE_MS = 1000;
 
 async function editSavedSession(page: Page, change: string, value: string) {
