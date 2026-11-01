@@ -1,7 +1,6 @@
 "use client";
 
 import { UserRound } from "lucide-react";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Alert } from "@/components/ui/alert";
@@ -14,9 +13,6 @@ import { IDENTIFIER_MAX_LENGTH, type OtpChallenge } from "../schema";
 
 const MIN_IDENTIFIER_LENGTH = 3;
 
-/** Loaded only when shown (mock mode), so mock accounts never ship to real users. */
-const DemoAccounts = dynamic(() => import("./demo-accounts").then((module) => module.DemoAccounts));
-
 /** Errors about what was typed show under the field; the rest show as a banner. */
 const FIELD_ERRORS: readonly LoginErrorKey[] = ["unknownIdentifier"];
 
@@ -24,14 +20,12 @@ interface IdentifierStepProps {
   initialIdentifier: string;
   /** A message carried back from the code step, e.g. "too many wrong codes". */
   initialError: LoginErrorKey | null;
-  showDemo: boolean;
   onCodeSent: (identifier: string, challenge: OtpChallenge) => void;
 }
 
 export function IdentifierStep({
   initialIdentifier,
   initialError,
-  showDemo,
   onCodeSent,
 }: IdentifierStepProps) {
   const t = useTranslations("login");
@@ -64,13 +58,6 @@ export function IdentifierStep({
 
   function showFieldError(message: string) {
     setFieldError(message);
-    inputRef.current?.focus();
-  }
-
-  function pickDemoIdentifier(value: string) {
-    setIdentifier(value);
-    setFieldError(null);
-    setBannerError(null);
     inputRef.current?.focus();
   }
 
@@ -112,8 +99,6 @@ export function IdentifierStep({
           {isSending ? t("sendingCode") : t("sendCode")}
         </Button>
       </form>
-
-      {showDemo ? <DemoAccounts onPick={pickDemoIdentifier} /> : null}
     </div>
   );
 }

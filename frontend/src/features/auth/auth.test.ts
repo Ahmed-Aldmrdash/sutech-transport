@@ -7,7 +7,7 @@ import { getMe, login, logout, requestOtp } from "./api";
 import { loginErrorKey } from "./auth-errors";
 import { normalizeIdentifier, sanitizeCode } from "./identifier";
 import { MOCK_OTP_RULES, resetAuthMock } from "./mock";
-import { MOCK_OTP_CODE } from "./mock-accounts";
+import { MOCK_OTP_LENGTH } from "./mock-accounts";
 import { AuthErrorCode } from "./schema";
 
 async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
@@ -104,9 +104,9 @@ describe("two-step login (mock server)", () => {
       masked_destination: "010•••••907",
       name_hint: "Ahmed",
       attempts_left: MOCK_OTP_RULES.attempts,
-      code_length: MOCK_OTP_CODE.length,
+      code_length: MOCK_OTP_LENGTH,
     });
-    const session = await login("240102791", MOCK_OTP_CODE);
+    const session = await login("240102791", challenge.demo_code ?? "");
     expect(session.user.role).toBe(Role.Student);
     expect(Date.parse(session.expires_at)).toBeGreaterThan(Date.now());
 
@@ -137,15 +137,28 @@ describe("two-step login (mock server)", () => {
   });
 
   it("uses a code only once", async () => {
-    await requestOtp("ADM-1001");
-    await login("ADM-1001", MOCK_OTP_CODE);
-    expect((await errorOf(login("ADM-1001", MOCK_OTP_CODE))).code).toBe(AuthErrorCode.InvalidOtp);
+    const { demo_code: code = "" } = await requestOtp("ADM-1001");
+    await login("ADM-1001", code);
+    expect((await errorOf(login("ADM-1001", code))).code).toBe(AuthErrorCode.InvalidOtp);
+  });
+
+  it("a new code replaces the old one", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const first = await requestOtp("CLN-1001");
+    vi.setSystemTime(Date.now() + MOCK_OTP_RULES.resendAfterSeconds * 1000);
+    const second = await requestOtp("CLN-1001");
+    if (first.demo_code !== second.demo_code) {
+      expect((await errorOf(login("CLN-1001", first.demo_code ?? ""))).code).toBe(
+        AuthErrorCode.InvalidOtp,
+      );
+    }
+    expect((await login("CLN-1001", second.demo_code ?? "")).user.role).toBe(Role.Clinic);
   });
 
   it("refuses an expired code", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
-    await requestOtp("SUP-1001");
+    const { demo_code: code = "" } = await requestOtp("SUP-1001");
     vi.setSystemTime(Date.now() + (MOCK_OTP_RULES.expiresInSeconds + 1) * 1000);
-    expect((await errorOf(login("SUP-1001", MOCK_OTP_CODE))).code).toBe(AuthErrorCode.OtpExpired);
+    expect((await errorOf(login("SUP-1001", code))).code).toBe(AuthErrorCode.OtpExpired);
   });
 });

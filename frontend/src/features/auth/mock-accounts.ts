@@ -8,8 +8,8 @@ export interface MockAccount {
   disabled?: boolean;
 }
 
-/** Every mock account receives this code (the server would text a random one). */
-export const MOCK_OTP_CODE = "4821";
+/** Mock codes are 4 random digits, like the real SMS. */
+export const MOCK_OTP_LENGTH = 4;
 
 const account = (
   user: Omit<User, "masked_phone">,

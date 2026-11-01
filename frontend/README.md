@@ -18,8 +18,8 @@ npm install
 npm run dev                  # http://localhost:3000 → /ar
 ```
 
-Open `/ar` and sign in. In mock mode the sign-in screen has a **Demo accounts** list (one per
-role) and every code is `4821`:
+Open `/ar` and sign in with one of these mock accounts. Each request makes a new random code
+(the old one stops working), and in mock mode the code step shows it in place of the SMS:
 
 | Role                  | ID                      | Home                 |
 | --------------------- | ----------------------- | -------------------- |

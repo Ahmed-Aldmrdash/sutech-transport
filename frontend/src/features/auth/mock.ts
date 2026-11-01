@@ -1,7 +1,7 @@
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { getMeEndpoint, loginEndpoint, logoutEndpoint, requestOtpEndpoint } from "./api";
-import { MOCK_OTP_CODE, findMockAccount, findMockAccountById, maskPhone } from "./mock-accounts";
+import { MOCK_OTP_LENGTH, findMockAccount, findMockAccountById, maskPhone } from "./mock-accounts";
 import { AuthErrorCode } from "./schema";
 
 /** The contract's rules: 5-minute code, 3 attempts, one resend per minute. */
@@ -19,6 +19,7 @@ const MS_PER_HOUR = 3_600_000;
 const TOKEN_PREFIX = "mock.";
 
 interface Challenge {
+  code: string;
   expiresAt: number;
   attemptsLeft: number;
   sentAt: number;
@@ -33,6 +34,11 @@ function throwIfLocked(identifier: string, now: number) {
   if (until > now) {
     throw new MockHttpError(HTTP.TooMany, AuthErrorCode.OtpLocked, "Too many wrong codes.");
   }
+}
+
+function randomCode(): string {
+  const digits = crypto.getRandomValues(new Uint8Array(MOCK_OTP_LENGTH));
+  return Array.from(digits, (value) => String(value % 10)).join("");
 }
 
 function encodeToken(userId: string, expiresAt: number): string {
@@ -70,7 +76,10 @@ registerMock(requestOtpEndpoint, ({ body }) => {
   if (previous && now - previous.sentAt < MOCK_OTP_RULES.resendAfterSeconds * MS_PER_SECOND) {
     throw new MockHttpError(HTTP.TooMany, AuthErrorCode.OtpRateLimited, "Wait before resending.");
   }
+  // A new code replaces the old one: only the latest code works.
+  const code = randomCode();
   challenges.set(key, {
+    code,
     expiresAt: now + MOCK_OTP_RULES.expiresInSeconds * MS_PER_SECOND,
     attemptsLeft: MOCK_OTP_RULES.attempts,
     sentAt: now,
@@ -80,9 +89,10 @@ registerMock(requestOtpEndpoint, ({ body }) => {
     name_hint: account.user.name.replace(/^Dr\.\s*/, "").split(" ")[0] ?? account.user.name,
     expires_in_seconds: MOCK_OTP_RULES.expiresInSeconds,
     attempts_left: MOCK_OTP_RULES.attempts,
-    code_length: MOCK_OTP_CODE.length,
+    code_length: MOCK_OTP_LENGTH,
     resend_after_seconds: MOCK_OTP_RULES.resendAfterSeconds,
-    demo_code: MOCK_OTP_CODE,
+    // Mock and test servers only: shows the code on screen in place of the SMS.
+    demo_code: code,
   };
 });
 
@@ -99,7 +109,7 @@ registerMock(loginEndpoint, ({ body }) => {
     challenges.delete(key);
     throw new MockHttpError(HTTP.BadRequest, AuthErrorCode.OtpExpired, "The code expired.");
   }
-  if (body.code !== MOCK_OTP_CODE) {
+  if (body.code !== challenge.code) {
     challenge.attemptsLeft -= 1;
     if (challenge.attemptsLeft <= 0) {
       challenges.delete(key);

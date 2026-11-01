@@ -1,7 +1,16 @@
 import { expect, test, type Page } from "@playwright/test";
 import { expectNoSidewaysScroll, isPhone, watchForErrors } from "./helpers";
 
-const DEMO_CODE = "4821";
+/** Mock mode shows each new code on the code step, in place of the SMS. */
+async function shownCode(page: Page): Promise<string> {
+  const text = await page.getByText(/(Demo code|كود التجربة): \d+/).textContent();
+  return /\d{4,6}/.exec(text ?? "")?.[0] ?? "";
+}
+
+/** A code that is certainly not the right one. */
+function wrongCodeFor(code: string, salt: number): string {
+  return code.replace(/^\d/, (digit) => String((Number(digit) + salt) % 10));
+}
 
 async function requestCode(page: Page, identifier: string) {
   await page.getByLabel("University ID, staff ID or phone").fill(identifier);
@@ -13,7 +22,7 @@ async function signIn(page: Page, identifier: string, path = "/en/login") {
   await page.goto(path);
   await requestCode(page, identifier);
   await expect(page.getByRole("heading", { name: "Enter the code" })).toBeVisible();
-  await page.getByLabel("One-time code").fill(DEMO_CODE);
+  await page.getByLabel("One-time code").fill(await shownCode(page));
 }
 
 /** Mock answers take ~400ms; let the home page's own session check finish before editing. */
@@ -65,7 +74,10 @@ test.describe("sign-in", () => {
     await page.getByLabel("الرقم الجامعي أو رقم الموظف أو الموبايل").fill("٢٤٠١٠٢٧٩١");
     await page.getByRole("button", { name: "ابعت الكود" }).click();
     await expect(page.getByText("010•••••907")).toBeVisible();
-    await page.getByLabel("كود الدخول").fill("٤٨٢١");
+    const arabicCode = (await shownCode(page)).replace(/\d/g, (digit) =>
+      String.fromCharCode(0x0660 + Number(digit)),
+    );
+    await page.getByLabel("كود الدخول").fill(arabicCode);
     await expect(page).toHaveURL(/\/ar\/student$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("أهلًا، Ahmed");
   });
@@ -86,11 +98,12 @@ test.describe("sign-in", () => {
     await page.goto("/en/login");
     await requestCode(page, "DRV-1001");
     const code = page.getByLabel("One-time code");
-    await code.fill("1111");
+    const right = await shownCode(page);
+    await code.fill(wrongCodeFor(right, 1));
     await expect(page.getByText("Wrong code. 2 attempts left.")).toBeVisible();
-    await code.fill("2222");
+    await code.fill(wrongCodeFor(right, 2));
     await expect(page.getByText("Wrong code. 1 attempt left.")).toBeVisible();
-    await code.fill("3333");
+    await code.fill(wrongCodeFor(right, 3));
     await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
     await expect(page.getByText("Too many wrong codes.", { exact: false })).toBeVisible();
   });
@@ -169,7 +182,7 @@ test.describe("session", () => {
     await expect(page.getByText("Your session ended. Sign in again to continue.")).toBeVisible();
 
     await requestCode(page, "240102791");
-    await page.getByLabel("One-time code").fill(DEMO_CODE);
+    await page.getByLabel("One-time code").fill(await shownCode(page));
     await expect(page).toHaveURL(/\/en\/student\/card$/);
   });
 

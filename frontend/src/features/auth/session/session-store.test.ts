@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MOCK_OTP_CODE } from "../mock-accounts";
 import { tokenStore } from "@/lib/api/token-store";
 import type { Session } from "../schema";
 
@@ -75,8 +74,8 @@ describe("session store", () => {
   it("works end to end with a real mock login", async () => {
     const { sessionStore, SessionStatus, api } = await freshStore();
     sessionStore.getSnapshot();
-    await api.requestOtp("TRN-1001");
-    sessionStore.start(await api.login("TRN-1001", MOCK_OTP_CODE));
+    const { demo_code: code = "" } = await api.requestOtp("TRN-1001");
+    sessionStore.start(await api.login("TRN-1001", code));
     expect((await api.getMe()).role).toBe("transport_admin");
     sessionStore.end("signed-out");
     expect(sessionStore.getSnapshot()).toEqual({

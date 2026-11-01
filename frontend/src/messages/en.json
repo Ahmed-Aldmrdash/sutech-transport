@@ -318,14 +318,6 @@
       "otpRateLimited": "Please wait a minute before asking for another code.",
       "network": "No connection. Check your internet and try again.",
       "generic": "Something went wrong. Try again in a moment."
-    },
-    "demo": {
-      "title": "Demo accounts (mock mode)",
-      "body": "Pick a role to fill its ID. Every account's code is {code}.",
-      "use": "Use {role}",
-      "disabled": "Disabled account",
-      "gallery": "Component gallery",
-      "previews": "Frame previews"
     }
   },
   "session": {

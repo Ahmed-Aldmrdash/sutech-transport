@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { isMockMode } from "@/lib/config";
 import { landingPathFor } from "../access";
 import type { LoginErrorKey } from "../auth-errors";
 import type { OtpChallenge, Session } from "../schema";
@@ -43,7 +42,6 @@ export function LoginForm({ next }: { next: string | null }) {
     <IdentifierStep
       initialIdentifier={step.identifier}
       initialError={step.error}
-      showDemo={isMockMode}
       onCodeSent={(identifier, challenge) =>
         setStep({ kind: "code", identifier, challenge, sentAt: Date.now() })
       }
