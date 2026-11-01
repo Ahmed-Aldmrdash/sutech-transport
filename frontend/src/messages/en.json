@@ -35,7 +35,7 @@
   },
   "roles": {
     "super_admin": "Super admin",
-    "transport": "Transportation office",
+    "transport_admin": "Transportation office",
     "finance": "Finance",
     "clinic": "Clinic",
     "student_affairs": "Student affairs / Security",
@@ -130,15 +130,6 @@
       "title": "You're offline",
       "description": "This page isn't saved on your phone yet. Connect to the internet and it will open."
     }
-  },
-  "home": {
-    "title": "Your bus, on time.",
-    "lead": "One app for students, parents, drivers and every university office.",
-    "foundationTitle": "Phase 0: the foundation",
-    "foundationBody": "Design system, Arabic and English, light and dark, app frames for laptop and phone, and the data layer the server will plug into. Sign-in arrives in phase 1.",
-    "openGallery": "Open the component gallery",
-    "previewTitle": "Preview each role's frame",
-    "previewBody": "Every role gets its own menu and sees only its own pages. Open any of them on a laptop and on a phone."
   },
   "preview": {
     "title": "Frame preview",
@@ -282,5 +273,74 @@
       "reload": "Call again",
       "simulateError": "Simulate no connection"
     }
+  },
+  "login": {
+    "metaTitle": "Sign in",
+    "brandTitle": "Your bus, on time.",
+    "brandLead": "One account for students, parents, drivers and every university office.",
+    "featureTracking": "Follow your bus live on the map",
+    "featureCard": "Your digital bus pass, always with you",
+    "featureSafety": "Safer trips, with SOS and attendance",
+    "welcome": "Welcome back",
+    "stepOf": "Step {step} of {total}",
+    "identifierTitle": "Sign in",
+    "identifierLead": "Enter your ID and we'll text a one-time code to your registered phone. No password needed.",
+    "identifierLabel": "University ID, staff ID or phone",
+    "identifierHint": "Students: your 9-digit university ID. Parents: the phone number registered with the university.",
+    "identifierRequired": "Enter your ID or phone number.",
+    "identifierTooShort": "This looks too short. Check it and try again.",
+    "sendCode": "Send code",
+    "sendingCode": "Sending…",
+    "codeTitle": "Enter the code",
+    "codeLead": "Hi {name}. We sent a {length}-digit code to <phone>{destination}</phone>.",
+    "codeLabel": "One-time code",
+    "codeIncomplete": "Enter all {length} digits.",
+    "verify": "Sign in",
+    "verifying": "Signing in…",
+    "expiresIn": "The code expires in {time}",
+    "codeExpired": "This code has expired. Ask for a new one.",
+    "resend": "Resend code",
+    "resendIn": "Resend in {time}",
+    "resent": "A new code is on its way.",
+    "changeIdentifier": "Use a different ID",
+    "demoCode": "Demo code: {code}",
+    "help": "Can't sign in? Contact the Transportation office.",
+    "notices": {
+      "expired": "Your session ended. Sign in again to continue.",
+      "signedOut": "You've signed out. See you soon."
+    },
+    "errors": {
+      "unknownIdentifier": "We couldn't find this ID. Check it, or contact the Transportation office.",
+      "accountDisabled": "This account is disabled. Contact the Transportation office.",
+      "invalidOtp": "Wrong code. {count, plural, =1 {1 attempt left.} other {# attempts left.}}",
+      "otpExpired": "This code has expired. Ask for a new one.",
+      "otpLocked": "Too many wrong codes. For your safety, try again in 15 minutes.",
+      "otpRateLimited": "Please wait a minute before asking for another code.",
+      "network": "No connection. Check your internet and try again.",
+      "generic": "Something went wrong. Try again in a moment."
+    },
+    "demo": {
+      "title": "Demo accounts (mock mode)",
+      "body": "Pick a role to fill its ID. Every account's code is {code}.",
+      "use": "Use {role}",
+      "disabled": "Disabled account",
+      "gallery": "Component gallery",
+      "previews": "Frame previews"
+    }
+  },
+  "session": {
+    "checking": "Checking your session…",
+    "welcome": "Welcome, {name}",
+    "homeLead": "You're signed in. Your pages arrive in the next phases.",
+    "accountTitle": "Your account",
+    "role": "Role",
+    "identifier": "ID",
+    "faculty": "Faculty",
+    "level": "Level",
+    "levelValue": "Level {level}",
+    "phone": "Registered phone",
+    "expiresAt": "Session ends",
+    "comingTitle": "What's next",
+    "comingBody": "This is your home. The rest of your menu fills in phase by phase; every page you see is only one your role may open."
   }
 }

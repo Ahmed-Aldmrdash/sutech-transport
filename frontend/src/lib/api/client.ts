@@ -9,7 +9,13 @@ import {
   type EndpointResponse,
   type ParsedInput,
 } from "./endpoint";
-import { ApiError, ClientErrorCode, HTTP_STATUS_NONE, apiErrorBodySchema } from "./errors";
+import {
+  ApiError,
+  ClientErrorCode,
+  HTTP_STATUS_NONE,
+  HTTP_STATUS_UNAUTHORIZED,
+  apiErrorBodySchema,
+} from "./errors";
 import type { MockResponse } from "./mock/mock-server";
 import { tokenStore } from "./token-store";
 
@@ -17,6 +23,22 @@ const REQUEST_TIMEOUT_MS = 15_000;
 
 export interface RequestOptions {
   signal?: AbortSignal;
+}
+
+type UnauthorizedHandler = () => void;
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+
+/**
+ * Called when the server answers 401 to a signed-in request (token expired or revoked).
+ * The session registers itself here so any screen's request can end an expired session.
+ */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
+  unauthorizedHandler = handler;
+}
+
+/** The page language, sent as Accept-Language so server messages match the screen. */
+function currentLanguage(): string | undefined {
+  return typeof document === "undefined" ? undefined : document.documentElement.lang || undefined;
 }
 
 interface TransportRequest {
@@ -78,6 +100,8 @@ async function sendToServer({
     buildQueryString(parsed.query as Record<string, unknown> | undefined);
 
   const headers: Record<string, string> = { Accept: "application/json" };
+  const language = currentLanguage();
+  if (language) headers["Accept-Language"] = language;
   if (token) headers.Authorization = `Bearer ${token}`;
   if (parsed.body !== undefined) headers["Content-Type"] = "application/json";
 
@@ -147,7 +171,12 @@ export async function callEndpoint<E extends Endpoint>(
 
   const payload = parseJson(body);
   const isSuccess = status >= 200 && status < 300;
-  if (!isSuccess) throw toApiError(status, payload);
+  if (!isSuccess) {
+    if (status === HTTP_STATUS_UNAUTHORIZED && endpoint.access !== "public" && request.token) {
+      unauthorizedHandler?.();
+    }
+    throw toApiError(status, payload);
+  }
 
   const result = endpoint.response.safeParse(payload);
   if (!result.success) {

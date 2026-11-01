@@ -6,16 +6,16 @@ test.describe("language and direction", () => {
     const context = await browser.newContext({ locale: "ar-EG" });
     const page = await context.newPage();
     await page.goto("/");
-    await expect(page).toHaveURL(/\/ar$/);
+    await expect(page).toHaveURL(/\/ar\/login$/);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
     await expect(page.locator("html")).toHaveAttribute("lang", "ar");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("باصك في ميعاده.");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("تسجيل الدخول");
     await context.close();
   });
 
   test("sends an English browser to English", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveURL(/\/en$/);
+    await expect(page).toHaveURL(/\/en\/login$/);
     await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
   });
 
@@ -48,11 +48,11 @@ test.describe("theme", () => {
 
 test.describe("pages render cleanly", () => {
   const paths = [
-    "/ar",
-    "/en",
+    "/ar/login",
+    "/en/login",
     "/ar/ui",
     "/en/ui",
-    "/ar/preview/transport",
+    "/ar/preview/transport_admin",
     "/en/preview/student",
     "/ar/preview/driver",
     "/ar/offline",
@@ -77,7 +77,7 @@ test.describe("pages render cleanly", () => {
 
 test.describe("app frame", () => {
   test("shows the role's menu and marks the current page", async ({ page }) => {
-    await page.goto("/en/preview/transport/lines");
+    await page.goto("/en/preview/transport_admin/lines");
     if (isPhone(page)) {
       await page.getByRole("button", { name: "Open menu" }).click();
       const menu = page.getByRole("dialog", { name: "Menu" });
@@ -95,7 +95,7 @@ test.describe("app frame", () => {
       );
       await sidebar.getByRole("link", { name: "Students" }).click();
     }
-    await expect(page).toHaveURL(/\/en\/preview\/transport\/students$/);
+    await expect(page).toHaveURL(/\/en\/preview\/transport_admin\/students$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Students");
   });
 

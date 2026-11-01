@@ -3,6 +3,7 @@
 import type {
   InputHTMLAttributes,
   ReactNode,
+  Ref,
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
@@ -17,6 +18,7 @@ export interface TextFieldProps
   /** Icon inside the control at the start edge (right in Arabic). */
   icon?: ReactNode;
   containerClassName?: string;
+  ref?: Ref<HTMLInputElement>;
 }
 
 export function TextField({
@@ -28,6 +30,7 @@ export function TextField({
   icon,
   className,
   containerClassName,
+  ref,
   ...inputProps
 }: TextFieldProps) {
   return (
@@ -52,6 +55,7 @@ export function TextField({
             </span>
           ) : null}
           <input
+            ref={ref}
             {...control}
             {...inputProps}
             className={cn(controlStyles, "h-12 px-3", icon ? "ps-10" : null, className)}

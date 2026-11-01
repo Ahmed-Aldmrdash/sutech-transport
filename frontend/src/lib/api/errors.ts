@@ -16,18 +16,19 @@ export const ClientErrorCode = {
   Unknown: "unknown_error",
 } as const;
 
-/** Codes the server is agreed to send (see the front end / back end contract). */
+/** Codes the server is agreed to send, in UPPER_SNAKE_CASE like the contract's examples. */
 export const ServerErrorCode = {
-  Unauthorized: "unauthorized",
-  Forbidden: "forbidden",
-  NotFound: "not_found",
-  Conflict: "conflict",
-  Validation: "validation_error",
-  RateLimited: "rate_limited",
-  Internal: "internal_error",
+  Unauthorized: "UNAUTHORIZED",
+  Forbidden: "FORBIDDEN",
+  NotFound: "NOT_FOUND",
+  Conflict: "CONFLICT",
+  Validation: "VALIDATION_ERROR",
+  RateLimited: "RATE_LIMITED",
+  Internal: "INTERNAL_ERROR",
 } as const;
 
 export const HTTP_STATUS_NONE = 0;
+export const HTTP_STATUS_UNAUTHORIZED = 401;
 
 export class ApiError extends Error {
   readonly status: number;

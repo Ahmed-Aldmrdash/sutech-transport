@@ -18,6 +18,23 @@ npm install
 npm run dev                  # http://localhost:3000 → /ar
 ```
 
+Open `/ar` and sign in. In mock mode the sign-in screen has a **Demo accounts** list (one per
+role) and every code is `4821`:
+
+| Role                  | ID                      | Home                 |
+| --------------------- | ----------------------- | -------------------- |
+| Student               | `240102791`             | `/student`           |
+| Parent                | `01098765432`           | `/parent`            |
+| Driver / supervisor   | `DRV-1001` / `SUP-1001` | `/driver`            |
+| Transportation office | `TRN-1001`              | `/admin`             |
+| Finance               | `FIN-1001`              | `/admin/payments`    |
+| Clinic                | `CLN-1001`              | `/admin/emergencies` |
+| Student affairs       | `STA-1001`              | `/admin/violations`  |
+| Secretary General     | `SGO-1001`              | `/admin/reports`     |
+| Abu El Hol            | `BUS-1001`              | `/admin/bus-company` |
+| Super admin           | `ADM-1001`              | `/admin`             |
+| Disabled account      | `240100000`             | (refused)            |
+
 While in mock mode, two developer pages are available:
 
 - `/ar/ui` (or `/en/ui`): every base component in both languages and themes.
@@ -99,6 +116,18 @@ Design rules that the code enforces:
 - Every tappable control is at least 48px on phones; every control has the teal focus ring.
 - Every screen has a loading state, an error state (`ErrorState`, with retry) and, for lists,
   an empty state (`EmptyState`).
+
+## Sign-in and roles
+
+- Two steps for every role (contract: `POST /auth/otp`, then `POST /auth/login`), then
+  `GET /me` once per visit and `POST /auth/logout`. Code in `features/auth`.
+- The session (token, `expires_at`, user) is kept in `localStorage` (`sut.session`) so it
+  survives closing the app. It ends at `expires_at`, on any `401`, on sign-out, and in every
+  open tab at once. An expired session returns the user to the page they were on after sign-in.
+- `app/[locale]/(app)/` holds every signed-in page. `SignedInFrame` renders nothing until the
+  session is read and `canOpen(role, path)` passes; any other role's page redirects to the user's
+  own home. Office roles see only their own `/admin/*` pages; the super admin sees all of them.
+  The server must still reject every request outside the caller's role.
 
 ## Adding an endpoint
 
