@@ -119,6 +119,11 @@ test.describe("sign-in", () => {
       .click();
     await expect(page.getByRole("heading", { name: "Enter the code" })).toBeVisible();
 
+    // The server itself renders the code step, so a full page load never flashes step 1.
+    const html = await (await page.request.get("/ar/login")).text();
+    expect(html).toContain("اكتب الكود");
+    expect(html).not.toContain("تسجيل الدخول</h1>");
+
     await page.getByRole("button", { name: "Switch to Arabic" }).filter({ visible: true }).click();
     await expect(page).toHaveURL(/\/ar\/login$/);
     await expect(page.getByRole("heading", { name: "اكتب الكود" })).toBeVisible();

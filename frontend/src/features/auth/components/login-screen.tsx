@@ -13,17 +13,19 @@ import { SessionStatus } from "../session/session-store";
 import { useSession } from "../session/use-session";
 import { LoginBrandPanel } from "./login-brand-panel";
 import { LoginForm } from "./login-form";
+import type { SavedCodeStep } from "./login-step-storage";
 
 interface LoginScreenProps {
   next: string | null;
   reason: SignInReason | null;
+  savedCodeStep: SavedCodeStep | null;
 }
 
 /**
  * Sign-in for every role. Laptop: purple brand half + form half. Phone: a short purple header
  * with the form on a card that overlaps it. Someone already signed in goes straight home.
  */
-export function LoginScreen({ next, reason }: LoginScreenProps) {
+export function LoginScreen({ next, reason, savedCodeStep }: LoginScreenProps) {
   const t = useTranslations();
   const router = useRouter();
   const session = useSession();
@@ -76,7 +78,7 @@ export function LoginScreen({ next, reason }: LoginScreenProps) {
                 }
               />
             ) : null}
-            <LoginForm next={next} />
+            <LoginForm next={next} savedCodeStep={savedCodeStep} />
             <p className="mt-8 text-center text-body-sm text-ink-muted">{t("login.help")}</p>
           </div>
         </main>

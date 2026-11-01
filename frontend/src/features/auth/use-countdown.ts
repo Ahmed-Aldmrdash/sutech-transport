@@ -8,9 +8,12 @@ function secondsUntil(deadline: number): number {
   return Math.max(0, Math.ceil((deadline - Date.now()) / TICK_MS));
 }
 
-/** Whole seconds left until `deadline` (epoch ms), updated every second. */
-export function useCountdown(deadline: number): number {
-  const [secondsLeft, setSecondsLeft] = useState(() => secondsUntil(deadline));
+/**
+ * Whole seconds left until `deadline` (epoch ms), updated every second. `null` until the page is
+ * hydrated: the server's clock and the browser's differ, so the first render must not show time.
+ */
+export function useCountdown(deadline: number): number | null {
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
   useEffect(() => {
     const update = () => setSecondsLeft(secondsUntil(deadline));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { landingPathFor } from "../access";
 import type { LoginErrorKey } from "../auth-errors";
@@ -8,23 +8,27 @@ import type { OtpChallenge, Session } from "../schema";
 import { sessionStore } from "../session/session-store";
 import { CodeStep } from "./code-step";
 import { IdentifierStep } from "./identifier-step";
-import { loginStepStorage } from "./login-step-storage";
+import { loginStepStorage, type SavedCodeStep } from "./login-step-storage";
 
 type Step =
   | { kind: "identifier"; identifier: string; error: LoginErrorKey | null }
   | { kind: "code"; identifier: string; challenge: OtpChallenge; sentAt: number };
 
 /** The two steps of sign-in: ID → one-time code → the role's home (or the page asked for). */
-export function LoginForm({ next }: { next: string | null }) {
+export function LoginForm({
+  next,
+  savedCodeStep,
+}: {
+  next: string | null;
+  /** From the cookie, read by the server: a reload or language switch stays on the code step. */
+  savedCodeStep: SavedCodeStep | null;
+}) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>({ kind: "identifier", identifier: "", error: null });
-
-  // Back to the code step after a language switch or reload. Layout effect: before first paint.
-  useLayoutEffect(() => {
-    const saved = loginStepStorage.read();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time restore from this tab's storage
-    if (saved) setStep({ kind: "code", ...saved });
-  }, []);
+  const [step, setStep] = useState<Step>(() =>
+    savedCodeStep
+      ? { kind: "code", ...savedCodeStep }
+      : { kind: "identifier", identifier: "", error: null },
+  );
 
   useEffect(() => {
     if (step.kind === "code") {

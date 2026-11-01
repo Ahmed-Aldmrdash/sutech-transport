@@ -49,6 +49,7 @@ export function CodeStep({
   const expiresIn = useCountdown(sentAt + challenge.expires_in_seconds * MS_PER_SECOND);
   const resendIn = useCountdown(sentAt + challenge.resend_after_seconds * MS_PER_SECOND);
   const isExpired = expiresIn === 0;
+  const canResend = resendIn === 0;
 
   async function verify(value: string) {
     if (isVerifying) return;
@@ -191,8 +192,11 @@ export function CodeStep({
       </form>
 
       <div className="flex flex-col gap-3 border-t border-line pt-5">
-        <p className="text-body-sm text-ink-muted" aria-live="off">
-          {isExpired ? t("codeExpired") : t("expiresIn", { time: formatCountdown(expiresIn) })}
+        <p
+          className={cn("text-body-sm text-ink-muted", expiresIn === null && "invisible")}
+          aria-live="off"
+        >
+          {isExpired ? t("codeExpired") : t("expiresIn", { time: formatCountdown(expiresIn ?? 0) })}
         </p>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Button
@@ -210,9 +214,9 @@ export function CodeStep({
             iconStart={<RotateCw className="size-4" />}
             onClick={() => void resend()}
             isLoading={isResending}
-            disabled={resendIn > 0 || isVerifying}
+            disabled={!canResend || isVerifying}
           >
-            {resendIn > 0 ? t("resendIn", { time: formatCountdown(resendIn) }) : t("resend")}
+            {resendIn ? t("resendIn", { time: formatCountdown(resendIn) }) : t("resend")}
           </Button>
         </div>
       </div>
