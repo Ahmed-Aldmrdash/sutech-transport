@@ -1,0 +1,10 @@
+.next
+node_modules
+coverage
+playwright-report
+test-results
+public
+src/styles/tokens.css
+design
+next-env.d.ts
+openapi.json

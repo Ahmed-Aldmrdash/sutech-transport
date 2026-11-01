@@ -1,3 +1,6 @@
-# SUtech Transport Demo
+# SUtech Transport
 
-Clickable prototype of the SUtech university transport app (student, parent, driver, admin). Arabic RTL, mock data only, static `index.html`.
+University transport system for SUtech: students, parents, drivers and every university office.
+
+- `frontend/` — the production PWA (Next.js, Arabic + English). Start with [frontend/README.md](frontend/README.md).
+- `index.html` — the earlier clickable demo (static, mock data), still served at the public demo link.

@@ -1,0 +1,321 @@
+import {
+  Armchair,
+  BadgeAlert,
+  Bell,
+  Building2,
+  Bus,
+  CalendarCheck,
+  CalendarDays,
+  ClipboardList,
+  CreditCard,
+  FileBarChart,
+  FileClock,
+  HeartPulse,
+  House,
+  IdCard,
+  Landmark,
+  LayoutDashboard,
+  ListChecks,
+  MapPinned,
+  Megaphone,
+  MessageCircleQuestion,
+  MessageSquareWarning,
+  Receipt,
+  Route,
+  ScanLine,
+  Settings,
+  ShieldAlert,
+  Siren,
+  Timer,
+  UserCheck,
+  Users,
+  UsersRound,
+  type LucideIcon,
+} from "lucide-react";
+import { Role } from "@/lib/auth/roles";
+
+/** Keys under `nav.items` in the translation files. */
+export type NavItemKey =
+  | "home"
+  | "lines"
+  | "card"
+  | "tracking"
+  | "announcements"
+  | "notifications"
+  | "notGoingToday"
+  | "attendanceHistory"
+  | "requests"
+  | "complaints"
+  | "assistant"
+  | "settings"
+  | "childDay"
+  | "approvals"
+  | "trip"
+  | "scan"
+  | "passengers"
+  | "reportDelay"
+  | "violations"
+  | "overview"
+  | "liveTracking"
+  | "emergencies"
+  | "attendance"
+  | "busesDrivers"
+  | "students"
+  | "departures"
+  | "payments"
+  | "refunds"
+  | "reports"
+  | "auditLog"
+  | "clinic"
+  | "secretaryGeneral"
+  | "events"
+  | "busCompany"
+  | "users";
+
+/** Keys under `nav.groups`. */
+export type NavGroupKey =
+  "main" | "account" | "operations" | "finance" | "followUp" | "otherParties" | "system";
+
+export interface NavItem {
+  key: NavItemKey;
+  icon: LucideIcon;
+  /** Path under the role's base path; "" is the role's home. */
+  segment: string;
+  /** Shown in the phone's bottom bar (at most four per role, the rest go in the menu). */
+  primary?: boolean;
+}
+
+export interface NavGroup {
+  key: NavGroupKey;
+  items: readonly NavItem[];
+}
+
+export interface RoleNavigation {
+  /** Where this role's pages live, e.g. "/student". */
+  basePath: `/${string}`;
+  groups: readonly NavGroup[];
+}
+
+export const MAX_PRIMARY_ITEMS = 4;
+
+const STUDENT_NAV: RoleNavigation = {
+  basePath: "/student",
+  groups: [
+    {
+      key: "main",
+      items: [
+        { key: "home", icon: House, segment: "", primary: true },
+        { key: "tracking", icon: MapPinned, segment: "tracking", primary: true },
+        { key: "card", icon: IdCard, segment: "card", primary: true },
+        { key: "lines", icon: Route, segment: "lines" },
+        { key: "notifications", icon: Bell, segment: "notifications", primary: true },
+        { key: "announcements", icon: Megaphone, segment: "announcements" },
+        { key: "notGoingToday", icon: CalendarDays, segment: "not-going-today" },
+        { key: "attendanceHistory", icon: CalendarCheck, segment: "attendance" },
+      ],
+    },
+    {
+      key: "account",
+      items: [
+        { key: "requests", icon: ClipboardList, segment: "requests" },
+        { key: "complaints", icon: MessageSquareWarning, segment: "complaints" },
+        { key: "assistant", icon: MessageCircleQuestion, segment: "assistant" },
+        { key: "settings", icon: Settings, segment: "settings" },
+      ],
+    },
+  ],
+};
+
+const PARENT_NAV: RoleNavigation = {
+  basePath: "/parent",
+  groups: [
+    {
+      key: "main",
+      items: [
+        { key: "home", icon: House, segment: "", primary: true },
+        { key: "childDay", icon: CalendarCheck, segment: "day", primary: true },
+        { key: "notifications", icon: Bell, segment: "notifications", primary: true },
+        { key: "approvals", icon: ListChecks, segment: "approvals", primary: true },
+      ],
+    },
+    { key: "account", items: [{ key: "settings", icon: Settings, segment: "settings" }] },
+  ],
+};
+
+const CREW_NAV: RoleNavigation = {
+  basePath: "/driver",
+  groups: [
+    {
+      key: "main",
+      items: [
+        { key: "trip", icon: Bus, segment: "", primary: true },
+        { key: "scan", icon: ScanLine, segment: "scan", primary: true },
+        { key: "passengers", icon: Users, segment: "passengers", primary: true },
+        { key: "reportDelay", icon: Timer, segment: "delay", primary: true },
+        { key: "violations", icon: BadgeAlert, segment: "violations" },
+      ],
+    },
+  ],
+};
+
+interface OfficeNavItem extends NavItem {
+  /** Office roles that may open this page. Super admin always may. */
+  roles: readonly Role[];
+}
+
+interface OfficeNavGroup {
+  key: NavGroupKey;
+  items: readonly OfficeNavItem[];
+}
+
+const { Transport, Finance, Clinic, StudentAffairs, SecretaryGeneral, BusCompany } = Role;
+
+/** The 20 office pages from the agreed plan, each with the offices that own it. */
+const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
+  {
+    key: "operations",
+    items: [
+      { key: "overview", icon: LayoutDashboard, segment: "", roles: [Transport], primary: true },
+      {
+        key: "liveTracking",
+        icon: MapPinned,
+        segment: "tracking",
+        roles: [Transport],
+        primary: true,
+      },
+      {
+        key: "emergencies",
+        icon: Siren,
+        segment: "emergencies",
+        roles: [Transport, Clinic],
+        primary: true,
+      },
+      { key: "attendance", icon: UserCheck, segment: "attendance", roles: [Transport] },
+      { key: "announcements", icon: Megaphone, segment: "announcements", roles: [Transport] },
+      { key: "lines", icon: Route, segment: "lines", roles: [Transport] },
+      { key: "busesDrivers", icon: Bus, segment: "buses", roles: [Transport] },
+      { key: "students", icon: UsersRound, segment: "students", roles: [Transport] },
+      { key: "departures", icon: Armchair, segment: "departures", roles: [Transport] },
+    ],
+  },
+  {
+    key: "finance",
+    items: [
+      { key: "payments", icon: CreditCard, segment: "payments", roles: [Finance], primary: true },
+      { key: "refunds", icon: Receipt, segment: "refunds", roles: [Finance] },
+    ],
+  },
+  {
+    key: "followUp",
+    items: [
+      {
+        key: "violations",
+        icon: ShieldAlert,
+        segment: "violations",
+        roles: [Transport, StudentAffairs],
+        primary: true,
+      },
+      { key: "complaints", icon: MessageSquareWarning, segment: "complaints", roles: [Transport] },
+      {
+        key: "reports",
+        icon: FileBarChart,
+        segment: "reports",
+        roles: [Transport, Finance, SecretaryGeneral],
+        primary: true,
+      },
+      { key: "auditLog", icon: FileClock, segment: "audit-log", roles: [] },
+    ],
+  },
+  {
+    key: "otherParties",
+    items: [
+      { key: "clinic", icon: HeartPulse, segment: "clinic", roles: [Clinic], primary: true },
+      {
+        key: "secretaryGeneral",
+        icon: Landmark,
+        segment: "secretary-general",
+        roles: [SecretaryGeneral],
+        primary: true,
+      },
+      { key: "events", icon: CalendarDays, segment: "events", roles: [Transport] },
+      {
+        key: "busCompany",
+        icon: Building2,
+        segment: "bus-company",
+        roles: [BusCompany],
+        primary: true,
+      },
+    ],
+  },
+  {
+    key: "system",
+    items: [{ key: "users", icon: Users, segment: "users", roles: [] }],
+  },
+];
+
+function toNavItem({ key, icon, segment, primary }: OfficeNavItem): NavItem {
+  return { key, icon, segment, primary };
+}
+
+function officeNavigationFor(role: Role): RoleNavigation {
+  const canSee = (item: OfficeNavItem) => role === Role.SuperAdmin || item.roles.includes(role);
+  const groups = OFFICE_GROUPS.map((group) => ({
+    key: group.key,
+    items: group.items.filter(canSee).map(toNavItem),
+  })).filter((group) => group.items.length > 0);
+  return { basePath: "/admin", groups };
+}
+
+/** The menu each role sees. Strict separation: a role never sees another role's pages. */
+export function navigationFor(role: Role): RoleNavigation {
+  switch (role) {
+    case Role.Student:
+      return STUDENT_NAV;
+    case Role.Parent:
+      return PARENT_NAV;
+    case Role.Driver:
+    case Role.Supervisor:
+      return CREW_NAV;
+    default:
+      return officeNavigationFor(role);
+  }
+}
+
+/** Items for the phone's bottom bar: the role's primary items, capped. */
+export function primaryItems(navigation: RoleNavigation): NavItem[] {
+  return navigation.groups
+    .flatMap((group) => group.items)
+    .filter((item) => item.primary)
+    .slice(0, MAX_PRIMARY_ITEMS);
+}
+
+export function itemHref(basePath: string, item: NavItem): string {
+  return item.segment ? `${basePath}/${item.segment}` : basePath;
+}
+
+/** Longest-prefix match so "/admin" is not active on "/admin/payments". */
+export function findActiveItem(
+  navigation: RoleNavigation,
+  basePath: string,
+  pathname: string,
+): NavItem | undefined {
+  const items = navigation.groups.flatMap((group) => group.items);
+  let best: NavItem | undefined;
+  let bestLength = -1;
+  for (const item of items) {
+    const href = itemHref(basePath, item);
+    const matches = pathname === href || (item.segment !== "" && pathname.startsWith(`${href}/`));
+    if (matches && href.length > bestLength) {
+      best = item;
+      bestLength = href.length;
+    }
+  }
+  return best;
+}
+
+/** Where a role lands after sign-in: its "" page, or its first page when it has none. */
+export function roleHomeHref(navigation: RoleNavigation): string {
+  const items = navigation.groups.flatMap((group) => group.items);
+  const home = items.find((item) => item.segment === "") ?? items[0];
+  return home ? itemHref(navigation.basePath, home) : navigation.basePath;
+}
