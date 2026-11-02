@@ -17,6 +17,8 @@ export class MockHttpError extends Error {
 export interface MockContext {
   /** The bearer token the request carried, or null. */
   token: string | null;
+  /** The page language ("ar" or "en"), as the real server reads it from Accept-Language. */
+  language: string;
 }
 
 export type MockHandler<E extends Endpoint> = (

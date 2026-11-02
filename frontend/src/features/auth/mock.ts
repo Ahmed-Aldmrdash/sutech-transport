@@ -1,7 +1,15 @@
-import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
+import { StoredMap } from "@/lib/api/mock/stored-map";
 import { getMeEndpoint, loginEndpoint, logoutEndpoint, requestOtpEndpoint } from "./api";
-import { MOCK_OTP_LENGTH, findMockAccount, findMockAccountById, maskPhone } from "./mock-accounts";
+import { MOCK_OTP_LENGTH, findMockAccount, maskPhone } from "./mock-accounts";
+import {
+  clearRevokedMockTokens,
+  decodeMockToken,
+  encodeMockToken,
+  mockUnauthorized,
+  requireMockAccount,
+  revokeMockToken,
+} from "./mock-token";
 import { AuthErrorCode } from "./schema";
 
 /** The contract's rules: 5-minute code, 3 attempts, one resend per minute. */
@@ -13,10 +21,9 @@ export const MOCK_OTP_RULES = {
   sessionHours: 12,
 } as const;
 
-const HTTP = { BadRequest: 400, Unauthorized: 401, Forbidden: 403, NotFound: 404, TooMany: 429 };
+const HTTP = { BadRequest: 400, Forbidden: 403, NotFound: 404, TooMany: 429 };
 const MS_PER_SECOND = 1000;
 const MS_PER_HOUR = 3_600_000;
-const TOKEN_PREFIX = "mock.";
 
 interface Challenge {
   code: string;
@@ -25,51 +32,8 @@ interface Challenge {
   sentAt: number;
 }
 
-/**
- * A Map kept in sessionStorage, so a reload or a language switch (a full page load) doesn't
- * make the mock server forget a code it just sent, as a real server wouldn't.
- */
-class SessionBackedMap<V> extends Map<string, V> {
-  constructor(private readonly storageKey: string) {
-    super();
-    try {
-      const saved = window.sessionStorage.getItem(storageKey);
-      if (saved)
-        for (const [key, value] of JSON.parse(saved) as [string, V][]) super.set(key, value);
-    } catch {
-      // No storage (tests, private mode): memory only.
-    }
-  }
-
-  private save(): void {
-    try {
-      window.sessionStorage.setItem(this.storageKey, JSON.stringify([...this.entries()]));
-    } catch {
-      // Memory only.
-    }
-  }
-
-  override set(key: string, value: V): this {
-    super.set(key, value);
-    this.save();
-    return this;
-  }
-
-  override delete(key: string): boolean {
-    const removed = super.delete(key);
-    this.save();
-    return removed;
-  }
-
-  override clear(): void {
-    super.clear();
-    this.save();
-  }
-}
-
-const challenges = new SessionBackedMap<Challenge>("sut.mock.otp-challenges");
-const lockedUntil = new SessionBackedMap<number>("sut.mock.otp-locks");
-const revokedTokens = new Set<string>();
+const challenges = new StoredMap<Challenge>("sut.mock.otp-challenges");
+const lockedUntil = new StoredMap<number>("sut.mock.otp-locks");
 
 function throwIfLocked(identifier: string, now: number) {
   const until = lockedUntil.get(identifier) ?? 0;
@@ -81,26 +45,6 @@ function throwIfLocked(identifier: string, now: number) {
 function randomCode(): string {
   const digits = crypto.getRandomValues(new Uint8Array(MOCK_OTP_LENGTH));
   return Array.from(digits, (value) => String(value % 10)).join("");
-}
-
-function encodeToken(userId: string, expiresAt: number): string {
-  return TOKEN_PREFIX + btoa(JSON.stringify({ sub: userId, exp: expiresAt }));
-}
-
-/** Mock tokens carry the user and expiry, so a reload (fresh mock memory) still knows them. */
-function decodeToken(token: string | null): { sub: string; exp: number } | null {
-  if (!token?.startsWith(TOKEN_PREFIX) || revokedTokens.has(token)) return null;
-  try {
-    const payload: unknown = JSON.parse(atob(token.slice(TOKEN_PREFIX.length)));
-    const { sub, exp } = payload as { sub?: unknown; exp?: unknown };
-    return typeof sub === "string" && typeof exp === "number" ? { sub, exp } : null;
-  } catch {
-    return null;
-  }
-}
-
-function unauthorized(): never {
-  throw new MockHttpError(HTTP.Unauthorized, ServerErrorCode.Unauthorized, "Sign in again.");
 }
 
 registerMock(requestOtpEndpoint, ({ body }) => {
@@ -164,27 +108,23 @@ registerMock(loginEndpoint, ({ body }) => {
   challenges.delete(key);
   const expiresAt = now + MOCK_OTP_RULES.sessionHours * MS_PER_HOUR;
   return {
-    token: encodeToken(account.user.id, expiresAt),
+    token: encodeMockToken(account.user.id, expiresAt),
     expires_at: new Date(expiresAt).toISOString(),
     user: account.user,
   };
 });
 
 registerMock(logoutEndpoint, (_input, { token }) => {
-  if (!decodeToken(token)) unauthorized();
-  if (token) revokedTokens.add(token);
+  if (!decodeMockToken(token)) mockUnauthorized();
+  if (token) revokeMockToken(token);
   return { ok: true as const };
 });
 
-registerMock(getMeEndpoint, (_input, { token }) => {
-  const payload = decodeToken(token);
-  if (!payload || payload.exp <= Date.now()) unauthorized();
-  return findMockAccountById(payload.sub)?.user ?? unauthorized();
-});
+registerMock(getMeEndpoint, (_input, { token }) => requireMockAccount(token).user);
 
 /** Test helper: forget codes, locks and revoked tokens. */
 export function resetAuthMock(): void {
   challenges.clear();
   lockedUntil.clear();
-  revokedTokens.clear();
+  clearRevokedMockTokens();
 }
