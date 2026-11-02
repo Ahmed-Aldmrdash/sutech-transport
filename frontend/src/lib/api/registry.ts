@@ -1,4 +1,6 @@
+import { absencesEndpoints } from "@/features/absences/api";
 import { announcementsEndpoints } from "@/features/announcements/api";
+import { attendanceEndpoints } from "@/features/attendance/api";
 import { authEndpoints } from "@/features/auth/api";
 import { cardEndpoints } from "@/features/card/api";
 import { linesEndpoints } from "@/features/lines/api";
@@ -25,4 +27,6 @@ export const allEndpoints: readonly Endpoint[] = [
   ...announcementsEndpoints,
   ...requestsEndpoints,
   ...notificationsEndpoints,
+  ...absencesEndpoints,
+  ...attendanceEndpoints,
 ];

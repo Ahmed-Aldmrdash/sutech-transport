@@ -30,7 +30,7 @@ import {
 } from "../schema";
 import { useRequestTitle } from "./request-list";
 import { REQUEST_STATUS_TONE, RequestStatusBadge } from "./request-status-badge";
-import { useSubmit } from "./use-submit";
+import { useSubmit } from "@/lib/hooks/use-submit";
 
 /** While the office is working on it, check for news this often. */
 const REFRESH_MS = 10_000;

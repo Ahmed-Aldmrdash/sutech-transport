@@ -70,6 +70,16 @@ export function formatCalendarDate(
   }).format(new Date(`${day}T00:00:00Z`));
 }
 
+/** A calendar day with its weekday, short, for day pickers: "Tue, Nov 3" / "الثلاثاء ٣ نوفمبر". */
+export function formatServiceDay(day: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    timeZone: "UTC",
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${day}T00:00:00Z`));
+}
+
 /** Bytes as "1.2 MB" / "350 KB" for upload limits and chosen files. */
 export function formatFileSize(bytes: number, locale: Locale): string {
   const kilobytes = bytes / 1024;

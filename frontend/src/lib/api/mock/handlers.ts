@@ -3,7 +3,9 @@
  * mock data ends up in the production bundle when the app talks to the real server.
  * Add one import line per feature that has a mock.ts.
  */
+import "@/features/absences/mock";
 import "@/features/announcements/mock";
+import "@/features/attendance/mock";
 import "@/features/auth/mock";
 import "@/features/card/mock";
 import "@/features/lines/mock";

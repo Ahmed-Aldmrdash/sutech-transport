@@ -34,7 +34,7 @@ import { COMPLAINT_CATEGORIES, ComplaintCategory } from "../schema";
 import { AttachmentsField } from "./attachments-field";
 import { REQUEST_SERVER_ERRORS, toUploads } from "./form-helpers";
 import { COMPLAINTS_PATH } from "./requests-page";
-import { useSubmit } from "./use-submit";
+import { useSubmit } from "@/lib/hooks/use-submit";
 
 export function ComplaintPage() {
   const t = useTranslations("student.requests.complaint");

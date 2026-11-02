@@ -36,7 +36,7 @@ import { LineChangeDuration } from "../schema";
 import { REQUEST_SERVER_ERRORS } from "./form-helpers";
 import { GuardianFields } from "./guardian-fields";
 import { REQUESTS_PATH } from "./requests-page";
-import { useSubmit } from "./use-submit";
+import { useSubmit } from "@/lib/hooks/use-submit";
 
 /** The university's line change form ("طلب تغيير خط السير"), online. */
 export function LineChangePage() {

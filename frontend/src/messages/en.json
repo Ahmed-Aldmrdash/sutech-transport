@@ -813,6 +813,86 @@
           "generic": "Couldn't withdraw it. Try again."
         }
       }
+    },
+    "notGoing": {
+      "title": "Not going today",
+      "lead": "Tell us before the bus leaves, so the driver doesn't wait for you and you aren't marked absent.",
+      "needsActiveTitle": "For active subscribers",
+      "needsActiveBody": "Once your subscription is active you can tell us the days you won't ride.",
+      "goHome": "Back to home",
+      "noDaysTitle": "No day to report right now",
+      "noDaysBody": "Every service day in the next week is already reported, or today's bus already left.",
+      "whichDay": "Which day?",
+      "today": "Today",
+      "cutoff": "You can report or take it back until {time}, when the bus leaves the first stop of your line.",
+      "reason": "Why?",
+      "reasons": {
+        "sick": "I'm sick",
+        "no_lectures": "No lectures",
+        "personal": "Personal reason",
+        "other": "Other"
+      },
+      "note": "Note for the office",
+      "noteHint": "Short, up to 200 characters.",
+      "optional": "optional",
+      "whoKnowsTitle": "Who is told",
+      "whoKnowsBody": "Your driver and bus supervisor, your guardian and the Transportation office. That day counts as \"not going\", not absent.",
+      "submit": "Report the day",
+      "confirmTitle": "Not going {day}?",
+      "confirmBody": "The driver won't wait for you at your stop. You can take it back until the bus leaves.",
+      "confirm": "Yes, I'm not going",
+      "sentTitle": "Reported",
+      "sentBody": "We told the driver, your guardian and the office about {day}.",
+      "upcomingTitle": "Days you reported",
+      "upcomingLead": "From today on. Past days are in My trips.",
+      "upcomingEmpty": "Nothing reported. You're riding every day.",
+      "cancel": "I'm riding after all",
+      "cancelConfirmTitle": "Ride on {day} after all?",
+      "cancelConfirmBody": "We'll tell the driver and your guardian that you're coming.",
+      "cancelConfirm": "Yes, I'm riding",
+      "keep": "Keep it",
+      "cancelledTitle": "Done. You're riding that day.",
+      "errors": {
+        "NO_ACTIVE_SUBSCRIPTION": "Your subscription isn't active.",
+        "DATE_NOT_REPORTABLE": "Pick a service day within the next week.",
+        "ABSENCE_CUTOFF_PASSED": "The bus already left, so this day can't be changed.",
+        "ALREADY_REPORTED": "You already reported this day.",
+        "network": "No connection. Check your internet and try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "myTrips": {
+      "title": "My trips",
+      "lead": "Every trip this term: when you got on, when the bus reached campus, and the days you missed.",
+      "emptyTitle": "No trips yet",
+      "emptyBody": "Your trips show up here once your subscription is active and you ride.",
+      "goLines": "See the lines",
+      "summary": {
+        "rode": "Rode",
+        "absent": "Absent",
+        "not_going": "Not going",
+        "checked_out": "Left early"
+      },
+      "filterLabel": "Show",
+      "all": "All",
+      "outcome": {
+        "rode": "Rode",
+        "absent": "Absent",
+        "not_going": "Not going",
+        "checked_out": "Left early"
+      },
+      "noneForFilter": "No trips of this kind.",
+      "loadMore": "Show more",
+      "lineAndStop": "Line {line} · {stop} · {direction}",
+      "direction": {
+        "outbound": "To campus",
+        "return": "Back home"
+      },
+      "boardedAt": "Got on {time}",
+      "arrivedAt": "Reached campus {time}",
+      "checkedOutAt": "Left the bus {time}",
+      "reason": "Reason: {reason}",
+      "returnNote": "Return trips will show here once the Transportation office publishes return times."
     }
   },
   "notifications": {

@@ -42,7 +42,7 @@ import { AttachmentsField } from "./attachments-field";
 import { REQUEST_SERVER_ERRORS, toUploads } from "./form-helpers";
 import { GuardianFields } from "./guardian-fields";
 import { REQUESTS_PATH } from "./requests-page";
-import { useSubmit } from "./use-submit";
+import { useSubmit } from "@/lib/hooks/use-submit";
 
 /** Cancelling a paid subscription for a refund, under the term's refund policy. */
 export function RefundPage() {
