@@ -63,7 +63,7 @@ test.describe("sign-in", () => {
     );
     await page.getByLabel("كود الدخول").fill(arabicCode);
     await expect(page).toHaveURL(/\/ar\/student$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("أهلًا، Ahmed");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("أهلًا، أحمد");
   });
 
   test("explains an unknown ID", async ({ page }) => {

@@ -72,13 +72,13 @@ const REJECTION_REASON = {
 const bookings = new StoredMap<MockBooking>("sut.mock.bookings", MockStorage.Local);
 const payments = new StoredMap<MockPayment[]>("sut.mock.payments", MockStorage.Local);
 
-/** Mariam (240102684) is already an active subscriber on line 5, to show the card at once. */
+/** Omar (240102684) is already an active subscriber on line 7 (El Shorouk), to show the card at once. */
 const SEED_ACTIVATED_AT = Date.parse("2026-09-20T09:12:00Z");
 const SEED_BOOKINGS: Record<string, MockBooking> = {
   usr_student_2: {
     subscriptionId: "sub_seed_2",
-    lineId: "ln_05",
-    stopOrder: 3,
+    lineId: "ln_07",
+    stopOrder: 2,
     status: SubscriptionStatus.Active,
     pricePiasters: MOCK_TERM_PRICE_PIASTERS,
     reservedAt: Date.parse("2026-09-14T10:02:00Z"),
@@ -96,7 +96,7 @@ const SEED_PAYMENTS: Record<string, MockPayment[]> = {
       referenceNumber: "NBE-48213377",
       amountPiasters: MOCK_TERM_PRICE_PIASTERS,
       paidOn: "2026-09-15",
-      payerName: "Adel Mahmoud",
+      payerName: "Ahmed Ramadan Ramadan",
       fileName: "deposit-slip.jpg",
       submittedAt: Date.parse("2026-09-15T08:30:00Z"),
       status: MockPaymentStatus.Approved,

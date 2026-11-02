@@ -150,11 +150,11 @@ describe("student journey (mock server)", () => {
     );
   });
 
-  it("shows Mariam's card at once: she is an active subscriber on line 5", async () => {
+  it("shows Omar's card at once: he is an active subscriber on line 7", async () => {
     resetAuthMock();
     await signIn("240102684");
     expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.Active);
-    expect((await getMyCard()).stop.pickup_time).toBe("07:40");
+    expect((await getMyCard()).stop.pickup_time).toBe("07:50");
   });
 
   it("keeps other roles out of student endpoints", async () => {

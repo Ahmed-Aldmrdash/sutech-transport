@@ -418,7 +418,8 @@
           "official": "Official",
           "delay": "Delay",
           "service_change": "Change"
-        }
+        },
+        "seeAll": "See all"
       }
     },
     "lines": {
@@ -593,6 +594,351 @@
       "expired": "This code has expired. Connect to the internet to get a new one.",
       "getNewCode": "Get a new code",
       "tip": "The code changes every 30 seconds, so a screenshot won't work. Turn your screen brightness up when you scan."
+    },
+    "requests": {
+      "title": "Requests",
+      "lead": "Change your line or ask for a refund, and follow each request until the office answers.",
+      "listLabel": "Your requests",
+      "rowMeta": "{kind} · {reference} · {date}",
+      "kinds": {
+        "line_change": "Line change",
+        "refund": "Refund",
+        "complaint": "Complaint"
+      },
+      "status": {
+        "submitted": "Sent",
+        "in_review": "Under review",
+        "approved": "Approved",
+        "rejected": "Not approved",
+        "resolved": "Answered",
+        "withdrawn": "Withdrawn"
+      },
+      "emptyTitle": "No requests yet",
+      "emptyBody": "Need a different line for a while, or have to cancel your subscription? Start a request above.",
+      "needsActiveTitle": "You need an active subscription",
+      "needsActiveBody": "Line changes and refunds are for students whose subscription is paid and active.",
+      "goHome": "Back to home",
+      "sent": "Request sent",
+      "sentBody": "You'll get a notification when the office answers.",
+      "textHint": "At least 10 characters.",
+      "phoneHint": "Egyptian mobile, e.g. 01012345678.",
+      "errors": {
+        "required": "Fill in this field.",
+        "phoneInvalid": "Enter an 11-digit mobile number starting 010, 011, 012 or 015.",
+        "textTooShort": "Write a little more (at least 10 characters).",
+        "textTooLong": "Keep it under 1,000 characters.",
+        "nameTooShort": "Write the full name.",
+        "sameLine": "That's already your line.",
+        "dateInPast": "The date can't be in the past.",
+        "dateInFuture": "The date can't be in the future.",
+        "dateBeforeTerm": "The date must be in this term.",
+        "dateAfterTerm": "The date is after the end of the term.",
+        "endBeforeStart": "The end date must be after the start date.",
+        "consentRequired": "Your guardian must agree before you send this.",
+        "documentsRequired": "Attach the supporting document (medical report, certificate or transfer letter).",
+        "tooManyFiles": "Attach 3 files at most.",
+        "fileType": "JPG, PNG or PDF files only.",
+        "fileTooLarge": "Each file must be {size} or less."
+      },
+      "serverErrors": {
+        "NO_ACTIVE_SUBSCRIPTION": "Your subscription isn't active, so this request can't be sent.",
+        "REQUEST_ALREADY_OPEN": "You already have an open request of this kind. Wait for its answer or withdraw it first.",
+        "SAME_LINE": "That's already your line.",
+        "INVALID_DATES": "Check the dates: they must be within this term.",
+        "REFUND_WINDOW_CLOSED": "Ordinary refunds are closed for this term. Only exceptional cases can be sent.",
+        "DOCUMENTS_REQUIRED": "Attach the supporting document for this reason.",
+        "NOT_WITHDRAWABLE": "The office has already started on this request.",
+        "LINE_NOT_FOUND": "That line no longer exists. Choose another.",
+        "STOP_NOT_ON_LINE": "That stop isn't on the line. Choose again.",
+        "RECEIPT_TOO_LARGE": "A file is larger than {size}.",
+        "network": "No connection. Check the internet and try again; nothing was sent twice.",
+        "generic": "Something went wrong. Try again in a moment.",
+        "NO_SUBSCRIPTION": "Book a seat first: complaints are for students with a booking."
+      },
+      "attachments": {
+        "add": "Add a file",
+        "remove": "Remove {name}",
+        "full": "{count} files attached (the most)"
+      },
+      "guardian": {
+        "title": "Guardian's approval",
+        "name": "Guardian's name",
+        "phone": "Guardian's mobile",
+        "consentLineChange": "My guardian agrees to this line change",
+        "consentRefund": "My guardian agrees to cancel the subscription and get the refund",
+        "consentHint": "The university's form needs the guardian's approval. The office may call to confirm."
+      },
+      "lineChange": {
+        "new": "Change my line",
+        "title": "Line change request",
+        "lead": "The university's line change form, online. Choose the new line and stop, for good or for a few days.",
+        "summary": "{from} → {to}",
+        "currentLine": "Your line now",
+        "toLine": "New line",
+        "toLineHint": "A line with free seats is approved faster.",
+        "chooseLine": "Choose a line",
+        "lineOption": "{line} ({seats, plural, =0 {0 free seats} one {# free seat} other {# free seats}})",
+        "toStop": "Pickup or drop-off stop",
+        "toStopHint": "Where you'll get on or off the new line.",
+        "chooseStop": "Choose a stop",
+        "loadingStops": "Loading stops…",
+        "duration": "For how long?",
+        "permanent": "Permanent",
+        "permanentHint": "For the rest of the term.",
+        "temporary": "Temporary",
+        "temporaryHint": "For a few days, then back to your line.",
+        "startsOn": "Starting from",
+        "endsOn": "Until",
+        "reason": "Why do you need to change?",
+        "studentPhone": "Your mobile",
+        "submit": "Send request",
+        "fromLine": "From line",
+        "temporaryRange": "Temporary: {from} to {to}",
+        "permanentFrom": "Permanent, from {from}"
+      },
+      "refund": {
+        "new": "Ask for a refund",
+        "title": "Refund request",
+        "lead": "Cancel your paid subscription and get money back under this term's refund policy.",
+        "summary": "Refund · {reason}",
+        "reasons": {
+          "standard": {
+            "label": "Ordinary refund",
+            "hint": "Follows the dated deduction table."
+          },
+          "medical": {
+            "label": "Health condition, disability or injury",
+            "hint": "Decided by the university. Attach a medical report."
+          },
+          "bereavement": {
+            "label": "Death in the family",
+            "hint": "Decided by the university. Attach the certificate."
+          },
+          "transfer": {
+            "label": "Moving to another university",
+            "hint": "Attach the transfer letter. The terms and conditions apply."
+          }
+        },
+        "needsPaidBody": "A refund is for a subscription that is paid and active. Unpaid bookings can simply be cancelled from the home page.",
+        "policyTitle": "Refund policy",
+        "windowRange": "{from} – {to}",
+        "windowFrom": "From {from}",
+        "deductionValue": "{percent}% deducted",
+        "today": "Today",
+        "ruleCheque": "The money is paid by a cheque in the guardian's name within {days} days.",
+        "ruleProcessing": "The office processes a request in {days} working days.",
+        "ruleOriginalReceipt": "Bring the original payment receipt to the Transportation office (A039).",
+        "ruleGuardian": "The guardian must agree.",
+        "ruleExceptional": "Death, health conditions and disability are left to the university's judgement, with documents.",
+        "closedTitle": "Ordinary refunds are closed",
+        "closedBody": "Since November 1, 100% of the fee is deducted. You can still ask for an exceptional case below.",
+        "reason": "Reason",
+        "standardClosed": "Closed: 100% is deducted from November 1.",
+        "explanation": "Tell us more",
+        "documents": "Supporting documents",
+        "documentsHint": "Medical report, certificate or transfer letter. JPG, PNG or PDF, up to {size} each.",
+        "paid": "You paid",
+        "deduction": "Deduction",
+        "estimate": "Expected refund",
+        "percent": "{percent}%",
+        "decidedByUniversity": "Decided by the university",
+        "cancelWarning": "If the refund is approved, your subscription ends and your card stops working.",
+        "submit": "Send refund request"
+      },
+      "complaint": {
+        "new": "New complaint",
+        "title": "Complaints",
+        "lead": "Tell the Transportation office about a problem on the bus. Every complaint gets an answer.",
+        "emptyTitle": "No complaints",
+        "emptyBody": "If something goes wrong on your bus, tell us here.",
+        "goToComplaints": "Make a complaint instead",
+        "newTitle": "New complaint",
+        "newLead": "What happened, when and on which line. Photos help.",
+        "safetyTitle": "In danger right now?",
+        "safetyBody": "Call the Transportation office at 01040772030 or tell the supervisor at once. This form is for follow-up.",
+        "category": "About",
+        "chooseCategory": "Choose a topic",
+        "categories": {
+          "driver_behaviour": "Driver's behaviour",
+          "delay": "Delay",
+          "bus_condition": "Bus condition",
+          "crowding": "Crowding or seating",
+          "safety": "Safety",
+          "payment": "Payment or receipt",
+          "other": "Something else"
+        },
+        "line": "Line",
+        "noLine": "Not about a line",
+        "happenedOn": "When did it happen?",
+        "description": "What happened?",
+        "descriptionHint": "Time, stop and what you saw. At least 10 characters.",
+        "attachments": "Photos or files",
+        "attachmentsHint": "Up to 3 files: JPG, PNG or PDF, {size} each.",
+        "submit": "Send complaint",
+        "onlyPayment": "Until your subscription is active you can only complain about a payment or receipt.",
+        "needsBookingTitle": "Book a seat first",
+        "needsBookingBody": "Complaints are for students with a booking. If you have a question before booking, call the Transportation office at 01040772030."
+      },
+      "detail": {
+        "waitingTitle": "Waiting for the office",
+        "waitingBody": "The Transportation office will open your request soon. You can still withdraw it until then.",
+        "answer": {
+          "submitted": "Sent",
+          "in_review": "The office is reviewing it",
+          "approved": "Approved",
+          "rejected": "Not approved",
+          "resolved": "The office answered",
+          "withdrawn": "You withdrew this request"
+        },
+        "noNote": "No note from the office.",
+        "historyTitle": "History",
+        "eventMeta": "{by} · {date}",
+        "by": {
+          "student": "You",
+          "transport_office": "Transportation office",
+          "finance": "Finance"
+        },
+        "detailsTitle": "What you sent",
+        "submittedAt": "Sent on",
+        "withdrawn": "Request withdrawn",
+        "withdrawHint": "Changed your mind? You can withdraw the request until the office opens it.",
+        "withdraw": "Withdraw request",
+        "withdrawConfirmTitle": "Withdraw this request?",
+        "withdrawConfirmBody": "{reference} will be closed. You can send a new one later.",
+        "withdrawConfirm": "Yes, withdraw",
+        "keep": "Keep it",
+        "withdrawErrors": {
+          "NOT_WITHDRAWABLE": "The office has already started on it, so it can't be withdrawn.",
+          "network": "No connection. Try again.",
+          "generic": "Couldn't withdraw it. Try again."
+        }
+      }
+    },
+    "notGoing": {
+      "title": "Not going today",
+      "lead": "Tell us before the bus leaves, so the driver doesn't wait for you and you aren't marked absent.",
+      "needsActiveTitle": "For active subscribers",
+      "needsActiveBody": "Once your subscription is active you can tell us the days you won't ride.",
+      "goHome": "Back to home",
+      "noDaysTitle": "No day to report right now",
+      "noDaysBody": "Every service day in the next week is already reported, or today's bus already left.",
+      "whichDay": "Which day?",
+      "today": "Today",
+      "cutoff": "You can report or take it back until {time}, when the bus leaves the first stop of your line.",
+      "reason": "Why?",
+      "reasons": {
+        "sick": "I'm sick",
+        "no_lectures": "No lectures",
+        "personal": "Personal reason",
+        "other": "Other"
+      },
+      "note": "Note for the office",
+      "noteHint": "Short, up to 200 characters.",
+      "optional": "optional",
+      "whoKnowsTitle": "Who is told",
+      "whoKnowsBody": "Your driver and bus supervisor, your guardian and the Transportation office. That day counts as \"not going\", not absent.",
+      "submit": "Report the day",
+      "confirmTitle": "Not going {day}?",
+      "confirmBody": "The driver won't wait for you at your stop. You can take it back until the bus leaves.",
+      "confirm": "Yes, I'm not going",
+      "sentTitle": "Reported",
+      "sentBody": "We told the driver, your guardian and the office about {day}.",
+      "upcomingTitle": "Days you reported",
+      "upcomingLead": "From today on. Past days are in My trips.",
+      "upcomingEmpty": "Nothing reported. You're riding every day.",
+      "cancel": "I'm riding after all",
+      "cancelConfirmTitle": "Ride on {day} after all?",
+      "cancelConfirmBody": "We'll tell the driver and your guardian that you're coming.",
+      "cancelConfirm": "Yes, I'm riding",
+      "keep": "Keep it",
+      "cancelledTitle": "Done. You're riding that day.",
+      "errors": {
+        "NO_ACTIVE_SUBSCRIPTION": "Your subscription isn't active.",
+        "DATE_NOT_REPORTABLE": "Pick a service day within the next week.",
+        "ABSENCE_CUTOFF_PASSED": "The bus already left, so this day can't be changed.",
+        "ALREADY_REPORTED": "You already reported this day.",
+        "network": "No connection. Check your internet and try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "myTrips": {
+      "title": "My trips",
+      "lead": "Every trip this term: when you got on, when the bus reached campus, and the days you missed.",
+      "emptyTitle": "No trips yet",
+      "emptyBody": "Your trips show up here once your subscription is active and you ride.",
+      "goLines": "See the lines",
+      "summary": {
+        "rode": "Rode",
+        "absent": "Absent",
+        "not_going": "Not going",
+        "checked_out": "Left early"
+      },
+      "filterLabel": "Show",
+      "all": "All",
+      "outcome": {
+        "rode": "Rode",
+        "absent": "Absent",
+        "not_going": "Not going",
+        "checked_out": "Left early"
+      },
+      "noneForFilter": "No trips of this kind.",
+      "loadMore": "Show more",
+      "lineAndStop": "Line {line} · {stop} · {direction}",
+      "direction": {
+        "outbound": "To campus",
+        "return": "Back home"
+      },
+      "boardedAt": "Got on {time}",
+      "arrivedAt": "Reached campus {time}",
+      "checkedOutAt": "Left the bus {time}",
+      "reason": "Reason: {reason}",
+      "returnNote": "Return trips will show here once the Transportation office publishes return times."
     }
+  },
+  "notifications": {
+    "bell": "Notifications",
+    "bellUnread": "Notifications, {count} new",
+    "newCount": "{count} new",
+    "title": "Notifications",
+    "lead": "Your bus, your payments and answers to your requests, all in one place.",
+    "markAll": "Mark all as read",
+    "markAllFailed": "Couldn't mark them as read. Try again.",
+    "filterLabel": "Show",
+    "filter": {
+      "all": "All",
+      "unread": "Unread",
+      "unreadCount": "Unread ({count})"
+    },
+    "emptyTitle": "No notifications yet",
+    "emptyUnreadTitle": "You're all caught up",
+    "emptyBody": "When your bus is near, your payment is reviewed or the office answers a request, you'll see it here.",
+    "loadMore": "Show more",
+    "unread": "New"
+  },
+  "announcements": {
+    "title": "Announcements",
+    "lead": "Notices from the Transportation office: official news, delays and changes to lines.",
+    "filterLabel": "Type",
+    "all": "All",
+    "emptyTitle": "No announcements",
+    "emptyBody": "Nothing of this type has been announced yet.",
+    "loadMore": "Show more"
+  },
+  "settings": {
+    "title": "Settings",
+    "lead": "Your account, language and how the app looks.",
+    "account": "Your account",
+    "accountHint": "From the university's records. To correct anything, visit the Transportation office (A039).",
+    "guardian": "Guardian",
+    "language": "Language",
+    "languageHint": "The whole app, including dates and messages from the office.",
+    "appearance": "Appearance",
+    "appearanceHint": "\"Device\" follows your phone or laptop's light or dark setting.",
+    "signOutTitle": "Sign out",
+    "signOutHint": "You'll need a new code by SMS to sign in again.",
+    "signOut": "Sign out",
+    "signOutConfirmTitle": "Sign out of this device?",
+    "signOutConfirmBody": "Your card and bookings stay safe. Sign in again with your university ID and a new code.",
+    "stay": "Stay signed in"
   }
 }

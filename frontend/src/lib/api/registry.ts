@@ -1,8 +1,12 @@
+import { absencesEndpoints } from "@/features/absences/api";
 import { announcementsEndpoints } from "@/features/announcements/api";
+import { attendanceEndpoints } from "@/features/attendance/api";
 import { authEndpoints } from "@/features/auth/api";
 import { cardEndpoints } from "@/features/card/api";
 import { linesEndpoints } from "@/features/lines/api";
+import { notificationsEndpoints } from "@/features/notifications/api";
 import { paymentsEndpoints } from "@/features/payments/api";
+import { requestsEndpoints } from "@/features/requests/api";
 import { subscriptionsEndpoints } from "@/features/subscriptions/api";
 import { systemEndpoints } from "@/features/system/api";
 import { tripsEndpoints } from "@/features/trips/api";
@@ -21,4 +25,8 @@ export const allEndpoints: readonly Endpoint[] = [
   ...cardEndpoints,
   ...tripsEndpoints,
   ...announcementsEndpoints,
+  ...requestsEndpoints,
+  ...notificationsEndpoints,
+  ...absencesEndpoints,
+  ...attendanceEndpoints,
 ];

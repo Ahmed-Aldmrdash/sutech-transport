@@ -12,12 +12,14 @@ import { formatDateTime } from "@/lib/format";
 import { SessionStatus } from "../session/session-store";
 import { useSession } from "../session/use-session";
 import type { User } from "../schema";
+import { firstNameOf, userText } from "../user-text";
 
 /**
  * Phase 1 content for every signed-in page: the role's home shows the account, other menu
  * pages say they come in a later phase. Each phase replaces its pages with the real screens.
  */
 export function SignedInPage() {
+  const locale = useLocale() as Locale;
   const t = useTranslations();
   const pathname = usePathname();
   const state = useSession();
@@ -48,7 +50,7 @@ export function SignedInPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow={activeItem ? t(`nav.items.${activeItem.key}`) : undefined}
-        title={t("session.welcome", { name: user.name.split(" ")[0] ?? user.name })}
+        title={t("session.welcome", { name: firstNameOf(userText(user, locale).name) })}
         description={t("session.homeLead")}
       />
       <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -73,14 +75,15 @@ function AccountCard({ user, expiresAt }: { user: User; expiresAt: string }) {
     { label: t("role"), value: tRoles(user.role) },
     { label: t("identifier"), value: user.identifier, ltr: true },
   ];
-  if (user.faculty) rows.push({ label: t("faculty"), value: user.faculty });
+  const text = userText(user, locale);
+  if (text.faculty) rows.push({ label: t("faculty"), value: text.faculty });
   if (user.level) rows.push({ label: t("level"), value: t("levelValue", { level: user.level }) });
   if (user.masked_phone) rows.push({ label: t("phone"), value: user.masked_phone, ltr: true });
   rows.push({ label: t("expiresAt"), value: formatDateTime(expiresAt, locale) });
 
   return (
     <Card elevation="raised">
-      <CardHeader title={t("accountTitle")} description={user.name} />
+      <CardHeader title={t("accountTitle")} description={text.name} />
       <CardBody>
         <dl className="divide-y divide-line">
           {rows.map((row) => (

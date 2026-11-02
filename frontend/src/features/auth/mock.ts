@@ -2,6 +2,7 @@ import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { StoredMap } from "@/lib/api/mock/stored-map";
 import { getMeEndpoint, loginEndpoint, logoutEndpoint, requestOtpEndpoint } from "./api";
 import { MOCK_OTP_LENGTH, findMockAccount, maskPhone } from "./mock-accounts";
+import { firstNameOf, userText } from "./user-text";
 import {
   clearRevokedMockTokens,
   decodeMockToken,
@@ -47,7 +48,7 @@ function randomCode(): string {
   return Array.from(digits, (value) => String(value % 10)).join("");
 }
 
-registerMock(requestOtpEndpoint, ({ body }) => {
+registerMock(requestOtpEndpoint, ({ body }, { language }) => {
   const now = Date.now();
   const account = findMockAccount(body.identifier);
   if (!account) {
@@ -72,7 +73,7 @@ registerMock(requestOtpEndpoint, ({ body }) => {
   });
   return {
     masked_destination: maskPhone(account.phone),
-    name_hint: account.user.name.replace(/^Dr\.\s*/, "").split(" ")[0] ?? account.user.name,
+    name_hint: firstNameOf(userText(account.user, language === "ar" ? "ar" : "en").name),
     expires_in_seconds: MOCK_OTP_RULES.expiresInSeconds,
     attempts_left: MOCK_OTP_RULES.attempts,
     code_length: MOCK_OTP_LENGTH,
