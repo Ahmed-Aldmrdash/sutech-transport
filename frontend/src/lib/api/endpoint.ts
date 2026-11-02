@@ -13,6 +13,8 @@ export type HttpMethod = (typeof HttpMethod)[keyof typeof HttpMethod];
 /** Every path is relative to this prefix on the FastAPI server. */
 export const API_PREFIX = "/api/v1";
 
+export const IDEMPOTENCY_HEADER = "Idempotency-Key";
+
 type Schema = z.ZodType;
 
 /**
@@ -35,6 +37,11 @@ export interface Endpoint<
   tag: string;
   /** Roles allowed to call it. `"public"` means no token is needed. */
   access: readonly Role[] | "public";
+  /**
+   * The request changes something (a booking, a payment, an SOS), so it carries an
+   * `Idempotency-Key` header: the server runs it once even if it arrives twice.
+   */
+  idempotent?: boolean;
   params?: TParams;
   query?: TQuery;
   body?: TBody;

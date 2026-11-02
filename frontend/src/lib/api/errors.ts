@@ -49,3 +49,16 @@ export class ApiError extends Error {
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
+
+/**
+ * Which message a screen shows for a failed action: the server's code when the screen has its
+ * own words for it, else "network" or "generic".
+ */
+export function errorMessageKey<TCode extends string>(
+  error: unknown,
+  knownCodes: readonly TCode[],
+): TCode | "network" | "generic" {
+  if (!isApiError(error)) return "generic";
+  if (error.isNetworkError) return "network";
+  return (knownCodes as readonly string[]).includes(error.code) ? (error.code as TCode) : "generic";
+}

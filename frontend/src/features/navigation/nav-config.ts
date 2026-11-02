@@ -30,6 +30,7 @@ import {
   UserCheck,
   Users,
   UsersRound,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { Role } from "@/lib/auth/roles";
@@ -38,6 +39,7 @@ import { Role } from "@/lib/auth/roles";
 export type NavItemKey =
   | "home"
   | "lines"
+  | "payment"
   | "card"
   | "tracking"
   | "announcements"
@@ -105,9 +107,10 @@ const STUDENT_NAV: RoleNavigation = {
       key: "main",
       items: [
         { key: "home", icon: House, segment: "", primary: true },
-        { key: "tracking", icon: MapPinned, segment: "tracking", primary: true },
+        { key: "lines", icon: Route, segment: "lines", primary: true },
         { key: "card", icon: IdCard, segment: "card", primary: true },
-        { key: "lines", icon: Route, segment: "lines" },
+        { key: "payment", icon: Wallet, segment: "payment" },
+        { key: "tracking", icon: MapPinned, segment: "tracking" },
         { key: "notifications", icon: Bell, segment: "notifications", primary: true },
         { key: "announcements", icon: Megaphone, segment: "announcements" },
         { key: "notGoingToday", icon: CalendarDays, segment: "not-going-today" },

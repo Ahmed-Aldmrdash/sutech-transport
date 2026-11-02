@@ -23,10 +23,11 @@ const LOADING = { status: AsyncStatus.Loading, data: undefined, error: undefined
 export function useAsync<T>(
   load: (signal: AbortSignal) => Promise<T>,
   deps: readonly unknown[],
-): AsyncState<T> & { reload: () => void } {
+): AsyncState<T> & { reload: () => void; refresh: () => void } {
   const [state, setState] = useState<AsyncState<T>>(LOADING);
   const [attempt, setAttempt] = useState(0);
   const loadRef = useRef(load);
+  const isSilentRef = useRef(false);
 
   useEffect(() => {
     loadRef.current = load;
@@ -34,8 +35,9 @@ export function useAsync<T>(
 
   useEffect(() => {
     const controller = new AbortController();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset to loading for each run
-    setState(LOADING);
+    // A silent refresh keeps the current data on screen until the new answer arrives.
+    if (!isSilentRef.current) setState(LOADING);
+    isSilentRef.current = false;
     loadRef.current(controller.signal).then(
       (data) => {
         if (!controller.signal.aborted)
@@ -51,5 +53,10 @@ export function useAsync<T>(
   }, [attempt, ...deps]);
 
   const reload = useCallback(() => setAttempt((value) => value + 1), []);
-  return { ...state, reload };
+  /** Loads again without the loading state (polling, background updates). */
+  const refresh = useCallback(() => {
+    isSilentRef.current = true;
+    setAttempt((value) => value + 1);
+  }, []);
+  return { ...state, reload, refresh };
 }

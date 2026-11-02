@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { API_PREFIX, type Endpoint } from "./endpoint";
+import { API_PREFIX, IDEMPOTENCY_HEADER, type Endpoint } from "./endpoint";
 import { apiErrorBodySchema } from "./errors";
 import { allEndpoints } from "./registry";
 
@@ -51,6 +51,18 @@ function toOperation(endpoint: Endpoint): Operation {
     parameters: [
       ...objectParameters(endpoint.params, "path"),
       ...objectParameters(endpoint.query, "query"),
+      ...(endpoint.idempotent
+        ? [
+            {
+              name: IDEMPOTENCY_HEADER,
+              in: "header",
+              required: true,
+              description:
+                "A unique key per action; a repeated request with the same key runs once.",
+              schema: { type: "string" },
+            },
+          ]
+        : []),
     ],
     responses: {
       "200": {

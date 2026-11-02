@@ -23,7 +23,8 @@ Open `/ar` and sign in with one of these mock accounts. Each request makes a new
 
 | Role                  | ID                      | Home                 |
 | --------------------- | ----------------------- | -------------------- |
-| Student               | `240102791`             | `/student`           |
+| Student (no booking)  | `240102791`             | `/student`           |
+| Student (subscribed)  | `240102684`             | `/student`           |
 | Parent                | `01098765432`           | `/parent`            |
 | Driver / supervisor   | `DRV-1001` / `SUP-1001` | `/driver`            |
 | Transportation office | `TRN-1001`              | `/admin`             |
@@ -34,6 +35,14 @@ Open `/ar` and sign in with one of these mock accounts. Each request makes a new
 | Abu El Hol            | `BUS-1001`              | `/admin/bus-company` |
 | Super admin           | `ADM-1001`              | `/admin`             |
 | Disabled account      | `240100000`             | (refused)            |
+
+Student pages in mock mode (phase 2):
+
+- Bookings and receipts are kept in the browser (`localStorage`), so they survive a refresh.
+- The mock finance office approves a receipt 20 seconds after it arrives. A reference number
+  ending in `0000` is rejected instead, so you can see the rejected state.
+- Only lines 5, 6, 9, 12 and 15 have free seats; every other bus is full.
+- To start over, clear the site data in the browser.
 
 While in mock mode, two developer pages are available:
 

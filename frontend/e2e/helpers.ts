@@ -20,3 +20,27 @@ export async function expectNoSidewaysScroll(page: Page) {
 export function isPhone(page: Page): boolean {
   return (page.viewportSize()?.width ?? 0) < 1024;
 }
+
+/** Mock mode shows each new code on the code step, in place of the SMS. */
+export async function shownCode(page: Page): Promise<string> {
+  const text = await page.getByText(/(Demo code|كود التجربة): \d+/).textContent();
+  return /\d{4,6}/.exec(text ?? "")?.[0] ?? "";
+}
+
+/** A code that is certainly not the right one. */
+export function wrongCodeFor(code: string, salt: number): string {
+  return code.replace(/^\d/, (digit) => String((Number(digit) + salt) % 10));
+}
+
+export async function requestCode(page: Page, identifier: string) {
+  await page.getByLabel("University ID, staff ID or phone").fill(identifier);
+  await page.getByRole("button", { name: "Send code" }).click();
+}
+
+/** Signs in through the real screens: ID → code (auto-submits when complete). */
+export async function signIn(page: Page, identifier: string, path = "/en/login") {
+  await page.goto(path);
+  await requestCode(page, identifier);
+  await expect(page.getByRole("heading", { name: "Enter the code" })).toBeVisible();
+  await page.getByLabel("One-time code").fill(await shownCode(page));
+}

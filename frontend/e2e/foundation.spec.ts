@@ -129,8 +129,8 @@ test.describe("app frame", () => {
     await page.goto("/en/preview/student");
     const bar = page.getByRole("navigation", { name: "Quick navigation" });
     await expect(bar).toBeVisible();
-    await bar.getByRole("link", { name: "Track my bus" }).click();
-    await expect(page).toHaveURL(/\/en\/preview\/student\/tracking$/);
+    await bar.getByRole("link", { name: "Lines & booking" }).click();
+    await expect(page).toHaveURL(/\/en\/preview\/student\/lines$/);
   });
 });
 

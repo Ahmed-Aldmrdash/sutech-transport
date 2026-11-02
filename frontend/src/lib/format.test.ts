@@ -28,3 +28,13 @@ describe("dates", () => {
     expect(formatDateTime(winterUtc, "en")).toMatch(/Dec/);
   });
 });
+
+describe("timetable values", () => {
+  it("shows an HH:MM timetable time without shifting it", async () => {
+    const { formatClockTime, formatCalendarDate, todayInCairo } = await import("./format");
+    expect(formatClockTime("07:40", "en")).toMatch(/7:40/);
+    expect(formatClockTime("07:40", "ar")).toMatch(/7:40/);
+    expect(formatCalendarDate("2027-01-21", "en")).toMatch(/Jan 21, 2027/);
+    expect(todayInCairo(new Date("2026-11-01T22:30:00Z"))).toBe("2026-11-02");
+  });
+});

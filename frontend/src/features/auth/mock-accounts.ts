@@ -36,6 +36,18 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     "01012345907",
   ),
   account(
+    {
+      id: "usr_student_2",
+      role: Role.Student,
+      name: "Mariam Adel",
+      identifier: "240102684",
+      faculty: "Faculty of Industry and Energy Technology",
+      level: 2,
+      guardian_name: "Adel Mahmoud",
+    },
+    "01012340684",
+  ),
+  account(
     { id: "usr_parent_1", role: Role.Parent, name: "Mohamed Aldmrdash", identifier: "01098765432" },
     "01098765432",
   ),

@@ -2,6 +2,7 @@ import type { z } from "zod";
 import { ApiMode, appConfig } from "@/lib/config";
 import {
   API_PREFIX,
+  IDEMPOTENCY_HEADER,
   buildPath,
   buildQueryString,
   type Endpoint,
@@ -23,6 +24,11 @@ const REQUEST_TIMEOUT_MS = 15_000;
 
 export interface RequestOptions {
   signal?: AbortSignal;
+  /**
+   * For idempotent endpoints: reuse the same key when retrying the same action, so the server
+   * runs it once. A new key is made for each call when none is given.
+   */
+  idempotencyKey?: string;
 }
 
 type UnauthorizedHandler = () => void;
@@ -45,6 +51,7 @@ interface TransportRequest {
   endpoint: Endpoint;
   parsed: ParsedInput<Endpoint>;
   token: string | null;
+  idempotencyKey?: string;
   signal?: AbortSignal;
 }
 
@@ -84,13 +91,14 @@ async function sendToMock({
     import("./mock/handlers"),
   ]);
   await sleep(appConfig.mockLatencyMs, signal);
-  return handleMockRequest(endpoint, parsed, { token });
+  return handleMockRequest(endpoint, parsed, { token, language: currentLanguage() ?? "ar" });
 }
 
 async function sendToServer({
   endpoint,
   parsed,
   token,
+  idempotencyKey,
   signal,
 }: TransportRequest): Promise<MockResponse> {
   const url =
@@ -104,6 +112,7 @@ async function sendToServer({
   if (language) headers["Accept-Language"] = language;
   if (token) headers.Authorization = `Bearer ${token}`;
   if (parsed.body !== undefined) headers["Content-Type"] = "application/json";
+  if (idempotencyKey) headers[IDEMPOTENCY_HEADER] = idempotencyKey;
 
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
@@ -164,6 +173,9 @@ export async function callEndpoint<E extends Endpoint>(
     endpoint,
     parsed,
     token: tokenStore.get(),
+    idempotencyKey: endpoint.idempotent
+      ? (options.idempotencyKey ?? crypto.randomUUID())
+      : undefined,
     signal: options.signal,
   };
   const { status, body } =
