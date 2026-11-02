@@ -11,6 +11,7 @@ import {
   findActiveItem,
   primaryItems,
   roleHomeHref,
+  type NavBadges,
   type RoleNavigation,
 } from "@/features/navigation/nav-config";
 import { BottomNav } from "./bottom-nav";
@@ -27,6 +28,8 @@ interface AppShellProps {
   onSignOut?: () => void;
   /** Extra controls in the top bar, before language and theme (e.g. notifications). */
   topBarActions?: ReactNode;
+  /** Counts shown on menu items, e.g. unread notifications. */
+  badges?: NavBadges;
   children: ReactNode;
 }
 
@@ -35,7 +38,14 @@ interface AppShellProps {
  * Laptop (≥1024px): fixed sidebar at the start edge + top bar + content capped at 1280px.
  * Phone: top app bar with a menu button, and a bottom bar for the role's main pages.
  */
-export function AppShell({ navigation, user, onSignOut, topBarActions, children }: AppShellProps) {
+export function AppShell({
+  navigation,
+  user,
+  onSignOut,
+  topBarActions,
+  badges,
+  children,
+}: AppShellProps) {
   const t = useTranslations();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -74,7 +84,7 @@ export function AppShell({ navigation, user, onSignOut, topBarActions, children 
           </Link>
         </div>
         <nav aria-label={t("common.mainNavigation")} className="flex-1 overflow-y-auto p-3">
-          <NavLinks navigation={navigation} activeItem={activeItem} />
+          <NavLinks navigation={navigation} activeItem={activeItem} badges={badges} />
         </nav>
         <div className="flex flex-col gap-2 border-t border-line p-3">
           <UserBadge user={user} className="px-2 py-1" />
@@ -126,6 +136,7 @@ export function AppShell({ navigation, user, onSignOut, topBarActions, children 
           basePath={navigation.basePath}
           items={bottomItems}
           activeItem={activeItem}
+          badges={badges}
           onOpenMenu={hasOverflow ? () => setIsMenuOpen(true) : undefined}
         />
       ) : null}
@@ -134,6 +145,7 @@ export function AppShell({ navigation, user, onSignOut, topBarActions, children 
         <NavLinks
           navigation={navigation}
           activeItem={activeItem}
+          badges={badges}
           onNavigate={() => setIsMenuOpen(false)}
         />
         {signOut ? (

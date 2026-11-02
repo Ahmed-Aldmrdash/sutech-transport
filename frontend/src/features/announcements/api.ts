@@ -4,6 +4,7 @@ import { ALL_ROLES } from "@/lib/auth/roles";
 import {
   announcementPageSchema,
   listAnnouncementsQuerySchema,
+  type AnnouncementKind,
   type AnnouncementPage,
 } from "./schema";
 
@@ -13,7 +14,9 @@ export const listAnnouncementsEndpoint = defineEndpoint({
   path: "/announcements",
   summary:
     "Announcements for the caller, newest first: official notices for everyone, and delays or " +
-    "changes on the caller's own line. Text follows Accept-Language.",
+    "changes on the caller's own line. Optional `kind` filter. Text follows Accept-Language. " +
+    "Published by the Transportation office (admin pages, later phase); each new one also " +
+    "creates an `announcement` notification.",
   tag: "announcements",
   access: ALL_ROLES,
   query: listAnnouncementsQuerySchema,
@@ -21,7 +24,7 @@ export const listAnnouncementsEndpoint = defineEndpoint({
 });
 
 export function listAnnouncements(
-  query: { page?: number; page_size?: number } = {},
+  query: { kind?: AnnouncementKind; page?: number; page_size?: number } = {},
   options?: RequestOptions,
 ): Promise<AnnouncementPage> {
   return callEndpoint(listAnnouncementsEndpoint, { query }, options);

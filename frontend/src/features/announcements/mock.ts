@@ -1,5 +1,5 @@
 import { requireMockAccount } from "@/features/auth/mock-token";
-import { localized } from "@/features/lines/mock-builders";
+import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
 import { registerMock } from "@/lib/api/mock/mock-server";
 import { listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
@@ -8,6 +8,18 @@ const DEFAULT_PAGE_SIZE = 20;
 
 /** Notices taken from the Fall 2026 registration letter and Ahmed's notes (2026-11-02). */
 const MOCK_ANNOUNCEMENTS = [
+  {
+    id: "ann_delay_ln07",
+    kind: AnnouncementKind.Delay,
+    lineId: "ln_07",
+    publishedAt: "2026-11-02T05:20:00Z",
+    titleAr: "خط 7 متأخر حوالي 15 دقيقة",
+    titleEn: "Line 7 is running about 15 minutes late",
+    bodyAr: "زحمة على طريق السويس. الباص هيعدي على المحطات متأخر حوالي ربع ساعة النهارده.",
+    bodyEn:
+      "Heavy traffic on the Suez road. The bus will reach each stop about a quarter of an hour " +
+      "late today.",
+  },
   {
     id: "ann_return_times",
     kind: AnnouncementKind.ServiceChange,
@@ -57,17 +69,29 @@ const MOCK_ANNOUNCEMENTS = [
   },
 ] as const;
 
-registerMock(listAnnouncementsEndpoint, ({ query }, { token, language }) => {
-  requireMockAccount(token);
-  const page = query.page ?? 1;
-  const pageSize = query.page_size ?? DEFAULT_PAGE_SIZE;
-  const items: Announcement[] = MOCK_ANNOUNCEMENTS.map((item) => ({
+function lineOf(item: (typeof MOCK_ANNOUNCEMENTS)[number], language: string) {
+  const source = "lineId" in item ? findMockLine(item.lineId) : undefined;
+  return source ? toLineSummary(source, language) : null;
+}
+
+/** Every announcement, newest first. Also read by the notifications mock. */
+export function mockAnnouncements(language: string): Announcement[] {
+  return MOCK_ANNOUNCEMENTS.map((item) => ({
     announcement_id: item.id,
     kind: item.kind,
     title: localized(language, item.titleAr, item.titleEn),
     body: localized(language, item.bodyAr, item.bodyEn),
-    line: null,
+    line: lineOf(item, language),
     published_at: item.publishedAt,
   }));
+}
+
+registerMock(listAnnouncementsEndpoint, ({ query }, { token, language }) => {
+  requireMockAccount(token);
+  const page = query.page ?? 1;
+  const pageSize = query.page_size ?? DEFAULT_PAGE_SIZE;
+  const items = mockAnnouncements(language).filter(
+    (item) => !query.kind || item.kind === query.kind,
+  );
   return { items: items.slice((page - 1) * pageSize, page * pageSize), total: items.length };
 });

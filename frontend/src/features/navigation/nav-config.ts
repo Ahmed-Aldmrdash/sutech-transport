@@ -87,6 +87,9 @@ export interface NavItem {
   primary?: boolean;
 }
 
+/** A number to show on a menu item (unread notifications). 0 or missing shows nothing. */
+export type NavBadges = Partial<Record<NavItemKey, number>>;
+
 export interface NavGroup {
   key: NavGroupKey;
   items: readonly NavItem[];

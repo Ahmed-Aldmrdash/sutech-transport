@@ -4,12 +4,18 @@ import { useTranslations } from "next-intl";
 import { useEffect, type ReactNode } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { navigationFor } from "@/features/navigation/nav-config";
+import { NotificationBell } from "@/features/notifications/components/notification-bell";
+import { NotificationsWatcher } from "@/features/notifications/components/notifications-watcher";
+import { useUnreadCount } from "@/features/notifications/unread-store";
+import { Role } from "@/lib/auth/roles";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { SignInReason, canOpen, homePathFor, loginHref } from "../access";
 import { SessionStatus } from "../session/session-store";
 import { SessionWatcher } from "../session/session-watcher";
 import { useSession, useSignOut } from "../session/use-session";
 import { FullPageLoader } from "./full-page-loader";
+
+const STUDENT_NOTIFICATIONS_PATH = "/student/notifications";
 
 /**
  * Wraps every signed-in page. Signed out → sign-in screen (coming back here after an expiry).
@@ -22,6 +28,7 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const state = useSession();
   const signOut = useSignOut();
+  const unreadCount = useUnreadCount();
 
   const user = state.status === SessionStatus.SignedIn ? state.session.user : null;
   const isAllowed = user !== null && canOpen(user.role, pathname);
@@ -45,13 +52,24 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
   }
 
   const { session } = state;
+  const isStudent = session.user.role === Role.Student;
   return (
     <AppShell
       navigation={navigationFor(session.user.role)}
       user={{ name: session.user.name, roleLabel: t(`roles.${session.user.role}`) }}
       onSignOut={signOut}
+      topBarActions={
+        isStudent ? (
+          <NotificationBell
+            href={STUDENT_NOTIFICATIONS_PATH}
+            className="hidden desktop:inline-flex"
+          />
+        ) : null
+      }
+      badges={isStudent ? { notifications: unreadCount } : undefined}
     >
       <SessionWatcher token={session.token} expiresAt={session.expires_at} />
+      {isStudent ? <NotificationsWatcher /> : null}
       {children}
     </AppShell>
   );

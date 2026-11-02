@@ -1,4 +1,5 @@
 export { Alert } from "./alert";
+export { BackLink } from "./back-link";
 export { Badge, LiveDot } from "./badge";
 export { Button, ButtonLink, buttonStyles, type ButtonProps } from "./button";
 export { Card, CardBody, CardFooter, CardHeader } from "./card";
@@ -6,6 +7,7 @@ export { Checkbox, Radio, Switch } from "./choice";
 export { ConfirmDialog, Dialog } from "./dialog";
 export { EmptyState } from "./empty-state";
 export { ErrorState } from "./error-state";
+export { FilterChips } from "./filter-chips";
 export { Field, type FieldControlProps } from "./field";
 export { IconButton } from "./icon-button";
 export { SelectField, TextAreaField, TextField, type SelectOption } from "./input";

@@ -24,7 +24,14 @@ export type Announcement = z.infer<typeof announcementSchema>;
 
 export const ANNOUNCEMENTS_MAX_PAGE_SIZE = 50;
 
+export const ANNOUNCEMENT_KINDS = [
+  AnnouncementKind.Official,
+  AnnouncementKind.Delay,
+  AnnouncementKind.ServiceChange,
+] as const;
+
 export const listAnnouncementsQuerySchema = z.object({
+  kind: z.enum(ANNOUNCEMENT_KINDS).optional(),
   page: z.number().int().positive().optional(),
   page_size: z.number().int().positive().max(ANNOUNCEMENTS_MAX_PAGE_SIZE).optional(),
 });

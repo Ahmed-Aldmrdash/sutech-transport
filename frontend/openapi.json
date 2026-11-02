@@ -2376,7 +2376,7 @@
     "/api/v1/announcements": {
       "get": {
         "operationId": "announcements.list",
-        "summary": "Announcements for the caller, newest first: official notices for everyone, and delays or changes on the caller's own line. Text follows Accept-Language.",
+        "summary": "Announcements for the caller, newest first: official notices for everyone, and delays or changes on the caller's own line. Optional `kind` filter. Text follows Accept-Language. Published by the Transportation office (admin pages, later phase); each new one also creates an `announcement` notification.",
         "tags": [
           "announcements"
         ],
@@ -2394,6 +2394,19 @@
           "parent"
         ],
         "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "official",
+                "delay",
+                "service_change"
+              ]
+            }
+          },
           {
             "name": "page",
             "in": "query",
@@ -2499,6 +2512,4360 @@
                   "required": [
                     "items",
                     "total"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/requests/me": {
+      "get": {
+        "operationId": "requests.listMine",
+        "summary": "The student's line change, refund and complaint requests this term, newest first, each with its status history. Office notes follow Accept-Language.",
+        "tags": [
+          "requests"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "line_change",
+                "refund",
+                "complaint"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "submitted",
+                              "in_review",
+                              "approved",
+                              "rejected",
+                              "resolved",
+                              "withdrawn"
+                            ]
+                          },
+                          "submitted_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "timeline": {
+                            "minItems": 1,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string",
+                                  "enum": [
+                                    "submitted",
+                                    "in_review",
+                                    "approved",
+                                    "rejected",
+                                    "resolved",
+                                    "withdrawn"
+                                  ]
+                                },
+                                "at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                "by": {
+                                  "type": "string",
+                                  "enum": [
+                                    "student",
+                                    "transport_office",
+                                    "finance"
+                                  ]
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "at",
+                                "by",
+                                "note"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "line_change"
+                          },
+                          "details": {
+                            "type": "object",
+                            "properties": {
+                              "from_line": {
+                                "type": "object",
+                                "properties": {
+                                  "line_id": {
+                                    "type": "string"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "line_id",
+                                  "code",
+                                  "name"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "to_line": {
+                                "type": "object",
+                                "properties": {
+                                  "line_id": {
+                                    "type": "string"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "line_id",
+                                  "code",
+                                  "name"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "to_stop": {
+                                "type": "object",
+                                "properties": {
+                                  "stop_id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "stop_id",
+                                  "name"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "duration": {
+                                "type": "string",
+                                "enum": [
+                                  "permanent",
+                                  "temporary"
+                                ]
+                              },
+                              "starts_on": {
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              },
+                              "ends_on": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "date",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "reason": {
+                                "type": "string"
+                              },
+                              "student_phone": {
+                                "type": "string"
+                              },
+                              "guardian_name": {
+                                "type": "string"
+                              },
+                              "guardian_phone": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "from_line",
+                              "to_line",
+                              "to_stop",
+                              "duration",
+                              "starts_on",
+                              "ends_on",
+                              "reason",
+                              "student_phone",
+                              "guardian_name",
+                              "guardian_phone"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "request_id",
+                          "reference",
+                          "status",
+                          "submitted_at",
+                          "updated_at",
+                          "timeline",
+                          "kind",
+                          "details"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "submitted",
+                              "in_review",
+                              "approved",
+                              "rejected",
+                              "resolved",
+                              "withdrawn"
+                            ]
+                          },
+                          "submitted_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "timeline": {
+                            "minItems": 1,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string",
+                                  "enum": [
+                                    "submitted",
+                                    "in_review",
+                                    "approved",
+                                    "rejected",
+                                    "resolved",
+                                    "withdrawn"
+                                  ]
+                                },
+                                "at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                "by": {
+                                  "type": "string",
+                                  "enum": [
+                                    "student",
+                                    "transport_office",
+                                    "finance"
+                                  ]
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "at",
+                                "by",
+                                "note"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "refund"
+                          },
+                          "details": {
+                            "type": "object",
+                            "properties": {
+                              "subscription_id": {
+                                "type": "string"
+                              },
+                              "reason": {
+                                "type": "string",
+                                "enum": [
+                                  "standard",
+                                  "medical",
+                                  "bereavement",
+                                  "transfer"
+                                ]
+                              },
+                              "explanation": {
+                                "type": "string"
+                              },
+                              "paid_piasters": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "deduction_percent": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100
+                              },
+                              "estimated_refund_piasters": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "guardian_name": {
+                                "type": "string"
+                              },
+                              "guardian_phone": {
+                                "type": "string"
+                              },
+                              "attachments": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "attachment_id": {
+                                      "type": "string"
+                                    },
+                                    "file_name": {
+                                      "type": "string"
+                                    },
+                                    "content_type": {
+                                      "type": "string"
+                                    },
+                                    "size_bytes": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 9007199254740991
+                                    }
+                                  },
+                                  "required": [
+                                    "attachment_id",
+                                    "file_name",
+                                    "content_type",
+                                    "size_bytes"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              }
+                            },
+                            "required": [
+                              "subscription_id",
+                              "reason",
+                              "explanation",
+                              "paid_piasters",
+                              "deduction_percent",
+                              "estimated_refund_piasters",
+                              "guardian_name",
+                              "guardian_phone",
+                              "attachments"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "request_id",
+                          "reference",
+                          "status",
+                          "submitted_at",
+                          "updated_at",
+                          "timeline",
+                          "kind",
+                          "details"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "submitted",
+                              "in_review",
+                              "approved",
+                              "rejected",
+                              "resolved",
+                              "withdrawn"
+                            ]
+                          },
+                          "submitted_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "timeline": {
+                            "minItems": 1,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "status": {
+                                  "type": "string",
+                                  "enum": [
+                                    "submitted",
+                                    "in_review",
+                                    "approved",
+                                    "rejected",
+                                    "resolved",
+                                    "withdrawn"
+                                  ]
+                                },
+                                "at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                "by": {
+                                  "type": "string",
+                                  "enum": [
+                                    "student",
+                                    "transport_office",
+                                    "finance"
+                                  ]
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "at",
+                                "by",
+                                "note"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "complaint"
+                          },
+                          "details": {
+                            "type": "object",
+                            "properties": {
+                              "category": {
+                                "type": "string",
+                                "enum": [
+                                  "driver_behaviour",
+                                  "delay",
+                                  "bus_condition",
+                                  "crowding",
+                                  "safety",
+                                  "payment",
+                                  "other"
+                                ]
+                              },
+                              "line": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "line_id": {
+                                        "type": "string"
+                                      },
+                                      "code": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "line_id",
+                                      "code",
+                                      "name"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "happened_on": {
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "attachments": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "attachment_id": {
+                                      "type": "string"
+                                    },
+                                    "file_name": {
+                                      "type": "string"
+                                    },
+                                    "content_type": {
+                                      "type": "string"
+                                    },
+                                    "size_bytes": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 9007199254740991
+                                    }
+                                  },
+                                  "required": [
+                                    "attachment_id",
+                                    "file_name",
+                                    "content_type",
+                                    "size_bytes"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              }
+                            },
+                            "required": [
+                              "category",
+                              "line",
+                              "happened_on",
+                              "description",
+                              "attachments"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "request_id",
+                          "reference",
+                          "status",
+                          "submitted_at",
+                          "updated_at",
+                          "timeline",
+                          "kind",
+                          "details"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/requests/refund-policy": {
+      "get": {
+        "operationId": "requests.getRefundPolicy",
+        "summary": "The term's refund table, today's deduction (Cairo date) and the amount the student paid. From the server so the dates change each term without a new app.",
+        "tags": [
+          "requests"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "term_name": {
+                      "type": "string"
+                    },
+                    "windows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "to": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "deduction_percent": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "to",
+                          "deduction_percent"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "today_deduction_percent": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    "paid_piasters": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "subscription_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "payout_days": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "processing_days": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "term_name",
+                    "windows",
+                    "today_deduction_percent",
+                    "paid_piasters",
+                    "subscription_id",
+                    "payout_days",
+                    "processing_days"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/requests/{request_id}": {
+      "get": {
+        "operationId": "requests.get",
+        "summary": "One of the student's own requests. Another student's request answers 404.",
+        "tags": [
+          "requests"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "line_change"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "from_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_stop": {
+                              "type": "object",
+                              "properties": {
+                                "stop_id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "stop_id",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "duration": {
+                              "type": "string",
+                              "enum": [
+                                "permanent",
+                                "temporary"
+                              ]
+                            },
+                            "starts_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "ends_on": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "student_phone": {
+                              "type": "string"
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from_line",
+                            "to_line",
+                            "to_stop",
+                            "duration",
+                            "starts_on",
+                            "ends_on",
+                            "reason",
+                            "student_phone",
+                            "guardian_name",
+                            "guardian_phone"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "refund"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "subscription_id": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string",
+                              "enum": [
+                                "standard",
+                                "medical",
+                                "bereavement",
+                                "transfer"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "paid_piasters": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "deduction_percent": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "estimated_refund_piasters": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "subscription_id",
+                            "reason",
+                            "explanation",
+                            "paid_piasters",
+                            "deduction_percent",
+                            "estimated_refund_piasters",
+                            "guardian_name",
+                            "guardian_phone",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "complaint"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "category": {
+                              "type": "string",
+                              "enum": [
+                                "driver_behaviour",
+                                "delay",
+                                "bus_condition",
+                                "crowding",
+                                "safety",
+                                "payment",
+                                "other"
+                              ]
+                            },
+                            "line": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "line_id": {
+                                      "type": "string"
+                                    },
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "line_id",
+                                    "code",
+                                    "name"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "happened_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "category",
+                            "line",
+                            "happened_on",
+                            "description",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/requests/line-change": {
+      "post": {
+        "operationId": "requests.createLineChange",
+        "summary": "The university's line change form: new line and stop, permanent or temporary (with dates), the reason, and the guardian's approval. Needs an active subscription. Errors: NO_ACTIVE_SUBSCRIPTION (409), REQUEST_ALREADY_OPEN (409), SAME_LINE (422), INVALID_DATES (422), LINE_NOT_FOUND (404), STOP_NOT_ON_LINE (422).",
+        "tags": [
+          "requests"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "line_change"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "from_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_stop": {
+                              "type": "object",
+                              "properties": {
+                                "stop_id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "stop_id",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "duration": {
+                              "type": "string",
+                              "enum": [
+                                "permanent",
+                                "temporary"
+                              ]
+                            },
+                            "starts_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "ends_on": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "student_phone": {
+                              "type": "string"
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from_line",
+                            "to_line",
+                            "to_stop",
+                            "duration",
+                            "starts_on",
+                            "ends_on",
+                            "reason",
+                            "student_phone",
+                            "guardian_name",
+                            "guardian_phone"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "refund"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "subscription_id": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string",
+                              "enum": [
+                                "standard",
+                                "medical",
+                                "bereavement",
+                                "transfer"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "paid_piasters": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "deduction_percent": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "estimated_refund_piasters": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "subscription_id",
+                            "reason",
+                            "explanation",
+                            "paid_piasters",
+                            "deduction_percent",
+                            "estimated_refund_piasters",
+                            "guardian_name",
+                            "guardian_phone",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "complaint"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "category": {
+                              "type": "string",
+                              "enum": [
+                                "driver_behaviour",
+                                "delay",
+                                "bus_condition",
+                                "crowding",
+                                "safety",
+                                "payment",
+                                "other"
+                              ]
+                            },
+                            "line": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "line_id": {
+                                      "type": "string"
+                                    },
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "line_id",
+                                    "code",
+                                    "name"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "happened_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "category",
+                            "line",
+                            "happened_on",
+                            "description",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "guardian_name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 100
+                  },
+                  "guardian_phone": {
+                    "type": "string",
+                    "pattern": "^01[0125]\\d{8}$"
+                  },
+                  "guardian_consent": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "to_line_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "to_stop_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "duration": {
+                    "type": "string",
+                    "enum": [
+                      "permanent",
+                      "temporary"
+                    ]
+                  },
+                  "starts_on": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "ends_on": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 1000
+                  },
+                  "student_phone": {
+                    "type": "string",
+                    "pattern": "^01[0125]\\d{8}$"
+                  }
+                },
+                "required": [
+                  "guardian_name",
+                  "guardian_phone",
+                  "guardian_consent",
+                  "to_line_id",
+                  "to_stop_id",
+                  "duration",
+                  "starts_on",
+                  "ends_on",
+                  "reason",
+                  "student_phone"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/requests/refund": {
+      "post": {
+        "operationId": "requests.createRefund",
+        "summary": "Cancels the paid subscription and asks for a refund under the term's refund policy, with the guardian's approval. An ordinary refund is refused once the deduction reaches 100%; medical, bereavement and transfer cases are decided by the university and need documents. Errors: NO_ACTIVE_SUBSCRIPTION (409), REQUEST_ALREADY_OPEN (409), REFUND_WINDOW_CLOSED (422), DOCUMENTS_REQUIRED (422), RECEIPT_TOO_LARGE (413).",
+        "tags": [
+          "requests"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "line_change"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "from_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_stop": {
+                              "type": "object",
+                              "properties": {
+                                "stop_id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "stop_id",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "duration": {
+                              "type": "string",
+                              "enum": [
+                                "permanent",
+                                "temporary"
+                              ]
+                            },
+                            "starts_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "ends_on": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "student_phone": {
+                              "type": "string"
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from_line",
+                            "to_line",
+                            "to_stop",
+                            "duration",
+                            "starts_on",
+                            "ends_on",
+                            "reason",
+                            "student_phone",
+                            "guardian_name",
+                            "guardian_phone"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "refund"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "subscription_id": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string",
+                              "enum": [
+                                "standard",
+                                "medical",
+                                "bereavement",
+                                "transfer"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "paid_piasters": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "deduction_percent": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "estimated_refund_piasters": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "subscription_id",
+                            "reason",
+                            "explanation",
+                            "paid_piasters",
+                            "deduction_percent",
+                            "estimated_refund_piasters",
+                            "guardian_name",
+                            "guardian_phone",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "complaint"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "category": {
+                              "type": "string",
+                              "enum": [
+                                "driver_behaviour",
+                                "delay",
+                                "bus_condition",
+                                "crowding",
+                                "safety",
+                                "payment",
+                                "other"
+                              ]
+                            },
+                            "line": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "line_id": {
+                                      "type": "string"
+                                    },
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "line_id",
+                                    "code",
+                                    "name"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "happened_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "category",
+                            "line",
+                            "happened_on",
+                            "description",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "guardian_name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 100
+                  },
+                  "guardian_phone": {
+                    "type": "string",
+                    "pattern": "^01[0125]\\d{8}$"
+                  },
+                  "guardian_consent": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "subscription_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "standard",
+                      "medical",
+                      "bereavement",
+                      "transfer"
+                    ]
+                  },
+                  "explanation": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 1000
+                  },
+                  "documents": {
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "file_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "content_type": {
+                          "type": "string",
+                          "enum": [
+                            "image/jpeg",
+                            "image/png",
+                            "application/pdf"
+                          ]
+                        },
+                        "data_base64": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "file_name",
+                        "content_type",
+                        "data_base64"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "guardian_name",
+                  "guardian_phone",
+                  "guardian_consent",
+                  "subscription_id",
+                  "reason",
+                  "explanation",
+                  "documents"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/requests/complaint": {
+      "post": {
+        "operationId": "requests.createComplaint",
+        "summary": "A complaint to the Transportation office (driver, delay, bus condition, crowding, safety, payment, other), with optional photos. Payment complaints need a booking; the others an active subscription. Errors: NO_SUBSCRIPTION (409), NO_ACTIVE_SUBSCRIPTION (409), LINE_NOT_FOUND (404), INVALID_DATES (422), RECEIPT_TOO_LARGE (413).",
+        "tags": [
+          "requests"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "line_change"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "from_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_stop": {
+                              "type": "object",
+                              "properties": {
+                                "stop_id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "stop_id",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "duration": {
+                              "type": "string",
+                              "enum": [
+                                "permanent",
+                                "temporary"
+                              ]
+                            },
+                            "starts_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "ends_on": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "student_phone": {
+                              "type": "string"
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from_line",
+                            "to_line",
+                            "to_stop",
+                            "duration",
+                            "starts_on",
+                            "ends_on",
+                            "reason",
+                            "student_phone",
+                            "guardian_name",
+                            "guardian_phone"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "refund"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "subscription_id": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string",
+                              "enum": [
+                                "standard",
+                                "medical",
+                                "bereavement",
+                                "transfer"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "paid_piasters": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "deduction_percent": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "estimated_refund_piasters": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "subscription_id",
+                            "reason",
+                            "explanation",
+                            "paid_piasters",
+                            "deduction_percent",
+                            "estimated_refund_piasters",
+                            "guardian_name",
+                            "guardian_phone",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "complaint"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "category": {
+                              "type": "string",
+                              "enum": [
+                                "driver_behaviour",
+                                "delay",
+                                "bus_condition",
+                                "crowding",
+                                "safety",
+                                "payment",
+                                "other"
+                              ]
+                            },
+                            "line": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "line_id": {
+                                      "type": "string"
+                                    },
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "line_id",
+                                    "code",
+                                    "name"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "happened_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "category",
+                            "line",
+                            "happened_on",
+                            "description",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "driver_behaviour",
+                      "delay",
+                      "bus_condition",
+                      "crowding",
+                      "safety",
+                      "payment",
+                      "other"
+                    ]
+                  },
+                  "line_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "happened_on": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 1000
+                  },
+                  "attachments": {
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "file_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "content_type": {
+                          "type": "string",
+                          "enum": [
+                            "image/jpeg",
+                            "image/png",
+                            "application/pdf"
+                          ]
+                        },
+                        "data_base64": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "file_name",
+                        "content_type",
+                        "data_base64"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "category",
+                  "line_id",
+                  "happened_on",
+                  "description",
+                  "attachments"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/requests/{request_id}/withdraw": {
+      "post": {
+        "operationId": "requests.withdraw",
+        "summary": "The student takes back a request the office hasn't started on yet. Errors: NOT_WITHDRAWABLE (409).",
+        "tags": [
+          "requests"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "line_change"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "from_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "to_stop": {
+                              "type": "object",
+                              "properties": {
+                                "stop_id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "stop_id",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "duration": {
+                              "type": "string",
+                              "enum": [
+                                "permanent",
+                                "temporary"
+                              ]
+                            },
+                            "starts_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "ends_on": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "format": "date",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "student_phone": {
+                              "type": "string"
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "from_line",
+                            "to_line",
+                            "to_stop",
+                            "duration",
+                            "starts_on",
+                            "ends_on",
+                            "reason",
+                            "student_phone",
+                            "guardian_name",
+                            "guardian_phone"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "refund"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "subscription_id": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string",
+                              "enum": [
+                                "standard",
+                                "medical",
+                                "bereavement",
+                                "transfer"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "paid_piasters": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "deduction_percent": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "estimated_refund_piasters": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "guardian_name": {
+                              "type": "string"
+                            },
+                            "guardian_phone": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "subscription_id",
+                            "reason",
+                            "explanation",
+                            "paid_piasters",
+                            "deduction_percent",
+                            "estimated_refund_piasters",
+                            "guardian_name",
+                            "guardian_phone",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "request_id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "submitted",
+                            "in_review",
+                            "approved",
+                            "rejected",
+                            "resolved",
+                            "withdrawn"
+                          ]
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "timeline": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "submitted",
+                                  "in_review",
+                                  "approved",
+                                  "rejected",
+                                  "resolved",
+                                  "withdrawn"
+                                ]
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "by": {
+                                "type": "string",
+                                "enum": [
+                                  "student",
+                                  "transport_office",
+                                  "finance"
+                                ]
+                              },
+                              "note": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status",
+                              "at",
+                              "by",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "complaint"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "category": {
+                              "type": "string",
+                              "enum": [
+                                "driver_behaviour",
+                                "delay",
+                                "bus_condition",
+                                "crowding",
+                                "safety",
+                                "payment",
+                                "other"
+                              ]
+                            },
+                            "line": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "line_id": {
+                                      "type": "string"
+                                    },
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "line_id",
+                                    "code",
+                                    "name"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "happened_on": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "attachments": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "attachment_id": {
+                                    "type": "string"
+                                  },
+                                  "file_name": {
+                                    "type": "string"
+                                  },
+                                  "content_type": {
+                                    "type": "string"
+                                  },
+                                  "size_bytes": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                "required": [
+                                  "attachment_id",
+                                  "file_name",
+                                  "content_type",
+                                  "size_bytes"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "category",
+                            "line",
+                            "happened_on",
+                            "description",
+                            "attachments"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "request_id",
+                        "reference",
+                        "status",
+                        "submitted_at",
+                        "updated_at",
+                        "timeline",
+                        "kind",
+                        "details"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "operationId": "notifications.list",
+        "summary": "The caller's notifications, newest first, with the unread count. New ones also arrive live as the `notification.new` event; the app re-reads this list when one comes in. Text follows Accept-Language.",
+        "tags": [
+          "notifications"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "finance",
+          "clinic",
+          "student_affairs",
+          "secretary_general",
+          "bus_company",
+          "driver",
+          "supervisor",
+          "student",
+          "parent"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "unread_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "notification_id": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "bus_near",
+                              "bus_delayed",
+                              "payment_approved",
+                              "payment_rejected",
+                              "request_update",
+                              "announcement"
+                            ]
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "body": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "read_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "link": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "target": {
+                                    "type": "string",
+                                    "enum": [
+                                      "home",
+                                      "tracking",
+                                      "payment",
+                                      "card",
+                                      "request",
+                                      "complaint",
+                                      "announcements"
+                                    ]
+                                  },
+                                  "id": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "target",
+                                  "id"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "notification_id",
+                          "kind",
+                          "title",
+                          "body",
+                          "created_at",
+                          "read_at",
+                          "link"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "unread_count": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "unread_count"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notifications/read-all": {
+      "post": {
+        "operationId": "notifications.markAllRead",
+        "summary": "Marks every notification read. Returns the new unread count (0).",
+        "tags": [
+          "notifications"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "finance",
+          "clinic",
+          "student_affairs",
+          "secretary_general",
+          "bus_company",
+          "driver",
+          "supervisor",
+          "student",
+          "parent"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "unread_count": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "unread_count"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notifications/{notification_id}/read": {
+      "post": {
+        "operationId": "notifications.markRead",
+        "summary": "Marks one notification read (already read: no change). Returns the new unread count.",
+        "tags": [
+          "notifications"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "finance",
+          "clinic",
+          "student_affairs",
+          "secretary_general",
+          "bus_company",
+          "driver",
+          "supervisor",
+          "student",
+          "parent"
+        ],
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "unread_count": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "unread_count"
                   ],
                   "additionalProperties": false
                 }
