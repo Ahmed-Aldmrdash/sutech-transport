@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { expectNoSidewaysScroll, isPhone, signIn, watchForErrors } from "./helpers";
 
-const MARIAM = "240102684"; // active on line 5
+const MARIAM = "240102684"; // Omar, active on line 7
 const AHMED = "240102791"; // no booking
 
 test.describe("student requests, notifications and settings", () => {
@@ -30,7 +30,7 @@ test.describe("student requests, notifications and settings", () => {
 
     await page.waitForURL(/\/en\/student\/requests\/req_/);
     await expect(page.getByText("Waiting for the office")).toBeVisible();
-    await expect(page.getByText("Line 5 → Line 12").first()).toBeVisible();
+    await expect(page.getByText("Line 7 → Line 12").first()).toBeVisible();
     await expectNoSidewaysScroll(page);
 
     await page.getByRole("button", { name: "Withdraw request" }).click();
@@ -98,9 +98,9 @@ test.describe("student requests, notifications and settings", () => {
     await expect(isPhone(page) ? entry.getByText(/new/) : entry).toBeAttached();
     await entry.click();
     await expect(page.getByRole("heading", { name: "Notifications", level: 1 })).toBeVisible();
-    // Only the student's own line: Mariam rides line 5, so line 7's delay never reaches her.
-    await expect(page.getByText("Line 5 is running about 10 minutes late")).toBeVisible();
-    await expect(page.getByText("Line 7 is running about 15 minutes late")).toHaveCount(0);
+    // Only the student's own line: Omar rides line 7, so line 5's delay never reaches him.
+    await expect(page.getByText("Line 7 is running about 15 minutes late")).toBeVisible();
+    await expect(page.getByText("Line 5 is running about 10 minutes late")).toHaveCount(0);
     await page.getByRole("button", { name: "Mark all as read" }).click();
     await expect(page.getByRole("button", { name: "Mark all as read" })).toBeDisabled();
     if (!isPhone(page)) {
@@ -117,8 +117,8 @@ test.describe("student requests, notifications and settings", () => {
     await page.waitForURL(/\/en\/student$/);
     await page.goto("/en/student/announcements");
     await page.getByRole("button", { name: "Delay" }).click();
-    await expect(page.getByText("Line 5 is running about 10 minutes late")).toBeVisible();
-    await expect(page.getByText("Line 7 is running about 15 minutes late")).toHaveCount(0);
+    await expect(page.getByText("Line 7 is running about 15 minutes late")).toBeVisible();
+    await expect(page.getByText("Line 5 is running about 10 minutes late")).toHaveCount(0);
     await expect(page.getByText("Accepted ways to pay")).toHaveCount(0);
   });
 

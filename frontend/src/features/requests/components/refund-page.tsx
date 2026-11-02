@@ -17,6 +17,7 @@ import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession } from "@/features/auth/session/use-session";
+import { userText } from "@/features/auth/user-text";
 import { RECEIPT_MAX_BYTES } from "@/features/payments/schema";
 import { useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -148,7 +149,9 @@ function RefundForm({ policy }: { policy: RefundPolicy }) {
   const toast = useToast();
   const session = useSession();
   const guardianName =
-    session.status === SessionStatus.SignedIn ? (session.session.user.guardian_name ?? "") : "";
+    session.status === SessionStatus.SignedIn
+      ? (userText(session.session.user, locale).guardianName ?? "")
+      : "";
   const windowOpen = isRefundWindowOpen(policy.today_deduction_percent);
   const paid = policy.paid_piasters ?? 0;
 

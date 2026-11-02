@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { expectNoSidewaysScroll, signIn, watchForErrors } from "./helpers";
 
-const MARIAM = "240102684"; // active on line 5
+const MARIAM = "240102684"; // Omar, active on line 7
 const AHMED = "240102791"; // no booking
 
 test.describe("not going today and my trips", () => {

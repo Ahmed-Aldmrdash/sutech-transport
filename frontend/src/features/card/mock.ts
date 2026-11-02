@@ -35,9 +35,10 @@ registerMock(getMyCardEndpoint, (_input, { token, language }) => {
   return {
     card_id: cardId,
     student: {
-      name: user.name,
+      name: localized(language, user.name_ar ?? user.name, user.name),
       identifier: user.identifier,
-      faculty: user.faculty ?? null,
+      faculty:
+        localized(language, user.faculty_ar ?? user.faculty ?? "", user.faculty ?? "") || null,
       level: user.level ?? null,
       photo_url: null,
     },

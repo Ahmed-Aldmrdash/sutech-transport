@@ -1,6 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/routing";
+import { userText } from "../user-text";
 import { useEffect, type ReactNode } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { navigationFor } from "@/features/navigation/nav-config";
@@ -24,6 +26,7 @@ const STUDENT_NOTIFICATIONS_PATH = "/student/notifications";
  */
 export function SignedInFrame({ children }: { children: ReactNode }) {
   const t = useTranslations();
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
   const state = useSession();
@@ -56,7 +59,10 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
   return (
     <AppShell
       navigation={navigationFor(session.user.role)}
-      user={{ name: session.user.name, roleLabel: t(`roles.${session.user.role}`) }}
+      user={{
+        name: userText(session.user, locale).name,
+        roleLabel: t(`roles.${session.user.role}`),
+      }}
       onSignOut={signOut}
       topBarActions={
         isStudent ? (

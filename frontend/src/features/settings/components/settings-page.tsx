@@ -1,7 +1,7 @@
 "use client";
 
 import { Languages, LogOut, Palette, UserRound } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { LanguageSegmented } from "@/components/layout/locale-switcher";
 import { ThemeSegmented } from "@/components/layout/theme-toggle";
@@ -10,6 +10,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/ui/page-header";
 import type { User } from "@/features/auth/schema";
+import { userText } from "@/features/auth/user-text";
+import type { Locale } from "@/i18n/routing";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession, useSignOut } from "@/features/auth/session/use-session";
 
@@ -89,14 +91,15 @@ function SettingCard({
 function AccountCard({ user }: { user: User }) {
   const t = useTranslations("settings");
   const tSession = useTranslations("session");
+  const text = userText(user, useLocale() as Locale);
   const rows: { label: string; value: ReactNode }[] = [
     { label: tSession("identifier"), value: <span dir="ltr">{user.identifier}</span> },
   ];
-  if (user.faculty) rows.push({ label: tSession("faculty"), value: user.faculty });
+  if (text.faculty) rows.push({ label: tSession("faculty"), value: text.faculty });
   if (user.level) {
     rows.push({ label: tSession("level"), value: tSession("levelValue", { level: user.level }) });
   }
-  if (user.guardian_name) rows.push({ label: t("guardian"), value: user.guardian_name });
+  if (text.guardianName) rows.push({ label: t("guardian"), value: text.guardianName });
   if (user.masked_phone) {
     rows.push({ label: tSession("phone"), value: <span dir="ltr">{user.masked_phone}</span> });
   }
@@ -112,7 +115,7 @@ function AccountCard({ user }: { user: User }) {
           >
             <UserRound />
           </span>
-          <p className="min-w-0 text-body font-bold break-words text-ink-strong">{user.name}</p>
+          <p className="min-w-0 text-body font-bold break-words text-ink-strong">{text.name}</p>
         </div>
         <dl className="flex flex-col divide-y divide-line">
           {rows.map((row) => (

@@ -102,7 +102,7 @@ describe("two-step login (mock server)", () => {
     const challenge = await requestOtp("240102791");
     expect(challenge).toMatchObject({
       masked_destination: "010•••••907",
-      name_hint: "Ahmed",
+      name_hint: "أحمد",
       attempts_left: MOCK_OTP_RULES.attempts,
       code_length: MOCK_OTP_LENGTH,
     });

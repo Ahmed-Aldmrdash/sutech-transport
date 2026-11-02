@@ -94,7 +94,7 @@ export interface MockRequest {
 
 const requests = new StoredMap<MockRequest[]>("sut.mock.requests", MockStorage.Local);
 
-/** Mariam had a delay on line 5 in October, which the office answered. */
+/** Omar had a delay on line 7 in October, which the office answered. */
 const SEED_REQUESTS: Record<string, MockRequest[]> = {
   usr_student_2: [
     {
@@ -116,7 +116,7 @@ const SEED_REQUESTS: Record<string, MockRequest[]> = {
       payload: {
         kind: "complaint",
         category: "delay",
-        lineId: "ln_05",
+        lineId: "ln_07",
         happenedOn: "2026-10-13",
         description: "The bus reached campus at 9:40 and I missed my first lecture.",
         attachments: [],

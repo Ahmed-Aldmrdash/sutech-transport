@@ -31,7 +31,7 @@ import {
   type CreateRefundBody,
 } from "./schema";
 
-const MARIAM = "240102684"; // active on line 5 since September
+const MARIAM = "240102684"; // Omar, active on line 7 since September
 const AHMED = "240102791"; // no booking
 const NOV_2 = Date.parse("2026-11-02T08:00:00Z");
 const OCT_1 = Date.parse("2026-10-01T08:00:00Z");
@@ -69,7 +69,7 @@ function lineChange(overrides: Partial<CreateLineChangeBody> = {}): CreateLineCh
     ends_on: null,
     reason: "We moved to a new flat near this line.",
     student_phone: "01012340684",
-    guardian_name: "Adel Mahmoud",
+    guardian_name: "Ahmed Ramadan Ramadan",
     guardian_phone: "01098760684",
     guardian_consent: true,
     ...overrides,
@@ -84,7 +84,7 @@ function refund(
     subscription_id: subscriptionId,
     reason: "standard",
     explanation: "I will come to campus by car from now on.",
-    guardian_name: "Adel Mahmoud",
+    guardian_name: "Ahmed Ramadan Ramadan",
     guardian_phone: "01098760684",
     guardian_consent: true,
     documents: [],
@@ -141,13 +141,13 @@ describe("student requests (mock server)", () => {
     at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Rejected);
-    expect((await getMySubscription()).subscription?.line.line_id).toBe("ln_05");
+    expect((await getMySubscription()).subscription?.line.line_id).toBe("ln_07");
   });
 
   it("checks the line change like the university form", async () => {
     await signIn(MARIAM);
     expect(
-      (await errorOf(createLineChange(lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }))))
+      (await errorOf(createLineChange(lineChange({ to_line_id: "ln_07", to_stop_id: "ln_07_s1" }))))
         .code,
     ).toBe(RequestErrorCode.SameLine);
     expect((await errorOf(createLineChange(lineChange({ starts_on: "2026-10-01" })))).code).toBe(
@@ -225,7 +225,7 @@ describe("student requests (mock server)", () => {
     await signIn(MARIAM);
     const complaint = {
       category: "driver_behaviour" as const,
-      line_id: "ln_05",
+      line_id: "ln_07",
       happened_on: "2026-11-01",
       description: "The driver was speeding on the ring road.",
       attachments: [],
@@ -278,7 +278,7 @@ describe("notifications (mock server)", () => {
 
     const complaint = await createComplaint({
       category: "delay",
-      line_id: "ln_05",
+      line_id: "ln_07",
       happened_on: "2026-11-02",
       description: "The bus was 30 minutes late this morning.",
       attachments: [],

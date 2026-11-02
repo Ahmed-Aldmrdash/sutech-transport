@@ -50,11 +50,16 @@ const roleSchema = z.enum(ALL_ROLES as [Role, ...Role[]]);
 export const userSchema = z.object({
   id: z.string(),
   role: roleSchema,
+  /** In English, as in the university's records. */
   name: z.string(),
+  /** The same name in Arabic, shown when the app is in Arabic. null if the records lack it. */
+  name_ar: z.string().nullable().optional(),
   identifier: z.string(),
   faculty: z.string().nullable().optional(),
+  faculty_ar: z.string().nullable().optional(),
   level: z.number().int().nullable().optional(),
   guardian_name: z.string().nullable().optional(),
+  guardian_name_ar: z.string().nullable().optional(),
   masked_phone: z.string().nullable().optional(),
 });
 export type User = z.infer<typeof userSchema>;

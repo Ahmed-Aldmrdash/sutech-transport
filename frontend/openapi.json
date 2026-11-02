@@ -186,10 +186,22 @@
                         "name": {
                           "type": "string"
                         },
+                        "name_ar": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "identifier": {
                           "type": "string"
                         },
                         "faculty": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "faculty_ar": {
                           "type": [
                             "string",
                             "null"
@@ -208,6 +220,12 @@
                           ]
                         },
                         "guardian_name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "guardian_name_ar": {
                           "type": [
                             "string",
                             "null"
@@ -377,10 +395,22 @@
                     "name": {
                       "type": "string"
                     },
+                    "name_ar": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "identifier": {
                       "type": "string"
                     },
                     "faculty": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "faculty_ar": {
                       "type": [
                         "string",
                         "null"
@@ -399,6 +429,12 @@
                       ]
                     },
                     "guardian_name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "guardian_name_ar": {
                       "type": [
                         "string",
                         "null"

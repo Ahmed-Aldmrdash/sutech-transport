@@ -1,14 +1,16 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession } from "@/features/auth/session/use-session";
+import { firstNameOf, userText } from "@/features/auth/user-text";
 import { getMySubscription } from "@/features/subscriptions/api";
 import { SubscriptionCard } from "@/features/subscriptions/components/subscription-card";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
+import type { Locale } from "@/i18n/routing";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { AlertsCard } from "./alerts-card";
 import { NextTripCard } from "./next-trip-card";
@@ -17,11 +19,12 @@ import { SubscribeSteps } from "./subscribe-steps";
 /** The student's home: subscription, next trip and bus, and the latest alerts. */
 export function StudentHome() {
   const t = useTranslations();
+  const locale = useLocale() as Locale;
   const session = useSession();
   const state = useAsync((signal) => getMySubscription({ signal }), []);
   const firstName =
     session.status === SessionStatus.SignedIn
-      ? (session.session.user.name.split(" ")[0] ?? session.session.user.name)
+      ? firstNameOf(userText(session.session.user, locale).name)
       : "";
 
   const subscription = state.status === AsyncStatus.Success ? state.data.subscription : null;
