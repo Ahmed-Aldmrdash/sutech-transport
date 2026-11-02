@@ -1,4 +1,4 @@
-import { mockAnnouncements } from "@/features/announcements/mock";
+import { mockAnnouncementsFor } from "@/features/announcements/mock";
 import { AnnouncementKind } from "@/features/announcements/schema";
 import { requireMockAccount } from "@/features/auth/mock-token";
 import { findMockLine, localized } from "@/features/lines/mock-builders";
@@ -134,8 +134,8 @@ function requestNotifications(userId: string, language: string): Draft[] {
   });
 }
 
-function announcementNotifications(language: string): Draft[] {
-  return mockAnnouncements(language).map((item) => ({
+function announcementNotifications(userId: string, role: Role, language: string): Draft[] {
+  return mockAnnouncementsFor({ id: userId, role }, language).map((item) => ({
     notification_id: `ntf_ann_${item.announcement_id}`,
     kind:
       item.kind === AnnouncementKind.Delay
@@ -184,7 +184,7 @@ function busNearNotifications(userId: string, language: string, now: number): Dr
 function notificationsFor(userId: string, role: Role, language: string): AppNotification[] {
   const now = Date.now();
   const drafts = [
-    ...announcementNotifications(language),
+    ...announcementNotifications(userId, role, language),
     ...(role === Role.Student
       ? [
           ...paymentNotifications(userId, language),

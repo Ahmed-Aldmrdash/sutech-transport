@@ -5,8 +5,9 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { AppProviders } from "@/components/providers/app-providers";
+import { ThemeBootScript } from "@/components/providers/theme-boot-script";
 import { LOCALE_DIRECTION, routing } from "@/i18n/routing";
-import { THEME_BOOT_SCRIPT, THEME_COLOR } from "@/lib/theme/theme";
+import { THEME_COLOR } from "@/lib/theme/theme";
 import "../globals.css";
 
 const montserrat = Montserrat({
@@ -69,7 +70,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <ThemeBootScript />
       </head>
       <body>
         <NextIntlClientProvider>

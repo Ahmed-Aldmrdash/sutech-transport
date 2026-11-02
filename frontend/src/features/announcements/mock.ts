@@ -1,6 +1,9 @@
 import { requireMockAccount } from "@/features/auth/mock-token";
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
+import { bookingOf } from "@/features/subscriptions/mock-state";
+import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
+import { Role } from "@/lib/auth/roles";
 import { listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
 
@@ -8,6 +11,17 @@ const DEFAULT_PAGE_SIZE = 20;
 
 /** Notices taken from the Fall 2026 registration letter and Ahmed's notes (2026-11-02). */
 const MOCK_ANNOUNCEMENTS = [
+  {
+    id: "ann_delay_ln05",
+    kind: AnnouncementKind.Delay,
+    lineId: "ln_05",
+    publishedAt: "2026-11-02T05:10:00Z",
+    titleAr: "خط 5 متأخر حوالي 10 دقايق",
+    titleEn: "Line 5 is running about 10 minutes late",
+    bodyAr: "زحمة على الدائري. الباص هيعدي على المحطات متأخر حوالي 10 دقايق النهارده.",
+    bodyEn:
+      "Heavy traffic on the Ring Road. The bus will reach each stop about 10 minutes late today.",
+  },
   {
     id: "ann_delay_ln07",
     kind: AnnouncementKind.Delay,
@@ -86,11 +100,33 @@ export function mockAnnouncements(language: string): Announcement[] {
   }));
 }
 
+/** Statuses where the student holds a seat on a line, so that line's news is theirs. */
+const SEAT_STATUSES: readonly SubscriptionStatus[] = [
+  SubscriptionStatus.Reserved,
+  SubscriptionStatus.PaymentReview,
+  SubscriptionStatus.Active,
+];
+
+/**
+ * What one account may see: a student gets notices for everyone plus their own line's news,
+ * never another line's. Office staff see every line.
+ */
+export function mockAnnouncementsFor(
+  user: { id: string; role: Role },
+  language: string,
+): Announcement[] {
+  const all = mockAnnouncements(language);
+  if (user.role !== Role.Student) return all;
+  const booking = bookingOf(user.id);
+  const ownLine = booking && SEAT_STATUSES.includes(booking.status) ? booking.lineId : null;
+  return all.filter((item) => item.line === null || item.line.line_id === ownLine);
+}
+
 registerMock(listAnnouncementsEndpoint, ({ query }, { token, language }) => {
-  requireMockAccount(token);
+  const { user } = requireMockAccount(token);
   const page = query.page ?? 1;
   const pageSize = query.page_size ?? DEFAULT_PAGE_SIZE;
-  const items = mockAnnouncements(language).filter(
+  const items = mockAnnouncementsFor(user, language).filter(
     (item) => !query.kind || item.kind === query.kind,
   );
   return { items: items.slice((page - 1) * pageSize, page * pageSize), total: items.length };
