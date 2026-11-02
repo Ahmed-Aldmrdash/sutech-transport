@@ -38,7 +38,8 @@ test.describe("student requests, notifications and settings", () => {
     await expect(page.getByText("You withdrew this request")).toBeVisible();
 
     await page.getByRole("link", { name: "Requests" }).first().click();
-    await expect(page.getByText("Withdrawn")).toBeVisible();
+    await page.waitForURL(/\/en\/student\/requests$/);
+    await expect(page.getByText("Withdrawn", { exact: true })).toBeVisible();
     expect(errors).toEqual([]);
   });
 
