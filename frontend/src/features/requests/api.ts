@@ -5,6 +5,7 @@ import { Role } from "@/lib/auth/roles";
 import {
   createComplaintBodySchema,
   createLineChangeBodySchema,
+  createModelPermitBodySchema,
   createRefundBodySchema,
   listMyRequestsQuerySchema,
   refundPolicySchema,
@@ -12,6 +13,7 @@ import {
   studentRequestSchema,
   type CreateComplaintBody,
   type CreateLineChangeBody,
+  type CreateModelPermitBody,
   type CreateRefundBody,
   type RefundPolicy,
   type RequestKind,
@@ -25,7 +27,7 @@ export const listMyRequestsEndpoint = defineEndpoint({
   method: HttpMethod.Get,
   path: "/requests/me",
   summary:
-    "The student's line change, refund and complaint requests this term, newest first, each " +
+    "The student's line change, refund, complaint and model permit requests this term, newest first, each " +
     "with its status history. Office notes follow Accept-Language.",
   tag: TAG,
   access: [Role.Student],
@@ -93,6 +95,24 @@ export const createComplaintEndpoint = defineEndpoint({
   response: studentRequestSchema,
 });
 
+export const createModelPermitEndpoint = defineEndpoint({
+  id: "requests.createModelPermit",
+  method: HttpMethod.Post,
+  path: "/requests/model-permit",
+  summary:
+    "The university's safety permit to bring a project model onto the bus: material, size, " +
+    "purpose and destination, entry and exit date and time, the doctor or TA responsible, and " +
+    "the student's liability declaration. The server fills the student's details and the bus " +
+    "(their own line) from the account and subscription; the office adds the driver later. " +
+    "Signed by the doctor/TA, then the Safety department. Needs an active subscription. " +
+    "Errors: NO_ACTIVE_SUBSCRIPTION (409), REQUEST_ALREADY_OPEN (409), INVALID_DATES (422).",
+  tag: TAG,
+  access: [Role.Student],
+  idempotent: true,
+  body: createModelPermitBodySchema,
+  response: studentRequestSchema,
+});
+
 export const withdrawRequestEndpoint = defineEndpoint({
   id: "requests.withdraw",
   method: HttpMethod.Post,
@@ -151,6 +171,13 @@ export function createComplaint(
   return callEndpoint(createComplaintEndpoint, { body }, options);
 }
 
+export function createModelPermit(
+  body: CreateModelPermitBody,
+  options?: RequestOptions,
+): Promise<StudentRequest> {
+  return callEndpoint(createModelPermitEndpoint, { body }, options);
+}
+
 export function withdrawRequest(
   requestId: string,
   options?: RequestOptions,
@@ -169,5 +196,6 @@ export const requestsEndpoints = [
   createLineChangeEndpoint,
   createRefundEndpoint,
   createComplaintEndpoint,
+  createModelPermitEndpoint,
   withdrawRequestEndpoint,
 ];

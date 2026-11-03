@@ -1,18 +1,28 @@
 import { z } from "zod";
-import { lineSummarySchema } from "@/features/lines/schema";
+import { busTypeSchema, clockTimeSchema, lineSummarySchema } from "@/features/lines/schema";
 import { receiptFileSchema } from "@/features/payments/schema";
 import { calendarDateSchema } from "@/features/subscriptions/schema";
 
-/** The three things a student asks the Transportation office for. */
+/** The things a student asks the Transportation office for. */
 export const RequestKind = {
   /** The university's "طلب تغيير خط السير" form, approved by the guardian. */
   LineChange: "line_change",
   /** Cancelling the subscription and getting money back, per the refund policy. */
   Refund: "refund",
   Complaint: "complaint",
+  /**
+   * The university's "تصريح دخول مجسم في باص الجامعة" form: permission to bring a project model
+   * onto the bus, signed by the project's doctor or TA and the Safety department.
+   */
+  ModelPermit: "model_permit",
 } as const;
 export type RequestKind = (typeof RequestKind)[keyof typeof RequestKind];
-export const REQUEST_KINDS = [RequestKind.LineChange, RequestKind.Refund, RequestKind.Complaint];
+export const REQUEST_KINDS = [
+  RequestKind.LineChange,
+  RequestKind.Refund,
+  RequestKind.Complaint,
+  RequestKind.ModelPermit,
+] as const;
 
 /**
  * submitted → in_review → approved | rejected (line change, refund) or resolved (complaint).
@@ -114,7 +124,37 @@ export const COMPLAINT_CATEGORIES = [
   ComplaintCategory.Other,
 ] as const;
 
+/** Why the model goes on the bus, as the permit form lists it. */
+export const ModelPurpose = {
+  Display: "display",
+  Transport: "transport",
+  Storage: "storage",
+  Other: "other",
+} as const;
+export type ModelPurpose = (typeof ModelPurpose)[keyof typeof ModelPurpose];
+export const MODEL_PURPOSES = [
+  ModelPurpose.Display,
+  ModelPurpose.Transport,
+  ModelPurpose.Storage,
+  ModelPurpose.Other,
+] as const;
+
+/**
+ * The student's pledges on the permit form, in order. The app shows them and the student
+ * accepts them all with one tick; the keys are under `student.requests.modelPermit.pledges`.
+ */
+export const MODEL_PERMIT_PLEDGES = [
+  "protectModel",
+  "noSeatDamage",
+  "keepAisleClear",
+  "noDanger",
+  "noHazardousMaterials",
+] as const;
+
 export const REQUEST_TEXT_MAX_LENGTH = 1000;
+/** Short form fields (material, size, destination). */
+export const SHORT_TEXT_MIN_LENGTH = 2;
+export const SHORT_TEXT_MAX_LENGTH = 100;
 export const REQUEST_TEXT_MIN_LENGTH = 10;
 export const MAX_ATTACHMENTS = 3;
 
@@ -126,6 +166,7 @@ const requestTextSchema = z
   .trim()
   .min(REQUEST_TEXT_MIN_LENGTH)
   .max(REQUEST_TEXT_MAX_LENGTH);
+const shortTextSchema = z.string().trim().min(SHORT_TEXT_MIN_LENGTH).max(SHORT_TEXT_MAX_LENGTH);
 
 /** The guardian's approval, which the university's forms ask for (line change and refund). */
 const guardianSchema = z.object({
@@ -186,17 +227,51 @@ export const complaintDetailsSchema = z.object({
   attachments: z.array(attachmentSchema),
 });
 
+export const modelPermitDetailsSchema = z.object({
+  /** The student's details as the permit prints them, filled from the account. */
+  student_name: z.string(),
+  university_id: z.string(),
+  faculty: z.string().nullable(),
+  /** Academic year (1 to 5); null if the university hasn't sent it. */
+  level: z.number().int().nullable(),
+  /** The bus: the student's own line, filled by the server from the subscription. */
+  line: lineSummarySchema,
+  bus_type: busTypeSchema,
+  /** Filled by the Transportation office once it assigns the trip; null until then. */
+  driver_name: z.string().nullable(),
+  driver_phone: z.string().nullable(),
+  material: z.string(),
+  dimensions: z.string(),
+  purpose: z.enum(MODEL_PURPOSES),
+  /** Only when purpose is "other". */
+  purpose_other: z.string().nullable(),
+  destination: z.string(),
+  entry_date: calendarDateSchema,
+  entry_time: clockTimeSchema,
+  exit_date: calendarDateSchema,
+  exit_time: clockTimeSchema,
+  /** The doctor or teaching assistant responsible for the project, who signs first. */
+  supervisor_name: z.string(),
+});
+
 export const RequestActor = {
   Student: "student",
   TransportOffice: "transport_office",
   Finance: "finance",
+  /** The Safety department, which signs the model permit last. */
+  Safety: "safety",
 } as const;
 
 /** One step in the request's history. The office's reply to the student is in `note`. */
 export const requestEventSchema = z.object({
   status: requestStatusSchema,
   at: z.iso.datetime(),
-  by: z.enum([RequestActor.Student, RequestActor.TransportOffice, RequestActor.Finance]),
+  by: z.enum([
+    RequestActor.Student,
+    RequestActor.TransportOffice,
+    RequestActor.Finance,
+    RequestActor.Safety,
+  ]),
   /** In the request's language; null when there is nothing to say. */
   note: z.string().nullable(),
 });
@@ -220,14 +295,19 @@ export const studentRequestSchema = z.discriminatedUnion("kind", [
   }),
   requestBase.extend({ kind: z.literal(RequestKind.Refund), details: refundDetailsSchema }),
   requestBase.extend({ kind: z.literal(RequestKind.Complaint), details: complaintDetailsSchema }),
+  requestBase.extend({
+    kind: z.literal(RequestKind.ModelPermit),
+    details: modelPermitDetailsSchema,
+  }),
 ]);
 export type StudentRequest = z.infer<typeof studentRequestSchema>;
 export type LineChangeRequest = Extract<StudentRequest, { kind: "line_change" }>;
 export type RefundRequest = Extract<StudentRequest, { kind: "refund" }>;
 export type ComplaintRequest = Extract<StudentRequest, { kind: "complaint" }>;
+export type ModelPermitRequest = Extract<StudentRequest, { kind: "model_permit" }>;
 
 export const listMyRequestsQuerySchema = z.object({
-  kind: z.enum([RequestKind.LineChange, RequestKind.Refund, RequestKind.Complaint]).optional(),
+  kind: z.enum(REQUEST_KINDS).optional(),
 });
 
 export const requestParamsSchema = z.object({ request_id: z.string().min(1) });
@@ -266,6 +346,34 @@ export const createComplaintBodySchema = z.object({
   attachments: z.array(receiptFileSchema).max(MAX_ATTACHMENTS),
 });
 export type CreateComplaintBody = z.infer<typeof createComplaintBodySchema>;
+
+/** "YYYY-MM-DD" + "HH:MM" compare correctly as plain strings. */
+const momentOf = (date: string, time: string) => `${date}T${time}`;
+
+export const createModelPermitBodySchema = z
+  .object({
+    material: shortTextSchema,
+    dimensions: shortTextSchema,
+    purpose: z.enum(MODEL_PURPOSES),
+    purpose_other: shortTextSchema.nullable(),
+    destination: shortTextSchema,
+    entry_date: calendarDateSchema,
+    entry_time: clockTimeSchema,
+    exit_date: calendarDateSchema,
+    exit_time: clockTimeSchema,
+    supervisor_name: personNameSchema,
+    /** The student accepts the liability declaration (every pledge on the form). */
+    declaration_accepted: z.literal(true),
+  })
+  .refine((body) => (body.purpose === ModelPurpose.Other) === (body.purpose_other !== null), {
+    message: "purpose_other is required when purpose is other and must be null otherwise",
+    path: ["purpose_other"],
+  })
+  .refine(
+    (body) => momentOf(body.exit_date, body.exit_time) > momentOf(body.entry_date, body.entry_time),
+    { message: "the exit must be after the entry", path: ["exit_time"] },
+  );
+export type CreateModelPermitBody = z.infer<typeof createModelPermitBodySchema>;
 
 /** One row of the refund table: from `from` to `to` (inclusive), `deduction_percent` is kept. */
 export const refundWindowSchema = z.object({

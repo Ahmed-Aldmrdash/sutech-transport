@@ -597,13 +597,14 @@
     },
     "requests": {
       "title": "الطلبات",
-      "lead": "غيّر خطك أو اطلب استرداد، وتابع كل طلب لحد ما المكتب يرد.",
+      "lead": "غيّر خطك، أو اطلب استرداد أو تصريح دخول مجسم في الباص، وتابع كل طلب لحد ما المكتب يرد.",
       "listLabel": "طلباتك",
       "rowMeta": "{kind} · {reference} · {date}",
       "kinds": {
         "line_change": "تغيير خط",
         "refund": "استرداد",
-        "complaint": "شكوى"
+        "complaint": "شكوى",
+        "model_permit": "تصريح مجسم"
       },
       "status": {
         "submitted": "اتبعت",
@@ -638,7 +639,11 @@
         "documentsRequired": "ارفق المستند (تقرير طبي، أو شهادة، أو خطاب التحويل).",
         "tooManyFiles": "3 ملفات بالكتير.",
         "fileType": "ملفات JPG أو PNG أو PDF بس.",
-        "fileTooLarge": "كل ملف لازم يكون {size} أو أقل."
+        "fileTooLarge": "كل ملف لازم يكون {size} أو أقل.",
+        "exitBeforeEntry": "ميعاد الخروج لازم يبقى بعد الدخول.",
+        "shortTextTooShort": "اكتب شوية كمان.",
+        "shortTextTooLong": "خليه أقل من 100 حرف.",
+        "declarationRequired": "لازم توافق على الإقرار قبل ما تبعت التصريح."
       },
       "serverErrors": {
         "NO_ACTIVE_SUBSCRIPTION": "اشتراكك مش مفعّل، فمينفعش تبعت الطلب ده.",
@@ -796,7 +801,8 @@
         "by": {
           "student": "انت",
           "transport_office": "إدارة النقل",
-          "finance": "المالية"
+          "finance": "المالية",
+          "safety": "إدارة السلامة"
         },
         "detailsTitle": "اللي بعته",
         "submittedAt": "اتبعت يوم",
@@ -812,6 +818,65 @@
           "network": "مفيش نت. جرّب تاني.",
           "generic": "ماعرفناش نسحبه. جرّب تاني."
         }
+      },
+      "modelPermit": {
+        "new": "دخّل مجسم مشروع",
+        "title": "تصريح دخول مجسم في الباص",
+        "lead": "تصريح السيفتي بتاع الجامعة لدخول مجسمات المشاريع في الباص، أونلاين. الدكتور أو المعيد المسؤول وإدارة السلامة بيوقّعوا عليه.",
+        "needsActiveBody": "التصريح لباصك انت، فلازم يكون اشتراكك مدفوع ومفعّل.",
+        "summary": "{material} · {date}",
+        "studentTitle": "بياناتك على التصريح",
+        "busTitle": "الباص",
+        "driverByOffice": "إدارة النقل هتضيف اسم السواق ورقم موبايله.",
+        "modelTitle": "وصف المجسم",
+        "material": "نوع الخامة",
+        "materialHint": "مثلًا: خشب، كرتون، أكريليك، فوم.",
+        "dimensions": "مقاس / أبعاد الخامة",
+        "dimensionsHint": "مثلًا: 60 × 40 × 30 سم.",
+        "purposeTitle": "سبب وجهة الدخول",
+        "purpose": "السبب",
+        "purposes": {
+          "display": "عرض",
+          "transport": "نقل",
+          "storage": "تخزين",
+          "other": "أخرى"
+        },
+        "purposeOther": "ليه؟",
+        "destination": "جهة الدخول",
+        "destinationHint": "المجسم رايح فين، مثلًا: معرض المشاريع، مبنى B.",
+        "timesTitle": "تاريخ ووقت الدخول والخروج",
+        "entryDate": "تاريخ الدخول",
+        "entryTime": "وقت الدخول",
+        "exitDate": "تاريخ الخروج",
+        "exitTime": "وقت الخروج",
+        "signaturesTitle": "التوقيعات",
+        "supervisorName": "الدكتور / المعيد المسؤول عن المشروع",
+        "supervisorHint": "هو بيوقّع الأول، وبعده إدارة السلامة.",
+        "declarationTitle": "إقرار مسؤولية الطالب",
+        "declarationIntro": "أنا الطالب {name}، الكود الجامعي {id}، أقر بأنني أتحمل كامل المسؤولية أثناء نقل المجسم (المشروع) في باص الجامعة، وألتزم بـ:",
+        "pledges": {
+          "protectModel": "الحفاظ على المجسم وعدم التسبب بأي ضرر أو أذى يلحق بي أو بالآخرين.",
+          "noSeatDamage": "عدم تمزيق كسوة أو مقاعد الباص.",
+          "keepAisleClear": "عدم التسبب في إصابة أي طالب أو إعاقة الممر داخل الباص.",
+          "noDanger": "عدم تعريض حياتي أو حياة الآخرين لأي خطر.",
+          "noHazardousMaterials": "عدم استخدام أي مواد قابلة للاشتعال أو نفاذة الروائح أو تسبب الاختناق داخل الباص."
+        },
+        "declarationOutro": "أفهم أن أي مخالفة لهذه التعليمات قد تؤدي إلى تطبيق لائحة السلوك.",
+        "declarationAccept": "موافق على الإقرار",
+        "declarationAccepted": "موافق",
+        "submit": "ابعت التصريح",
+        "studentName": "اسم الطالب",
+        "universityId": "الكود الجامعي",
+        "faculty": "الكلية",
+        "level": "السنة الدراسية",
+        "levelValue": "السنة {level}",
+        "line": "الخط",
+        "busType": "نوع الباص",
+        "driver": "السواق",
+        "driverPending": "إدارة النقل هتضيفه",
+        "entry": "الدخول",
+        "exit": "الخروج",
+        "moment": "{date}، {time}"
       }
     },
     "notGoing": {

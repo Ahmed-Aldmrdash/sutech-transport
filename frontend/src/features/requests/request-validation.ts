@@ -4,8 +4,11 @@ import {
   EXCEPTIONAL_REFUND_REASONS,
   LineChangeDuration,
   MAX_ATTACHMENTS,
+  ModelPurpose,
   REQUEST_TEXT_MAX_LENGTH,
   REQUEST_TEXT_MIN_LENGTH,
+  SHORT_TEXT_MAX_LENGTH,
+  SHORT_TEXT_MIN_LENGTH,
   type ComplaintCategory,
   type RefundReason,
 } from "./schema";
@@ -23,7 +26,11 @@ export type RequestFieldError =
   | "dateBeforeTerm"
   | "dateAfterTerm"
   | "endBeforeStart"
+  | "exitBeforeEntry"
+  | "shortTextTooShort"
+  | "shortTextTooLong"
   | "consentRequired"
+  | "declarationRequired"
   | "documentsRequired"
   | "tooManyFiles"
   | "fileType"
@@ -60,6 +67,13 @@ function checkText(text: string): RequestFieldError | undefined {
   if (length === 0) return "required";
   if (length < REQUEST_TEXT_MIN_LENGTH) return "textTooShort";
   return length > REQUEST_TEXT_MAX_LENGTH ? "textTooLong" : undefined;
+}
+
+function checkShortText(text: string): RequestFieldError | undefined {
+  const length = text.trim().length;
+  if (length === 0) return "required";
+  if (length < SHORT_TEXT_MIN_LENGTH) return "shortTextTooShort";
+  return length > SHORT_TEXT_MAX_LENGTH ? "shortTextTooLong" : undefined;
 }
 
 function checkName(name: string): RequestFieldError | undefined {
@@ -187,5 +201,63 @@ export function validateComplaint(
     happenedOn,
     description: checkText(values.description),
     attachments: checkFiles(values.attachments, rules.maxBytes),
+  });
+}
+
+export interface ModelPermitValues {
+  material: string;
+  dimensions: string;
+  purpose: ModelPurpose | "";
+  purposeOther: string;
+  destination: string;
+  entryDate: string;
+  entryTime: string;
+  exitDate: string;
+  exitTime: string;
+  supervisorName: string;
+  declarationAccepted: boolean;
+}
+export type ModelPermitField = keyof ModelPermitValues;
+
+/** The model permit form: what the model is, why, when it comes in and out, and who signs. */
+export function validateModelPermit(
+  values: ModelPermitValues,
+  rules: DateRules,
+): FieldErrors<ModelPermitField> {
+  let entryDate: RequestFieldError | undefined;
+  if (!values.entryDate) entryDate = "required";
+  else if (values.entryDate < rules.today) entryDate = "dateInPast";
+  else if (values.entryDate > rules.termEndsOn) entryDate = "dateAfterTerm";
+
+  let exitDate: RequestFieldError | undefined;
+  if (!values.exitDate) exitDate = "required";
+  else if (values.entryDate && values.exitDate < values.entryDate) exitDate = "exitBeforeEntry";
+  else if (values.exitDate > rules.termEndsOn) exitDate = "dateAfterTerm";
+
+  // Same day: the exit time must come after the entry time.
+  let exitTime: RequestFieldError | undefined;
+  if (!values.exitTime) exitTime = "required";
+  else if (
+    !exitDate &&
+    values.exitDate === values.entryDate &&
+    values.entryTime &&
+    values.exitTime <= values.entryTime
+  ) {
+    exitTime = "exitBeforeEntry";
+  }
+
+  return compact<ModelPermitField>({
+    material: checkShortText(values.material),
+    dimensions: checkShortText(values.dimensions),
+    purpose: values.purpose ? undefined : "required",
+    purposeOther:
+      values.purpose === ModelPurpose.Other ? checkShortText(values.purposeOther) : undefined,
+    destination: checkShortText(values.destination),
+    entryDate,
+    entryTime: values.entryTime ? undefined : "required",
+    exitDate,
+    exitTime,
+    supervisorName: checkName(values.supervisorName),
+    declarationAccepted: values.declarationAccepted ? undefined : "declarationRequired",
   });
 }

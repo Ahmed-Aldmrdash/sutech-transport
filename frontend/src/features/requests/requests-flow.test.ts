@@ -16,6 +16,7 @@ import { tokenStore } from "@/lib/api/token-store";
 import {
   createComplaint,
   createLineChange,
+  createModelPermit,
   createRefund,
   getRefundPolicy,
   getRequest,
@@ -27,7 +28,9 @@ import {
   RequestErrorCode,
   RequestKind,
   RequestStatus,
+  RequestActor,
   type CreateLineChangeBody,
+  type CreateModelPermitBody,
   type CreateRefundBody,
 } from "./schema";
 
@@ -72,6 +75,23 @@ function lineChange(overrides: Partial<CreateLineChangeBody> = {}): CreateLineCh
     guardian_name: "Ahmed Ramadan Ramadan",
     guardian_phone: "01098760684",
     guardian_consent: true,
+    ...overrides,
+  };
+}
+
+function modelPermit(overrides: Partial<CreateModelPermitBody> = {}): CreateModelPermitBody {
+  return {
+    material: "Wood and acrylic",
+    dimensions: "60 × 40 × 30 cm",
+    purpose: "display",
+    purpose_other: null,
+    destination: "Project exhibition, building B",
+    entry_date: "2026-11-05",
+    entry_time: "07:30",
+    exit_date: "2026-11-05",
+    exit_time: "16:00",
+    supervisor_name: "Dr. Nihal",
+    declaration_accepted: true,
     ...overrides,
   };
 }
@@ -249,6 +269,69 @@ describe("student requests (mock server)", () => {
       second.request_id,
       first.request_id,
     ]);
+  });
+});
+
+describe("model permit (mock server)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    at(NOV_2);
+    resetAuthMock();
+    resetStudentMock();
+    resetRequestsMock();
+    resetNotificationsMock();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    tokenStore.set(null);
+  });
+
+  it("fills the student and bus from the account, and Safety approves it", async () => {
+    await signIn(MARIAM);
+    const sent = await createModelPermit(modelPermit());
+    expect(sent.kind).toBe(RequestKind.ModelPermit);
+    if (sent.kind !== RequestKind.ModelPermit) return;
+    expect(sent.details.university_id).toBe(MARIAM);
+    expect(sent.details.student_name).toBe("عمر أحمد رمضان رمضان");
+    expect(sent.details.line.line_id).toBe("ln_07");
+    expect(sent.details.driver_name).toBeNull();
+    expect((await errorOf(createModelPermit(modelPermit()))).code).toBe(
+      RequestErrorCode.RequestAlreadyOpen,
+    );
+
+    at(NOV_2 + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
+    expect((await getRequest(sent.request_id)).timeline.at(-1)?.note).toContain("Dr. Nihal");
+
+    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    const decided = await getRequest(sent.request_id);
+    expect(decided.status).toBe(RequestStatus.Approved);
+    expect(decided.timeline.at(-1)?.by).toBe(RequestActor.Safety);
+    expect((await listMyRequests(RequestKind.ModelPermit)).map((item) => item.request_id)).toEqual([
+      sent.request_id,
+    ]);
+  });
+
+  it("checks the permit like the university form", async () => {
+    await signIn(MARIAM);
+    expect(
+      (
+        await errorOf(
+          createModelPermit(modelPermit({ entry_date: "2026-11-01", exit_date: "2026-11-01" })),
+        )
+      ).code,
+    ).toBe(RequestErrorCode.InvalidDates);
+    expect((await errorOf(createModelPermit(modelPermit({ exit_time: "07:00" })))).code).toBe(
+      "invalid_request",
+    );
+    expect((await errorOf(createModelPermit(modelPermit({ purpose: "other" })))).code).toBe(
+      "invalid_request",
+    );
+
+    tokenStore.set(null);
+    await signIn(AHMED);
+    expect((await errorOf(createModelPermit(modelPermit()))).code).toBe(
+      RequestErrorCode.NoActiveSubscription,
+    );
   });
 });
 

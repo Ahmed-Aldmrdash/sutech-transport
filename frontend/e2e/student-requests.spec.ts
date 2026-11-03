@@ -43,6 +43,38 @@ test.describe("student requests, notifications and settings", () => {
     expect(errors).toEqual([]);
   });
 
+  test("sends a project model permit and sees it on the request", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await signIn(page, MARIAM);
+    await page.waitForURL(/\/en\/student$/);
+    await page.goto("/en/student/requests");
+    await page.getByRole("link", { name: "Bring a project model" }).click();
+    await expect(page.getByRole("heading", { name: "Project model permit" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Send permit" }).click();
+    await expect(
+      page.getByText("Accept the declaration before you send the permit."),
+    ).toBeVisible();
+
+    await page.getByLabel("Material").fill("Wood and acrylic");
+    await page.getByLabel("Size / dimensions").fill("60 × 40 × 30 cm");
+    await page.getByLabel("Display").check();
+    await page.getByRole("textbox", { name: "Destination" }).fill("Project exhibition, building B");
+    await page.getByLabel("Entry time").fill("07:30");
+    await page.getByLabel("Exit time").fill("16:00");
+    await page.getByLabel("Doctor / TA responsible for the project").fill("Dr. Nihal");
+    await page.getByLabel("I accept the declaration").check();
+    await expectNoSidewaysScroll(page);
+    await page.getByRole("button", { name: "Send permit" }).click();
+
+    await page.waitForURL(/\/en\/student\/requests\/req_/);
+    await expect(page.getByText("Waiting for the office")).toBeVisible();
+    await expect(page.getByText("Wood and acrylic", { exact: true })).toBeVisible();
+    await expect(page.getByText("The office will add it")).toBeVisible();
+    await expectNoSidewaysScroll(page);
+    expect(errors).toEqual([]);
+  });
+
   test("shows the refund policy and asks for documents for exceptional cases", async ({ page }) => {
     const errors = watchForErrors(page);
     await signIn(page, MARIAM);

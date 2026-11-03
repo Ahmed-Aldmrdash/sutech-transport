@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowLeftRight, ClipboardList, MessageSquareWarning, ReceiptText } from "lucide-react";
+import {
+  ArrowLeftRight,
+  ClipboardList,
+  MessageSquareWarning,
+  Package,
+  ReceiptText,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { ButtonLink } from "@/components/ui/button";
@@ -43,7 +49,7 @@ function RequestsView({
   );
 }
 
-/** Line change and refund requests, with buttons to start each. */
+/** Line change, refund and model permit requests, with buttons to start each. */
 export function RequestsPage() {
   const t = useTranslations("student.requests");
   const actions = (
@@ -60,6 +66,13 @@ export function RequestsPage() {
         iconStart={<ReceiptText className="size-4" />}
       >
         {t("refund.new")}
+      </ButtonLink>
+      <ButtonLink
+        href={`${REQUESTS_PATH}/new/model-permit`}
+        variant="secondary"
+        iconStart={<Package className="size-4" />}
+      >
+        {t("modelPermit.new")}
       </ButtonLink>
     </>
   );

@@ -2,6 +2,7 @@ import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
 import type {
   ComplaintCategory,
   LineChangeDuration,
+  ModelPurpose,
   RefundReason,
   RequestKind,
   RequestStatus,
@@ -76,7 +77,31 @@ export interface MockComplaintPayload {
   attachments: MockAttachment[];
 }
 
-export type MockRequestPayload = MockLineChangePayload | MockRefundPayload | MockComplaintPayload;
+export interface MockModelPermitPayload {
+  kind: typeof RequestKind.ModelPermit;
+  /** The student's details as printed on the permit, kept as they were on the day. */
+  student: {
+    name: MockText;
+    universityId: string;
+    faculty: MockText | null;
+    level: number | null;
+  };
+  /** The bus is the student's own line at the time of the request. */
+  lineId: string;
+  material: string;
+  dimensions: string;
+  purpose: ModelPurpose;
+  purposeOther: string | null;
+  destination: string;
+  entryDate: string;
+  entryTime: string;
+  exitDate: string;
+  exitTime: string;
+  supervisorName: string;
+}
+
+export type MockRequestPayload =
+  MockLineChangePayload | MockRefundPayload | MockComplaintPayload | MockModelPermitPayload;
 
 export interface MockRequest {
   requestId: string;

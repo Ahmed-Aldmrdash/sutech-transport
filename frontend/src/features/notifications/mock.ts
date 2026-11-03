@@ -89,6 +89,7 @@ const REQUEST_NAME = {
   [RequestKind.LineChange]: { ar: "طلب تغيير الخط", en: "line change request" },
   [RequestKind.Refund]: { ar: "طلب الاسترداد", en: "refund request" },
   [RequestKind.Complaint]: { ar: "الشكوى", en: "complaint" },
+  [RequestKind.ModelPermit]: { ar: "تصريح دخول المجسم", en: "model permit" },
 } as const;
 
 const STATUS_PHRASE: Partial<Record<RequestStatus, { ar: string; en: string }>> = {

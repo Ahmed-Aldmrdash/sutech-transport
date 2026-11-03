@@ -15,7 +15,13 @@ import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
-import { formatCalendarDate, formatDateTime, formatFileSize, formatMoney } from "@/lib/format";
+import {
+  formatCalendarDate,
+  formatClockTime,
+  formatDateTime,
+  formatFileSize,
+  formatMoney,
+} from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { getRequest, withdrawRequest } from "../api";
 import {
@@ -286,6 +292,54 @@ function RequestDetails({ request }: { request: StudentRequest }) {
               <Attachments items={details.attachments} />
             </Row>
           ) : null}
+        </>
+      );
+      break;
+    }
+    case RequestKind.ModelPermit: {
+      const details = request.details;
+      const p = "requests.modelPermit";
+      const moment = (date: string, time: string) =>
+        t(`${p}.moment`, { date: day(date), time: formatClockTime(time, locale) });
+      rows = (
+        <>
+          <Row label={t(`${p}.studentName`)}>{details.student_name}</Row>
+          <Row label={t(`${p}.universityId`)}>
+            <span dir="ltr">{details.university_id}</span>
+          </Row>
+          {details.faculty ? <Row label={t(`${p}.faculty`)}>{details.faculty}</Row> : null}
+          {details.level ? (
+            <Row label={t(`${p}.level`)}>{t(`${p}.levelValue`, { level: details.level })}</Row>
+          ) : null}
+          <Row label={t(`${p}.line`)}>{lineLabel(details.line)}</Row>
+          <Row label={t(`${p}.busType`)}>{t(`busType.${details.bus_type}`)}</Row>
+          <Row label={t(`${p}.driver`)}>
+            {details.driver_name ? (
+              <>
+                {details.driver_name}
+                {details.driver_phone ? (
+                  <>
+                    {" · "}
+                    <span dir="ltr">{details.driver_phone}</span>
+                  </>
+                ) : null}
+              </>
+            ) : (
+              t(`${p}.driverPending`)
+            )}
+          </Row>
+          <Row label={t(`${p}.material`)}>{details.material}</Row>
+          <Row label={t(`${p}.dimensions`)}>{details.dimensions}</Row>
+          <Row label={t(`${p}.purpose`)}>
+            {details.purpose_other
+              ? `${t(`${p}.purposes.${details.purpose}`)}: ${details.purpose_other}`
+              : t(`${p}.purposes.${details.purpose}`)}
+          </Row>
+          <Row label={t(`${p}.destination`)}>{details.destination}</Row>
+          <Row label={t(`${p}.entry`)}>{moment(details.entry_date, details.entry_time)}</Row>
+          <Row label={t(`${p}.exit`)}>{moment(details.exit_date, details.exit_time)}</Row>
+          <Row label={t(`${p}.supervisorName`)}>{details.supervisor_name}</Row>
+          <Row label={t(`${p}.declarationTitle`)}>{t(`${p}.declarationAccepted`)}</Row>
         </>
       );
       break;

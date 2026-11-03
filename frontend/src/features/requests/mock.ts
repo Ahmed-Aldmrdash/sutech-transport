@@ -24,6 +24,7 @@ import { formatMoney, todayInCairo } from "@/lib/format";
 import {
   createComplaintEndpoint,
   createLineChangeEndpoint,
+  createModelPermitEndpoint,
   createRefundEndpoint,
   getRefundPolicyEndpoint,
   getRequestEndpoint,
@@ -69,6 +70,14 @@ const TRANSPORT_ROOM = "A039";
 
 const iso = (time: number) => new Date(time).toISOString();
 
+/** Who gives the final answer for each kind. The office always opens the request first. */
+const DECIDED_BY: Record<RequestKind, RequestEvent["by"]> = {
+  [RequestKind.LineChange]: RequestActor.TransportOffice,
+  [RequestKind.Refund]: RequestActor.Finance,
+  [RequestKind.Complaint]: RequestActor.TransportOffice,
+  [RequestKind.ModelPermit]: RequestActor.Safety,
+};
+
 function statusAt(request: MockRequest, now: number): RequestStatus {
   if (request.withdrawnAt !== null) return RequestStatus.Withdrawn;
   const elapsed = now - request.submittedAt;
@@ -81,10 +90,7 @@ function statusAt(request: MockRequest, now: number): RequestStatus {
 
 function timelineOf(request: MockRequest, now: number, language: string): RequestEvent[] {
   const note = (text: MockText | null) => (text ? localized(language, text.ar, text.en) : null);
-  const office =
-    request.payload.kind === RequestKind.Refund
-      ? RequestActor.Finance
-      : RequestActor.TransportOffice;
+  const office = DECIDED_BY[request.payload.kind];
   const events: RequestEvent[] = [
     {
       status: RequestStatus.Submitted,
@@ -186,6 +192,37 @@ function detailsOf(payload: MockRequestPayload, language: string) {
           attachments: toAttachments(payload.attachments),
         },
       };
+    case RequestKind.ModelPermit: {
+      const line = findMockLine(payload.lineId);
+      if (!line) throw new Error(`Unknown mock line ${payload.lineId}`);
+      const { student } = payload;
+      return {
+        kind: payload.kind,
+        details: {
+          student_name: localized(language, student.name.ar, student.name.en),
+          university_id: student.universityId,
+          faculty: student.faculty
+            ? localized(language, student.faculty.ar, student.faculty.en)
+            : null,
+          level: student.level,
+          line: toLineSummary(line, language),
+          bus_type: line.busType,
+          // Driver names and phones are not in the mock on purpose (see mock-lines.ts).
+          driver_name: null,
+          driver_phone: null,
+          material: payload.material,
+          dimensions: payload.dimensions,
+          purpose: payload.purpose,
+          purpose_other: payload.purposeOther,
+          destination: payload.destination,
+          entry_date: payload.entryDate,
+          entry_time: payload.entryTime,
+          exit_date: payload.exitDate,
+          exit_time: payload.exitTime,
+          supervisor_name: payload.supervisorName,
+        },
+      };
+    }
   }
 }
 
@@ -551,6 +588,63 @@ registerMock(createComplaintEndpoint, ({ body }, { token, language }) => {
       happenedOn: body.happened_on,
       description: body.description,
       attachments: storeFiles(body.attachments),
+    },
+  });
+  return toStudentRequest(stored, language, now);
+});
+
+registerMock(createModelPermitEndpoint, ({ body }, { token, language }) => {
+  const { user } = requireMockStudent(token);
+  const now = Date.now();
+  const booking = requireActiveBooking(user.id);
+  rejectIfOpen(user.id, RequestKind.ModelPermit, now);
+  if (body.entry_date < todayInCairo(new Date(now))) {
+    throw invalidDates("The model can't come in on a day that has passed.");
+  }
+  if (body.exit_date > MOCK_TERM.ends_on) {
+    throw invalidDates("The dates are after the end of the term.");
+  }
+  const stored = addRequest(user.id, {
+    submittedAt: now,
+    withdrawnAt: null,
+    outcome: RequestStatus.Approved,
+    reviewNote: {
+      ar:
+        `استلمنا التصريح، وبعتناه لـ ${body.supervisor_name} يوقّع عليه، وبعدها لإدارة ` +
+        `السلامة (Safety).`,
+      en:
+        `We got your permit and sent it to ${body.supervisor_name} to sign, then to the Safety ` +
+        `department.`,
+    },
+    decisionNote: {
+      ar:
+        `إدارة السلامة وافقت. يوم ${body.entry_date} الساعة ${body.entry_time} ورّي التصريح ده ` +
+        `للسواق والمشرف قبل ما تركب، وخلّي المجسم بعيد عن الممر.`,
+      en:
+        `The Safety department approved it. On ${body.entry_date} at ${body.entry_time}, show ` +
+        `this permit to the driver and supervisor before you board, and keep the model out of ` +
+        `the aisle.`,
+    },
+    appliedAt: null,
+    payload: {
+      kind: RequestKind.ModelPermit,
+      student: {
+        name: { ar: user.name_ar ?? user.name, en: user.name },
+        universityId: user.identifier,
+        faculty: user.faculty ? { ar: user.faculty_ar ?? user.faculty, en: user.faculty } : null,
+        level: user.level ?? null,
+      },
+      lineId: booking.lineId,
+      material: body.material,
+      dimensions: body.dimensions,
+      purpose: body.purpose,
+      purposeOther: body.purpose_other,
+      destination: body.destination,
+      entryDate: body.entry_date,
+      entryTime: body.entry_time,
+      exitDate: body.exit_date,
+      exitTime: body.exit_time,
+      supervisorName: body.supervisor_name,
     },
   });
   return toStudentRequest(stored, language, now);
