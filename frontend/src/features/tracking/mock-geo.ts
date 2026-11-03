@@ -6,8 +6,8 @@ import type { GeoPoint } from "./geo";
  * roads. Real positions come from the GPS device in each bus.
  */
 
-/** About Km 51 on the Cairo – Ismailia desert road. To be replaced by the real campus pin. */
-export const MOCK_CAMPUS: GeoPoint = { lat: 30.2128, lng: 31.695 };
+/** The campus in 10th of Ramadan (the spot used in the first demo, 2026-10-31). */
+export const MOCK_CAMPUS: GeoPoint = { lat: 30.23319, lng: 31.70602 };
 
 const point = (lat: number, lng: number): GeoPoint => ({ lat, lng });
 
