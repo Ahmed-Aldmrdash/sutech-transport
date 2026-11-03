@@ -17,7 +17,11 @@ import { SessionWatcher } from "../session/session-watcher";
 import { useSession, useSignOut } from "../session/use-session";
 import { FullPageLoader } from "./full-page-loader";
 
-const STUDENT_NOTIFICATIONS_PATH = "/student/notifications";
+/** Roles with a notifications page, and where it is. */
+const NOTIFICATIONS_PATH: Partial<Record<Role, string>> = {
+  [Role.Student]: "/student/notifications",
+  [Role.Parent]: "/parent/notifications",
+};
 
 /**
  * Wraps every signed-in page. Signed out → sign-in screen (coming back here after an expiry).
@@ -55,7 +59,7 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
   }
 
   const { session } = state;
-  const isStudent = session.user.role === Role.Student;
+  const notificationsPath = NOTIFICATIONS_PATH[session.user.role];
   return (
     <AppShell
       navigation={navigationFor(session.user.role)}
@@ -65,17 +69,14 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
       }}
       onSignOut={signOut}
       topBarActions={
-        isStudent ? (
-          <NotificationBell
-            href={STUDENT_NOTIFICATIONS_PATH}
-            className="hidden desktop:inline-flex"
-          />
+        notificationsPath ? (
+          <NotificationBell href={notificationsPath} className="hidden desktop:inline-flex" />
         ) : null
       }
-      badges={isStudent ? { notifications: unreadCount } : undefined}
+      badges={notificationsPath ? { notifications: unreadCount } : undefined}
     >
       <SessionWatcher token={session.token} expiresAt={session.expires_at} />
-      {isStudent ? <NotificationsWatcher /> : null}
+      {notificationsPath ? <NotificationsWatcher /> : null}
       {children}
     </AppShell>
   );

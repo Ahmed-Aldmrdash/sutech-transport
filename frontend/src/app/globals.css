@@ -276,3 +276,30 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The live bus map (Leaflet). Tiles are darkened in dark mode; markers keep the brand colours. */
+.bus-map.leaflet-container {
+  font: inherit;
+  background: var(--sut-surface-alt);
+  z-index: 0;
+}
+[data-theme="dark"] .bus-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+}
+.bus-map .leaflet-control-attribution {
+  font-size: 10px;
+  background: var(--sut-glass);
+  color: var(--sut-ink-muted);
+}
+.bus-map .leaflet-control-attribution a {
+  color: var(--sut-teal-text);
+}
+.bus-map .leaflet-bar a {
+  background: var(--sut-surface-raised);
+  color: var(--sut-ink-strong);
+  border-color: var(--sut-line);
+}
+.bus-map-marker {
+  background: transparent;
+  border: 0;
+}

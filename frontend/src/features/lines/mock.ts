@@ -1,6 +1,7 @@
 import { seatsHeldOn } from "@/features/subscriptions/mock-state";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { requireMockAccount } from "@/features/auth/mock-token";
+import { mayCallDriverOf } from "@/features/children/mock-links";
 import { getLineEndpoint, listLinesEndpoint } from "./api";
 import { findMockLine, toLine, toLineDetail } from "./mock-builders";
 import { MOCK_LINES } from "./mock-lines";
@@ -14,8 +15,13 @@ registerMock(listLinesEndpoint, (_input, { token, language }) => {
 });
 
 registerMock(getLineEndpoint, ({ params }, { token, language }) => {
-  requireMockAccount(token);
+  const account = requireMockAccount(token);
   const line = findMockLine(params.line_id);
   if (!line) throw new MockHttpError(HTTP_NOT_FOUND, LineErrorCode.LineNotFound, "No such line.");
-  return toLineDetail(line, language, seatsHeldOn(line.lineId));
+  return toLineDetail(
+    line,
+    language,
+    seatsHeldOn(line.lineId),
+    mayCallDriverOf(account, line.lineId),
+  );
 });

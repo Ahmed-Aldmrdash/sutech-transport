@@ -11,6 +11,16 @@ export const NotificationKind = {
   RequestUpdate: "request_update",
   /** A new announcement from the Transportation office. */
   Announcement: "announcement",
+  /** To guardians: their child's card was scanned on the bus. */
+  ChildBoarded: "child_boarded",
+  /** To guardians: the bus reached campus with their child on it. */
+  ChildArrived: "child_arrived",
+  /** To guardians: the bus reached campus without their child (no scan, no "not going"). */
+  ChildAbsent: "child_absent",
+  /** To guardians: the child said they won't ride today. */
+  ChildNotGoing: "child_not_going",
+  /** To guardians: the child left the bus mid-trip; the body has the reason. */
+  ChildCheckedOut: "child_checked_out",
 } as const;
 export type NotificationKind = (typeof NotificationKind)[keyof typeof NotificationKind];
 export const NOTIFICATION_KINDS = Object.values(NotificationKind) as [
@@ -30,6 +40,8 @@ export const NotificationTarget = {
   Request: "request",
   Complaint: "complaint",
   Announcements: "announcements",
+  /** A guardian's "Today's trip" page; id is the student_id. */
+  ChildDay: "child_day",
 } as const;
 export type NotificationTarget = (typeof NotificationTarget)[keyof typeof NotificationTarget];
 
@@ -37,7 +49,7 @@ export const notificationLinkSchema = z.object({
   target: z.enum(
     Object.values(NotificationTarget) as [NotificationTarget, ...NotificationTarget[]],
   ),
-  /** The request id for "request" and "complaint"; null otherwise. */
+  /** The request id for "request" and "complaint", the student_id for "child_day"; else null. */
   id: z.string().nullable(),
 });
 export type NotificationLink = z.infer<typeof notificationLinkSchema>;

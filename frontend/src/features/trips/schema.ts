@@ -1,7 +1,7 @@
 import { z } from "zod";
 import {
   arrivalWindowSchema,
-  busTypeSchema,
+  busSchema,
   clockTimeSchema,
   lineSummarySchema,
 } from "@/features/lines/schema";
@@ -32,7 +32,8 @@ export const nextTripSchema = z.object({
   campus_arrival: arrivalWindowSchema,
   /** null until the Transportation office publishes return times. */
   return_departure_time: clockTimeSchema.nullable(),
-  bus: z.object({ bus_type: busTypeSchema, plate: z.string() }).nullable(),
+  /** The bus and driver (with the driver's mobile, since the student rides this line). */
+  bus: busSchema.nullable(),
   status: z.enum([
     TripStatus.Scheduled,
     TripStatus.Approaching,

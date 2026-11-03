@@ -29,7 +29,9 @@ export const getLineEndpoint = defineEndpoint({
   method: HttpMethod.Get,
   path: "/lines/{line_id}",
   summary:
-    "One line with its stops in order (name, landmark note, morning pickup time, map pin). " +
+    "One line with its stops in order (name, landmark note, morning pickup time, map pin) and " +
+    "its bus and driver. The driver's mobile is filled only for the line's active subscribers " +
+    "and their guardians; everyone else gets null. " +
     "Errors: LINE_NOT_FOUND (404).",
   tag: TAG,
   access: ALL_ROLES,

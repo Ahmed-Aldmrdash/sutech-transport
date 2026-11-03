@@ -69,7 +69,28 @@ export const stopSchema = z.object({
 });
 export type Stop = z.infer<typeof stopSchema>;
 
-export const lineDetailSchema = lineSchema.extend({ stops: z.array(stopSchema) });
+/** The line's regular driver. The mobile goes only to the line's own subscribers and guardians. */
+export const driverSchema = z.object({
+  name: z.string(),
+  /** null when the caller isn't subscribed on this line. */
+  phone: z.string().nullable(),
+});
+export type Driver = z.infer<typeof driverSchema>;
+
+/** The bus that runs the line, as registered with the bus company. */
+export const busSchema = z.object({
+  bus_type: busTypeSchema,
+  /** As painted on the bus: Arabic letters, then digits ("ج ص 9943"). */
+  plate: z.string(),
+  /** null if no driver is assigned yet. */
+  driver: driverSchema.nullable(),
+});
+export type Bus = z.infer<typeof busSchema>;
+
+export const lineDetailSchema = lineSchema.extend({
+  bus: busSchema,
+  stops: z.array(stopSchema),
+});
 export type LineDetail = z.infer<typeof lineDetailSchema>;
 
 export const lineParamsSchema = z.object({ line_id: z.string().min(1) });

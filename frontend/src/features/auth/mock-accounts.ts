@@ -178,6 +178,22 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     },
     "01000002658",
   ),
+  // Demo only: Ahmed's younger brother, so the guardian below has two children to switch between.
+  account(
+    {
+      id: "usr_student_11",
+      role: Role.Student,
+      name: "Youssef Mohamed Fathy Aldmrdash",
+      name_ar: "يوسف محمد فتحي الدمرداش",
+      identifier: "260101207",
+      faculty: "Computer Science Technology Program",
+      faculty_ar: "برنامج تكنولوجيا علوم الحاسب",
+      level: 1,
+      guardian_name: "Mohamed Fathy Aldmrdash",
+      guardian_name_ar: "محمد فتحي الدمرداش",
+    },
+    "01098861908",
+  ),
   account(
     {
       id: "usr_parent_1",

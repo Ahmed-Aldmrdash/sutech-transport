@@ -409,7 +409,7 @@
         "arrived": "At campus",
         "nearStop": "Last stop passed: {stop}",
         "updated": "Updated {time}",
-        "mapLater": "The live map comes with bus tracking."
+        "trackBus": "Track the bus"
       },
       "alerts": {
         "title": "Alerts",
@@ -978,7 +978,8 @@
     "emptyUnreadTitle": "You're all caught up",
     "emptyBody": "When your bus is near, your payment is reviewed or the office answers a request, you'll see it here.",
     "loadMore": "Show more",
-    "unread": "New"
+    "unread": "New",
+    "leadParent": "When your children get on the bus, reach campus, miss the bus or won't ride, and notices for their lines."
   },
   "announcements": {
     "title": "Announcements",
@@ -1004,6 +1005,112 @@
     "signOut": "Sign out",
     "signOutConfirmTitle": "Sign out of this device?",
     "signOutConfirmBody": "Your card and bookings stay safe. Sign in again with your university ID and a new code.",
-    "stay": "Stay signed in"
+    "stay": "Stay signed in",
+    "signOutConfirmBodyParent": "Sign in again with your phone number and a new code."
+  },
+  "bus": {
+    "title": "Bus and driver",
+    "bus": "Bus",
+    "driver": "Driver",
+    "noDriver": "Not assigned yet",
+    "call": "Call {name}",
+    "phoneHidden": "The driver's number shows here for this line's subscribers."
+  },
+  "tracking": {
+    "studentTitle": "Track my bus",
+    "studentLead": "Where your bus is now, from the GPS device in the bus.",
+    "toCampus": "To campus",
+    "noSubscriptionTitle": "{who, select, self {You aren't subscribed yet} other {{name} has no subscription}}",
+    "noSubscriptionBody": "{who, select, self {Book a seat on a line to follow your bus here.} other {Once a seat is booked and paid, you'll follow the bus here.}}",
+    "findLine": "Find a line",
+    "noTripTitle": "The bus isn't on the road now",
+    "noTripBody": "The next trip starts {time}. The map comes alive a few minutes before.",
+    "noTripBodyUnknown": "The map comes alive a few minutes before the next trip.",
+    "playDemo": "Play a demo trip (test mode)",
+    "status": {
+      "scheduled": "Not on the road yet",
+      "approaching": "On the way to {who, select, self {your stop} other {{name}'s stop}} ({stop}), about {time}",
+      "passed_stop": "Past {who, select, self {your stop} other {{name}'s stop}}, reaching campus in about {time}",
+      "arrived": "The bus reached campus"
+    },
+    "nearStop": "Last stop passed: {stop}",
+    "updated": "Location updated {time}",
+    "noFix": "Waiting for the bus's GPS",
+    "speed": "{speed} km/h",
+    "noStopPins": "Stop pins appear once the Transportation office sends their locations.",
+    "demoNote": "Test mode: the bus position is made up. In the real app it comes from the GPS device in the bus.",
+    "map": {
+      "label": "Live map of the bus",
+      "bus": "The bus",
+      "campus": "SUtech campus",
+      "stop": "Your stop"
+    }
+  },
+  "parent": {
+    "switchChild": "Choose a child",
+    "noChildrenTitle": "No students linked yet",
+    "noChildrenBody": "Your phone number isn't on any student's file. Contact the Transportation office (A039).",
+    "childMeta": "ID {id} · Year {level}",
+    "home": {
+      "lead": "Your children's bus, live, and today's trip.",
+      "pickup": "Pickup at {stop}, {time}",
+      "noSubscription": "{name} has no bus booking this term.",
+      "openDay": "Today's details",
+      "liveTitle": "The bus now"
+    },
+    "day": {
+      "title": "Today's trip",
+      "lead": "Boarding, arrival and anything unusual, as it happens.",
+      "timelineTitle": "So far today",
+      "recentTitle": "Last few days",
+      "recentLead": "{name}'s recent trips to campus.",
+      "noEvents": "Nothing yet today.",
+      "status": {
+        "no_subscription": {
+          "title": "{name} has no bus subscription",
+          "body": "Once a seat is booked and paid, today's trip shows here."
+        },
+        "no_service": {
+          "title": "No buses today",
+          "body": "Buses run Sunday to Thursday."
+        },
+        "not_going": {
+          "title": "{name} won't ride today",
+          "body": "They said so in the app at {time}. The driver and the office know."
+        },
+        "waiting": {
+          "title": "The bus hasn't left yet",
+          "body": "Pickup at {stop}, {pickup}."
+        },
+        "bus_on_way": {
+          "title": "The bus is on its way",
+          "body": "{name}'s pickup is at {stop}, {pickup}."
+        },
+        "boarded": {
+          "title": "{name} got on the bus at {time}",
+          "body": "Card scanned at {stop}. The bus is heading to campus."
+        },
+        "arrived": {
+          "title": "{name} reached campus at {time}",
+          "body": "The bus arrived with them on board."
+        },
+        "checked_out": {
+          "title": "{name} left the bus at {time}",
+          "body": "They got off on the way. The reason is below."
+        },
+        "absent": {
+          "title": "{name} wasn't on the bus today",
+          "body": "The bus reached campus without their card being scanned, and they hadn't reported a day off."
+        }
+      },
+      "event": {
+        "not_going": "Reported a day off: {detail}",
+        "bus_left": "Bus left {detail}",
+        "boarded": "Got on at {detail}",
+        "arrived": "Reached campus",
+        "checked_out": "Left the bus: {detail}",
+        "absent": "Marked absent: not on the bus"
+      }
+    }
   }
 }

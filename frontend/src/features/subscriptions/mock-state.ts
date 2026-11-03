@@ -72,7 +72,11 @@ const REJECTION_REASON = {
 const bookings = new StoredMap<MockBooking>("sut.mock.bookings", MockStorage.Local);
 const payments = new StoredMap<MockPayment[]>("sut.mock.payments", MockStorage.Local);
 
-/** Omar (240102684) is already an active subscriber on line 7 (El Shorouk), to show the card at once. */
+/**
+ * Omar (240102684) is already an active subscriber on line 7 (El Shorouk), to show the card at
+ * once. Youssef (260101207, Ahmed's brother in the demo) rides line 12 (Nasr City), so the
+ * guardian's pages have a child on the bus.
+ */
 const SEED_ACTIVATED_AT = Date.parse("2026-09-20T09:12:00Z");
 const SEED_BOOKINGS: Record<string, MockBooking> = {
   usr_student_2: {
@@ -84,6 +88,17 @@ const SEED_BOOKINGS: Record<string, MockBooking> = {
     reservedAt: Date.parse("2026-09-14T10:02:00Z"),
     holdExpiresAt: null,
     activatedAt: SEED_ACTIVATED_AT,
+    seeded: true,
+  },
+  usr_student_11: {
+    subscriptionId: "sub_seed_11",
+    lineId: "ln_12",
+    stopOrder: 3,
+    status: SubscriptionStatus.Active,
+    pricePiasters: MOCK_TERM_PRICE_PIASTERS,
+    reservedAt: Date.parse("2026-09-13T17:40:00Z"),
+    holdExpiresAt: null,
+    activatedAt: Date.parse("2026-09-16T11:05:00Z"),
     seeded: true,
   },
 };
@@ -102,6 +117,22 @@ const SEED_PAYMENTS: Record<string, MockPayment[]> = {
       status: MockPaymentStatus.Approved,
       rejectionReason: null,
       reviewedAt: SEED_ACTIVATED_AT,
+    },
+  ],
+  usr_student_11: [
+    {
+      paymentId: "pay_seed_11",
+      subscriptionId: "sub_seed_11",
+      method: "bank_transfer",
+      referenceNumber: "NBE-51902264",
+      amountPiasters: MOCK_TERM_PRICE_PIASTERS,
+      paidOn: "2026-09-14",
+      payerName: "Mohamed Fathy Aldmrdash",
+      fileName: "transfer.pdf",
+      submittedAt: Date.parse("2026-09-14T19:10:00Z"),
+      status: MockPaymentStatus.Approved,
+      rejectionReason: null,
+      reviewedAt: Date.parse("2026-09-16T11:05:00Z"),
     },
   ],
 };

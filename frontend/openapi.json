@@ -663,7 +663,7 @@
     "/api/v1/lines/{line_id}": {
       "get": {
         "operationId": "lines.get",
-        "summary": "One line with its stops in order (name, landmark note, morning pickup time, map pin). Errors: LINE_NOT_FOUND (404).",
+        "summary": "One line with its stops in order (name, landmark note, morning pickup time, map pin) and its bus and driver. The driver's mobile is filled only for the line's active subscribers and their guardians; everyone else gets null. Errors: LINE_NOT_FOUND (404).",
         "tags": [
           "lines"
         ],
@@ -778,6 +778,55 @@
                         }
                       ]
                     },
+                    "bus": {
+                      "type": "object",
+                      "properties": {
+                        "bus_type": {
+                          "type": "string",
+                          "enum": [
+                            "minibus",
+                            "coaster",
+                            "midibus",
+                            "large_bus"
+                          ]
+                        },
+                        "plate": {
+                          "type": "string"
+                        },
+                        "driver": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "phone": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "phone"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "bus_type",
+                        "plate",
+                        "driver"
+                      ],
+                      "additionalProperties": false
+                    },
                     "stops": {
                       "type": "array",
                       "items": {
@@ -859,6 +908,7 @@
                     "first_pickup_time",
                     "campus_arrival",
                     "return_departure_time",
+                    "bus",
                     "stops"
                   ],
                   "additionalProperties": false
@@ -2315,11 +2365,38 @@
                                     },
                                     "plate": {
                                       "type": "string"
+                                    },
+                                    "driver": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "name": {
+                                              "type": "string"
+                                            },
+                                            "phone": {
+                                              "type": [
+                                                "string",
+                                                "null"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "phone"
+                                          ],
+                                          "additionalProperties": false
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
                                     "bus_type",
-                                    "plate"
+                                    "plate",
+                                    "driver"
                                   ],
                                   "additionalProperties": false
                                 },
@@ -9026,7 +9103,12 @@
                               "payment_approved",
                               "payment_rejected",
                               "request_update",
-                              "announcement"
+                              "announcement",
+                              "child_boarded",
+                              "child_arrived",
+                              "child_absent",
+                              "child_not_going",
+                              "child_checked_out"
                             ]
                           },
                           "title": {
@@ -9066,7 +9148,8 @@
                                       "card",
                                       "request",
                                       "complaint",
-                                      "announcements"
+                                      "announcements",
+                                      "child_day"
                                     ]
                                   },
                                   "id": {
@@ -9837,6 +9920,1235 @@
                     "items",
                     "total",
                     "summary"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tracking/me": {
+      "get": {
+        "operationId": "tracking.getMine",
+        "summary": "Where the student's bus is now: latest GPS fix, the trail so far, ETA to their stop or to campus, and the bus and driver. trip is null with a reason when there's nothing to follow. Positions come from the GPS device installed in the bus. After the first read, follow the `bus.location` WebSocket event for that trip_id (the app re-reads this every 5 s until the WebSocket is in place).",
+        "tags": [
+          "tracking"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "trip": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "trip_id": {
+                              "type": "string"
+                            },
+                            "service_date": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": [
+                                "outbound",
+                                "return"
+                              ]
+                            },
+                            "line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "bus": {
+                              "type": "object",
+                              "properties": {
+                                "bus_type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "minibus",
+                                    "coaster",
+                                    "midibus",
+                                    "large_bus"
+                                  ]
+                                },
+                                "plate": {
+                                  "type": "string"
+                                },
+                                "driver": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "phone": {
+                                          "type": [
+                                            "string",
+                                            "null"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "phone"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "bus_type",
+                                "plate",
+                                "driver"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "stop": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "pickup_time": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "pickup_time"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "campus_arrival": {
+                              "type": "object",
+                              "properties": {
+                                "from": {
+                                  "type": "string",
+                                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "to": {
+                                  "type": "string",
+                                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                              },
+                              "required": [
+                                "from",
+                                "to"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "scheduled",
+                                "approaching",
+                                "passed_stop",
+                                "arrived"
+                              ]
+                            },
+                            "eta_minutes": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "near_stop": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "position": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "lat": {
+                                      "type": "number"
+                                    },
+                                    "lng": {
+                                      "type": "number"
+                                    },
+                                    "heading": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number",
+                                          "minimum": 0,
+                                          "maximum": 360
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "speed_kmh": {
+                                      "type": "number",
+                                      "minimum": 0
+                                    },
+                                    "recorded_at": {
+                                      "type": "string",
+                                      "format": "date-time",
+                                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                    }
+                                  },
+                                  "required": [
+                                    "lat",
+                                    "lng",
+                                    "heading",
+                                    "speed_kmh",
+                                    "recorded_at"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "trail": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "lat": {
+                                    "type": "number"
+                                  },
+                                  "lng": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "lat",
+                                  "lng"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "stop_location": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "lat": {
+                                      "type": "number"
+                                    },
+                                    "lng": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "lat",
+                                    "lng"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "campus_location": {
+                              "type": "object",
+                              "properties": {
+                                "lat": {
+                                  "type": "number"
+                                },
+                                "lng": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "lat",
+                                "lng"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "trip_id",
+                            "service_date",
+                            "direction",
+                            "line",
+                            "bus",
+                            "stop",
+                            "campus_arrival",
+                            "status",
+                            "eta_minutes",
+                            "near_stop",
+                            "position",
+                            "trail",
+                            "stop_location",
+                            "campus_location"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "no_subscription",
+                            "no_trip_now"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "next_departure_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "trip",
+                    "reason",
+                    "next_departure_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/parent/children/{student_id}/tracking": {
+      "get": {
+        "operationId": "tracking.getChild",
+        "summary": "The same live view for one of the guardian's children. Errors: NOT_YOUR_CHILD (403) for a student who isn't linked to this guardian. Positions come from the GPS device installed in the bus. After the first read, follow the `bus.location` WebSocket event for that trip_id (the app re-reads this every 5 s until the WebSocket is in place).",
+        "tags": [
+          "tracking"
+        ],
+        "x-roles": [
+          "parent"
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "trip": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "trip_id": {
+                              "type": "string"
+                            },
+                            "service_date": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            },
+                            "direction": {
+                              "type": "string",
+                              "enum": [
+                                "outbound",
+                                "return"
+                              ]
+                            },
+                            "line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "bus": {
+                              "type": "object",
+                              "properties": {
+                                "bus_type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "minibus",
+                                    "coaster",
+                                    "midibus",
+                                    "large_bus"
+                                  ]
+                                },
+                                "plate": {
+                                  "type": "string"
+                                },
+                                "driver": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "phone": {
+                                          "type": [
+                                            "string",
+                                            "null"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "phone"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "bus_type",
+                                "plate",
+                                "driver"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "stop": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "pickup_time": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "pickup_time"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "campus_arrival": {
+                              "type": "object",
+                              "properties": {
+                                "from": {
+                                  "type": "string",
+                                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "to": {
+                                  "type": "string",
+                                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                              },
+                              "required": [
+                                "from",
+                                "to"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "scheduled",
+                                "approaching",
+                                "passed_stop",
+                                "arrived"
+                              ]
+                            },
+                            "eta_minutes": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "near_stop": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "position": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "lat": {
+                                      "type": "number"
+                                    },
+                                    "lng": {
+                                      "type": "number"
+                                    },
+                                    "heading": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number",
+                                          "minimum": 0,
+                                          "maximum": 360
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "speed_kmh": {
+                                      "type": "number",
+                                      "minimum": 0
+                                    },
+                                    "recorded_at": {
+                                      "type": "string",
+                                      "format": "date-time",
+                                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                    }
+                                  },
+                                  "required": [
+                                    "lat",
+                                    "lng",
+                                    "heading",
+                                    "speed_kmh",
+                                    "recorded_at"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "trail": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "lat": {
+                                    "type": "number"
+                                  },
+                                  "lng": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "lat",
+                                  "lng"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "stop_location": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "lat": {
+                                      "type": "number"
+                                    },
+                                    "lng": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": [
+                                    "lat",
+                                    "lng"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "campus_location": {
+                              "type": "object",
+                              "properties": {
+                                "lat": {
+                                  "type": "number"
+                                },
+                                "lng": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "lat",
+                                "lng"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "trip_id",
+                            "service_date",
+                            "direction",
+                            "line",
+                            "bus",
+                            "stop",
+                            "campus_arrival",
+                            "status",
+                            "eta_minutes",
+                            "near_stop",
+                            "position",
+                            "trail",
+                            "stop_location",
+                            "campus_location"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "no_subscription",
+                            "no_trip_now"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "next_departure_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "trip",
+                    "reason",
+                    "next_departure_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/parent/children": {
+      "get": {
+        "operationId": "parent.listChildren",
+        "summary": "The students linked to this guardian (by the guardian's phone on the student's file), with each one's booking this term. Names follow Accept-Language.",
+        "tags": [
+          "parent"
+        ],
+        "x-roles": [
+          "parent"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "children": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "student_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "identifier": {
+                            "type": "string"
+                          },
+                          "faculty": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "level": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "subscription": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "status": {
+                                    "type": "string",
+                                    "enum": [
+                                      "reserved",
+                                      "payment_review",
+                                      "active",
+                                      "expired",
+                                      "cancelled"
+                                    ]
+                                  },
+                                  "line": {
+                                    "type": "object",
+                                    "properties": {
+                                      "line_id": {
+                                        "type": "string"
+                                      },
+                                      "code": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "line_id",
+                                      "code",
+                                      "name"
+                                    ],
+                                    "additionalProperties": false
+                                  },
+                                  "stop": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "pickup_time": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "pickup_time"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                },
+                                "required": [
+                                  "status",
+                                  "line",
+                                  "stop"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "student_id",
+                          "name",
+                          "identifier",
+                          "faculty",
+                          "level",
+                          "subscription"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "children"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/parent/children/{student_id}/day": {
+      "get": {
+        "operationId": "parent.getChildDay",
+        "summary": "Today for one child: where they are in the trip to campus (from the bus scans and its GPS), what happened so far, the bus and driver, and the last few days. Changes arrive live as `child.day` events (the app re-reads every 30 s until the WebSocket is in place). Errors: NOT_YOUR_CHILD (403).",
+        "tags": [
+          "parent"
+        ],
+        "x-roles": [
+          "parent"
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "student_id": {
+                      "type": "string"
+                    },
+                    "service_date": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "no_subscription",
+                        "no_service",
+                        "not_going",
+                        "waiting",
+                        "bus_on_way",
+                        "boarded",
+                        "arrived",
+                        "checked_out",
+                        "absent"
+                      ]
+                    },
+                    "trip": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "line": {
+                              "type": "object",
+                              "properties": {
+                                "line_id": {
+                                  "type": "string"
+                                },
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "line_id",
+                                "code",
+                                "name"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "stop": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "pickup_time": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "pickup_time"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "campus_arrival": {
+                              "type": "object",
+                              "properties": {
+                                "from": {
+                                  "type": "string",
+                                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                },
+                                "to": {
+                                  "type": "string",
+                                  "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                                }
+                              },
+                              "required": [
+                                "from",
+                                "to"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "bus": {
+                              "type": "object",
+                              "properties": {
+                                "bus_type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "minibus",
+                                    "coaster",
+                                    "midibus",
+                                    "large_bus"
+                                  ]
+                                },
+                                "plate": {
+                                  "type": "string"
+                                },
+                                "driver": {
+                                  "anyOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "phone": {
+                                          "type": [
+                                            "string",
+                                            "null"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "phone"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "bus_type",
+                                "plate",
+                                "driver"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "line",
+                            "stop",
+                            "campus_arrival",
+                            "bus"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "not_going",
+                              "bus_left",
+                              "boarded",
+                              "arrived",
+                              "checked_out",
+                              "absent"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "detail": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "at",
+                          "detail"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "recent": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "trip_id": {
+                            "type": "string"
+                          },
+                          "service_date": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "direction": {
+                            "type": "string",
+                            "enum": [
+                              "outbound",
+                              "return"
+                            ]
+                          },
+                          "line": {
+                            "type": "object",
+                            "properties": {
+                              "line_id": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "line_id",
+                              "code",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "stop_name": {
+                            "type": "string"
+                          },
+                          "outcome": {
+                            "type": "string",
+                            "enum": [
+                              "rode",
+                              "absent",
+                              "not_going",
+                              "checked_out"
+                            ]
+                          },
+                          "boarded_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "arrived_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "checked_out_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "checkout_reason": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "trip_id",
+                          "service_date",
+                          "direction",
+                          "line",
+                          "stop_name",
+                          "outcome",
+                          "boarded_at",
+                          "arrived_at",
+                          "checked_out_at",
+                          "checkout_reason"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "student_id",
+                    "service_date",
+                    "status",
+                    "trip",
+                    "events",
+                    "recent"
                   ],
                   "additionalProperties": false
                 }

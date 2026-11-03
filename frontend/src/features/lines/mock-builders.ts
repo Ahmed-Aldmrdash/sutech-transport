@@ -1,4 +1,11 @@
-import { BusType, type Line, type LineDetail, type LineSummary, type Stop } from "./schema";
+import {
+  BusType,
+  type Bus,
+  type Line,
+  type LineDetail,
+  type LineSummary,
+  type Stop,
+} from "./schema";
 import { MOCK_LINES, type MockLineSource } from "./mock-lines";
 
 /** One term on any line costs 15,000 EGP (registration letter, Fall 2026). */
@@ -61,10 +68,27 @@ export function toLine(source: MockLineSource, language: string, seatsHeld: numb
   };
 }
 
+/** The bus and its driver. The driver's mobile only when the caller rides this line. */
+export function toBus(source: MockLineSource, language: string, withPhone: boolean): Bus {
+  return {
+    bus_type: source.busType,
+    plate: source.plate,
+    driver: {
+      name: localized(language, source.driver.nameAr, source.driver.nameEn),
+      phone: withPhone ? source.driver.phone : null,
+    },
+  };
+}
+
 export function toLineDetail(
   source: MockLineSource,
   language: string,
   seatsHeld: number,
+  withPhone: boolean,
 ): LineDetail {
-  return { ...toLine(source, language, seatsHeld), stops: toStops(source, language) };
+  return {
+    ...toLine(source, language, seatsHeld),
+    bus: toBus(source, language, withPhone),
+    stops: toStops(source, language),
+  };
 }

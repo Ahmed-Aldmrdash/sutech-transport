@@ -9,9 +9,12 @@ function keys(value: unknown, prefix = ""): string[] {
   );
 }
 
-/** Argument names, e.g. "{count, plural, =1 {…} other {…}}" → ["count"]. Plural cases may differ. */
+/**
+ * Argument names, e.g. "{count, plural, =1 {…} other {…}}" → ["count"]. Plural and select cases
+ * may differ; a case's text ("{You aren't…}") isn't a name because no "," or "}" follows it.
+ */
 function placeholders(text: string): string[] {
-  const names = [...text.matchAll(/\{([A-Za-z_]\w*)/g)].map((match) => match[1] ?? "");
+  const names = [...text.matchAll(/\{([A-Za-z_]\w*)\s*[,}]/g)].map((match) => match[1] ?? "");
   return [...new Set(names)].sort();
 }
 

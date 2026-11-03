@@ -18,6 +18,7 @@ import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { getLine } from "../api";
 import { LineErrorCode } from "../schema";
 import { BookingPanel } from "./booking-panel";
+import { BusDriverCard } from "./bus-driver-card";
 import { LineFacts } from "./line-facts";
 import { StopList } from "./stop-list";
 
@@ -103,7 +104,8 @@ export function LineDetailPage({ lineId }: { lineId: string }) {
             </p>
           </CardBody>
         </Card>
-        <div className="desktop:sticky desktop:top-24">
+        <div className="flex flex-col gap-5 desktop:sticky desktop:top-24">
+          <BusDriverCard bus={line.data.bus} />
           <BookingPanel
             line={line.data}
             selectedStopId={selectedStopId}

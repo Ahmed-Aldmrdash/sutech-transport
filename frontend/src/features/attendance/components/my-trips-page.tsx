@@ -135,7 +135,8 @@ export function MyTripsPage() {
   );
 }
 
-function TripRow({ item }: { item: TripRecord }) {
+/** One trip with its scans; also used on the guardian's day page. */
+export function TripRow({ item }: { item: TripRecord }) {
   const t = useTranslations("student.myTrips");
   const locale = useLocale() as Locale;
   const time = (iso: string | null) => (iso ? formatTime(iso, locale) : null);
