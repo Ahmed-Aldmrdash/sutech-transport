@@ -21,7 +21,7 @@ import { formatClockTime } from "@/lib/format";
 import { AsyncStatus } from "@/lib/hooks/use-async";
 import type { Child } from "../schema";
 import { useChildren } from "./children-provider";
-import { DayStatusBanner } from "./day-status";
+import { DayStatusBanner, DaysOffList } from "./day-status";
 import { useChildDay } from "./use-child-day";
 
 const STATUS_TONE: Record<SubscriptionStatus, Tone> = {
@@ -169,7 +169,10 @@ function ChildToday({ child }: { child: Child }) {
         <ErrorState error={day.error} onRetry={day.reload} />
       ) : null}
       {day.status === AsyncStatus.Success ? (
-        <DayStatusBanner day={day.data} childName={child.name} />
+        <>
+          <DayStatusBanner day={day.data} childName={child.name} />
+          <DaysOffList day={day.data} />
+        </>
       ) : null}
       <ButtonLink
         href={`/parent/day?child=${child.student_id}`}

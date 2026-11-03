@@ -109,7 +109,6 @@ export interface LineChangeValues {
   studentPhone: string;
   guardianName: string;
   guardianPhone: string;
-  guardianConsent: boolean;
 }
 export type LineChangeField = keyof LineChangeValues;
 
@@ -144,7 +143,6 @@ export function validateLineChange(
     studentPhone: checkPhone(values.studentPhone),
     guardianName: checkName(values.guardianName),
     guardianPhone: checkPhone(values.guardianPhone),
-    guardianConsent: values.guardianConsent ? undefined : "consentRequired",
   });
 }
 

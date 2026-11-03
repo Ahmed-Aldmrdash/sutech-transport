@@ -5,6 +5,12 @@ import {
   toLine,
   toLineSummary,
 } from "@/features/lines/mock-builders";
+import {
+  hasMockGuardianAccount,
+  requireMockGuardian,
+  requireMockGuardianOf,
+  mockChildrenOf,
+} from "@/features/children/mock-links";
 import { LineErrorCode } from "@/features/lines/schema";
 import { PaymentErrorCode, RECEIPT_MAX_BYTES, type ReceiptFile } from "@/features/payments/schema";
 import { mockTerm, requireMockStudent } from "@/features/subscriptions/mock";
@@ -28,7 +34,10 @@ import {
   createRefundEndpoint,
   getRefundPolicyEndpoint,
   getRequestEndpoint,
+  approveAsGuardianEndpoint,
+  listGuardianApprovalsEndpoint,
   listMyRequestsEndpoint,
+  refuseAsGuardianEndpoint,
   withdrawRequestEndpoint,
 } from "./api";
 import {
@@ -53,6 +62,8 @@ import {
   RequestStatus,
   type RefundWindow,
   type RequestEvent,
+  WITHDRAWABLE_REQUEST_STATUSES,
+  type GuardianApproval,
   type StudentRequest,
 } from "./schema";
 
@@ -78,9 +89,39 @@ const DECIDED_BY: Record<RequestKind, RequestEvent["by"]> = {
   [RequestKind.ModelPermit]: RequestActor.Safety,
 };
 
+/** The guardian's answer, if any: recorded, or the mock's stand-in for a guardian with no account. */
+function guardianAnswerOf(
+  request: MockRequest,
+  now: number,
+): { at: number; approved: boolean; note: string | null } | null {
+  const step = request.guardian;
+  if (!step) return null;
+  if (step.decidedAt !== null) {
+    return { at: step.decidedAt, approved: step.approved, note: step.note };
+  }
+  const autoAt = request.submittedAt + MOCK_REQUEST_TIMING.guardianAutoApproveAfterMs;
+  if (!step.hasAccount && now >= autoAt) {
+    return { at: autoAt, approved: true, note: null };
+  }
+  return null;
+}
+
+/** When the office got the request: on sending, or once the guardian approved. Null: not yet. */
+function officeStartOf(request: MockRequest, now: number): number | null {
+  if (!request.guardian) return request.submittedAt;
+  const answer = guardianAnswerOf(request, now);
+  return answer?.approved ? answer.at : null;
+}
+
 function statusAt(request: MockRequest, now: number): RequestStatus {
   if (request.withdrawnAt !== null) return RequestStatus.Withdrawn;
-  const elapsed = now - request.submittedAt;
+  if (request.guardian) {
+    const answer = guardianAnswerOf(request, now);
+    if (!answer) return RequestStatus.AwaitingGuardian;
+    if (!answer.approved) return RequestStatus.Rejected;
+  }
+  const start = officeStartOf(request, now) ?? request.submittedAt;
+  const elapsed = now - start;
   if (elapsed < MOCK_REQUEST_TIMING.inReviewAfterMs) return RequestStatus.Submitted;
   if (elapsed < MOCK_REQUEST_TIMING.decidedAfterMs || request.outcome === "stays_in_review") {
     return RequestStatus.InReview;
@@ -93,12 +134,21 @@ function timelineOf(request: MockRequest, now: number, language: string): Reques
   const office = DECIDED_BY[request.payload.kind];
   const events: RequestEvent[] = [
     {
-      status: RequestStatus.Submitted,
+      status: request.guardian ? RequestStatus.AwaitingGuardian : RequestStatus.Submitted,
       at: iso(request.submittedAt),
       by: RequestActor.Student,
       note: null,
     },
   ];
+  const answer = guardianAnswerOf(request, now);
+  if (answer && (request.withdrawnAt === null || answer.at < request.withdrawnAt)) {
+    events.push({
+      status: answer.approved ? RequestStatus.Submitted : RequestStatus.Rejected,
+      at: iso(answer.at),
+      by: RequestActor.Guardian,
+      note: answer.note,
+    });
+  }
   if (request.withdrawnAt !== null) {
     events.push({
       status: RequestStatus.Withdrawn,
@@ -109,17 +159,24 @@ function timelineOf(request: MockRequest, now: number, language: string): Reques
     return events;
   }
   const status = statusAt(request, now);
-  if (status === RequestStatus.Submitted) return events;
+  const start = officeStartOf(request, now);
+  if (
+    start === null ||
+    status === RequestStatus.Submitted ||
+    status === RequestStatus.AwaitingGuardian
+  ) {
+    return events;
+  }
   events.push({
     status: RequestStatus.InReview,
-    at: iso(request.submittedAt + MOCK_REQUEST_TIMING.inReviewAfterMs),
+    at: iso(start + MOCK_REQUEST_TIMING.inReviewAfterMs),
     by: RequestActor.TransportOffice,
     note: note(request.reviewNote),
   });
   if (status !== RequestStatus.InReview) {
     events.push({
       status,
-      at: iso(request.submittedAt + MOCK_REQUEST_TIMING.decidedAfterMs),
+      at: iso(start + MOCK_REQUEST_TIMING.decidedAfterMs),
       by: office,
       note: note(request.decisionNote),
     });
@@ -411,8 +468,8 @@ registerMock(createLineChangeEndpoint, ({ body }, { token, language }) => {
     withdrawnAt: null,
     outcome: hasSeat ? RequestStatus.Approved : RequestStatus.Rejected,
     reviewNote: {
-      ar: `استلمنا الاستمارة، وهنكلم ولي الأمر على ${body.guardian_phone} نتأكد من الموافقة.`,
-      en: `We got your form and will call your guardian on ${body.guardian_phone} to confirm.`,
+      ar: "استلمنا الاستمارة بعد موافقة ولي الأمر، وبنشوف الأماكن على الخط.",
+      en: "We got your form with your guardian's approval and are checking seats on the line.",
     },
     decisionNote: hasSeat
       ? {
@@ -432,6 +489,12 @@ registerMock(createLineChangeEndpoint, ({ body }, { token, language }) => {
             `seats, or see us at office ${TRANSPORT_ROOM}.`,
         },
     appliedAt: null,
+    guardian: {
+      hasAccount: hasMockGuardianAccount(user.id),
+      decidedAt: null,
+      approved: false,
+      note: null,
+    },
     payload: {
       kind: RequestKind.LineChange,
       fromLineId: booking.lineId,
@@ -657,7 +720,7 @@ registerMock(withdrawRequestEndpoint, ({ params }, { token, language }) => {
   const request = list.find((item) => item.requestId === params.request_id);
   if (!request)
     throw new MockHttpError(HTTP.NotFound, ServerErrorCode.NotFound, "No such request.");
-  if (statusAt(request, now) !== RequestStatus.Submitted) {
+  if (!WITHDRAWABLE_REQUEST_STATUSES.includes(statusAt(request, now))) {
     throw new MockHttpError(
       HTTP.Conflict,
       RequestErrorCode.NotWithdrawable,
@@ -686,3 +749,79 @@ registerMock(getRefundPolicyEndpoint, (_input, { token, language }) => {
     processing_days: PROCESSING_DAYS,
   };
 });
+
+/** A child's line changes, the ones a guardian answers. */
+function lineChangesOf(studentId: string, now: number): MockRequest[] {
+  return currentRequestsOf(studentId, now).filter(
+    (request) => request.payload.kind === RequestKind.LineChange && request.guardian,
+  );
+}
+
+/** Mock only: the line changes waiting for this guardian (for the notifications mock). */
+export function awaitingGuardianOf(guardianId: string, now = Date.now()) {
+  return mockChildrenOf(guardianId).flatMap((child) =>
+    lineChangesOf(child.user.id, now)
+      .filter((request) => statusAt(request, now) === RequestStatus.AwaitingGuardian)
+      .map((request) => ({ child, request })),
+  );
+}
+
+registerMock(listGuardianApprovalsEndpoint, (_input, { token, language }) => {
+  const guardian = requireMockGuardian(token);
+  const now = Date.now();
+  const approvals: GuardianApproval[] = mockChildrenOf(guardian.user.id)
+    .flatMap((child) =>
+      lineChangesOf(child.user.id, now).map((request) => ({
+        student_id: child.user.id,
+        student_name: localized(language, child.user.name_ar ?? child.user.name, child.user.name),
+        request: toStudentRequest(request, language, now),
+      })),
+    )
+    .sort((a, b) => b.request.submitted_at.localeCompare(a.request.submitted_at));
+  return { approvals };
+});
+
+function answerAsGuardian(
+  token: string | null,
+  requestId: string,
+  approved: boolean,
+  note: string | null,
+  language: string,
+): StudentRequest {
+  const guardian = requireMockGuardian(token);
+  const now = Date.now();
+  const owner = mockChildrenOf(guardian.user.id).find((child) =>
+    requestsOf(child.user.id).some((request) => request.requestId === requestId),
+  );
+  if (!owner) {
+    // Same answer as for someone else's child: the guardian can't tell the request exists.
+    requireMockGuardianOf(token, "");
+    throw new Error("unreachable");
+  }
+  const list = currentRequestsOf(owner.user.id, now);
+  const request = list.find((item) => item.requestId === requestId);
+  if (!request?.guardian || statusAt(request, now) !== RequestStatus.AwaitingGuardian) {
+    throw new MockHttpError(
+      HTTP.Conflict,
+      RequestErrorCode.NotAwaitingGuardian,
+      "This request isn't waiting for you any more.",
+    );
+  }
+  const answered: MockRequest = {
+    ...request,
+    guardian: { ...request.guardian, decidedAt: now, approved, note: note?.trim() || null },
+  };
+  saveRequests(
+    owner.user.id,
+    list.map((item) => (item === request ? answered : item)),
+  );
+  return toStudentRequest(answered, language, now);
+}
+
+registerMock(approveAsGuardianEndpoint, ({ params, body }, { token, language }) =>
+  answerAsGuardian(token, params.request_id, true, body.note, language),
+);
+
+registerMock(refuseAsGuardianEndpoint, ({ params, body }, { token, language }) =>
+  answerAsGuardian(token, params.request_id, false, body.note, language),
+);

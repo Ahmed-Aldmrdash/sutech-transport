@@ -8,7 +8,8 @@ import { mockChildDay } from "@/features/children/mock";
 import { mockChildrenOf } from "@/features/children/mock-links";
 import { DayEventKind } from "@/features/children/schema";
 import { MOCK_CAMPUS_ARRIVAL, findMockLine, localized } from "@/features/lines/mock-builders";
-import { currentRequestsOf, toStudentRequest } from "@/features/requests/mock";
+import { absencesOf } from "@/features/absences/mock-state";
+import { awaitingGuardianOf, currentRequestsOf, toStudentRequest } from "@/features/requests/mock";
 import { RequestActor, RequestKind, RequestStatus } from "@/features/requests/schema";
 import { MockPaymentStatus, bookingOf, paymentsOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -36,6 +37,7 @@ const HTTP_NOT_FOUND = 404;
 /** The bus "is near" this many minutes before the pickup time. */
 const BUS_NEAR_MINUTES = 5;
 const DAYS_BACK_FOR_BUS = 7;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 interface ReadState {
   ids: string[];
@@ -113,9 +115,17 @@ function requestNotifications(userId: string, language: string): Draft[] {
     return request.timeline
       .filter((event) => event.by !== RequestActor.Student)
       .map((event): Draft => {
-        const phrase = STATUS_PHRASE[event.status] ?? { ar: "", en: "" };
+        const phrase =
+          event.by === RequestActor.Guardian
+            ? event.status === RequestStatus.Rejected
+              ? { ar: "ولي الأمر مش موافق عليه", en: "was not approved by your guardian" }
+              : {
+                  ar: "ولي الأمر وافق عليه وراح لمكتب النقل",
+                  en: "was approved by your guardian and sent to the office",
+                }
+            : (STATUS_PHRASE[event.status] ?? { ar: "", en: "" });
         return {
-          notification_id: `ntf_req_${request.request_id}_${event.status}`,
+          notification_id: `ntf_req_${request.request_id}_${event.by}_${event.status}`,
           kind: NotificationKind.RequestUpdate,
           title: localized(
             language,
@@ -297,8 +307,9 @@ function childNotifications(guardianId: string, language: string, now: number): 
         events.push({ date, kind: DayEventKind.Absent, at, detail: null });
       }
     }
+    // Today's "not going" comes from the reports below, with the coming days.
     for (const event of mockChildDay(user.id, language, now).events) {
-      events.push({ date: today, ...event });
+      if (event.kind !== DayEventKind.NotGoing) events.push({ date: today, ...event });
     }
     return events.flatMap((event): Draft[] => {
       const kind = CHILD_KIND[event.kind];
@@ -316,6 +327,84 @@ function childNotifications(guardianId: string, language: string, now: number): 
   });
 }
 
+/** The day a report is for, as the guardian reads it: "today" or the date. */
+function dayPhrase(date: string, today: string, language: string): { ar: string; en: string } {
+  if (date === today) return { ar: "النهارده", en: "today" };
+  const shown = new Intl.DateTimeFormat(language === "ar" ? "ar-EG" : "en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00Z`));
+  return { ar: `يوم ${shown}`, en: `on ${shown}` };
+}
+
+const ABSENCE_REASON_TEXT: Record<string, { ar: string; en: string }> = {
+  sick: { ar: "تعبان", en: "Not feeling well" },
+  no_lectures: { ar: "مفيش محاضرات", en: "No lectures" },
+  personal: { ar: "ظرف شخصي", en: "Personal reason" },
+  other: { ar: "سبب تاني", en: "Other reason" },
+};
+
+/** To guardians: each "not going" report, when it was made, for today or a coming day. */
+function daysOffNotifications(guardianId: string, language: string, now: number): Draft[] {
+  const today = cairoNow(new Date(now)).date;
+  const weekAgo = now - DAYS_BACK_FOR_BUS * MS_PER_DAY;
+  return mockChildrenOf(guardianId).flatMap(({ user }) => {
+    const name = { ar: firstNameOf(user.name_ar ?? user.name), en: firstNameOf(user.name) };
+    return absencesOf(user.id)
+      .filter((item) => item.createdAt >= weekAgo)
+      .map((item): Draft => {
+        const day = dayPhrase(item.serviceDate, today, language);
+        const reason = ABSENCE_REASON_TEXT[item.reason] ?? { ar: "", en: "" };
+        const detail = item.note ?? localized(language, reason.ar, reason.en);
+        return {
+          notification_id: `ntf_off_${item.absenceId}`,
+          kind: NotificationKind.ChildNotGoing,
+          title: localized(
+            language,
+            `بلاغ بعدم ركوب ${name.ar} ${day.ar}`,
+            `${name.en} won't ride ${day.en}`,
+          ),
+          body: localized(
+            language,
+            `البلاغ من التطبيق: ${detail}`,
+            `They said so in the app: ${detail}`,
+          ),
+          created_at: new Date(item.createdAt).toISOString(),
+          link: { target: NotificationTarget.ChildDay, id: user.id },
+        };
+      });
+  });
+}
+
+/** To guardians: a child's line change waiting for their answer. */
+function approvalNotifications(guardianId: string, language: string, now: number): Draft[] {
+  return awaitingGuardianOf(guardianId, now).map(({ child, request }): Draft => {
+    const name = localized(
+      language,
+      firstNameOf(child.user.name_ar ?? child.user.name),
+      firstNameOf(child.user.name),
+    );
+    return {
+      notification_id: `ntf_approve_${request.requestId}`,
+      kind: NotificationKind.ApprovalNeeded,
+      title: localized(
+        language,
+        `${name} طالب تغيير خط ومستني موافقتك`,
+        `${name} asked to change line and needs your approval`,
+      ),
+      body: localized(
+        language,
+        "الطلب مش هيروح لمكتب النقل غير لما توافق. افتحه عشان توافق أو ترفض.",
+        "It won't reach the Transportation office until you approve. Open it to approve or refuse.",
+      ),
+      created_at: new Date(request.submittedAt).toISOString(),
+      link: { target: NotificationTarget.Approvals, id: null },
+    };
+  });
+}
+
 function notificationsFor(userId: string, role: Role, language: string): AppNotification[] {
   const now = Date.now();
   const drafts = [
@@ -327,7 +416,13 @@ function notificationsFor(userId: string, role: Role, language: string): AppNoti
           ...busNearNotifications(userId, language, now),
         ]
       : []),
-    ...(role === Role.Parent ? childNotifications(userId, language, now) : []),
+    ...(role === Role.Parent
+      ? [
+          ...childNotifications(userId, language, now),
+          ...daysOffNotifications(userId, language, now),
+          ...approvalNotifications(userId, language, now),
+        ]
+      : []),
   ];
   const read = readStateOf(userId);
   return drafts

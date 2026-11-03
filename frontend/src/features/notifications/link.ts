@@ -18,6 +18,7 @@ const PARENT_PATHS: Paths = {
   [NotificationTarget.Home]: "/parent",
   [NotificationTarget.Tracking]: "/parent",
   [NotificationTarget.ChildDay]: "/parent/day",
+  [NotificationTarget.Approvals]: "/parent/approvals",
 };
 
 /** Targets whose id is a query (which child) rather than a page of its own. */

@@ -20,7 +20,10 @@ import {
   createRefund,
   getRefundPolicy,
   getRequest,
+  approveAsGuardian,
+  listGuardianApprovals,
   listMyRequests,
+  refuseAsGuardian,
   withdrawRequest,
 } from "./api";
 import { MOCK_REQUEST_TIMING, resetRequestsMock } from "./mock-state";
@@ -36,8 +39,13 @@ import {
 
 const MARIAM = "240102684"; // Omar, active on line 7 since September
 const AHMED = "240102791"; // no booking
+const YOUSSEF = "260101207"; // active on line 12; his guardian has an account
+const GUARDIAN = "01098765432"; // Ahmed's and Youssef's father
 const NOV_2 = Date.parse("2026-11-02T08:00:00Z");
 const OCT_1 = Date.parse("2026-10-01T08:00:00Z");
+/** Omar's guardian has no account in the mock, so it "approves" by itself after a while. */
+const OFFICE_GETS_IT = NOV_2 + MOCK_REQUEST_TIMING.guardianAutoApproveAfterMs;
+
 const DOCUMENT = {
   file_name: "report.pdf",
   content_type: "application/pdf" as const,
@@ -74,7 +82,6 @@ function lineChange(overrides: Partial<CreateLineChangeBody> = {}): CreateLineCh
     student_phone: "01012340684",
     guardian_name: "Ahmed Ramadan Ramadan",
     guardian_phone: "01098760684",
-    guardian_consent: true,
     ...overrides,
   };
 }
@@ -129,28 +136,77 @@ describe("student requests (mock server)", () => {
   it("a line change moves through review to approval and moves the booking", async () => {
     await signIn(MARIAM);
     const sent = await createLineChange(lineChange());
-    expect(sent.status).toBe(RequestStatus.Submitted);
+    expect(sent.status).toBe(RequestStatus.AwaitingGuardian);
     expect(sent.reference).toMatch(/^REQ-2026-\d{4}$/);
     expect((await errorOf(createLineChange(lineChange()))).code).toBe(
       RequestErrorCode.RequestAlreadyOpen,
     );
 
-    at(NOV_2 + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
+    at(OFFICE_GETS_IT + 1);
+    expect((await getRequest(sent.request_id)).status).toBe(RequestStatus.Submitted);
+
+    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
     const reviewing = await getRequest(sent.request_id);
     expect(reviewing.status).toBe(RequestStatus.InReview);
-    expect(reviewing.timeline.at(-1)?.note).toContain("01098760684");
 
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Approved);
-    expect(decided.timeline.map((event) => event.status)).toEqual([
-      RequestStatus.Submitted,
-      RequestStatus.InReview,
-      RequestStatus.Approved,
+    expect(decided.timeline.map((event) => [event.status, event.by])).toEqual([
+      [RequestStatus.AwaitingGuardian, RequestActor.Student],
+      [RequestStatus.Submitted, RequestActor.Guardian],
+      [RequestStatus.InReview, RequestActor.TransportOffice],
+      [RequestStatus.Approved, RequestActor.TransportOffice],
     ]);
     const { subscription } = await getMySubscription();
     expect(subscription?.line.line_id).toBe("ln_12");
     expect(subscription?.stop.stop_id).toBe("ln_12_s3");
+  });
+
+  it("a line change waits for the guardian, who approves or refuses it in the app", async () => {
+    await signIn(YOUSSEF);
+    const first = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    // No guardian answer: it never reaches the office on its own.
+    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs * 2);
+    expect((await getRequest(first.request_id)).status).toBe(RequestStatus.AwaitingGuardian);
+
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    const { approvals } = await listGuardianApprovals();
+    expect(approvals).toHaveLength(1);
+    expect(approvals[0]?.student_id).toBe("usr_student_11");
+    const refused = await refuseAsGuardian(first.request_id, { note: "Too far from home." });
+    expect(refused.status).toBe(RequestStatus.Rejected);
+    expect(refused.timeline.at(-1)).toMatchObject({
+      by: RequestActor.Guardian,
+      note: "Too far from home.",
+    });
+    expect((await errorOf(approveAsGuardian(first.request_id, { note: null }))).code).toBe(
+      RequestErrorCode.NotAwaitingGuardian,
+    );
+
+    tokenStore.set(null);
+    await signIn(YOUSSEF);
+    const second = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    const approved = await approveAsGuardian(second.request_id, { note: null });
+    expect(approved.status).toBe(RequestStatus.Submitted);
+    expect(approved.timeline.at(-1)?.by).toBe(RequestActor.Guardian);
+
+    // Another student's request is not the guardian's to answer.
+    tokenStore.set(null);
+    await signIn(MARIAM);
+    const omars = await createLineChange(lineChange());
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    expect((await errorOf(approveAsGuardian(omars.request_id, { note: null }))).code).toBe(
+      "NOT_YOUR_CHILD",
+    );
   });
 
   it("a change to a full line is not approved", async () => {
@@ -158,7 +214,7 @@ describe("student requests (mock server)", () => {
     const sent = await createLineChange(
       lineChange({ to_line_id: "ln_02", to_stop_id: "ln_02_s1" }),
     );
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Rejected);
     expect((await getMySubscription()).subscription?.line.line_id).toBe("ln_07");

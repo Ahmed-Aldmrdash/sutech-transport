@@ -44,7 +44,14 @@ export function mockChildDay(studentId: string, language: string, now: number): 
   const line = booking && findMockLine(booking.lineId);
   const base = { student_id: studentId, service_date: cairo.date };
   if (!booking || !line || booking.status !== SubscriptionStatus.Active) {
-    return { ...base, status: ChildDayStatus.NoSubscription, trip: null, events: [], recent: [] };
+    return {
+      ...base,
+      status: ChildDayStatus.NoSubscription,
+      trip: null,
+      events: [],
+      recent: [],
+      days_off: [],
+    };
   }
 
   const [pickup = "07:00", stopAr = "", stopEn = ""] = line.stops[booking.stopOrder - 1] ?? [];
@@ -59,7 +66,16 @@ export function mockChildDay(studentId: string, language: string, now: number): 
   const recent = historyOf(studentId, language, now)
     .filter((record) => record.service_date < cairo.date)
     .slice(0, RECENT_DAYS);
-  const day = { ...base, trip, recent };
+  const days_off = absencesOf(studentId)
+    .filter((item) => item.serviceDate >= cairo.date)
+    .sort((a, b) => a.serviceDate.localeCompare(b.serviceDate))
+    .map((item) => ({
+      service_date: item.serviceDate,
+      reason: item.reason,
+      note: item.note,
+      reported_at: new Date(item.createdAt).toISOString(),
+    }));
+  const day = { ...base, trip, recent, days_off };
 
   if (!SERVICE_DAYS.has(cairo.weekday)) {
     return { ...day, status: ChildDayStatus.NoService, events: [] };

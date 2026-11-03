@@ -7,6 +7,8 @@ import {
   createLineChangeBodySchema,
   createModelPermitBodySchema,
   createRefundBodySchema,
+  guardianApprovalListSchema,
+  guardianDecisionBodySchema,
   listMyRequestsQuerySchema,
   refundPolicySchema,
   requestParamsSchema,
@@ -15,6 +17,7 @@ import {
   type CreateLineChangeBody,
   type CreateModelPermitBody,
   type CreateRefundBody,
+  type GuardianDecisionBody,
   type RefundPolicy,
   type RequestKind,
   type StudentRequest,
@@ -52,7 +55,9 @@ export const createLineChangeEndpoint = defineEndpoint({
   path: "/requests/line-change",
   summary:
     "The university's line change form: new line and stop, permanent or temporary (with " +
-    "dates), the reason, and the guardian's approval. Needs an active subscription. Errors: " +
+    "dates), the reason and the guardian's details. It starts as awaiting_guardian and reaches " +
+    "the office only once the guardian approves it in the app (the guardian's account is the " +
+    "phone on the student's file). Needs an active subscription. Errors: " +
     "NO_ACTIVE_SUBSCRIPTION (409), REQUEST_ALREADY_OPEN (409), SAME_LINE (422), " +
     "INVALID_DATES (422), LINE_NOT_FOUND (404), STOP_NOT_ON_LINE (422).",
   tag: TAG,
@@ -118,7 +123,8 @@ export const withdrawRequestEndpoint = defineEndpoint({
   method: HttpMethod.Post,
   path: "/requests/{request_id}/withdraw",
   summary:
-    "The student takes back a request the office hasn't started on yet. " +
+    "The student takes back a request the office hasn't started on yet (awaiting_guardian or " +
+    "submitted). " +
     "Errors: NOT_WITHDRAWABLE (409).",
   tag: TAG,
   access: [Role.Student],
@@ -138,6 +144,78 @@ export const getRefundPolicyEndpoint = defineEndpoint({
   access: [Role.Student],
   response: refundPolicySchema,
 });
+
+export const listGuardianApprovalsEndpoint = defineEndpoint({
+  id: "parent.listApprovals",
+  method: HttpMethod.Get,
+  path: "/parent/approvals",
+  summary:
+    "The line change requests of this guardian's children this term, newest first: the ones " +
+    "waiting for the guardian (awaiting_guardian) and the ones already answered. A new one " +
+    "arrives as a notification. Names and notes follow Accept-Language.",
+  tag: "parent",
+  access: [Role.Parent],
+  response: guardianApprovalListSchema,
+});
+
+export const approveAsGuardianEndpoint = defineEndpoint({
+  id: "parent.approveRequest",
+  method: HttpMethod.Post,
+  path: "/parent/approvals/{request_id}/approve",
+  summary:
+    "The guardian agrees to the child's line change: awaiting_guardian → submitted, and it goes " +
+    "to the Transportation office. The student is notified. Errors: NOT_YOUR_CHILD (403), " +
+    "NOT_AWAITING_GUARDIAN (409).",
+  tag: "parent",
+  access: [Role.Parent],
+  idempotent: true,
+  params: requestParamsSchema,
+  body: guardianDecisionBodySchema,
+  response: studentRequestSchema,
+});
+
+export const refuseAsGuardianEndpoint = defineEndpoint({
+  id: "parent.refuseRequest",
+  method: HttpMethod.Post,
+  path: "/parent/approvals/{request_id}/refuse",
+  summary:
+    "The guardian doesn't agree: awaiting_guardian → rejected, with an optional note to the " +
+    "student. The office never sees it. Errors: NOT_YOUR_CHILD (403), NOT_AWAITING_GUARDIAN (409).",
+  tag: "parent",
+  access: [Role.Parent],
+  idempotent: true,
+  params: requestParamsSchema,
+  body: guardianDecisionBodySchema,
+  response: studentRequestSchema,
+});
+
+export function listGuardianApprovals(options?: RequestOptions) {
+  return callEndpoint(listGuardianApprovalsEndpoint, {}, options);
+}
+
+export function approveAsGuardian(
+  requestId: string,
+  body: GuardianDecisionBody,
+  options?: RequestOptions,
+): Promise<StudentRequest> {
+  return callEndpoint(
+    approveAsGuardianEndpoint,
+    { params: { request_id: requestId }, body },
+    options,
+  );
+}
+
+export function refuseAsGuardian(
+  requestId: string,
+  body: GuardianDecisionBody,
+  options?: RequestOptions,
+): Promise<StudentRequest> {
+  return callEndpoint(
+    refuseAsGuardianEndpoint,
+    { params: { request_id: requestId }, body },
+    options,
+  );
+}
 
 export function listMyRequests(
   kind?: RequestKind,
@@ -198,4 +276,7 @@ export const requestsEndpoints = [
   createComplaintEndpoint,
   createModelPermitEndpoint,
   withdrawRequestEndpoint,
+  listGuardianApprovalsEndpoint,
+  approveAsGuardianEndpoint,
+  refuseAsGuardianEndpoint,
 ];

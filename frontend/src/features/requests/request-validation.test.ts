@@ -23,7 +23,6 @@ const lineChange: LineChangeValues = {
   studentPhone: "٠١٠١٢٣٤٥٦٧٨",
   guardianName: "Adel Mahmoud",
   guardianPhone: "+20 109 876 0684",
-  guardianConsent: true,
 };
 
 const modelPermit: ModelPermitValues = {
@@ -78,10 +77,10 @@ describe("request forms", () => {
     expect(validateLineChange(lineChange, { ...RULES, currentLineId: "ln_05" })).toEqual({});
     expect(
       validateLineChange(
-        { ...lineChange, toLineId: "ln_05", guardianConsent: false },
+        { ...lineChange, toLineId: "ln_05", guardianPhone: "" },
         { ...RULES, currentLineId: "ln_05" },
       ),
-    ).toEqual({ toLineId: "sameLine", guardianConsent: "consentRequired" });
+    ).toEqual({ toLineId: "sameLine", guardianPhone: "required" });
     expect(
       validateLineChange(
         { ...lineChange, duration: "temporary", startsOn: "2026-11-01" },

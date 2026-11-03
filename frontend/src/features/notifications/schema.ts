@@ -17,8 +17,10 @@ export const NotificationKind = {
   ChildArrived: "child_arrived",
   /** To guardians: the bus reached campus without their child (no scan, no "not going"). */
   ChildAbsent: "child_absent",
-  /** To guardians: the child said they won't ride today. */
+  /** To guardians: the child said they won't ride on a day (today or a coming one). */
   ChildNotGoing: "child_not_going",
+  /** To guardians: the child asked for a line change, which waits for the guardian's answer. */
+  ApprovalNeeded: "approval_needed",
   /** To guardians: the child left the bus mid-trip; the body has the reason. */
   ChildCheckedOut: "child_checked_out",
 } as const;
@@ -42,6 +44,8 @@ export const NotificationTarget = {
   Announcements: "announcements",
   /** A guardian's "Today's trip" page; id is the student_id. */
   ChildDay: "child_day",
+  /** A guardian's approvals page. */
+  Approvals: "approvals",
 } as const;
 export type NotificationTarget = (typeof NotificationTarget)[keyof typeof NotificationTarget];
 

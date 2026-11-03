@@ -612,7 +612,8 @@
         "approved": "Approved",
         "rejected": "Not approved",
         "resolved": "Answered",
-        "withdrawn": "Withdrawn"
+        "withdrawn": "Withdrawn",
+        "awaiting_guardian": "Waiting for guardian"
       },
       "emptyTitle": "No requests yet",
       "emptyBody": "Need a different line for a while, or have to cancel your subscription? Start a request above.",
@@ -658,7 +659,8 @@
         "RECEIPT_TOO_LARGE": "A file is larger than {size}.",
         "network": "No connection. Check the internet and try again; nothing was sent twice.",
         "generic": "Something went wrong. Try again in a moment.",
-        "NO_SUBSCRIPTION": "Book a seat first: complaints are for students with a booking."
+        "NO_SUBSCRIPTION": "Book a seat first: complaints are for students with a booking.",
+        "NOT_AWAITING_GUARDIAN": "This request isn't waiting for the guardian any more."
       },
       "attachments": {
         "add": "Add a file",
@@ -671,7 +673,9 @@
         "phone": "Guardian's mobile",
         "consentLineChange": "My guardian agrees to this line change",
         "consentRefund": "My guardian agrees to cancel the subscription and get the refund",
-        "consentHint": "The university's form needs the guardian's approval. The office may call to confirm."
+        "consentHint": "The university's form needs the guardian's approval. The office may call to confirm.",
+        "lineChangeTitle": "Guardian's details",
+        "lineChangeNote": "Once you send it, your guardian gets it in the app to approve. Only then does it go to the Transportation office."
       },
       "lineChange": {
         "new": "Change my line",
@@ -793,7 +797,8 @@
           "approved": "Approved",
           "rejected": "Not approved",
           "resolved": "The office answered",
-          "withdrawn": "You withdrew this request"
+          "withdrawn": "You withdrew this request",
+          "awaiting_guardian": "Waiting for your guardian"
         },
         "noNote": "No note from the office.",
         "historyTitle": "History",
@@ -802,7 +807,8 @@
           "student": "You",
           "transport_office": "Transportation office",
           "finance": "Finance",
-          "safety": "Safety department"
+          "safety": "Safety department",
+          "guardian": "Your guardian"
         },
         "detailsTitle": "What you sent",
         "submittedAt": "Sent on",
@@ -817,7 +823,11 @@
           "NOT_WITHDRAWABLE": "The office has already started on it, so it can't be withdrawn.",
           "network": "No connection. Try again.",
           "generic": "Couldn't withdraw it. Try again."
-        }
+        },
+        "guardianWaitingTitle": "Waiting for your guardian's approval",
+        "guardianWaitingBody": "Your guardian has it in the app. Once they approve, it goes to the Transportation office. You can withdraw it until the office opens it.",
+        "guardianApproved": "Your guardian approved; sent to the Transportation office",
+        "guardianRefused": "Your guardian didn't approve"
       },
       "modelPermit": {
         "new": "Bring a project model",
@@ -1117,6 +1127,55 @@
         "checked_out": "Left the bus: {detail}",
         "absent": "Marked absent: not on the bus"
       }
+    },
+    "approvals": {
+      "title": "Approvals",
+      "lead": "Your children's line change requests. A request reaches the Transportation office only after you approve it.",
+      "waitingTitle": "Waiting for you",
+      "answeredTitle": "Answered",
+      "emptyTitle": "Nothing waiting for you",
+      "emptyBody": "When one of your children asks to change line, it shows here and you get a notification.",
+      "cardTitle": "Line change · {name}",
+      "cardMeta": "{reference} · sent {date}",
+      "from": "From line",
+      "to": "To line",
+      "stop": "Stop: {stop}",
+      "duration": "For how long",
+      "reason": "{name}'s reason",
+      "explain": "If you approve, it goes to the Transportation office, which checks the seats. If you refuse, it's closed and {name} is told.",
+      "approve": "Approve",
+      "refuse": "Refuse",
+      "approveTitle": "Approve the line change?",
+      "approveBody": "{name}'s request for {line} goes to the Transportation office.",
+      "refuseTitle": "Refuse the line change?",
+      "refuseBody": "The request is closed. {name} can send a new one later.",
+      "approveNote": "A note for the Transportation office",
+      "refuseNote": "Want to tell {name} why?",
+      "optional": "Optional",
+      "approveConfirm": "Yes, approve",
+      "refuseConfirm": "Yes, refuse",
+      "back": "Back",
+      "approvedToast": "You approved the request",
+      "approvedToastBody": "{name}'s request went to the Transportation office.",
+      "refusedToast": "You refused the request",
+      "youApproved": "You approved it on {date}",
+      "youRefused": "You refused it on {date}",
+      "errors": {
+        "NOT_AWAITING_GUARDIAN": "This request was already answered or withdrawn.",
+        "network": "No connection. Try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "daysOff": {
+      "title": "Days they won't ride",
+      "today": "Today",
+      "item": "{day}: {reason}"
+    },
+    "reasons": {
+      "sick": "Not feeling well",
+      "no_lectures": "No lectures",
+      "personal": "Personal reason",
+      "other": "Other reason"
     }
   }
 }

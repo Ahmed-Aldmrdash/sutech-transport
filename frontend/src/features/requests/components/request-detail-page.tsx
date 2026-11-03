@@ -27,6 +27,7 @@ import { getRequest, withdrawRequest } from "../api";
 import {
   OPEN_REQUEST_STATUSES,
   RequestActor,
+  WITHDRAWABLE_REQUEST_STATUSES,
   RequestErrorCode,
   RequestKind,
   RequestStatus,
@@ -98,7 +99,7 @@ export function RequestDetailPage({
         <RequestDetails request={request} />
         <div className="flex flex-col gap-5">
           <Timeline events={request.timeline} />
-          {request.status === RequestStatus.Submitted ? (
+          {WITHDRAWABLE_REQUEST_STATUSES.includes(request.status) ? (
             <WithdrawCard request={request} onWithdrawn={state.refresh} />
           ) : null}
         </div>
@@ -114,12 +115,26 @@ function LatestAnswer({ request }: { request: StudentRequest }) {
   if (last?.status === RequestStatus.Withdrawn) {
     return <Alert tone={Tone.Info} title={t("answer.withdrawn")} />;
   }
-  if (!last || last.by === RequestActor.Student) {
+  if (request.status === RequestStatus.AwaitingGuardian) {
+    return (
+      <Alert tone={Tone.Warning} title={t("guardianWaitingTitle")}>
+        {t("guardianWaitingBody")}
+      </Alert>
+    );
+  }
+  if (!last || last.by === RequestActor.Student || request.status === RequestStatus.Submitted) {
     return request.status === RequestStatus.Submitted ? (
       <Alert tone={Tone.Info} title={t("waitingTitle")}>
         {t("waitingBody")}
       </Alert>
     ) : null;
+  }
+  if (last.by === RequestActor.Guardian) {
+    return (
+      <Alert tone={Tone.Danger} title={t("guardianRefused")}>
+        {last.note ?? null}
+      </Alert>
+    );
   }
   const tone = REQUEST_STATUS_TONE[last.status];
   const alertTone =
@@ -161,7 +176,13 @@ function Timeline({ events }: { events: readonly RequestEvent[] }) {
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-body-sm font-bold text-ink-strong">
-                    {t(`status.${event.status}`)}
+                    {event.by === RequestActor.Guardian
+                      ? t(
+                          event.status === RequestStatus.Rejected
+                            ? "detail.guardianRefused"
+                            : "detail.guardianApproved",
+                        )
+                      : t(`status.${event.status}`)}
                   </p>
                   <p className="text-caption text-ink-muted">
                     {t("detail.eventMeta", {

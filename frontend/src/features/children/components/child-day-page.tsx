@@ -14,7 +14,7 @@ import { AsyncStatus } from "@/lib/hooks/use-async";
 import type { Child } from "../schema";
 import { ChildSwitcher } from "./child-switcher";
 import { useChildren } from "./children-provider";
-import { DayStatusBanner, DayTimeline } from "./day-status";
+import { DayStatusBanner, DayTimeline, DaysOffList } from "./day-status";
 import { useChildDay } from "./use-child-day";
 
 /** "Today's trip": where the child is, what happened so far, the bus, and the last few days. */
@@ -59,6 +59,7 @@ function ChildDay({ child }: { child: Child }) {
     <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <div className="flex flex-col gap-5">
         <DayStatusBanner day={day} childName={child.name} />
+        <DaysOffList day={day} />
         <Card>
           <CardHeader title={t("timelineTitle")} />
           <CardBody>

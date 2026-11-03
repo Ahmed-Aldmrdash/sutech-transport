@@ -25,6 +25,11 @@ export function isMockGuardianOf(guardianId: string, studentId: string): boolean
   return (GUARDIAN_CHILDREN[guardianId] ?? []).includes(studentId);
 }
 
+/** True when one of the mock guardian accounts follows this student. */
+export function hasMockGuardianAccount(studentId: string): boolean {
+  return Object.values(GUARDIAN_CHILDREN).some((children) => children.includes(studentId));
+}
+
 /** The line the student rides now, or null without an active subscription. */
 export function activeLineOf(studentId: string): string | null {
   const booking = bookingOf(studentId);

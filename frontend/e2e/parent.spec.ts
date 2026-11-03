@@ -4,6 +4,7 @@ import { expectNoSidewaysScroll, signIn } from "./helpers";
 const GUARDIAN = "01098765432"; // Ahmed's father: Ahmed (no booking) and Youssef (line 12)
 const OMAR = "240102684"; // active on line 7, El Shorouk
 const AHMED = "240102791"; // no booking
+const YOUSSEF = "260101207"; // Ahmed's brother, active on line 12
 
 const TILE_HOST = "tile.openstreetmap.org";
 
@@ -102,6 +103,54 @@ test.describe("guardian", () => {
         return { noReload: w.__noReload, sawLoader: w.__sawLoader };
       }),
     ).toEqual({ noReload: true, sawLoader: false });
+    expect(errors).toEqual([]);
+  });
+
+  test("answers a child's line change and sees their days off", async ({ page }) => {
+    const errors = watchForAppErrors(page);
+    // Youssef asks to change line and reports a day off.
+    await signIn(page, YOUSSEF);
+    await page.waitForURL(/\/en\/student$/);
+    await page.goto("/en/student/requests/new/line-change");
+    await page.getByLabel("New line").selectOption("ln_05");
+    await page.getByLabel("Pickup or drop-off stop").selectOption("ln_05_s1");
+    await page.getByLabel("Why do you need to change?").fill("We moved near this line.");
+    await page.getByLabel("Your mobile").fill("01012340684");
+    await page.getByLabel("Guardian's mobile").fill("01098765432");
+    await page.getByRole("button", { name: "Send request" }).click();
+    await page.waitForURL(/\/en\/student\/requests\/req_/);
+    await expect(page.getByText("Waiting for your guardian's approval")).toBeVisible();
+    await page.goto("/en/student/not-going-today");
+    await page.getByLabel("No lectures").check();
+    await page.getByRole("button", { name: "Report the day" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Yes, I'm not going" }).click();
+    await expect(page.getByText("Reported", { exact: true })).toBeVisible();
+
+    // His father sees both, and approves.
+    await page.evaluate(() => window.localStorage.removeItem("sut.session"));
+    await signIn(page, GUARDIAN);
+    await page.waitForURL(/\/en\/parent$/);
+    await expect(page.getByText("Days they won't ride")).toBeVisible();
+    await page.goto("/en/parent/notifications");
+    await expect(page.getByText(/Youssef won't ride/).first()).toBeVisible();
+    await page.getByRole("button", { name: /Youssef asked to change line/ }).click();
+    await page.waitForURL(/\/en\/parent\/approvals$/);
+    await expect(page.getByText("Line change · Youssef Mohamed Fathy Aldmrdash")).toBeVisible();
+    await expectNoSidewaysScroll(page);
+    await page.getByRole("button", { name: "Approve", exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Yes, approve" }).click();
+    await expect(page.getByText(/You approved it on/)).toBeVisible();
+    await expect(page.getByText("Nothing waiting for you")).toBeVisible();
+
+    // Youssef sees it went to the office.
+    await page.evaluate(() => window.localStorage.removeItem("sut.session"));
+    await signIn(page, YOUSSEF);
+    await page.waitForURL(/\/en\/student$/);
+    await page.goto("/en/student/requests");
+    await page.getByText("Line 12 → Line 5").first().click();
+    await expect(
+      page.getByText("Your guardian approved; sent to the Transportation office"),
+    ).toBeVisible();
     expect(errors).toEqual([]);
   });
 

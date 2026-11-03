@@ -8,6 +8,7 @@ import {
   CircleCheck,
   CircleX,
   ClipboardList,
+  ListChecks,
   LogOut,
   Megaphone,
   School,
@@ -52,6 +53,7 @@ const KIND_ICON: Record<NotificationKind, LucideIcon> = {
   [NotificationKind.ChildAbsent]: UserX,
   [NotificationKind.ChildNotGoing]: CalendarX2,
   [NotificationKind.ChildCheckedOut]: LogOut,
+  [NotificationKind.ApprovalNeeded]: ListChecks,
 };
 
 const KIND_STYLE: Record<NotificationKind, string> = {
@@ -66,6 +68,7 @@ const KIND_STYLE: Record<NotificationKind, string> = {
   [NotificationKind.ChildAbsent]: "bg-danger-soft text-danger",
   [NotificationKind.ChildNotGoing]: "bg-surface-alt text-ink",
   [NotificationKind.ChildCheckedOut]: "bg-warning-soft text-warning-text",
+  [NotificationKind.ApprovalNeeded]: "bg-warning-soft text-warning-text",
 };
 
 const Filter = { All: "all", Unread: "unread" } as const;

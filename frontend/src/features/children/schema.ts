@@ -6,6 +6,7 @@ import {
   clockTimeSchema,
   lineSummarySchema,
 } from "@/features/lines/schema";
+import { ABSENCE_REASONS } from "@/features/absences/schema";
 import { calendarDateSchema, subscriptionSchema } from "@/features/subscriptions/schema";
 
 export const childParamsSchema = z.object({ student_id: z.string().min(1) });
@@ -97,5 +98,14 @@ export const childDaySchema = z.object({
   events: z.array(dayEventSchema),
   /** The last few service days before today, newest first. */
   recent: z.array(tripRecordSchema),
+  /** Days from today on the child said they won't ride, soonest first. */
+  days_off: z.array(
+    z.object({
+      service_date: calendarDateSchema,
+      reason: z.enum(ABSENCE_REASONS),
+      note: z.string().nullable(),
+      reported_at: z.iso.datetime(),
+    }),
+  ),
 });
 export type ChildDay = z.infer<typeof childDaySchema>;

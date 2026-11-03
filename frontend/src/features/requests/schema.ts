@@ -26,9 +26,12 @@ export const REQUEST_KINDS = [
 
 /**
  * submitted → in_review → approved | rejected (line change, refund) or resolved (complaint).
- * The student may withdraw a request only while it is still submitted.
+ * A line change starts one step earlier, at awaiting_guardian: the guardian approves it in the
+ * app (→ submitted, to the office) or refuses it (→ rejected). The model permit, refund and
+ * complaint skip that step. The student may withdraw a request until the office opens it.
  */
 export const RequestStatus = {
+  AwaitingGuardian: "awaiting_guardian",
   Submitted: "submitted",
   InReview: "in_review",
   Approved: "approved",
@@ -38,6 +41,7 @@ export const RequestStatus = {
 } as const;
 export type RequestStatus = (typeof RequestStatus)[keyof typeof RequestStatus];
 const requestStatusSchema = z.enum([
+  RequestStatus.AwaitingGuardian,
   RequestStatus.Submitted,
   RequestStatus.InReview,
   RequestStatus.Approved,
@@ -46,8 +50,15 @@ const requestStatusSchema = z.enum([
   RequestStatus.Withdrawn,
 ]);
 
-/** Requests still waiting for the office. Only one open request of each kind at a time. */
+/** The student may withdraw a request in these statuses (before the office opens it). */
+export const WITHDRAWABLE_REQUEST_STATUSES: readonly RequestStatus[] = [
+  RequestStatus.AwaitingGuardian,
+  RequestStatus.Submitted,
+];
+
+/** Requests not answered yet. Only one open request of each kind at a time. */
 export const OPEN_REQUEST_STATUSES: readonly RequestStatus[] = [
+  RequestStatus.AwaitingGuardian,
   RequestStatus.Submitted,
   RequestStatus.InReview,
 ];
@@ -69,6 +80,8 @@ export const RequestErrorCode = {
   /** Exceptional refund reasons need at least one supporting document. */
   DocumentsRequired: "DOCUMENTS_REQUIRED",
   NotWithdrawable: "NOT_WITHDRAWABLE",
+  /** The guardian answers only a request that is still waiting for them. */
+  NotAwaitingGuardian: "NOT_AWAITING_GUARDIAN",
 } as const;
 
 export const LineChangeDuration = {
@@ -168,7 +181,11 @@ const requestTextSchema = z
   .max(REQUEST_TEXT_MAX_LENGTH);
 const shortTextSchema = z.string().trim().min(SHORT_TEXT_MIN_LENGTH).max(SHORT_TEXT_MAX_LENGTH);
 
-/** The guardian's approval, which the university's forms ask for (line change and refund). */
+/**
+ * The guardian's details, which the university's forms ask for. For a refund the student also
+ * confirms the guardian agreed; a line change instead waits for the guardian to approve it in
+ * the app (the guardian's account is the phone on the student's file).
+ */
 const guardianSchema = z.object({
   guardian_name: personNameSchema,
   guardian_phone: egyptianMobileSchema,
@@ -256,6 +273,8 @@ export const modelPermitDetailsSchema = z.object({
 
 export const RequestActor = {
   Student: "student",
+  /** The guardian, approving or refusing a line change in the app. */
+  Guardian: "guardian",
   TransportOffice: "transport_office",
   Finance: "finance",
   /** The Safety department, which signs the model permit last. */
@@ -268,6 +287,7 @@ export const requestEventSchema = z.object({
   at: z.iso.datetime(),
   by: z.enum([
     RequestActor.Student,
+    RequestActor.Guardian,
     RequestActor.TransportOffice,
     RequestActor.Finance,
     RequestActor.Safety,
@@ -284,7 +304,7 @@ const requestBase = z.object({
   status: requestStatusSchema,
   submitted_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  /** Oldest first; the first event is always "submitted". */
+  /** Oldest first; the first event is the student sending it (submitted or awaiting_guardian). */
   timeline: z.array(requestEventSchema).min(1),
 });
 
@@ -313,6 +333,7 @@ export const listMyRequestsQuerySchema = z.object({
 export const requestParamsSchema = z.object({ request_id: z.string().min(1) });
 
 export const createLineChangeBodySchema = guardianSchema
+  .omit({ guardian_consent: true })
   .extend({
     to_line_id: z.string().min(1),
     to_stop_id: z.string().min(1),
@@ -399,3 +420,18 @@ export const refundPolicySchema = z.object({
   processing_days: z.number().int().positive(),
 });
 export type RefundPolicy = z.infer<typeof refundPolicySchema>;
+
+/** A child's line change, as the guardian sees it on the approvals page. */
+export const guardianApprovalSchema = z.object({
+  student_id: z.string(),
+  student_name: z.string(),
+  request: studentRequestSchema,
+});
+export type GuardianApproval = z.infer<typeof guardianApprovalSchema>;
+export const guardianApprovalListSchema = z.object({ approvals: z.array(guardianApprovalSchema) });
+
+/** Why the guardian refused, shown to the student; optional. */
+export const guardianDecisionBodySchema = z.object({
+  note: z.string().trim().max(REQUEST_TEXT_MAX_LENGTH).nullable(),
+});
+export type GuardianDecisionBody = z.infer<typeof guardianDecisionBodySchema>;

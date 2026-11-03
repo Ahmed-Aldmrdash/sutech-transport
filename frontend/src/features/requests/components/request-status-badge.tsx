@@ -4,6 +4,7 @@ import { Tone } from "@/components/ui/tone";
 import { RequestStatus } from "../schema";
 
 export const REQUEST_STATUS_TONE: Record<RequestStatus, Tone> = {
+  [RequestStatus.AwaitingGuardian]: Tone.Warning,
   [RequestStatus.Submitted]: Tone.Brand,
   [RequestStatus.InReview]: Tone.Info,
   [RequestStatus.Approved]: Tone.Success,

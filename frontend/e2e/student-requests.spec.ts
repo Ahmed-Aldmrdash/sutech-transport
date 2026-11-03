@@ -14,9 +14,6 @@ test.describe("student requests, notifications and settings", () => {
     await page.getByRole("link", { name: "Change my line" }).click();
     await expect(page.getByRole("heading", { name: "Line change request" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Send request" }).click();
-    await expect(page.getByText("Your guardian must agree before you send this.")).toBeVisible();
-
     await page.getByLabel("New line").selectOption("ln_12");
     await page.getByLabel("Pickup or drop-off stop").selectOption("ln_12_s3");
     await page.getByLabel("Temporary").check();
@@ -24,12 +21,12 @@ test.describe("student requests, notifications and settings", () => {
     await page.getByLabel("Why do you need to change?").fill("Staying with my aunt for a while.");
     await page.getByLabel("Your mobile").fill("01012340684");
     await page.getByLabel("Guardian's mobile").fill("0109 876 0684");
-    await page.getByLabel("My guardian agrees to this line change").check();
+    await expect(page.getByText(/your guardian gets it in the app to approve/)).toBeVisible();
     await expectNoSidewaysScroll(page);
     await page.getByRole("button", { name: "Send request" }).click();
 
     await page.waitForURL(/\/en\/student\/requests\/req_/);
-    await expect(page.getByText("Waiting for the office")).toBeVisible();
+    await expect(page.getByText("Waiting for your guardian's approval")).toBeVisible();
     await expect(page.getByText("Line 7 → Line 12").first()).toBeVisible();
     await expectNoSidewaysScroll(page);
 

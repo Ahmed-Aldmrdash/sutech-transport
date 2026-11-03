@@ -5,25 +5,34 @@ import { useId } from "react";
 import { Checkbox } from "@/components/ui/choice";
 import { TextField } from "@/components/ui/input";
 
-/** Guardian's name, phone and approval: both university forms ask for them. */
+/**
+ * Guardian's name and phone, which both university forms ask for. A refund also takes the
+ * student's word that the guardian agrees (`consent`); a line change instead goes to the
+ * guardian in the app, so it shows `note` and no checkbox.
+ */
 export function GuardianFields({
+  title,
   name,
   phone,
   consent,
-  consentLabel,
+  note,
   errors,
   onName,
   onPhone,
-  onConsent,
 }: {
+  title?: string;
   name: string;
   phone: string;
-  consent: boolean;
-  consentLabel: string;
-  errors: { name?: string; phone?: string; consent?: string };
+  consent?: {
+    checked: boolean;
+    label: string;
+    error?: string;
+    onChange: (value: boolean) => void;
+  };
+  note?: string;
+  errors: { name?: string; phone?: string };
   onName: (value: string) => void;
   onPhone: (value: string) => void;
-  onConsent: (value: boolean) => void;
 }) {
   const t = useTranslations("student.requests");
   const titleId = useId();
@@ -34,7 +43,7 @@ export function GuardianFields({
       className="flex flex-col gap-4 rounded-md bg-surface-alt p-4"
     >
       <p id={titleId} className="text-body-sm font-bold text-ink-strong">
-        {t("guardian.title")}
+        {title ?? t("guardian.title")}
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
@@ -57,20 +66,23 @@ export function GuardianFields({
           onChange={(event) => onPhone(event.target.value)}
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <Checkbox
-          label={consentLabel}
-          description={t("guardian.consentHint")}
-          checked={consent}
-          aria-invalid={errors.consent ? true : undefined}
-          onChange={(event) => onConsent(event.target.checked)}
-        />
-        {errors.consent ? (
-          <p role="alert" className="text-body-sm text-danger">
-            {errors.consent}
-          </p>
-        ) : null}
-      </div>
+      {consent ? (
+        <div className="flex flex-col gap-1">
+          <Checkbox
+            label={consent.label}
+            description={t("guardian.consentHint")}
+            checked={consent.checked}
+            aria-invalid={consent.error ? true : undefined}
+            onChange={(event) => consent.onChange(event.target.checked)}
+          />
+          {consent.error ? (
+            <p role="alert" className="text-body-sm text-danger">
+              {consent.error}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {note ? <p className="text-body-sm text-ink">{note}</p> : null}
     </div>
   );
 }
