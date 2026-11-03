@@ -303,3 +303,8 @@
   background: transparent;
   border: 0;
 }
+/* Tailwind's reset shrinks images to their box, which breaks Leaflet's tiles. */
+.bus-map img {
+  max-width: none;
+  max-height: none;
+}

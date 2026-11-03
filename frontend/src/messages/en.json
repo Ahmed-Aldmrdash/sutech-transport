@@ -1043,7 +1043,12 @@
       "label": "Live map of the bus",
       "bus": "The bus",
       "campus": "SUtech campus",
-      "stop": "Your stop"
+      "stop": "Your stop",
+      "followBus": "Follow the bus",
+      "following": "Following the bus",
+      "wholeTrip": "Whole trip",
+      "fullScreen": "Full screen",
+      "exitFullScreen": "Exit full screen"
     }
   },
   "parent": {

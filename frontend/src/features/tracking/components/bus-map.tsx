@@ -4,7 +4,8 @@ import "leaflet/dist/leaflet.css";
 import type * as Leaflet from "leaflet";
 import type { LatLngTuple, Map as LeafletMap, Marker, Polyline } from "leaflet";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { Crosshair, Maximize2, Minimize2, Route } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import type { GeoPoint } from "../geo";
 
@@ -15,6 +16,8 @@ const TILE_ATTRIBUTION =
 const MAX_ZOOM = 18;
 const START_ZOOM = 11;
 const FIT_MAX_ZOOM = 14;
+/** How close "follow the bus" zooms in, at least. */
+const BUS_ZOOM = 15;
 const FIT_PADDING: [number, number] = [36, 36];
 const BUS_SIZE = 40;
 const CAMPUS_SIZE = 34;
@@ -70,6 +73,10 @@ interface MapState {
   trail: Polyline | null;
   stop: Marker | null;
   hasFit: boolean;
+  /** The map keeps the bus in view until the user moves the map themselves. */
+  follow: boolean;
+  /** The last fix drawn, so a re-render with the same fix does not move the map. */
+  lastFix: string | null;
   glideFrame: number | null;
 }
 
@@ -95,12 +102,29 @@ function marker(
   });
 }
 
-function createMap(leaflet: typeof Leaflet, container: HTMLElement, data: MapData): MapState {
-  const map = leaflet.map(container, { scrollWheelZoom: false });
+function createMap(
+  leaflet: typeof Leaflet,
+  container: HTMLElement,
+  data: MapData,
+  onUserMove: () => void,
+): MapState {
+  // Drag, pinch, double-tap, the mouse wheel and the +/- buttons all work.
+  const map = leaflet.map(container, { scrollWheelZoom: true, zoomSnap: 0.5 });
+  map.on("dragstart", onUserMove);
   leaflet.tileLayer(TILE_URL, { maxZoom: MAX_ZOOM, attribution: TILE_ATTRIBUTION }).addTo(map);
   marker(leaflet, data.campus, CAMPUS_HTML, CAMPUS_SIZE, data.labels.campus).addTo(map);
   map.setView(toTuple(data.campus), START_ZOOM);
-  return { leaflet, map, bus: null, trail: null, stop: null, hasFit: false, glideFrame: null };
+  return {
+    leaflet,
+    map,
+    bus: null,
+    trail: null,
+    stop: null,
+    hasFit: false,
+    follow: true,
+    lastFix: null,
+    glideFrame: null,
+  };
 }
 
 /** Slides the marker to the new fix instead of jumping (skipped with reduced motion). */
@@ -134,7 +158,11 @@ function draw(state: MapState, data: MapData): void {
     state.stop = marker(leaflet, data.stop, STOP_HTML, STOP_SIZE, data.labels.stop).addTo(map);
   }
 
-  if (data.bus) {
+  const fix = data.bus ? `${data.bus.lat},${data.bus.lng},${data.bus.heading}` : null;
+  const isNewFix = fix !== state.lastFix;
+  state.lastFix = fix;
+
+  if (data.bus && isNewFix) {
     const html = busIconHtml(data.bus.heading);
     if (!state.bus) {
       state.bus = marker(leaflet, data.bus, html, BUS_SIZE, data.labels.bus, BUS_Z).addTo(map);
@@ -149,29 +177,40 @@ function draw(state: MapState, data: MapData): void {
       );
       glide(state, state.bus, data.bus);
     }
-  } else if (state.bus) {
+  } else if (!data.bus && state.bus) {
     state.bus.remove();
     state.bus = null;
   }
 
   if (!state.hasFit && data.bus) {
-    const bounds = leaflet.latLngBounds([toTuple(data.bus), toTuple(data.campus)]);
-    if (data.stop) bounds.extend(toTuple(data.stop));
-    map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM, animate: false });
+    showWholeTrip(state, data, false);
     state.hasFit = true;
+  } else if (state.follow && data.bus && isNewFix) {
+    map.panTo(toTuple(data.bus), { animate: true, duration: GLIDE_MS / 1000 });
   }
+}
+
+/** Zooms out to the bus, its trail, the stop and campus together. */
+function showWholeTrip(state: MapState, data: MapData, animate: boolean): void {
+  const points = [data.campus, ...data.trail, ...(data.bus ? [data.bus] : [])];
+  if (data.stop) points.push(data.stop);
+  const bounds = state.leaflet.latLngBounds(points.map(toTuple));
+  state.map.fitBounds(bounds, { padding: FIT_PADDING, maxZoom: FIT_MAX_ZOOM, animate });
 }
 
 /**
  * The live map: the bus (with its heading), where it has been, the rider's stop when known,
- * and campus. Leaflet loads only in the browser. The map fits everything once, then follows
- * the bus without fighting the user's own panning and zooming.
+ * and campus. Leaflet loads only in the browser. It opens on the whole trip, then follows the
+ * bus. Dragging the map stops following, so it never fights the user; "Follow the bus" brings
+ * it back. Full screen is for phones.
  */
 export function BusMap({ bus, trail, campus, stop, className }: BusMapProps) {
   const t = useTranslations("tracking.map");
   const containerRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef<MapState | null>(null);
   const dataRef = useRef<MapData | null>(null);
+  const [isFollowing, setIsFollowing] = useState(true);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   // Create the map once; Leaflet itself loads only in the browser.
   useEffect(() => {
@@ -180,7 +219,10 @@ export function BusMap({ bus, trail, campus, stop, className }: BusMapProps) {
       const container = containerRef.current;
       const data = dataRef.current;
       if (cancelled || !container || !data || stateRef.current) return;
-      stateRef.current = createMap(leaflet, container, data);
+      stateRef.current = createMap(leaflet, container, data, () => {
+        if (stateRef.current) stateRef.current.follow = false;
+        setIsFollowing(false);
+      });
       draw(stateRef.current, data);
     });
     return () => {
@@ -208,15 +250,86 @@ export function BusMap({ bus, trail, campus, stop, className }: BusMapProps) {
     if (stateRef.current) draw(stateRef.current, data);
   });
 
+  // The map must re-measure itself after its box changes size.
+  useEffect(() => {
+    stateRef.current?.map.invalidateSize();
+    if (!isFullScreen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsFullScreen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isFullScreen]);
+
+  function centerOnBus() {
+    const state = stateRef.current;
+    const data = dataRef.current;
+    if (!state || !data?.bus) return;
+    state.follow = true;
+    setIsFollowing(true);
+    state.map.setView(toTuple(data.bus), Math.max(state.map.getZoom(), BUS_ZOOM), {
+      animate: true,
+    });
+  }
+
+  function wholeTrip() {
+    const state = stateRef.current;
+    const data = dataRef.current;
+    if (!state || !data) return;
+    state.follow = false;
+    setIsFollowing(false);
+    showWholeTrip(state, data, true);
+  }
+
+  const control =
+    "inline-flex h-10 items-center gap-2 rounded-md border border-line bg-surface-raised px-3 text-body-sm font-bold text-ink-strong shadow-card focus-ring hover:bg-surface-alt";
+
   return (
     <div
-      ref={containerRef}
-      role="region"
-      aria-label={t("label")}
       className={cn(
-        "bus-map h-80 w-full overflow-hidden rounded-card border border-line",
-        className,
+        "relative",
+        isFullScreen ? "fixed inset-0 z-50 bg-surface p-2" : "h-80 w-full",
+        isFullScreen ? undefined : className,
       )}
-    />
+    >
+      <div
+        ref={containerRef}
+        role="region"
+        aria-label={t("label")}
+        className="bus-map h-full w-full overflow-hidden rounded-card border border-line"
+      />
+      <div className="pointer-events-none absolute end-3 top-3 z-[500] flex flex-col items-end gap-2">
+        <button
+          type="button"
+          onClick={centerOnBus}
+          disabled={!bus}
+          aria-pressed={isFollowing}
+          className={cn(
+            control,
+            "pointer-events-auto disabled:opacity-50",
+            isFollowing && "border-brand text-brand",
+          )}
+        >
+          <Crosshair aria-hidden="true" className="size-4" />
+          {isFollowing ? t("following") : t("followBus")}
+        </button>
+        <button type="button" onClick={wholeTrip} className={cn(control, "pointer-events-auto")}>
+          <Route aria-hidden="true" className="size-4" />
+          {t("wholeTrip")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsFullScreen(!isFullScreen)}
+          className={cn(control, "pointer-events-auto")}
+        >
+          {isFullScreen ? (
+            <Minimize2 aria-hidden="true" className="size-4" />
+          ) : (
+            <Maximize2 aria-hidden="true" className="size-4" />
+          )}
+          {isFullScreen ? t("exitFullScreen") : t("fullScreen")}
+        </button>
+      </div>
+    </div>
   );
 }
