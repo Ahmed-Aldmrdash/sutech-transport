@@ -1,6 +1,5 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
 import type * as Leaflet from "leaflet";
 import type { LatLngTuple, Map as LeafletMap, Marker, Polyline } from "leaflet";
 import { useTranslations } from "next-intl";

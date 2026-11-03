@@ -1,5 +1,10 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+/*
+ * Leaflet's map styles load with the rest, not with the map: a separate stylesheet was
+ * preloaded whenever a page linked to the map, and the browser warned it went unused.
+ */
+@import "leaflet/dist/leaflet.css";
 
 /* Dark mode follows the data-theme attribute that ThemeScript sets before first paint. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
