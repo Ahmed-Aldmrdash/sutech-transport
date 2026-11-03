@@ -35,6 +35,18 @@ export function hashOf(text: string): number {
   return hash;
 }
 
+/**
+ * Mock only: how many minutes off the timetable one trip ran. It belongs to the bus, not the
+ * rider, so two riders on the same bus reach campus together, and riders at the same stop get
+ * on together.
+ */
+export function tripShiftsOf(lineId: string, stopOrder: number, date: string) {
+  return {
+    boardShift: (hashOf(`${lineId}${stopOrder}${date}`) % 4) - 1,
+    arriveShift: hashOf(`${lineId}${date}`) % 14,
+  };
+}
+
 function weekdayOf(date: string): number {
   return new Date(`${date}T12:00:00Z`).getUTCDay();
 }
@@ -73,6 +85,7 @@ export function historyOf(userId: string, language: string, now: number): TripRe
       if (notGoing.has(date)) outcome = TripOutcome.NotGoing;
       else if (index === CHECKOUT_DAY_INDEX) outcome = TripOutcome.CheckedOut;
       else if (seed % ABSENT_ONE_IN === 0) outcome = TripOutcome.Absent;
+      const { boardShift, arriveShift } = tripShiftsOf(line.lineId, booking.stopOrder, date);
       const rides = outcome === TripOutcome.Rode || outcome === TripOutcome.CheckedOut;
       records.push({
         trip_id: `trp_${line.lineId}_${date}_out`,
@@ -81,9 +94,9 @@ export function historyOf(userId: string, language: string, now: number): TripRe
         line: summary,
         stop_name: localized(language, stopAr, stopEn),
         outcome,
-        boarded_at: rides ? at(date, pickup, (seed % 4) - 1) : null,
+        boarded_at: rides ? at(date, pickup, boardShift) : null,
         arrived_at:
-          outcome === TripOutcome.Rode ? at(date, MOCK_CAMPUS_ARRIVAL.from, seed % 14) : null,
+          outcome === TripOutcome.Rode ? at(date, MOCK_CAMPUS_ARRIVAL.from, arriveShift) : null,
         checked_out_at: outcome === TripOutcome.CheckedOut ? at(date, pickup, 25) : null,
         checkout_reason:
           outcome === TripOutcome.CheckedOut

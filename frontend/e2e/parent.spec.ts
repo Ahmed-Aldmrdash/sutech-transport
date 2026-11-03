@@ -31,14 +31,18 @@ async function startDemoTripIfIdle(page: Page) {
 }
 
 test.describe("guardian", () => {
-  test("follows each child: today, the bus live, switching children", async ({ page }) => {
+  test("sees every child at once, the bus live, and each child's day", async ({ page }) => {
     const errors = watchForAppErrors(page);
     await signIn(page, GUARDIAN);
     await page.waitForURL(/\/en\/parent$/);
 
-    // Opens on the child who rides the bus.
-    await expect(page.getByRole("button", { name: "Youssef", pressed: true })).toBeVisible();
+    // Both children on the home page, no switching needed.
+    await expect(page.getByText("Youssef Mohamed Fathy Aldmrdash")).toBeVisible();
+    await expect(page.getByText("Ahmed Mohamed Fathy Aldmrdash")).toBeVisible();
+    await expect(page.getByText("Ahmed has no bus booking this term.")).toBeVisible();
     await expect(page.getByText("Line 12 · Nasr City")).toBeVisible();
+    // One map per bus, named for who rides it.
+    await expect(page.getByText("Line 12 · Youssef")).toBeVisible();
     await startDemoTripIfIdle(page);
     await expect(page.getByText("Hany Abdel Messih").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Call Hany Abdel Messih" })).toHaveAttribute(
@@ -47,9 +51,11 @@ test.describe("guardian", () => {
     );
     await expectNoSidewaysScroll(page);
 
+    await page.getByRole("link", { name: "Today's details" }).click();
+    await page.waitForURL(/\/en\/parent\/day\?child=usr_student_11$/);
+    await expect(page.getByRole("button", { name: "Youssef", pressed: true })).toBeVisible();
     await page.getByRole("button", { name: "Ahmed" }).click();
-    await expect(page.getByText("Ahmed has no bus booking this term.")).toBeVisible();
-    await expect(page.getByText("Ahmed has no subscription")).toBeVisible();
+    await expect(page.getByText("Ahmed has no bus subscription")).toBeVisible();
 
     // The pick follows to the other pages.
     await page.goto("/en/parent/day");
@@ -88,8 +94,8 @@ test.describe("guardian", () => {
     });
     await page.getByRole("button", { name: "Switch to Arabic" }).first().click();
     await page.waitForURL(/\/ar\/parent$/);
-    await expect(page.getByRole("button", { name: "يوسف", pressed: true })).toBeVisible();
     await expect(page.getByText("يوسف محمد فتحي الدمرداش")).toBeVisible();
+    await expect(page.getByText("خط 12 · يوسف")).toBeVisible();
     expect(
       await page.evaluate(() => {
         const w = window as unknown as { __noReload?: boolean; __sawLoader?: boolean };

@@ -1,6 +1,6 @@
 import { absencesOf } from "@/features/absences/mock-state";
 import { AbsenceReason } from "@/features/absences/schema";
-import { ABSENT_ONE_IN, hashOf, historyOf } from "@/features/attendance/mock";
+import { ABSENT_ONE_IN, hashOf, historyOf, tripShiftsOf } from "@/features/attendance/mock";
 import {
   MOCK_CAMPUS_ARRIVAL,
   findMockLine,
@@ -84,6 +84,7 @@ export function mockChildDay(studentId: string, language: string, now: number): 
   // Same made-up outcome as the student's "My trips", so both pages agree.
   const seed = hashOf(`${studentId}${cairo.date}`);
   const isAbsent = seed % ABSENT_ONE_IN === 0;
+  const { boardShift, arriveShift } = tripShiftsOf(line.lineId, booking.stopOrder, cairo.date);
   const at = (clock: string, shift = 0) =>
     cairoInstant(cairo.date, clock, cairo.offsetMinutes) + shift * MS_PER_MINUTE;
   const steps: { kind: DayEventKind; at: number; detail: string | null }[] = [
@@ -101,8 +102,8 @@ export function mockChildDay(studentId: string, language: string, now: number): 
     });
   } else {
     steps.push(
-      { kind: DayEventKind.Boarded, at: at(pickup, (seed % 4) - 1), detail: stopName },
-      { kind: DayEventKind.Arrived, at: at(MOCK_CAMPUS_ARRIVAL.from, seed % 14), detail: null },
+      { kind: DayEventKind.Boarded, at: at(pickup, boardShift), detail: stopName },
+      { kind: DayEventKind.Arrived, at: at(MOCK_CAMPUS_ARRIVAL.from, arriveShift), detail: null },
     );
   }
   const events: DayEvent[] = steps

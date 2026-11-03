@@ -1057,11 +1057,12 @@
     "noChildrenBody": "Your phone number isn't on any student's file. Contact the Transportation office (A039).",
     "childMeta": "ID {id} · Year {level}",
     "home": {
-      "lead": "Your children's bus, live, and today's trip.",
+      "lead": "How each of your children's day is going, and the bus live.",
       "pickup": "Pickup at {stop}, {time}",
       "noSubscription": "{name} has no bus booking this term.",
       "openDay": "Today's details",
-      "liveTitle": "The bus now"
+      "liveTitle": "The bus now",
+      "liveFor": "Line {code} · {names}"
     },
     "day": {
       "title": "Today's trip",
@@ -1088,20 +1089,20 @@
           "body": "Pickup at {stop}, {pickup}."
         },
         "bus_on_way": {
-          "title": "The bus is on its way",
-          "body": "{name}'s pickup is at {stop}, {pickup}."
+          "title": "The bus is on its way to {stop}",
+          "body": "Pickup at {pickup}."
         },
         "boarded": {
-          "title": "{name} got on the bus at {time}",
+          "title": "On the bus since {time}",
           "body": "Card scanned at {stop}. The bus is heading to campus."
         },
         "arrived": {
-          "title": "{name} reached campus at {time}",
-          "body": "The bus arrived with them on board."
+          "title": "Reached campus at {time}",
+          "body": "Got on at {stop} at {boarded}."
         },
         "checked_out": {
-          "title": "{name} left the bus at {time}",
-          "body": "They got off on the way. The reason is below."
+          "title": "Left the bus on the way at {time}",
+          "body": "The reason is in today's details."
         },
         "absent": {
           "title": "{name} wasn't on the bus today",

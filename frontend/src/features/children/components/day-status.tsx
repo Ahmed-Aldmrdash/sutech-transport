@@ -62,10 +62,12 @@ export function DayStatusBanner({ day, childName }: { day: ChildDay; childName: 
   const Icon = STATUS_ICON[day.status];
   const last = day.events.at(-1);
   const name = firstNameOf(childName);
+  const boarded = day.events.find((event) => event.kind === DayEventKind.Boarded);
   const values = {
     name,
     time: last ? formatTime(last.at, locale) : "",
     stop: day.trip?.stop.name ?? "",
+    boarded: boarded ? formatTime(boarded.at, locale) : "",
     pickup: day.trip?.stop.pickup_time ? formatClockTime(day.trip.stop.pickup_time, locale) : "",
   };
   return (
