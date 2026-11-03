@@ -24,7 +24,7 @@ import {
 import { registerMock } from "@/lib/api/mock/mock-server";
 import { getChildTrackingEndpoint, getMyTrackingEndpoint } from "./api";
 import { DEMO_TRIP_MS, demoTripStartedAt } from "./demo-trip";
-import { pathLengthKm, pointAlong, type GeoPoint } from "./geo";
+import { pathLengthKm, pathUntil, pointAlong } from "./geo";
 import { MOCK_CAMPUS, mockPathOf } from "./mock-geo";
 import { NoTrackingReason, type Tracking } from "./schema";
 
@@ -32,8 +32,6 @@ import { NoTrackingReason, type Tracking } from "./schema";
 const WARM_UP_MINUTES = 5;
 /** The trip shows as "arrived" this long after reaching campus. */
 const ARRIVED_SHOW_MINUTES = 15;
-/** One trail point per minute of the trip. */
-const TRAIL_STEP_MINUTES = 1;
 const GPS_LAG_MS = 3000;
 /** Speed wobble, so the number doesn't look frozen. */
 const SPEED_WOBBLE_KMH = 6;
@@ -123,12 +121,8 @@ export function mockTrackingFor(studentId: string, language: string, now: number
 
   const passed = line.stops.filter((_, index) => stopProgress(line, index + 1) <= done).at(-1);
   const { point, heading } = pointAlong(path, done);
-  const trail: GeoPoint[] = [];
-  const steps = Math.floor((done * realMinutes) / TRAIL_STEP_MINUTES);
-  for (let step = 0; step <= steps; step += 1) {
-    trail.push(pointAlong(path, (step * TRAIL_STEP_MINUTES) / realMinutes).point);
-  }
-  trail.push(point);
+  // Where the bus has been: along the roads, as its GPS fixes would draw it.
+  const trail = pathUntil(path, done);
 
   const cruiseKmh = pathLengthKm(path) / (realMinutes / 60);
   const moving = done > 0 && done < 1;

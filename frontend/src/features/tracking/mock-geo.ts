@@ -1,4 +1,5 @@
 import type { GeoPoint } from "./geo";
+import { ROAD_PATHS } from "./mock-road-paths";
 
 /**
  * Mock only. The office hasn't sent stop locations or the campus pin yet, so the demo bus
@@ -18,8 +19,11 @@ const SHOROUK_EXIT = point(30.158, 31.6);
 const CAIRO_EXIT = [SUEZ_ROAD_JUNCTION, SHOROUK_EXIT] as const;
 const FROM_SOUTH = [RING_ROAD_EAST, ...CAIRO_EXIT] as const;
 
-/** Where each line's bus starts, and the road points it takes to campus. */
-const LINE_PATHS: Readonly<Record<string, readonly GeoPoint[]>> = {
+/**
+ * Where each line's bus starts, and the road points it passes on the way to campus.
+ * `npm run road-paths` turns these into routes along the real streets (mock-road-paths.ts).
+ */
+export const LINE_WAYPOINTS: Readonly<Record<string, readonly GeoPoint[]>> = {
   ln_01_1: [point(30.296, 31.745), point(30.26, 31.735)],
   ln_01_2: [point(30.31, 31.772), point(30.265, 31.74)],
   ln_02: [point(30.596, 32.271), point(30.42, 32.0), point(30.3, 31.82)],
@@ -47,7 +51,14 @@ const LINE_PATHS: Readonly<Record<string, readonly GeoPoint[]>> = {
   ln_23: [point(30.124, 31.36), ...CAIRO_EXIT],
 };
 
-/** The demo route of a line, ending at campus. */
+/** The waypoints of a line, ending at campus. */
+export function mockWaypointsOf(lineId: string): GeoPoint[] {
+  return [...(LINE_WAYPOINTS[lineId] ?? [SUEZ_ROAD_JUNCTION]), MOCK_CAMPUS];
+}
+
+/** The demo route of a line along the streets, ending at campus (waypoints if not generated). */
 export function mockPathOf(lineId: string): GeoPoint[] {
-  return [...(LINE_PATHS[lineId] ?? [SUEZ_ROAD_JUNCTION]), MOCK_CAMPUS];
+  const road = ROAD_PATHS[lineId];
+  if (!road) return mockWaypointsOf(lineId);
+  return road.map(([lat, lng]) => ({ lat, lng }));
 }

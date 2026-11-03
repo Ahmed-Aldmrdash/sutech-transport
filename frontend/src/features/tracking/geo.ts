@@ -63,3 +63,24 @@ export function pointAlong(
   }
   return { point: first, heading: 0 };
 }
+
+/** The path from its start to a fraction (0 to 1) of the way along, every bend included. */
+export function pathUntil(path: readonly GeoPoint[], fraction: number): GeoPoint[] {
+  const first = path[0];
+  if (!first) return [];
+  const target = Math.min(1, Math.max(0, fraction)) * pathLengthKm(path);
+  const walkedPath: GeoPoint[] = [first];
+  let walked = 0;
+  for (let index = 1; index < path.length; index += 1) {
+    const from = path[index - 1] as GeoPoint;
+    const to = path[index] as GeoPoint;
+    const leg = distanceKm(from, to);
+    if (walked + leg >= target) {
+      walkedPath.push(lerpPoint(from, to, leg === 0 ? 0 : (target - walked) / leg));
+      return walkedPath;
+    }
+    walkedPath.push(to);
+    walked += leg;
+  }
+  return walkedPath;
+}
