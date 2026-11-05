@@ -61,3 +61,11 @@ export function addDays(date: string, days: number): string {
 export function cairoInstant(date: string, clock: string, offsetMinutes: number): number {
   return Date.parse(`${date}T${clock}:00Z`) - offsetMinutes * MS_PER_MINUTE;
 }
+
+/**
+ * Cairo's UTC offset (minutes) on a given date. Egypt moves its clocks for summer time, so a
+ * past date may differ from today: use this, not today's offset, for times on other days.
+ */
+export function cairoOffsetOn(date: string): number {
+  return cairoNow(new Date(`${date}T12:00:00Z`)).offsetMinutes;
+}

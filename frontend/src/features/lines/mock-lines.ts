@@ -5,13 +5,22 @@ import { BusType } from "./schema";
  * stop names, their order, morning pickup times and notes, exactly as sent. The campus stop is
  * left out: Ahmed confirmed every bus reaches campus between 8:45 and 9:00.
  *
- * Bus types come from the Abu El Hol drivers list. Not known yet, so kept as placeholders:
- * return times, stop locations (map pins) and exact seat counts (estimated from the bus type).
- * Driver phone numbers from that list are deliberately not copied anywhere.
+ * Bus types, plates, drivers and their mobiles come from the Abu El Hol drivers list (Ahmed asked
+ * for the real names and numbers, 2026-11-03). The list's two extra routes (Maadi Mall 50 HUB,
+ * ENPPI – Ghamra) aren't in the Routes file, so they wait for the office to confirm them.
+ * Not known yet, so kept as placeholders: return times, stop locations (map pins) and exact seat
+ * counts (estimated from the bus type).
  */
 
 /** [pickup "HH:MM", Arabic name, English name, Arabic note, English note] */
 type StopSource = readonly [string, string, string, string?, string?];
+
+export interface MockDriverSource {
+  nameAr: string;
+  nameEn: string;
+  /** Egyptian mobile, 11 digits. Only the line's subscribers (and their guardians) get it. */
+  phone: string;
+}
 
 export interface MockLineSource {
   lineId: string;
@@ -21,6 +30,8 @@ export interface MockLineSource {
   nameEn: string;
   busType: BusType;
   plate: string;
+  /** The line's regular Abu El Hol driver (drivers list, 2026-11-02). */
+  driver: MockDriverSource;
   /** Free seats this term. Ahmed: count every bus as full, so most lines are 0. */
   seatsAvailable: number;
   stops: readonly StopSource[];
@@ -34,6 +45,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "10th of Ramadan 1",
     busType: BusType.Minibus,
     plate: "ص ق ع 5581",
+    driver: { nameAr: "عادل عبد الرحمن", nameEn: "Adel Abdel Rahman", phone: "01033561014" },
     seatsAvailable: 0,
     stops: [
       ["07:50", "الموقف الجديد", "New bus station"],
@@ -51,6 +63,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "10th of Ramadan 2",
     busType: BusType.Minibus,
     plate: "ق ر هـ 4396",
+    driver: { nameAr: "عمرو عبد الحميد", nameEn: "Amr Abdel Hamid", phone: "01001429573" },
     seatsAvailable: 0,
     stops: [
       ["07:40", "صينية الـ 43", "Roundabout 43"],
@@ -68,6 +81,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Ismailia",
     busType: BusType.Minibus,
     plate: "ب ص 9956",
+    driver: { nameAr: "محمد كامل", nameEn: "Mohamed Kamel", phone: "01020330660" },
     seatsAvailable: 0,
     stops: [
       ["07:10", "أرض الجمعيات", "Ard El Gameyat", "ميدان فوكس", "Fox Square"],
@@ -89,6 +103,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Suez",
     busType: BusType.Midibus,
     plate: "ب ص 2969",
+    driver: { nameAr: "محمود أحمد", nameEn: "Mahmoud Ahmed", phone: "01286951348" },
     seatsAvailable: 0,
     stops: [
       ["06:40", "محطة السويس", "Suez station", "أمام بازوكا", "In front of Bazooka"],
@@ -114,6 +129,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Mit Ghamr – Zagazig",
     busType: BusType.Coaster,
     plate: "ب ص 9945",
+    driver: { nameAr: "صالح عيد", nameEn: "Salah Eid", phone: "01288987733" },
     seatsAvailable: 0,
     stops: [
       ["06:20", "ميت غمر", "Mit Ghamr", "موقف العاشر", "10th of Ramadan bus stand"],
@@ -133,6 +149,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "New Cairo (Tagamoa)",
     busType: BusType.Coaster,
     plate: "ح ص 1776",
+    driver: { nameAr: "حسن عبد الباقي", nameEn: "Hassan Abdel Baky", phone: "01094015331" },
     seatsAvailable: 3,
     stops: [
       ["07:20", "منتجع النخيل", "El Nakheel resort", "أمام لولو ماركت", "In front of Lulu Market"],
@@ -149,6 +166,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "El Rehab",
     busType: BusType.Coaster,
     plate: "ب ص 9958",
+    driver: { nameAr: "محمد عبد اللطيف", nameEn: "Mohamed Abdel Latif", phone: "01153228010" },
     seatsAvailable: 2,
     stops: [
       ["06:45", "شل أوت – محور السادات", "Shell Out – El Sadat axis"],
@@ -177,6 +195,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "El Shorouk",
     busType: BusType.Coaster,
     plate: "ج ص 9943",
+    driver: { nameAr: "محمد حسن", nameEn: "Mohamed Hassan", phone: "01006796783" },
     seatsAvailable: 0,
     stops: [
       ["07:35", "وصال", "Wesal", "مرور على بوابة R3 / V3", "Passing gate R3 / V3"],
@@ -199,6 +218,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Madinaty",
     busType: BusType.Coaster,
     plate: "ب ص 9953",
+    driver: { nameAr: "أحمد سيد", nameEn: "Ahmed Sayed", phone: "01018040044" },
     seatsAvailable: 0,
     stops: [
       ["07:50", "أول سيزونز", "First Seasons"],
@@ -215,6 +235,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "El Obour",
     busType: BusType.Coaster,
     plate: "ج ص 1187",
+    driver: { nameAr: "محمد السيد", nameEn: "Mohamed El Sayed", phone: "01020601132" },
     seatsAvailable: 2,
     stops: [
       ["07:30", "سلم بسمة", "Basma footbridge"],
@@ -240,6 +261,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Gesr El Suez",
     busType: BusType.Coaster,
     plate: "ب ص 9964",
+    driver: { nameAr: "علي عبد الله", nameEn: "Ali Abdallah", phone: "01001374280" },
     seatsAvailable: 0,
     stops: [
       [
@@ -265,6 +287,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Heliopolis",
     busType: BusType.Coaster,
     plate: "ب ص 9934",
+    driver: { nameAr: "أحمد أبو المجد", nameEn: "Ahmed Abul Magd", phone: "01123133076" },
     seatsAvailable: 0,
     stops: [
       ["06:55", "ميدان السواح", "El Sawah Square"],
@@ -283,6 +306,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Nasr City",
     busType: BusType.LargeBus,
     plate: "ج هـ ص 975",
+    driver: { nameAr: "هاني عبد المسيح", nameEn: "Hany Abdel Messih", phone: "01225626166" },
     seatsAvailable: 4,
     stops: [
       ["06:45", "مسجد آل راشدان", "Al Rashdan Mosque"],
@@ -329,6 +353,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Abbaseya – via Salah Salem",
     busType: BusType.Coaster,
     plate: "ب ص 9971",
+    driver: { nameAr: "عباس عبد النبي", nameEn: "Abbas Abdel Naby", phone: "01140836744" },
     seatsAvailable: 0,
     stops: [
       ["06:55", "دوران شبرا", "Shubra turn"],
@@ -355,6 +380,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Haram 1",
     busType: BusType.LargeBus,
     plate: "ج ف ي 659",
+    driver: { nameAr: "مصطفى", nameEn: "Mostafa", phone: "01099111543" },
     seatsAvailable: 0,
     stops: [
       ["06:45", "المريوطية – هرم", "El Marioteya – Haram"],
@@ -391,6 +417,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Haram 2",
     busType: BusType.Coaster,
     plate: "ب ص 9963",
+    driver: { nameAr: "محمد شاكر", nameEn: "Mohamed Shaker", phone: "01026326270" },
     seatsAvailable: 0,
     stops: [
       ["06:45", "الفردوس", "El Ferdous", "تحت كوبري المشاة", "Under the footbridge"],
@@ -424,6 +451,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "October – Basos / El Marg",
     busType: BusType.LargeBus,
     plate: "ج ف ي 958",
+    driver: { nameAr: "بدر السيد", nameEn: "Badr El Sayed", phone: "01145770361" },
     seatsAvailable: 1,
     stops: [
       ["06:00", "ميدان النجدة", "El Nagda Square"],
@@ -447,6 +475,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Giza Ring Road",
     busType: BusType.Coaster,
     plate: "ب ص 9954",
+    driver: { nameAr: "ظافر", nameEn: "Zafer", phone: "01032965599" },
     seatsAvailable: 0,
     stops: [
       ["06:45", "ميدان لبنان", "Lebanon Square", "عند طلعة الدائري", "At the Ring Road ramp"],
@@ -462,6 +491,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Maadi 1",
     busType: BusType.Coaster,
     plate: "هـ ر ج 9968",
+    driver: { nameAr: "سعد", nameEn: "Saad", phone: "01100079089" },
     seatsAvailable: 0,
     stops: [
       ["07:00", "مركز البلازما", "Plasma center"],
@@ -477,6 +507,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Civilizations Museum",
     busType: BusType.Minibus,
     plate: "أ م 2682",
+    driver: { nameAr: "عبد الله فهمي", nameEn: "Abdallah Fahmy", phone: "01113016232" },
     seatsAvailable: 0,
     stops: [
       ["07:35", "متحف الحضارات", "National Museum of Egyptian Civilization"],
@@ -490,6 +521,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "El Mokattam",
     busType: BusType.Coaster,
     plate: "ج ص 1626",
+    driver: { nameAr: "تامر عبد الله", nameEn: "Tamer Abdallah", phone: "01005269899" },
     seatsAvailable: 0,
     stops: [
       [
@@ -519,6 +551,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Banha – Minya El Qamh",
     busType: BusType.Coaster,
     plate: "ب ص 9965",
+    driver: { nameAr: "محمد الشحات", nameEn: "Mohamed El Shahat", phone: "01126797713" },
     seatsAvailable: 0,
     stops: [
       ["07:00", "بنها", "Banha", "تحت كوبري بنها", "Under Banha bridge"],
@@ -532,6 +565,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Helwan",
     busType: BusType.Coaster,
     plate: "ب ص 9967",
+    driver: { nameAr: "جودة", nameEn: "Gouda", phone: "01140612336" },
     seatsAvailable: 0,
     stops: [
       ["07:00", "موقف مايو", "Mayo bus stand"],
@@ -547,6 +581,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Maadi Ring Road",
     busType: BusType.Coaster,
     plate: "ب ص 9973",
+    driver: { nameAr: "جرجس", nameEn: "Gerges", phone: "01001791581" },
     seatsAvailable: 0,
     stops: [
       ["07:30", "سلم أديداس", "Adidas footbridge"],
@@ -560,6 +595,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
     nameEn: "Gesr El Suez 2",
     busType: BusType.Minibus,
     plate: "ن ف د 7425",
+    driver: { nameAr: "يوسف إسحاق", nameEn: "Youssef Ishak", phone: "01001534176" },
     seatsAvailable: 0,
     stops: [
       ["07:45", "العرب – الجراج", "El Arab – the garage", "عند مسجد العرب", "At El Arab Mosque"],

@@ -104,3 +104,10 @@ export function toLatinDigits(text: string): string {
     .replace(/٫/g, ".")
     .replace(/[,٬]/g, "");
 }
+
+/** An Egyptian mobile in groups, "010 0679 6783". Always Latin digits, shown left to right. */
+export function formatPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length !== 11) return phone;
+  return `${digits.slice(0, 3)} ${digits.slice(3, 7)} ${digits.slice(7)}`;
+}

@@ -4,7 +4,9 @@ import { Bus, MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Badge, LiveDot } from "@/components/ui/badge";
+import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { BusDriverDetails } from "@/features/lines/components/bus-driver-card";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { Tone } from "@/components/ui/tone";
@@ -16,7 +18,7 @@ import { formatCalendarDate, formatClockTime, formatTime } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 
 const MS_PER_MINUTE = 60_000;
-/** The home re-reads the bus status this often until the live WebSocket arrives in phase 3. */
+/** The home re-reads the bus status this often; the tracking page follows the bus live. */
 const REFRESH_MS = 60_000;
 
 /** Tomorrow's (or today's) trip to campus, and where the bus is now. Active subscribers only. */
@@ -117,17 +119,16 @@ function TripDetails({ trip }: { trip: NextTrip }) {
         ))}
       </dl>
 
-      {trip.bus ? (
-        <p className="flex items-center gap-2 text-body-sm text-ink">
-          <Bus aria-hidden="true" className="size-4 text-teal" />
-          {t("bus")}: {tStudent(`busType.${trip.bus.bus_type}`)} ·{" "}
-          <bdi className="font-bold">{trip.bus.plate}</bdi>
-        </p>
-      ) : null}
-      <p className="flex items-center gap-2 text-caption text-ink-muted">
-        <MapPin aria-hidden="true" className="size-4" />
-        {t("mapLater")}
-      </p>
+      {trip.bus ? <BusDriverDetails bus={trip.bus} /> : null}
+      <ButtonLink
+        href="/student/tracking"
+        variant="secondary"
+        size="sm"
+        className="self-start"
+        iconStart={<MapPin className="size-4" />}
+      >
+        {t("trackBus")}
+      </ButtonLink>
     </div>
   );
 }

@@ -409,7 +409,7 @@
         "arrived": "At campus",
         "nearStop": "Last stop passed: {stop}",
         "updated": "Updated {time}",
-        "mapLater": "The live map comes with bus tracking."
+        "trackBus": "Track the bus"
       },
       "alerts": {
         "title": "Alerts",
@@ -597,13 +597,14 @@
     },
     "requests": {
       "title": "Requests",
-      "lead": "Change your line or ask for a refund, and follow each request until the office answers.",
+      "lead": "Change your line, ask for a refund or a permit to bring a project model on the bus, and follow each request until the office answers.",
       "listLabel": "Your requests",
       "rowMeta": "{kind} · {reference} · {date}",
       "kinds": {
         "line_change": "Line change",
         "refund": "Refund",
-        "complaint": "Complaint"
+        "complaint": "Complaint",
+        "model_permit": "Model permit"
       },
       "status": {
         "submitted": "Sent",
@@ -611,7 +612,8 @@
         "approved": "Approved",
         "rejected": "Not approved",
         "resolved": "Answered",
-        "withdrawn": "Withdrawn"
+        "withdrawn": "Withdrawn",
+        "awaiting_guardian": "Waiting for guardian"
       },
       "emptyTitle": "No requests yet",
       "emptyBody": "Need a different line for a while, or have to cancel your subscription? Start a request above.",
@@ -638,7 +640,11 @@
         "documentsRequired": "Attach the supporting document (medical report, certificate or transfer letter).",
         "tooManyFiles": "Attach 3 files at most.",
         "fileType": "JPG, PNG or PDF files only.",
-        "fileTooLarge": "Each file must be {size} or less."
+        "fileTooLarge": "Each file must be {size} or less.",
+        "exitBeforeEntry": "The exit must be after the entry.",
+        "shortTextTooShort": "Write a little more.",
+        "shortTextTooLong": "Keep it under 100 characters.",
+        "declarationRequired": "Accept the declaration before you send the permit."
       },
       "serverErrors": {
         "NO_ACTIVE_SUBSCRIPTION": "Your subscription isn't active, so this request can't be sent.",
@@ -653,7 +659,8 @@
         "RECEIPT_TOO_LARGE": "A file is larger than {size}.",
         "network": "No connection. Check the internet and try again; nothing was sent twice.",
         "generic": "Something went wrong. Try again in a moment.",
-        "NO_SUBSCRIPTION": "Book a seat first: complaints are for students with a booking."
+        "NO_SUBSCRIPTION": "Book a seat first: complaints are for students with a booking.",
+        "NOT_AWAITING_GUARDIAN": "This request isn't waiting for the guardian any more."
       },
       "attachments": {
         "add": "Add a file",
@@ -666,7 +673,9 @@
         "phone": "Guardian's mobile",
         "consentLineChange": "My guardian agrees to this line change",
         "consentRefund": "My guardian agrees to cancel the subscription and get the refund",
-        "consentHint": "The university's form needs the guardian's approval. The office may call to confirm."
+        "consentHint": "The university's form needs the guardian's approval. The office may call to confirm.",
+        "lineChangeTitle": "Guardian's details",
+        "lineChangeNote": "Once you send it, your guardian gets it in the app to approve. Only then does it go to the Transportation office."
       },
       "lineChange": {
         "new": "Change my line",
@@ -788,7 +797,8 @@
           "approved": "Approved",
           "rejected": "Not approved",
           "resolved": "The office answered",
-          "withdrawn": "You withdrew this request"
+          "withdrawn": "You withdrew this request",
+          "awaiting_guardian": "Waiting for your guardian"
         },
         "noNote": "No note from the office.",
         "historyTitle": "History",
@@ -796,7 +806,9 @@
         "by": {
           "student": "You",
           "transport_office": "Transportation office",
-          "finance": "Finance"
+          "finance": "Finance",
+          "safety": "Safety department",
+          "guardian": "Your guardian"
         },
         "detailsTitle": "What you sent",
         "submittedAt": "Sent on",
@@ -811,7 +823,70 @@
           "NOT_WITHDRAWABLE": "The office has already started on it, so it can't be withdrawn.",
           "network": "No connection. Try again.",
           "generic": "Couldn't withdraw it. Try again."
-        }
+        },
+        "guardianWaitingTitle": "Waiting for your guardian's approval",
+        "guardianWaitingBody": "Your guardian has it in the app. Once they approve, it goes to the Transportation office. You can withdraw it until the office opens it.",
+        "guardianApproved": "Your guardian approved; sent to the Transportation office",
+        "guardianRefused": "Your guardian didn't approve"
+      },
+      "modelPermit": {
+        "new": "Bring a project model",
+        "title": "Project model permit",
+        "lead": "The university's safety permit to bring a project model onto the bus, online. Your doctor or TA and the Safety department sign it.",
+        "needsActiveBody": "The permit is for your own bus, so you need a paid, active subscription.",
+        "summary": "{material} · {date}",
+        "studentTitle": "Your details on the permit",
+        "busTitle": "The bus",
+        "driverByOffice": "The Transportation office adds the driver's name and mobile.",
+        "modelTitle": "The model",
+        "material": "Material",
+        "materialHint": "E.g. wood, cardboard, acrylic, foam.",
+        "dimensions": "Size / dimensions",
+        "dimensionsHint": "E.g. 60 × 40 × 30 cm.",
+        "purposeTitle": "Purpose and destination",
+        "purpose": "Purpose",
+        "purposes": {
+          "display": "Display",
+          "transport": "Transport",
+          "storage": "Storage",
+          "other": "Other"
+        },
+        "purposeOther": "What for?",
+        "destination": "Destination",
+        "destinationHint": "Where the model goes, e.g. the project exhibition, building B.",
+        "timesTitle": "Entry and exit",
+        "entryDate": "Entry date",
+        "entryTime": "Entry time",
+        "exitDate": "Exit date",
+        "exitTime": "Exit time",
+        "signaturesTitle": "Who signs",
+        "supervisorName": "Doctor / TA responsible for the project",
+        "supervisorHint": "They sign first, then the Safety department.",
+        "declarationTitle": "Student liability declaration",
+        "declarationIntro": "I, {name}, university ID {id}, accept full responsibility while carrying the model (project) on the university bus, and I undertake to:",
+        "pledges": {
+          "protectModel": "Protect the model and not cause any damage or harm to myself or to others.",
+          "noSeatDamage": "Not tear the bus upholstery or seats.",
+          "keepAisleClear": "Not injure any student or block the aisle inside the bus.",
+          "noDanger": "Not put my life or the lives of others in any danger.",
+          "noHazardousMaterials": "Not use any flammable materials, materials with strong odours, or materials that cause suffocation inside the bus."
+        },
+        "declarationOutro": "I understand that breaking these instructions may lead to the Code of Conduct being applied.",
+        "declarationAccept": "I accept the declaration",
+        "declarationAccepted": "Accepted",
+        "submit": "Send permit",
+        "studentName": "Student name",
+        "universityId": "University ID",
+        "faculty": "Faculty",
+        "level": "Academic year",
+        "levelValue": "Year {level}",
+        "line": "Line",
+        "busType": "Bus type",
+        "driver": "Driver",
+        "driverPending": "The office will add it",
+        "entry": "Entry",
+        "exit": "Exit",
+        "moment": "{date}, {time}"
       }
     },
     "notGoing": {
@@ -913,7 +988,8 @@
     "emptyUnreadTitle": "You're all caught up",
     "emptyBody": "When your bus is near, your payment is reviewed or the office answers a request, you'll see it here.",
     "loadMore": "Show more",
-    "unread": "New"
+    "unread": "New",
+    "leadParent": "When your children get on the bus, reach campus, miss the bus or won't ride, and notices for their lines."
   },
   "announcements": {
     "title": "Announcements",
@@ -939,6 +1015,167 @@
     "signOut": "Sign out",
     "signOutConfirmTitle": "Sign out of this device?",
     "signOutConfirmBody": "Your card and bookings stay safe. Sign in again with your university ID and a new code.",
-    "stay": "Stay signed in"
+    "stay": "Stay signed in",
+    "signOutConfirmBodyParent": "Sign in again with your phone number and a new code."
+  },
+  "bus": {
+    "title": "Bus and driver",
+    "bus": "Bus",
+    "driver": "Driver",
+    "noDriver": "Not assigned yet",
+    "call": "Call {name}",
+    "phoneHidden": "The driver's number shows here for this line's subscribers."
+  },
+  "tracking": {
+    "studentTitle": "Track my bus",
+    "studentLead": "Where your bus is now, from the GPS device in the bus.",
+    "toCampus": "To campus",
+    "noSubscriptionTitle": "{who, select, self {You aren't subscribed yet} other {{name} has no subscription}}",
+    "noSubscriptionBody": "{who, select, self {Book a seat on a line to follow your bus here.} other {Once a seat is booked and paid, you'll follow the bus here.}}",
+    "findLine": "Find a line",
+    "noTripTitle": "The bus isn't on the road now",
+    "noTripBody": "The next trip starts {time}. The map comes alive a few minutes before.",
+    "noTripBodyUnknown": "The map comes alive a few minutes before the next trip.",
+    "playDemo": "Play a demo trip (test mode)",
+    "status": {
+      "scheduled": "Not on the road yet",
+      "approaching": "On the way to {who, select, self {your stop} other {{name}'s stop}} ({stop}), about {time}",
+      "passed_stop": "Past {who, select, self {your stop} other {{name}'s stop}}, reaching campus in about {time}",
+      "arrived": "The bus reached campus"
+    },
+    "nearStop": "Last stop passed: {stop}",
+    "updated": "Location updated {time}",
+    "noFix": "Waiting for the bus's GPS",
+    "speed": "{speed} km/h",
+    "noStopPins": "Stop pins appear once the Transportation office sends their locations.",
+    "demoNote": "Test mode: the bus position is made up. In the real app it comes from the GPS device in the bus.",
+    "map": {
+      "label": "Live map of the bus",
+      "bus": "The bus",
+      "campus": "SUtech campus",
+      "stop": "Your stop",
+      "followBus": "Follow the bus",
+      "following": "Following the bus",
+      "wholeTrip": "Whole trip",
+      "fullScreen": "Full screen",
+      "exitFullScreen": "Exit full screen"
+    }
+  },
+  "parent": {
+    "switchChild": "Choose a child",
+    "noChildrenTitle": "No students linked yet",
+    "noChildrenBody": "Your phone number isn't on any student's file. Contact the Transportation office (A039).",
+    "childMeta": "ID {id} · Year {level}",
+    "home": {
+      "lead": "How each of your children's day is going, and the bus live.",
+      "pickup": "Pickup at {stop}, {time}",
+      "noSubscription": "{name} has no bus booking this term.",
+      "openDay": "Today's details",
+      "liveTitle": "The bus now",
+      "liveFor": "Line {code} · {names}"
+    },
+    "day": {
+      "title": "Today's trip",
+      "lead": "Boarding, arrival and anything unusual, as it happens.",
+      "timelineTitle": "So far today",
+      "recentTitle": "Last few days",
+      "recentLead": "{name}'s recent trips to campus.",
+      "noEvents": "Nothing yet today.",
+      "status": {
+        "no_subscription": {
+          "title": "{name} has no bus subscription",
+          "body": "Once a seat is booked and paid, today's trip shows here."
+        },
+        "no_service": {
+          "title": "No buses today",
+          "body": "Buses run Sunday to Thursday."
+        },
+        "not_going": {
+          "title": "{name} won't ride today",
+          "body": "They said so in the app at {time}. The driver and the office know."
+        },
+        "waiting": {
+          "title": "The bus hasn't left yet",
+          "body": "Pickup at {stop}, {pickup}."
+        },
+        "bus_on_way": {
+          "title": "The bus is on its way to {stop}",
+          "body": "Pickup at {pickup}."
+        },
+        "boarded": {
+          "title": "On the bus since {time}",
+          "body": "Card scanned at {stop}. The bus is heading to campus."
+        },
+        "arrived": {
+          "title": "Reached campus at {time}",
+          "body": "Got on at {stop} at {boarded}."
+        },
+        "checked_out": {
+          "title": "Left the bus on the way at {time}",
+          "body": "The reason is in today's details."
+        },
+        "absent": {
+          "title": "{name} wasn't on the bus today",
+          "body": "The bus reached campus without their card being scanned, and they hadn't reported a day off."
+        }
+      },
+      "event": {
+        "not_going": "Reported a day off: {detail}",
+        "bus_left": "Bus left {detail}",
+        "boarded": "Got on at {detail}",
+        "arrived": "Reached campus",
+        "checked_out": "Left the bus: {detail}",
+        "absent": "Marked absent: not on the bus"
+      }
+    },
+    "approvals": {
+      "title": "Approvals",
+      "lead": "Your children's line change requests. A request reaches the Transportation office only after you approve it.",
+      "waitingTitle": "Waiting for you",
+      "answeredTitle": "Answered",
+      "emptyTitle": "Nothing waiting for you",
+      "emptyBody": "When one of your children asks to change line, it shows here and you get a notification.",
+      "cardTitle": "Line change · {name}",
+      "cardMeta": "{reference} · sent {date}",
+      "from": "From line",
+      "to": "To line",
+      "stop": "Stop: {stop}",
+      "duration": "For how long",
+      "reason": "{name}'s reason",
+      "explain": "If you approve, it goes to the Transportation office, which checks the seats. If you refuse, it's closed and {name} is told.",
+      "approve": "Approve",
+      "refuse": "Refuse",
+      "approveTitle": "Approve the line change?",
+      "approveBody": "{name}'s request for {line} goes to the Transportation office.",
+      "refuseTitle": "Refuse the line change?",
+      "refuseBody": "The request is closed. {name} can send a new one later.",
+      "approveNote": "A note for the Transportation office",
+      "refuseNote": "Want to tell {name} why?",
+      "optional": "Optional",
+      "approveConfirm": "Yes, approve",
+      "refuseConfirm": "Yes, refuse",
+      "back": "Back",
+      "approvedToast": "You approved the request",
+      "approvedToastBody": "{name}'s request went to the Transportation office.",
+      "refusedToast": "You refused the request",
+      "youApproved": "You approved it on {date}",
+      "youRefused": "You refused it on {date}",
+      "errors": {
+        "NOT_AWAITING_GUARDIAN": "This request was already answered or withdrawn.",
+        "network": "No connection. Try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "daysOff": {
+      "title": "Days they won't ride",
+      "today": "Today",
+      "item": "{day}: {reason}"
+    },
+    "reasons": {
+      "sick": "Not feeling well",
+      "no_lectures": "No lectures",
+      "personal": "Personal reason",
+      "other": "Other reason"
+    }
   }
 }

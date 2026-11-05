@@ -16,10 +16,14 @@ import { tokenStore } from "@/lib/api/token-store";
 import {
   createComplaint,
   createLineChange,
+  createModelPermit,
   createRefund,
   getRefundPolicy,
   getRequest,
+  approveAsGuardian,
+  listGuardianApprovals,
   listMyRequests,
+  refuseAsGuardian,
   withdrawRequest,
 } from "./api";
 import { MOCK_REQUEST_TIMING, resetRequestsMock } from "./mock-state";
@@ -27,14 +31,21 @@ import {
   RequestErrorCode,
   RequestKind,
   RequestStatus,
+  RequestActor,
   type CreateLineChangeBody,
+  type CreateModelPermitBody,
   type CreateRefundBody,
 } from "./schema";
 
 const MARIAM = "240102684"; // Omar, active on line 7 since September
 const AHMED = "240102791"; // no booking
+const YOUSSEF = "260101207"; // active on line 12; his guardian has an account
+const GUARDIAN = "01098765432"; // Ahmed's and Youssef's father
 const NOV_2 = Date.parse("2026-11-02T08:00:00Z");
 const OCT_1 = Date.parse("2026-10-01T08:00:00Z");
+/** Omar's guardian has no account in the mock, so it "approves" by itself after a while. */
+const OFFICE_GETS_IT = NOV_2 + MOCK_REQUEST_TIMING.guardianAutoApproveAfterMs;
+
 const DOCUMENT = {
   file_name: "report.pdf",
   content_type: "application/pdf" as const,
@@ -71,7 +82,23 @@ function lineChange(overrides: Partial<CreateLineChangeBody> = {}): CreateLineCh
     student_phone: "01012340684",
     guardian_name: "Ahmed Ramadan Ramadan",
     guardian_phone: "01098760684",
-    guardian_consent: true,
+    ...overrides,
+  };
+}
+
+function modelPermit(overrides: Partial<CreateModelPermitBody> = {}): CreateModelPermitBody {
+  return {
+    material: "Wood and acrylic",
+    dimensions: "60 × 40 × 30 cm",
+    purpose: "display",
+    purpose_other: null,
+    destination: "Project exhibition, building B",
+    entry_date: "2026-11-05",
+    entry_time: "07:30",
+    exit_date: "2026-11-05",
+    exit_time: "16:00",
+    supervisor_name: "Dr. Nihal",
+    declaration_accepted: true,
     ...overrides,
   };
 }
@@ -109,28 +136,77 @@ describe("student requests (mock server)", () => {
   it("a line change moves through review to approval and moves the booking", async () => {
     await signIn(MARIAM);
     const sent = await createLineChange(lineChange());
-    expect(sent.status).toBe(RequestStatus.Submitted);
+    expect(sent.status).toBe(RequestStatus.AwaitingGuardian);
     expect(sent.reference).toMatch(/^REQ-2026-\d{4}$/);
     expect((await errorOf(createLineChange(lineChange()))).code).toBe(
       RequestErrorCode.RequestAlreadyOpen,
     );
 
-    at(NOV_2 + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
+    at(OFFICE_GETS_IT + 1);
+    expect((await getRequest(sent.request_id)).status).toBe(RequestStatus.Submitted);
+
+    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
     const reviewing = await getRequest(sent.request_id);
     expect(reviewing.status).toBe(RequestStatus.InReview);
-    expect(reviewing.timeline.at(-1)?.note).toContain("01098760684");
 
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Approved);
-    expect(decided.timeline.map((event) => event.status)).toEqual([
-      RequestStatus.Submitted,
-      RequestStatus.InReview,
-      RequestStatus.Approved,
+    expect(decided.timeline.map((event) => [event.status, event.by])).toEqual([
+      [RequestStatus.AwaitingGuardian, RequestActor.Student],
+      [RequestStatus.Submitted, RequestActor.Guardian],
+      [RequestStatus.InReview, RequestActor.TransportOffice],
+      [RequestStatus.Approved, RequestActor.TransportOffice],
     ]);
     const { subscription } = await getMySubscription();
     expect(subscription?.line.line_id).toBe("ln_12");
     expect(subscription?.stop.stop_id).toBe("ln_12_s3");
+  });
+
+  it("a line change waits for the guardian, who approves or refuses it in the app", async () => {
+    await signIn(YOUSSEF);
+    const first = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    // No guardian answer: it never reaches the office on its own.
+    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs * 2);
+    expect((await getRequest(first.request_id)).status).toBe(RequestStatus.AwaitingGuardian);
+
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    const { approvals } = await listGuardianApprovals();
+    expect(approvals).toHaveLength(1);
+    expect(approvals[0]?.student_id).toBe("usr_student_11");
+    const refused = await refuseAsGuardian(first.request_id, { note: "Too far from home." });
+    expect(refused.status).toBe(RequestStatus.Rejected);
+    expect(refused.timeline.at(-1)).toMatchObject({
+      by: RequestActor.Guardian,
+      note: "Too far from home.",
+    });
+    expect((await errorOf(approveAsGuardian(first.request_id, { note: null }))).code).toBe(
+      RequestErrorCode.NotAwaitingGuardian,
+    );
+
+    tokenStore.set(null);
+    await signIn(YOUSSEF);
+    const second = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    const approved = await approveAsGuardian(second.request_id, { note: null });
+    expect(approved.status).toBe(RequestStatus.Submitted);
+    expect(approved.timeline.at(-1)?.by).toBe(RequestActor.Guardian);
+
+    // Another student's request is not the guardian's to answer.
+    tokenStore.set(null);
+    await signIn(MARIAM);
+    const omars = await createLineChange(lineChange());
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    expect((await errorOf(approveAsGuardian(omars.request_id, { note: null }))).code).toBe(
+      "NOT_YOUR_CHILD",
+    );
   });
 
   it("a change to a full line is not approved", async () => {
@@ -138,7 +214,7 @@ describe("student requests (mock server)", () => {
     const sent = await createLineChange(
       lineChange({ to_line_id: "ln_02", to_stop_id: "ln_02_s1" }),
     );
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Rejected);
     expect((await getMySubscription()).subscription?.line.line_id).toBe("ln_07");
@@ -249,6 +325,69 @@ describe("student requests (mock server)", () => {
       second.request_id,
       first.request_id,
     ]);
+  });
+});
+
+describe("model permit (mock server)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    at(NOV_2);
+    resetAuthMock();
+    resetStudentMock();
+    resetRequestsMock();
+    resetNotificationsMock();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    tokenStore.set(null);
+  });
+
+  it("fills the student and bus from the account, and Safety approves it", async () => {
+    await signIn(MARIAM);
+    const sent = await createModelPermit(modelPermit());
+    expect(sent.kind).toBe(RequestKind.ModelPermit);
+    if (sent.kind !== RequestKind.ModelPermit) return;
+    expect(sent.details.university_id).toBe(MARIAM);
+    expect(sent.details.student_name).toBe("عمر أحمد رمضان رمضان");
+    expect(sent.details.line.line_id).toBe("ln_07");
+    expect(sent.details.driver_name).toBeNull();
+    expect((await errorOf(createModelPermit(modelPermit()))).code).toBe(
+      RequestErrorCode.RequestAlreadyOpen,
+    );
+
+    at(NOV_2 + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
+    expect((await getRequest(sent.request_id)).timeline.at(-1)?.note).toContain("Dr. Nihal");
+
+    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    const decided = await getRequest(sent.request_id);
+    expect(decided.status).toBe(RequestStatus.Approved);
+    expect(decided.timeline.at(-1)?.by).toBe(RequestActor.Safety);
+    expect((await listMyRequests(RequestKind.ModelPermit)).map((item) => item.request_id)).toEqual([
+      sent.request_id,
+    ]);
+  });
+
+  it("checks the permit like the university form", async () => {
+    await signIn(MARIAM);
+    expect(
+      (
+        await errorOf(
+          createModelPermit(modelPermit({ entry_date: "2026-11-01", exit_date: "2026-11-01" })),
+        )
+      ).code,
+    ).toBe(RequestErrorCode.InvalidDates);
+    expect((await errorOf(createModelPermit(modelPermit({ exit_time: "07:00" })))).code).toBe(
+      "invalid_request",
+    );
+    expect((await errorOf(createModelPermit(modelPermit({ purpose: "other" })))).code).toBe(
+      "invalid_request",
+    );
+
+    tokenStore.set(null);
+    await signIn(AHMED);
+    expect((await errorOf(createModelPermit(modelPermit()))).code).toBe(
+      RequestErrorCode.NoActiveSubscription,
+    );
   });
 });
 

@@ -2,6 +2,7 @@ import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
 import type {
   ComplaintCategory,
   LineChangeDuration,
+  ModelPurpose,
   RefundReason,
   RequestKind,
   RequestStatus,
@@ -17,6 +18,8 @@ const MS_PER_SECOND = 1000;
 
 /** Mock only: when the office opens a request, and when it answers. */
 export const MOCK_REQUEST_TIMING = {
+  /** A guardian with no account in the mock "approves" after this long, so the demo goes on. */
+  guardianAutoApproveAfterMs: 20 * MS_PER_SECOND,
   inReviewAfterMs: 15 * MS_PER_SECOND,
   decidedAfterMs: 45 * MS_PER_SECOND,
 } as const;
@@ -76,7 +79,43 @@ export interface MockComplaintPayload {
   attachments: MockAttachment[];
 }
 
-export type MockRequestPayload = MockLineChangePayload | MockRefundPayload | MockComplaintPayload;
+export interface MockModelPermitPayload {
+  kind: typeof RequestKind.ModelPermit;
+  /** The student's details as printed on the permit, kept as they were on the day. */
+  student: {
+    name: MockText;
+    universityId: string;
+    faculty: MockText | null;
+    level: number | null;
+  };
+  /** The bus is the student's own line at the time of the request. */
+  lineId: string;
+  material: string;
+  dimensions: string;
+  purpose: ModelPurpose;
+  purposeOther: string | null;
+  destination: string;
+  entryDate: string;
+  entryTime: string;
+  exitDate: string;
+  exitTime: string;
+  supervisorName: string;
+}
+
+export type MockRequestPayload =
+  MockLineChangePayload | MockRefundPayload | MockComplaintPayload | MockModelPermitPayload;
+
+/**
+ * The guardian's answer to a line change. Requests saved before this step existed have none,
+ * and count as already sent to the office.
+ */
+export interface MockGuardianStep {
+  /** False when no guardian account follows the student in the mock (see the auto-approval). */
+  hasAccount: boolean;
+  decidedAt: number | null;
+  approved: boolean;
+  note: string | null;
+}
 
 export interface MockRequest {
   requestId: string;
@@ -89,6 +128,8 @@ export interface MockRequest {
   decisionNote: MockText | null;
   /** Set once the decision's effect (e.g. moving the booking) has been applied. */
   appliedAt: number | null;
+  /** Set for a line change: it waits for the guardian before the office sees it. */
+  guardian?: MockGuardianStep | null;
   payload: MockRequestPayload;
 }
 

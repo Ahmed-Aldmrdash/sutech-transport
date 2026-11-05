@@ -264,16 +264,15 @@ function RefundForm({ policy }: { policy: RefundPolicy }) {
           <GuardianFields
             name={values.guardianName}
             phone={values.guardianPhone}
-            consent={values.guardianConsent}
-            consentLabel={t("guardian.consentRefund")}
-            errors={{
-              name: fieldError("guardianName"),
-              phone: fieldError("guardianPhone"),
-              consent: fieldError("guardianConsent"),
+            consent={{
+              checked: values.guardianConsent,
+              label: t("guardian.consentRefund"),
+              error: fieldError("guardianConsent"),
+              onChange: (value) => update("guardianConsent", value),
             }}
+            errors={{ name: fieldError("guardianName"), phone: fieldError("guardianPhone") }}
             onName={(value) => update("guardianName", value)}
             onPhone={(value) => update("guardianPhone", value)}
-            onConsent={(value) => update("guardianConsent", value)}
           />
 
           <dl className="grid gap-3 rounded-md bg-brand-soft p-4 sm:grid-cols-3">

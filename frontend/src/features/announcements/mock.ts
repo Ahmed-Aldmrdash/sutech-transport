@@ -1,4 +1,5 @@
 import { requireMockAccount } from "@/features/auth/mock-token";
+import { mockChildrenOf } from "@/features/children/mock-links";
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
 import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -116,10 +117,17 @@ export function mockAnnouncementsFor(
   language: string,
 ): Announcement[] {
   const all = mockAnnouncements(language);
-  if (user.role !== Role.Student) return all;
-  const booking = bookingOf(user.id);
-  const ownLine = booking && SEAT_STATUSES.includes(booking.status) ? booking.lineId : null;
-  return all.filter((item) => item.line === null || item.line.line_id === ownLine);
+  const lineOf = (studentId: string) => {
+    const booking = bookingOf(studentId);
+    return booking && SEAT_STATUSES.includes(booking.status) ? booking.lineId : null;
+  };
+  // Students see their own line's news; guardians their children's lines only.
+  let ownLines: (string | null)[];
+  if (user.role === Role.Student) ownLines = [lineOf(user.id)];
+  else if (user.role === Role.Parent) {
+    ownLines = mockChildrenOf(user.id).map((child) => lineOf(child.user.id));
+  } else return all;
+  return all.filter((item) => item.line === null || ownLines.includes(item.line.line_id));
 }
 
 registerMock(listAnnouncementsEndpoint, ({ query }, { token, language }) => {

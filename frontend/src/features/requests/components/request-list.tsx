@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { List, ListItem } from "@/components/ui/list";
 import type { Locale } from "@/i18n/routing";
-import { formatDate } from "@/lib/format";
+import { formatCalendarDate, formatDate } from "@/lib/format";
 import { RequestKind, type StudentRequest } from "../schema";
 import { REQUEST_KIND_ICON } from "./request-kind-icon";
 import { RequestStatusBadge } from "./request-status-badge";
@@ -11,6 +11,7 @@ import { RequestStatusBadge } from "./request-status-badge";
 /** One line that says what the request is about, e.g. "Line 5 → Line 12". */
 export function useRequestTitle() {
   const t = useTranslations("student");
+  const locale = useLocale() as Locale;
   return (request: StudentRequest): string => {
     switch (request.kind) {
       case RequestKind.LineChange:
@@ -24,6 +25,11 @@ export function useRequestTitle() {
         });
       case RequestKind.Complaint:
         return t(`requests.complaint.categories.${request.details.category}`);
+      case RequestKind.ModelPermit:
+        return t("requests.modelPermit.summary", {
+          material: request.details.material,
+          date: formatCalendarDate(request.details.entry_date, locale),
+        });
     }
   };
 }

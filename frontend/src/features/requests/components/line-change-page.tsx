@@ -112,7 +112,6 @@ function LineChangeForm({ subscription, lines }: { subscription: Subscription; l
     studentPhone: "",
     guardianName,
     guardianPhone: "",
-    guardianConsent: false,
   });
   const [errors, setErrors] = useState<FieldErrors<LineChangeField>>({});
   const { submit, isSending, serverError } = useSubmit(REQUEST_SERVER_ERRORS);
@@ -169,7 +168,6 @@ function LineChangeForm({ subscription, lines }: { subscription: Subscription; l
           student_phone: normalizePhone(values.studentPhone),
           guardian_name: values.guardianName.trim(),
           guardian_phone: normalizePhone(values.guardianPhone),
-          guardian_consent: true,
         },
         { idempotencyKey },
       ),
@@ -287,18 +285,13 @@ function LineChangeForm({ subscription, lines }: { subscription: Subscription; l
           />
 
           <GuardianFields
+            title={tForm("guardian.lineChangeTitle")}
             name={values.guardianName}
             phone={values.guardianPhone}
-            consent={values.guardianConsent}
-            consentLabel={tForm("guardian.consentLineChange")}
-            errors={{
-              name: fieldError("guardianName"),
-              phone: fieldError("guardianPhone"),
-              consent: fieldError("guardianConsent"),
-            }}
+            note={tForm("guardian.lineChangeNote")}
+            errors={{ name: fieldError("guardianName"), phone: fieldError("guardianPhone") }}
             onName={(value) => update("guardianName", value)}
             onPhone={(value) => update("guardianPhone", value)}
-            onConsent={(value) => update("guardianConsent", value)}
           />
 
           {serverError ? (

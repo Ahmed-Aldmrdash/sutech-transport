@@ -3,12 +3,14 @@ import { announcementsEndpoints } from "@/features/announcements/api";
 import { attendanceEndpoints } from "@/features/attendance/api";
 import { authEndpoints } from "@/features/auth/api";
 import { cardEndpoints } from "@/features/card/api";
+import { childrenEndpoints } from "@/features/children/api";
 import { linesEndpoints } from "@/features/lines/api";
 import { notificationsEndpoints } from "@/features/notifications/api";
 import { paymentsEndpoints } from "@/features/payments/api";
 import { requestsEndpoints } from "@/features/requests/api";
 import { subscriptionsEndpoints } from "@/features/subscriptions/api";
 import { systemEndpoints } from "@/features/system/api";
+import { trackingEndpoints } from "@/features/tracking/api";
 import { tripsEndpoints } from "@/features/trips/api";
 import type { Endpoint } from "./endpoint";
 
@@ -29,4 +31,6 @@ export const allEndpoints: readonly Endpoint[] = [
   ...notificationsEndpoints,
   ...absencesEndpoints,
   ...attendanceEndpoints,
+  ...trackingEndpoints,
+  ...childrenEndpoints,
 ];

@@ -2,6 +2,7 @@ import {
   MOCK_CAMPUS_ARRIVAL,
   findMockLine,
   localized,
+  toBus,
   toLineSummary,
 } from "@/features/lines/mock-builders";
 import { requireMockStudent } from "@/features/subscriptions/mock";
@@ -71,7 +72,7 @@ registerMock(getMyNextTripEndpoint, (_input, { token, language }) => {
       stop: { name: localized(language, nameAr, nameEn), pickup_time: pickup },
       campus_arrival: MOCK_CAMPUS_ARRIVAL,
       return_departure_time: null,
-      bus: { bus_type: line.busType, plate: line.plate },
+      bus: toBus(line, language, true),
       status,
       eta_minutes: eta,
       near_stop: nearStop,

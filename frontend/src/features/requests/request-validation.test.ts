@@ -4,8 +4,10 @@ import {
   normalizePhone,
   validateComplaint,
   validateLineChange,
+  validateModelPermit,
   validateRefund,
   type LineChangeValues,
+  type ModelPermitValues,
 } from "./request-validation";
 
 const RULES = { today: "2026-11-02", termStartsOn: "2026-09-26", termEndsOn: "2027-01-21" };
@@ -21,10 +23,49 @@ const lineChange: LineChangeValues = {
   studentPhone: "٠١٠١٢٣٤٥٦٧٨",
   guardianName: "Adel Mahmoud",
   guardianPhone: "+20 109 876 0684",
-  guardianConsent: true,
+};
+
+const modelPermit: ModelPermitValues = {
+  material: "Wood",
+  dimensions: "60 × 40 cm",
+  purpose: "display",
+  purposeOther: "",
+  destination: "Exhibition hall",
+  entryDate: "2026-11-05",
+  entryTime: "07:30",
+  exitDate: "2026-11-05",
+  exitTime: "16:00",
+  supervisorName: "Dr. Nihal",
+  declarationAccepted: true,
 };
 
 describe("request forms", () => {
+  it("checks the model permit form", () => {
+    expect(validateModelPermit(modelPermit, RULES)).toEqual({});
+    expect(
+      validateModelPermit(
+        {
+          ...modelPermit,
+          purpose: "other",
+          entryDate: "2026-11-01",
+          exitTime: "07:00",
+          declarationAccepted: false,
+        },
+        RULES,
+      ),
+    ).toEqual({
+      purposeOther: "required",
+      entryDate: "dateInPast",
+      declarationAccepted: "declarationRequired",
+    });
+    expect(validateModelPermit({ ...modelPermit, exitTime: "07:00" }, RULES)).toEqual({
+      exitTime: "exitBeforeEntry",
+    });
+    expect(validateModelPermit({ ...modelPermit, exitDate: "2026-11-04" }, RULES)).toEqual({
+      exitDate: "exitBeforeEntry",
+    });
+  });
+
   it("accepts Egyptian mobiles typed in any common way", () => {
     expect(normalizePhone("+20 109 876 0684")).toBe("01098760684");
     expect(isEgyptianMobile("٠١٠١٢٣٤٥٦٧٨")).toBe(true);
@@ -36,10 +77,10 @@ describe("request forms", () => {
     expect(validateLineChange(lineChange, { ...RULES, currentLineId: "ln_05" })).toEqual({});
     expect(
       validateLineChange(
-        { ...lineChange, toLineId: "ln_05", guardianConsent: false },
+        { ...lineChange, toLineId: "ln_05", guardianPhone: "" },
         { ...RULES, currentLineId: "ln_05" },
       ),
-    ).toEqual({ toLineId: "sameLine", guardianConsent: "consentRequired" });
+    ).toEqual({ toLineId: "sameLine", guardianPhone: "required" });
     expect(
       validateLineChange(
         { ...lineChange, duration: "temporary", startsOn: "2026-11-01" },

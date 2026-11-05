@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import type { User } from "@/features/auth/schema";
 import { userText } from "@/features/auth/user-text";
 import type { Locale } from "@/i18n/routing";
+import { Role } from "@/lib/auth/roles";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession, useSignOut } from "@/features/auth/session/use-session";
 
@@ -47,7 +48,9 @@ export function SettingsPage() {
         onClose={() => setIsConfirming(false)}
         onConfirm={signOut}
         title={t("signOutConfirmTitle")}
-        description={t("signOutConfirmBody")}
+        description={
+          user?.role === Role.Parent ? t("signOutConfirmBodyParent") : t("signOutConfirmBody")
+        }
         confirmLabel={t("signOut")}
         cancelLabel={t("stay")}
         destructive

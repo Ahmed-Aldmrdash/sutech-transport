@@ -3,12 +3,17 @@
 import {
   Bell,
   BusFront,
+  CalendarX2,
   CheckCheck,
   CircleCheck,
   CircleX,
   ClipboardList,
+  ListChecks,
+  LogOut,
   Megaphone,
+  School,
   Timer,
+  UserX,
   type LucideIcon,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -23,10 +28,13 @@ import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
 import { useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import { Role } from "@/lib/auth/roles";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { listNotifications, markAllNotificationsRead, markNotificationRead } from "../api";
+import { SessionStatus } from "@/features/auth/session/session-store";
+import { useSession } from "@/features/auth/session/use-session";
 import { notificationHref } from "../link";
 import { NotificationKind, type AppNotification } from "../schema";
 import { unreadStore } from "../unread-store";
@@ -40,6 +48,12 @@ const KIND_ICON: Record<NotificationKind, LucideIcon> = {
   [NotificationKind.PaymentRejected]: CircleX,
   [NotificationKind.RequestUpdate]: ClipboardList,
   [NotificationKind.Announcement]: Megaphone,
+  [NotificationKind.ChildBoarded]: BusFront,
+  [NotificationKind.ChildArrived]: School,
+  [NotificationKind.ChildAbsent]: UserX,
+  [NotificationKind.ChildNotGoing]: CalendarX2,
+  [NotificationKind.ChildCheckedOut]: LogOut,
+  [NotificationKind.ApprovalNeeded]: ListChecks,
 };
 
 const KIND_STYLE: Record<NotificationKind, string> = {
@@ -49,18 +63,30 @@ const KIND_STYLE: Record<NotificationKind, string> = {
   [NotificationKind.PaymentRejected]: "bg-danger-soft text-danger",
   [NotificationKind.RequestUpdate]: "bg-brand-soft text-brand",
   [NotificationKind.Announcement]: "bg-coral-soft text-coral-text",
+  [NotificationKind.ChildBoarded]: "bg-teal-soft text-teal-text",
+  [NotificationKind.ChildArrived]: "bg-success-soft text-success-text",
+  [NotificationKind.ChildAbsent]: "bg-danger-soft text-danger",
+  [NotificationKind.ChildNotGoing]: "bg-surface-alt text-ink",
+  [NotificationKind.ChildCheckedOut]: "bg-warning-soft text-warning-text",
+  [NotificationKind.ApprovalNeeded]: "bg-warning-soft text-warning-text",
 };
 
 const Filter = { All: "all", Unread: "unread" } as const;
 type Filter = (typeof Filter)[keyof typeof Filter];
 
-/** Everything the app told the student: bus near, payment results, request answers, notices. */
+/**
+ * Everything the app told the user. Students: bus near, payments, requests, notices. Guardians:
+ * their children boarding, arriving, absent, not going or leaving the bus.
+ */
 export function NotificationsPage() {
   const t = useTranslations("notifications");
   const toast = useToast();
   const [filter, setFilter] = useState<Filter>(Filter.All);
   const [pages, setPages] = useState(1);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
+  const session = useSession();
+  const isParent =
+    session.status === SessionStatus.SignedIn && session.session.user.role === Role.Parent;
   // Every page shown so far, re-read together so a refresh keeps the list in step.
   const state = useAsync(
     async (signal) => {
@@ -104,7 +130,7 @@ export function NotificationsPage() {
   const header = (
     <PageHeader
       title={t("title")}
-      description={t("lead")}
+      description={isParent ? t("leadParent") : t("lead")}
       actions={
         <Button
           variant="secondary"
@@ -173,7 +199,9 @@ function NotificationRow({ item, onRead }: { item: AppNotification; onRead: () =
   const locale = useLocale() as Locale;
   const router = useRouter();
   const Icon = KIND_ICON[item.kind];
-  const href = notificationHref(item.link);
+  const session = useSession();
+  const role = session.status === SessionStatus.SignedIn ? session.session.user.role : null;
+  const href = role ? notificationHref(item.link, role) : null;
   const isUnread = item.read_at === null;
 
   function open() {
