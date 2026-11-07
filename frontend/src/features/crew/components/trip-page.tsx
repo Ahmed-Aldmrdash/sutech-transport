@@ -57,7 +57,12 @@ const STATUS_TONE: Record<CrewTripStatus, Tone> = {
 
 /** The crew's home: today's bus and trip, start and end, the counts and the quick actions. */
 export function TripPage() {
-  return <CrewGate>{(today, refresh) => <TripView today={today} refresh={refresh} />}</CrewGate>;
+  const t = useTranslations("crew.trip");
+  return (
+    <CrewGate header={<PageHeader title={t("title")} />}>
+      {(today, refresh) => <TripView today={today} refresh={refresh} />}
+    </CrewGate>
+  );
 }
 
 function TripView({ today, refresh }: { today: CrewToday; refresh: () => void }) {

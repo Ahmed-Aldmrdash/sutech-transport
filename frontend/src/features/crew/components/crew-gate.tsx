@@ -17,15 +17,31 @@ import { useCrewToday } from "./use-crew-today";
 interface CrewGateProps {
   /** The page itself, once today's trip is known. `refresh` re-reads it after an action. */
   children: (today: CrewToday, refresh: () => void) => ReactNode;
+  /** Shown above the waiting states, for a page that draws its own header once the day loads. */
+  header?: ReactNode;
 }
 
 /**
  * Loads the crew's day for every crew page and covers what comes before the page: loading,
  * an error, an account on no bus, and a day without trips.
  */
-export function CrewGate({ children }: CrewGateProps) {
-  const t = useTranslations("crew.gate");
+export function CrewGate({ children, header }: CrewGateProps) {
   const state = useCrewToday();
+  if (state.status === AsyncStatus.Success && state.data.is_service_day) {
+    return <>{children(state.data, state.refresh)}</>;
+  }
+  if (!header) return <GateState state={state} />;
+  return (
+    <div className="flex flex-col gap-6">
+      {header}
+      <GateState state={state} />
+    </div>
+  );
+}
+
+/** Everything before the page: loading, an error, an account on no bus, a day without trips. */
+function GateState({ state }: { state: ReturnType<typeof useCrewToday> }) {
+  const t = useTranslations("crew.gate");
 
   if (state.status === AsyncStatus.Loading) {
     return (
@@ -68,5 +84,5 @@ export function CrewGate({ children }: CrewGateProps) {
       />
     );
   }
-  return <>{children(today, state.refresh)}</>;
+  return null;
 }
