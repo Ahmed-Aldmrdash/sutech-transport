@@ -1,5 +1,7 @@
 import { requireMockAccount } from "@/features/auth/mock-token";
 import { mockChildrenOf } from "@/features/children/mock-links";
+import { allCrewDelays } from "@/features/crew/mock-state";
+import { DelayReason } from "@/features/crew/schema";
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
 import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -89,9 +91,45 @@ function lineOf(item: (typeof MOCK_ANNOUNCEMENTS)[number], language: string) {
   return source ? toLineSummary(source, language) : null;
 }
 
+const DELAY_REASON_TEXT: Record<DelayReason, { ar: string; en: string }> = {
+  [DelayReason.Traffic]: { ar: "زحمة على الطريق", en: "Heavy traffic on the road" },
+  [DelayReason.Breakdown]: { ar: "عطل بسيط في الباص", en: "A minor problem with the bus" },
+  [DelayReason.Weather]: { ar: "الجو", en: "The weather" },
+  [DelayReason.RoadClosed]: { ar: "طريق مقفول", en: "A closed road" },
+  [DelayReason.Other]: { ar: "ظرف على الطريق", en: "Something on the way" },
+};
+
+/** What the server posts when a driver reports a delay (POST /trips/{id}/delay). */
+function crewDelayAnnouncements(language: string): Announcement[] {
+  return allCrewDelays().flatMap(({ lineId, delay }) => {
+    const line = findMockLine(lineId);
+    if (!line) return [];
+    const reason = DELAY_REASON_TEXT[delay.reason];
+    const minutes = String(delay.minutes);
+    return [
+      {
+        announcement_id: `ann_${delay.delayId}`,
+        kind: AnnouncementKind.Delay,
+        title: localized(
+          language,
+          `خط ${line.code} متأخر حوالي ${minutes} دقيقة`,
+          `Line ${line.code} is running about ${minutes} minutes late`,
+        ),
+        body: localized(
+          language,
+          `${reason.ar}. الباص هيعدي على المحطات متأخر حوالي ${minutes} دقيقة.${delay.note ? ` ${delay.note}` : ""}`,
+          `${reason.en}. The bus will reach each stop about ${minutes} minutes late.${delay.note ? ` ${delay.note}` : ""}`,
+        ),
+        line: toLineSummary(line, language),
+        published_at: new Date(delay.reportedAt).toISOString(),
+      },
+    ];
+  });
+}
+
 /** Every announcement, newest first. Also read by the notifications mock. */
 export function mockAnnouncements(language: string): Announcement[] {
-  return MOCK_ANNOUNCEMENTS.map((item) => ({
+  const fixed = MOCK_ANNOUNCEMENTS.map((item) => ({
     announcement_id: item.id,
     kind: item.kind,
     title: localized(language, item.titleAr, item.titleEn),
@@ -99,6 +137,9 @@ export function mockAnnouncements(language: string): Announcement[] {
     line: lineOf(item, language),
     published_at: item.publishedAt,
   }));
+  return [...crewDelayAnnouncements(language), ...fixed].sort((a, b) =>
+    b.published_at.localeCompare(a.published_at),
+  );
 }
 
 /** Statuses where the student holds a seat on a line, so that line's news is theirs. */

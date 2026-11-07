@@ -208,11 +208,12 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     {
       id: "usr_driver_1",
       role: Role.Driver,
-      name: "Hassan Ibrahim",
-      name_ar: "حسن إبراهيم",
+      name: "Mohamed Hassan",
+      name_ar: "محمد حسن",
       identifier: "DRV-1001",
     },
-    "01111111234",
+    // Line 7's driver from the Abu El Hol drivers list, so the crew pages match the line.
+    "01006796783",
   ),
   account(
     {

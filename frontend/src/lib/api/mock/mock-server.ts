@@ -19,6 +19,8 @@ export interface MockContext {
   token: string | null;
   /** The page language ("ar" or "en"), as the real server reads it from Accept-Language. */
   language: string;
+  /** The Idempotency-Key header, for endpoints that send one. */
+  idempotencyKey?: string | null;
 }
 
 export type MockHandler<E extends Endpoint> = (

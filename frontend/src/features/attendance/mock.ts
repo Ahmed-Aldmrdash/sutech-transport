@@ -1,5 +1,11 @@
 import { notGoingDatesOf } from "@/features/absences/mock-state";
 import {
+  CHECKOUT_REASON_TEXT,
+  crewOutcomeFor,
+  type MockCrewOutcome,
+} from "@/features/crew/mock-state";
+import { RiderState } from "@/features/crew/schema";
+import {
   MOCK_CAMPUS_ARRIVAL,
   findMockLine,
   localized,
@@ -78,6 +84,16 @@ export function historyOf(userId: string, language: string, now: number): TripRe
   let date = cairoNow(new Date(booking.activatedAt)).date;
   let index = 0;
   while (date <= cairo.date) {
+    const crew = crewOutcomeFor(userId, line.lineId, date, now);
+    if (crew) {
+      // A trip the crew is still running has no record until it ends.
+      if (crew.trip.endedAt !== null) {
+        records.push(crewRecord(crew, { date, summary, language, stopAr, stopEn }));
+        index += 1;
+      }
+      date = addDays(date, 1);
+      continue;
+    }
     const finished = date < cairo.date || cairo.minute >= toMinutes(MOCK_CAMPUS_ARRIVAL.to);
     if (SERVICE_DAYS.has(weekdayOf(date)) && finished) {
       const seed = hashOf(`${userId}${date}`);
@@ -108,6 +124,42 @@ export function historyOf(userId: string, language: string, now: number): TripRe
     date = addDays(date, 1);
   }
   return records.reverse();
+}
+
+/** A trip the crew ran from the driver's page: its real scans decide the outcome. */
+function crewRecord(
+  { trip, rider }: MockCrewOutcome,
+  context: {
+    date: string;
+    summary: TripRecord["line"];
+    language: string;
+    stopAr: string;
+    stopEn: string;
+  },
+): TripRecord {
+  const iso = (time: number | null) => (time === null ? null : new Date(time).toISOString());
+  const outcome: Record<RiderState, TripOutcome> = {
+    [RiderState.Boarded]: TripOutcome.Rode,
+    [RiderState.CheckedOut]: TripOutcome.CheckedOut,
+    [RiderState.NotGoing]: TripOutcome.NotGoing,
+    [RiderState.Absent]: TripOutcome.Absent,
+    [RiderState.Waiting]: TripOutcome.Absent,
+  };
+  const reason = rider.reason ? CHECKOUT_REASON_TEXT[rider.reason] : null;
+  return {
+    trip_id: trip.tripId,
+    service_date: context.date,
+    direction: TripDirection.Outbound,
+    line: context.summary,
+    stop_name: localized(context.language, context.stopAr, context.stopEn),
+    outcome: outcome[rider.state],
+    boarded_at: iso(rider.boardedAt),
+    arrived_at: rider.state === RiderState.Boarded ? iso(trip.endedAt) : null,
+    checked_out_at: iso(rider.checkedOutAt),
+    checkout_reason: reason
+      ? (rider.note ?? localized(context.language, reason.ar, reason.en))
+      : null,
+  };
 }
 
 function summarize(records: readonly TripRecord[]): AttendanceSummary {

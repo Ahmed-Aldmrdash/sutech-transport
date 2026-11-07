@@ -1,4 +1,5 @@
 import type { MockAccount } from "@/features/auth/mock-accounts";
+import { crewLiveClock } from "@/features/crew/mock-state";
 import { requireMockGuardianOf } from "@/features/children/mock-links";
 import {
   MOCK_CAMPUS_ARRIVAL,
@@ -46,6 +47,14 @@ interface TripClock {
 /** Today's trip if the bus is on the road now (or the test-mode demo trip), else null. */
 function liveClock(line: MockLineSource, now: number): TripClock | null {
   const cairo = cairoNow(new Date(now));
+  // Once the crew starts today's trip from the driver's page, the map follows that trip.
+  const crew = crewLiveClock(line.lineId, now);
+  if (crew) {
+    const arrivesAt =
+      crew.endedAt === null ? crew.arrivesAt : Math.min(crew.arrivesAt, crew.endedAt);
+    const closesAt = arrivesAt + ARRIVED_SHOW_MINUTES * MS_PER_MINUTE;
+    return now <= closesAt ? { date: crew.date, startsAt: crew.startsAt, arrivesAt } : null;
+  }
   const demoStart = demoTripStartedAt(now);
   if (demoStart !== null) {
     return { date: cairo.date, startsAt: demoStart, arrivesAt: demoStart + DEMO_TRIP_MS };

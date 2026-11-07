@@ -56,6 +56,7 @@ export type NavItemKey =
   | "scan"
   | "passengers"
   | "reportDelay"
+  | "sos"
   | "violations"
   | "overview"
   | "liveTracking"
@@ -157,7 +158,8 @@ const CREW_NAV: RoleNavigation = {
         { key: "trip", icon: Bus, segment: "", primary: true },
         { key: "scan", icon: ScanLine, segment: "scan", primary: true },
         { key: "passengers", icon: Users, segment: "passengers", primary: true },
-        { key: "reportDelay", icon: Timer, segment: "delay", primary: true },
+        { key: "sos", icon: Siren, segment: "sos", primary: true },
+        { key: "reportDelay", icon: Timer, segment: "delay" },
         { key: "violations", icon: BadgeAlert, segment: "violations" },
       ],
     },
