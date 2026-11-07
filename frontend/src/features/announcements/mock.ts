@@ -9,6 +9,7 @@ import { SosAction } from "@/features/sos/schema";
 import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
+import { formatPhone } from "@/lib/format";
 import { Role } from "@/lib/auth/roles";
 import { listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
@@ -189,8 +190,8 @@ function emergencyAnnouncements(language: string): Announcement[] {
       localized(language, `تغيير في باص خط ${code} النهارده`, `Line ${code} has a change today`),
       localized(
         language,
-        `الباص دلوقتي ${bus.plate} والسواق ${name} (${driver.phone}).`,
-        `The bus is now ${bus.plate} with driver ${name} (${driver.phone}).`,
+        `الباص دلوقتي ${bus.plate} والسواق ${name} (${formatPhone(driver.phone)}).`,
+        `The bus is now ${bus.plate} with driver ${name} (${formatPhone(driver.phone)}).`,
       ),
     );
   }

@@ -1591,5 +1591,26 @@
       "whoIsTold": "The driver's page, the line's students and their guardians show the new bus and driver at once.",
       "sent": "Sent: {plate} with {name}"
     }
+  },
+  "clinic": {
+    "title": "Clinic",
+    "lead": "Medical emergencies and accidents on the buses, live, with what was done for each.",
+    "statActive": "Cases open now",
+    "statWeek": "Cases this week",
+    "statAmbulance": "Ambulances this week",
+    "statAmbulanceCaption": "Logged by the office or the clinic",
+    "nowTitle": "Needs you now",
+    "nowEmptyTitle": "No medical case on the buses now",
+    "nowEmptyBody": "When a crew sends a medical SOS or reports an accident, it shows here at once with the bus's location.",
+    "callDriver": "Call the driver",
+    "historyTitle": "All cases",
+    "historyEmpty": "No medical cases yet.",
+    "colWhen": "When",
+    "colCase": "Case",
+    "colStatus": "Status",
+    "colAmbulance": "Ambulance",
+    "colSummary": "What was done",
+    "yes": "Yes",
+    "no": "No"
   }
 }
