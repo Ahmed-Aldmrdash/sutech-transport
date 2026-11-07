@@ -14416,6 +14416,49 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "replacement": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "bus_type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "minibus",
+                                      "coaster",
+                                      "midibus",
+                                      "large_bus"
+                                    ]
+                                  },
+                                  "plate": {
+                                    "type": "string"
+                                  },
+                                  "driver_name": {
+                                    "type": "string"
+                                  },
+                                  "driver_phone": {
+                                    "type": "string"
+                                  },
+                                  "at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  }
+                                },
+                                "required": [
+                                  "bus_type",
+                                  "plate",
+                                  "driver_name",
+                                  "driver_phone",
+                                  "at"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -14428,7 +14471,8 @@
                           "riders",
                           "counts",
                           "delays",
-                          "sos"
+                          "sos",
+                          "replacement"
                         ],
                         "additionalProperties": false
                       }
@@ -14822,6 +14866,49 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "replacement": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "bus_type": {
+                              "type": "string",
+                              "enum": [
+                                "minibus",
+                                "coaster",
+                                "midibus",
+                                "large_bus"
+                              ]
+                            },
+                            "plate": {
+                              "type": "string"
+                            },
+                            "driver_name": {
+                              "type": "string"
+                            },
+                            "driver_phone": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "bus_type",
+                            "plate",
+                            "driver_name",
+                            "driver_phone",
+                            "at"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -14834,7 +14921,8 @@
                     "riders",
                     "counts",
                     "delays",
-                    "sos"
+                    "sos",
+                    "replacement"
                   ],
                   "additionalProperties": false
                 }
@@ -15214,6 +15302,49 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "replacement": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "bus_type": {
+                              "type": "string",
+                              "enum": [
+                                "minibus",
+                                "coaster",
+                                "midibus",
+                                "large_bus"
+                              ]
+                            },
+                            "plate": {
+                              "type": "string"
+                            },
+                            "driver_name": {
+                              "type": "string"
+                            },
+                            "driver_phone": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": [
+                            "bus_type",
+                            "plate",
+                            "driver_name",
+                            "driver_phone",
+                            "at"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -15226,7 +15357,8 @@
                     "riders",
                     "counts",
                     "delays",
-                    "sos"
+                    "sos",
+                    "replacement"
                   ],
                   "additionalProperties": false
                 }
@@ -16165,6 +16297,1786 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/api/v1/admin/sos": {
+      "get": {
+        "operationId": "emergencies.list",
+        "summary": "Every SOS, newest first, with an optional `status` filter. The clinic gets only `medical` and `accident`. New alerts also arrive on the WebSocket as sos.new; until then the office pages re-read this every 5 s.",
+        "tags": [
+          "emergencies"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "clinic"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "acknowledged",
+                "closed"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "medical",
+                              "breakdown",
+                              "accident"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "open",
+                              "acknowledged",
+                              "closed"
+                            ]
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "trip_id": {
+                            "type": "string"
+                          },
+                          "line_id": {
+                            "type": "string"
+                          },
+                          "bus_id": {
+                            "type": "string"
+                          },
+                          "raised_by": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string",
+                                "enum": [
+                                  "driver",
+                                  "supervisor"
+                                ]
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "role",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "location": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "lat": {
+                                    "type": "number"
+                                  },
+                                  "lng": {
+                                    "type": "number"
+                                  },
+                                  "fix_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "const": "bus_gps"
+                                  }
+                                },
+                                "required": [
+                                  "lat",
+                                  "lng",
+                                  "fix_at",
+                                  "source"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "riders_on_board": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "actions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "action": {
+                                  "type": "string",
+                                  "enum": [
+                                    "acknowledge",
+                                    "ambulance_called",
+                                    "replacement_sent",
+                                    "note",
+                                    "close"
+                                  ]
+                                },
+                                "by": {
+                                  "type": "string"
+                                },
+                                "by_name": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "action",
+                                "by",
+                                "by_name",
+                                "at",
+                                "note"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "line": {
+                            "type": "object",
+                            "properties": {
+                              "line_id": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "line_id",
+                              "code",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "direction": {
+                            "type": "string",
+                            "enum": [
+                              "outbound",
+                              "return"
+                            ]
+                          },
+                          "bus": {
+                            "type": "object",
+                            "properties": {
+                              "bus_id": {
+                                "type": "string"
+                              },
+                              "bus_type": {
+                                "type": "string",
+                                "enum": [
+                                  "minibus",
+                                  "coaster",
+                                  "midibus",
+                                  "large_bus"
+                                ]
+                              },
+                              "plate": {
+                                "type": "string"
+                              },
+                              "seats": {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "bus_id",
+                              "bus_type",
+                              "plate",
+                              "seats"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "driver": {
+                            "type": "object",
+                            "properties": {
+                              "driver_id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "phone": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "driver_id",
+                              "name",
+                              "phone"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "raised_by_phone": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "replacements": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "replacement_id": {
+                                  "type": "string"
+                                },
+                                "bus": {
+                                  "type": "object",
+                                  "properties": {
+                                    "bus_id": {
+                                      "type": "string"
+                                    },
+                                    "bus_type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "minibus",
+                                        "coaster",
+                                        "midibus",
+                                        "large_bus"
+                                      ]
+                                    },
+                                    "plate": {
+                                      "type": "string"
+                                    },
+                                    "seats": {
+                                      "type": "integer",
+                                      "exclusiveMinimum": 0,
+                                      "maximum": 9007199254740991
+                                    }
+                                  },
+                                  "required": [
+                                    "bus_id",
+                                    "bus_type",
+                                    "plate",
+                                    "seats"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "driver": {
+                                  "type": "object",
+                                  "properties": {
+                                    "driver_id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "phone": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "driver_id",
+                                    "name",
+                                    "phone"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "reason": {
+                                  "type": "string",
+                                  "enum": [
+                                    "breakdown",
+                                    "accident",
+                                    "driver_unavailable",
+                                    "other"
+                                  ]
+                                },
+                                "note": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "sos_id": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "by_name": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "at": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                }
+                              },
+                              "required": [
+                                "replacement_id",
+                                "bus",
+                                "driver",
+                                "reason",
+                                "note",
+                                "sos_id",
+                                "by_name",
+                                "at"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "campus_location": {
+                            "type": "object",
+                            "properties": {
+                              "lat": {
+                                "type": "number"
+                              },
+                              "lng": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "lat",
+                              "lng"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "status",
+                          "note",
+                          "trip_id",
+                          "line_id",
+                          "bus_id",
+                          "raised_by",
+                          "location",
+                          "riders_on_board",
+                          "created_at",
+                          "actions",
+                          "line",
+                          "direction",
+                          "bus",
+                          "driver",
+                          "raised_by_phone",
+                          "replacements",
+                          "campus_location"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sos/{sos_id}": {
+      "get": {
+        "operationId": "emergencies.get",
+        "summary": "One SOS with its log, the trip's bus and driver now, the crew's phone and any bus or driver changes. Errors: NOT_FOUND (404, also for the clinic on a breakdown).",
+        "tags": [
+          "emergencies"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "clinic"
+        ],
+        "parameters": [
+          {
+            "name": "sos_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "medical",
+                        "breakdown",
+                        "accident"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "open",
+                        "acknowledged",
+                        "closed"
+                      ]
+                    },
+                    "note": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "trip_id": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "string"
+                    },
+                    "bus_id": {
+                      "type": "string"
+                    },
+                    "raised_by": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "driver",
+                            "supervisor"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "role",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "location": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "lat": {
+                              "type": "number"
+                            },
+                            "lng": {
+                              "type": "number"
+                            },
+                            "fix_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "source": {
+                              "type": "string",
+                              "const": "bus_gps"
+                            }
+                          },
+                          "required": [
+                            "lat",
+                            "lng",
+                            "fix_at",
+                            "source"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "riders_on_board": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "acknowledge",
+                              "ambulance_called",
+                              "replacement_sent",
+                              "note",
+                              "close"
+                            ]
+                          },
+                          "by": {
+                            "type": "string"
+                          },
+                          "by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action",
+                          "by",
+                          "by_name",
+                          "at",
+                          "note"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "line": {
+                      "type": "object",
+                      "properties": {
+                        "line_id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "line_id",
+                        "code",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "direction": {
+                      "type": "string",
+                      "enum": [
+                        "outbound",
+                        "return"
+                      ]
+                    },
+                    "bus": {
+                      "type": "object",
+                      "properties": {
+                        "bus_id": {
+                          "type": "string"
+                        },
+                        "bus_type": {
+                          "type": "string",
+                          "enum": [
+                            "minibus",
+                            "coaster",
+                            "midibus",
+                            "large_bus"
+                          ]
+                        },
+                        "plate": {
+                          "type": "string"
+                        },
+                        "seats": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "bus_id",
+                        "bus_type",
+                        "plate",
+                        "seats"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "driver": {
+                      "type": "object",
+                      "properties": {
+                        "driver_id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "driver_id",
+                        "name",
+                        "phone"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "raised_by_phone": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "replacements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "replacement_id": {
+                            "type": "string"
+                          },
+                          "bus": {
+                            "type": "object",
+                            "properties": {
+                              "bus_id": {
+                                "type": "string"
+                              },
+                              "bus_type": {
+                                "type": "string",
+                                "enum": [
+                                  "minibus",
+                                  "coaster",
+                                  "midibus",
+                                  "large_bus"
+                                ]
+                              },
+                              "plate": {
+                                "type": "string"
+                              },
+                              "seats": {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "bus_id",
+                              "bus_type",
+                              "plate",
+                              "seats"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "driver": {
+                            "type": "object",
+                            "properties": {
+                              "driver_id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "phone": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "driver_id",
+                              "name",
+                              "phone"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "breakdown",
+                              "accident",
+                              "driver_unavailable",
+                              "other"
+                            ]
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "sos_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "replacement_id",
+                          "bus",
+                          "driver",
+                          "reason",
+                          "note",
+                          "sos_id",
+                          "by_name",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "campus_location": {
+                      "type": "object",
+                      "properties": {
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "lat",
+                        "lng"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "status",
+                    "note",
+                    "trip_id",
+                    "line_id",
+                    "bus_id",
+                    "raised_by",
+                    "location",
+                    "riders_on_board",
+                    "created_at",
+                    "actions",
+                    "line",
+                    "direction",
+                    "bus",
+                    "driver",
+                    "raised_by_phone",
+                    "replacements",
+                    "campus_location"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/sos/{sos_id}/actions": {
+      "post": {
+        "operationId": "emergencies.addAction",
+        "summary": "Logs what the office did, with who and when (the log is never edited). `acknowledge` takes an open alert (the crew sees who took it); then `ambulance_called`, `note` (needs `note`) and `close` (needs the summary in `note`). Closing tells the trip's students and guardians it was handled. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED (409), NOTE_REQUIRED (422).",
+        "tags": [
+          "emergencies"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin",
+          "clinic"
+        ],
+        "parameters": [
+          {
+            "name": "sos_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "medical",
+                        "breakdown",
+                        "accident"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "open",
+                        "acknowledged",
+                        "closed"
+                      ]
+                    },
+                    "note": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "trip_id": {
+                      "type": "string"
+                    },
+                    "line_id": {
+                      "type": "string"
+                    },
+                    "bus_id": {
+                      "type": "string"
+                    },
+                    "raised_by": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "driver",
+                            "supervisor"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "role",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "location": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "lat": {
+                              "type": "number"
+                            },
+                            "lng": {
+                              "type": "number"
+                            },
+                            "fix_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "source": {
+                              "type": "string",
+                              "const": "bus_gps"
+                            }
+                          },
+                          "required": [
+                            "lat",
+                            "lng",
+                            "fix_at",
+                            "source"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "riders_on_board": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "acknowledge",
+                              "ambulance_called",
+                              "replacement_sent",
+                              "note",
+                              "close"
+                            ]
+                          },
+                          "by": {
+                            "type": "string"
+                          },
+                          "by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action",
+                          "by",
+                          "by_name",
+                          "at",
+                          "note"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "line": {
+                      "type": "object",
+                      "properties": {
+                        "line_id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "line_id",
+                        "code",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "direction": {
+                      "type": "string",
+                      "enum": [
+                        "outbound",
+                        "return"
+                      ]
+                    },
+                    "bus": {
+                      "type": "object",
+                      "properties": {
+                        "bus_id": {
+                          "type": "string"
+                        },
+                        "bus_type": {
+                          "type": "string",
+                          "enum": [
+                            "minibus",
+                            "coaster",
+                            "midibus",
+                            "large_bus"
+                          ]
+                        },
+                        "plate": {
+                          "type": "string"
+                        },
+                        "seats": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "bus_id",
+                        "bus_type",
+                        "plate",
+                        "seats"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "driver": {
+                      "type": "object",
+                      "properties": {
+                        "driver_id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "driver_id",
+                        "name",
+                        "phone"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "raised_by_phone": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "replacements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "replacement_id": {
+                            "type": "string"
+                          },
+                          "bus": {
+                            "type": "object",
+                            "properties": {
+                              "bus_id": {
+                                "type": "string"
+                              },
+                              "bus_type": {
+                                "type": "string",
+                                "enum": [
+                                  "minibus",
+                                  "coaster",
+                                  "midibus",
+                                  "large_bus"
+                                ]
+                              },
+                              "plate": {
+                                "type": "string"
+                              },
+                              "seats": {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "bus_id",
+                              "bus_type",
+                              "plate",
+                              "seats"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "driver": {
+                            "type": "object",
+                            "properties": {
+                              "driver_id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "phone": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "driver_id",
+                              "name",
+                              "phone"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "breakdown",
+                              "accident",
+                              "driver_unavailable",
+                              "other"
+                            ]
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "sos_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "replacement_id",
+                          "bus",
+                          "driver",
+                          "reason",
+                          "note",
+                          "sos_id",
+                          "by_name",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "campus_location": {
+                      "type": "object",
+                      "properties": {
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "lat",
+                        "lng"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "status",
+                    "note",
+                    "trip_id",
+                    "line_id",
+                    "bus_id",
+                    "raised_by",
+                    "location",
+                    "riders_on_board",
+                    "created_at",
+                    "actions",
+                    "line",
+                    "direction",
+                    "bus",
+                    "driver",
+                    "raised_by_phone",
+                    "replacements",
+                    "campus_location"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "acknowledge",
+                      "ambulance_called",
+                      "note",
+                      "close"
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 500
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "action",
+                  "note"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/trips/{trip_id}/replacement-options": {
+      "get": {
+        "operationId": "emergencies.replacementOptions",
+        "summary": "The trip's bus and driver now, how many riders it carries, and the buses (each with its driver) and drivers free to send today.",
+        "tags": [
+          "emergencies"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "trip_id": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "type": "object",
+                      "properties": {
+                        "line_id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "line_id",
+                        "code",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "bus": {
+                      "type": "object",
+                      "properties": {
+                        "bus_id": {
+                          "type": "string"
+                        },
+                        "bus_type": {
+                          "type": "string",
+                          "enum": [
+                            "minibus",
+                            "coaster",
+                            "midibus",
+                            "large_bus"
+                          ]
+                        },
+                        "plate": {
+                          "type": "string"
+                        },
+                        "seats": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "bus_id",
+                        "bus_type",
+                        "plate",
+                        "seats"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "driver": {
+                      "type": "object",
+                      "properties": {
+                        "driver_id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "driver_id",
+                        "name",
+                        "phone"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "riders": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "buses": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bus_id": {
+                            "type": "string"
+                          },
+                          "bus_type": {
+                            "type": "string",
+                            "enum": [
+                              "minibus",
+                              "coaster",
+                              "midibus",
+                              "large_bus"
+                            ]
+                          },
+                          "plate": {
+                            "type": "string"
+                          },
+                          "seats": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "driver": {
+                            "type": "object",
+                            "properties": {
+                              "driver_id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "phone": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "driver_id",
+                              "name",
+                              "phone"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "bus_id",
+                          "bus_type",
+                          "plate",
+                          "seats",
+                          "driver"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "drivers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "driver_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "phone": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "driver_id",
+                          "name",
+                          "phone"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "trip_id",
+                    "line",
+                    "bus",
+                    "driver",
+                    "riders",
+                    "buses",
+                    "drivers"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/trips/{trip_id}/replacement": {
+      "post": {
+        "operationId": "emergencies.sendReplacement",
+        "summary": "Sends another bus (with its own driver, or `driver_id`) or only another driver to a trip that hasn't ended. Riders and attendance stay with the trip (business rule 10); the crew, the line's students and their guardians see the new bus and driver at once, and `sos_id` gets a `replacement_sent` line. Errors: TRIP_ALREADY_ENDED, BUS_NOT_AVAILABLE, DRIVER_NOT_AVAILABLE, SOS_CLOSED (409), NOTHING_TO_CHANGE (422).",
+        "tags": [
+          "emergencies"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "replacement_id": {
+                      "type": "string"
+                    },
+                    "bus": {
+                      "type": "object",
+                      "properties": {
+                        "bus_id": {
+                          "type": "string"
+                        },
+                        "bus_type": {
+                          "type": "string",
+                          "enum": [
+                            "minibus",
+                            "coaster",
+                            "midibus",
+                            "large_bus"
+                          ]
+                        },
+                        "plate": {
+                          "type": "string"
+                        },
+                        "seats": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "bus_id",
+                        "bus_type",
+                        "plate",
+                        "seats"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "driver": {
+                      "type": "object",
+                      "properties": {
+                        "driver_id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "driver_id",
+                        "name",
+                        "phone"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "breakdown",
+                        "accident",
+                        "driver_unavailable",
+                        "other"
+                      ]
+                    },
+                    "note": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "sos_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "by_name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "replacement_id",
+                    "bus",
+                    "driver",
+                    "reason",
+                    "note",
+                    "sos_id",
+                    "by_name",
+                    "at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "bus_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "driver_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "breakdown",
+                      "accident",
+                      "driver_unavailable",
+                      "other"
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 500
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "sos_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "bus_id",
+                  "driver_id",
+                  "reason",
+                  "note",
+                  "sos_id"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/violations": {

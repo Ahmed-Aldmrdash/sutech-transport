@@ -29,7 +29,13 @@ import { SosStatus } from "@/features/sos/schema";
 import { TripDirection } from "@/features/trips/schema";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
-import { formatClockTime, formatNumber, formatServiceDay, formatTime } from "@/lib/format";
+import {
+  formatClockTime,
+  formatNumber,
+  formatPhone,
+  formatServiceDay,
+  formatTime,
+} from "@/lib/format";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { endTrip, startTrip } from "../api";
 import {
@@ -90,6 +96,15 @@ function TripView({ today, refresh }: { today: CrewToday; refresh: () => void })
           }
         >
           {t(`sosOpenBody.${trip.sos.status}`)}
+        </Alert>
+      ) : null}
+      {trip?.replacement ? (
+        <Alert tone={Tone.Info} title={t("replacedTitle")}>
+          {t("replacedBody", {
+            plate: trip.replacement.plate,
+            name: trip.replacement.driver_name,
+            phone: formatPhone(trip.replacement.driver_phone),
+          })}
         </Alert>
       ) : null}
       <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">

@@ -23,6 +23,16 @@ import {
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError } from "@/lib/api/mock/mock-server";
 import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
+import {
+  lineBusId,
+  lineDriverId,
+  mockFleetBus,
+  mockFleetDriver,
+  withFleet,
+  type MockFleetBus,
+  type MockFleetDriver,
+} from "@/features/lines/mock-fleet";
+import type { ReplacementReason } from "@/features/emergencies/schema";
 import { TEST_DAY_KEY, isTestDay } from "./test-day";
 import { Role } from "@/lib/auth/roles";
 import {
@@ -82,6 +92,19 @@ export interface MockCrewTrip {
   scans: Record<string, MockScan>;
   delays: MockDelay[];
   sosIds: string[];
+  /** The office sent another bus or driver. Oldest first; the last one is the trip's crew now. */
+  replacements?: MockReplacement[];
+}
+
+export interface MockReplacement {
+  replacementId: string;
+  busId: string;
+  driverId: string;
+  reason: ReplacementReason;
+  note: string | null;
+  sosId: string | null;
+  by: string;
+  at: number;
 }
 
 const trips = new StoredMap<MockCrewTrip>("sut.mock.crewTrips", MockStorage.Local);
@@ -122,6 +145,53 @@ export function findCrewTrip(tripId: string): MockCrewTrip | undefined {
   const [, lineId = "", date = "", kind] = match;
   if (!findMockLine(lineId)) return undefined;
   return crewTripOf(lineId, date, kind === "out" ? TripDirection.Outbound : TripDirection.Return);
+}
+
+/** The bus and driver running the trip now: the line's own, or the last ones the office sent. */
+export function crewFleetOf(
+  trip: MockCrewTrip,
+  line: MockLineSource,
+): { bus: MockFleetBus; driver: MockFleetDriver } {
+  const last = trip.replacements?.at(-1);
+  const bus = mockFleetBus(last?.busId ?? lineBusId(line.lineId));
+  const driver = mockFleetDriver(last?.driverId ?? lineDriverId(line.lineId));
+  if (!bus || !driver) throw new Error(`No fleet for ${trip.tripId}`);
+  return { bus, driver };
+}
+
+/** Every trip stored for a day, on any line. */
+export function crewTripsOn(date: string): MockCrewTrip[] {
+  return [...trips.values()].filter((trip) => trip.date === date);
+}
+
+/**
+ * The bus and driver on the line today: if the office changed the bus or the driver on
+ * today's trip, the new ones. Students, guardians and the crew all see this.
+ */
+export function todayFleetOf(
+  line: MockLineSource,
+  now: number,
+): { bus: MockFleetBus; driver: MockFleetDriver } {
+  const date = cairoNow(new Date(now)).date;
+  const replaced = [TripDirection.Outbound, TripDirection.Return]
+    .map((direction) => trips.get(tripIdOf(line.lineId, date, direction)))
+    .filter((trip): trip is MockCrewTrip => Boolean(trip?.replacements?.length))
+    .sort((a, b) => (a.replacements?.at(-1)?.at ?? 0) - (b.replacements?.at(-1)?.at ?? 0))
+    .at(-1);
+  return crewFleetOf(replaced ?? crewTripOf(line.lineId, date, TripDirection.Outbound), line);
+}
+
+/** The line as students and guardians should see it today (see todayFleetOf). */
+export function todayLineSource(line: MockLineSource, now: number): MockLineSource {
+  const { bus, driver } = todayFleetOf(line, now);
+  return withFleet(line, bus, driver);
+}
+
+/** Every bus or driver change the office made, for the line notices. */
+export function allReplacements(): { lineId: string; replacement: MockReplacement }[] {
+  return [...trips.values()].flatMap((trip) =>
+    (trip.replacements ?? []).map((replacement) => ({ lineId: trip.lineId, replacement })),
+  );
 }
 
 export function crewTripStatus(trip: MockCrewTrip): CrewTripStatus {

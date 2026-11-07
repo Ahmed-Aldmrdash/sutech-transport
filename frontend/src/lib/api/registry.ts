@@ -9,6 +9,7 @@ import { linesEndpoints } from "@/features/lines/api";
 import { notificationsEndpoints } from "@/features/notifications/api";
 import { paymentsEndpoints } from "@/features/payments/api";
 import { requestsEndpoints } from "@/features/requests/api";
+import { emergenciesEndpoints } from "@/features/emergencies/api";
 import { sosEndpoints } from "@/features/sos/api";
 import { subscriptionsEndpoints } from "@/features/subscriptions/api";
 import { systemEndpoints } from "@/features/system/api";
@@ -38,5 +39,6 @@ export const allEndpoints: readonly Endpoint[] = [
   ...childrenEndpoints,
   ...crewEndpoints,
   ...sosEndpoints,
+  ...emergenciesEndpoints,
   ...violationsEndpoints,
 ];

@@ -1280,7 +1280,9 @@
       "stopsTitle": "المحطات",
       "stopsLead": "الطلاب اللي لسه هتاخدهم من كل محطة.",
       "stopsLeadReturn": "الطلاب اللي لسه مركبوش، حسب محطتهم.",
-      "toPickUp": "{count, plural, =0 {مفيش حد} one {واحد لسه} two {اتنين لسه} few {# لسه} other {# لسه}}"
+      "toPickUp": "{count, plural, =0 {مفيش حد} one {واحد لسه} two {اتنين لسه} few {# لسه} other {# لسه}}",
+      "replacedTitle": "المكتب غيّر باص النهارده",
+      "replacedBody": "دلوقتي {plate} مع السواق {name} ({phone})."
     },
     "scan": {
       "title": "امسح الكارنيهات",
@@ -1415,6 +1417,18 @@
       "transport": "إدارة النقل",
       "ambulance": "الإسعاف",
       "hotline": "الخط الساخن للجامعة"
+    },
+    "log": {
+      "title": "اللي المكتب عمله",
+      "empty": "لسه مفيش حاجة متسجلة.",
+      "actions": {
+        "acknowledge": "استلم البلاغ",
+        "ambulance_called": "طلب إسعاف",
+        "replacement_sent": "بعت باص أو سواق تاني",
+        "note": "ملاحظة",
+        "close": "قفل البلاغ"
+      },
+      "by": "{name} · {time}"
     }
   },
   "violations": {
@@ -1468,6 +1482,114 @@
       "STUDENT_NOT_FOUND": "مفيش طالب بالرقم الجامعي ده.",
       "network": "مفيش نت. اتأكد من الاتصال وجرب تاني.",
       "generic": "حصلت مشكلة. جرب تاني."
+    }
+  },
+  "emergencies": {
+    "title": "الطوارئ",
+    "lead": "بلاغات الـ SOS من الباصات لايف. استلم كل بلاغ، وسجّل اللي بتعمله، واقفله بملخص.",
+    "filters": {
+      "label": "اعرض",
+      "active": "الشغالة",
+      "closed": "المقفولة",
+      "all": "الكل"
+    },
+    "emptyActive": {
+      "title": "مفيش بلاغات شغالة",
+      "body": "أول ما سواق أو مشرف يدوس SOS، البلاغ هيظهر هنا على طول بمكان الباص."
+    },
+    "emptyClosed": {
+      "title": "مفيش بلاغات مقفولة",
+      "body": "البلاغات اللي بتقفلها بتفضل هنا بسجلها."
+    },
+    "status": {
+      "open": "محدش استلمه",
+      "acknowledged": "بيتابع",
+      "closed": "مقفول"
+    },
+    "lineName": "خط {code} · {name}",
+    "direction": {
+      "outbound": "رحلة الصبح",
+      "return": "رحلة العودة"
+    },
+    "raisedAt": "اتبعت الساعة {time}",
+    "raisedBy": "{role}: {name}",
+    "onBoard": "{count} في الباص",
+    "open": "افتح",
+    "back": "الطوارئ",
+    "openBanner": "محدش استلم البلاغ ده لسه.",
+    "take": "استلم البلاغ",
+    "takenBy": "استلمه {name} الساعة {time}",
+    "closedBy": "قفله {name} الساعة {time}",
+    "location": "مكان الباص",
+    "openInMaps": "افتح في خرائط جوجل",
+    "fromGps": "من جهاز الـ GPS اللي في الباص الساعة {time}",
+    "noLocation": "جهاز الـ GPS في الباص مبعتش مكان في الرحلة دي.",
+    "busTitle": "الباص والطاقم",
+    "bus": "الباص",
+    "busLine": "{plate} · {type} · {seats} كرسي",
+    "driver": "السواق",
+    "raisedByTitle": "مين بعته",
+    "call": "اتصل بـ {name}",
+    "ridersOnBoard": "الطلاب في الباص",
+    "crewNote": "كلام الطاقم",
+    "trip": "الرحلة",
+    "actionsTitle": "اللي بيتعمل",
+    "takeFirst": "استلم البلاغ الأول، وبعدين سجّل اللي بتعمله.",
+    "ambulance": "اتطلب إسعاف",
+    "ambulanceTitle": "تسجّل إن الإسعاف اتطلب؟",
+    "ambulanceBody": "ده تسجيل بس باسمك والوقت. لو لسه مطلبتش، كلّم {number} الأول.",
+    "replacement": "ابعت باص أو سواق تاني",
+    "addNote": "ضيف ملاحظة",
+    "noteTitle": "ضيف ملاحظة للسجل",
+    "noteLabel": "الملاحظة",
+    "close": "اقفل البلاغ",
+    "closeTitle": "تقفل البلاغ ده؟",
+    "closeBody": "اكتب اللي اتعمل. الطاقم هيشوف إنه اتقفل، وطلاب الخط وأولياء أمورهم هيوصلهم إن الموقف اتحل.",
+    "summaryLabel": "اللي اتعمل",
+    "logged": "اتسجل",
+    "clinicNote": "إدارة النقل هي اللي بتبعت الباصات والسواقين.",
+    "errors": {
+      "ALREADY_ACKNOWLEDGED": "حد تاني استلمه من لحظة.",
+      "SOS_NOT_ACKNOWLEDGED": "استلم البلاغ الأول.",
+      "SOS_CLOSED": "البلاغ ده اتقفل.",
+      "NOTE_REQUIRED": "اكتب كلمتين الأول.",
+      "TRIP_ALREADY_ENDED": "الرحلة دي خلصت.",
+      "BUS_NOT_AVAILABLE": "الباص ده اتبعت لمكان تاني دلوقتي. اختار غيره.",
+      "DRIVER_NOT_AVAILABLE": "السواق ده اتبعت لمكان تاني دلوقتي. اختار غيره.",
+      "NOTHING_TO_CHANGE": "ده نفس الباص والسواق اللي على الرحلة.",
+      "network": "مفيش اتصال. جرّب تاني.",
+      "generic": "حصلت مشكلة. جرّب تاني."
+    },
+    "alarm": {
+      "title": "SOS جديد: {type} على خط {code}",
+      "body": "{time} · {count} في الباص",
+      "more": "{count, plural, one {وبلاغ تاني مفتوح} two {وبلاغين تانيين مفتوحين} few {و# بلاغات تانية مفتوحة} many {و# بلاغ تاني مفتوح} other {و# بلاغ تاني مفتوح}}",
+      "open": "افتح"
+    },
+    "replacementDialog": {
+      "title": "ابعت باص أو سواق تاني",
+      "now": "خط {code} دلوقتي: {plate} مع {driver}. {riders} راكب على الرحلة.",
+      "kind": "هتبعت إيه",
+      "kindBus": "باص تاني بسواقه",
+      "kindDriver": "سواق تاني بس",
+      "busOption": "{plate} · {type} · {seats} كرسي",
+      "busDriver": "السواق: {name}",
+      "seatsWarning": "{seats} كرسي لـ {riders} راكب: مش الكل هيلحق مكان.",
+      "noBuses": "مفيش باص احتياطي فاضي دلوقتي. كلّم أبو الهول.",
+      "noDrivers": "مفيش سواق احتياطي فاضي دلوقتي. كلّم أبو الهول.",
+      "pickBus": "اختار باص",
+      "pickDriver": "اختار سواق",
+      "reason": "السبب",
+      "reasons": {
+        "breakdown": "الباص عطلان",
+        "accident": "حادثة",
+        "driver_unavailable": "السواق مش قادر يسوق",
+        "other": "سبب تاني"
+      },
+      "note": "ملاحظة للسجل",
+      "confirm": "ابعت",
+      "whoIsTold": "صفحة السواق وطلاب الخط وأولياء أمورهم هيظهر فيها الباص والسواق الجداد على طول.",
+      "sent": "اتبعت: {plate} مع {name}"
     }
   }
 }

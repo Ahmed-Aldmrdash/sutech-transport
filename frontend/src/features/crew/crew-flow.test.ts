@@ -5,7 +5,8 @@ import { getMyCard } from "@/features/card/api";
 import { listAnnouncements } from "@/features/announcements/api";
 import { getMyAttendance } from "@/features/attendance/api";
 import { createSos, getSos } from "@/features/sos/api";
-import { MOCK_ACKNOWLEDGE_MS, resetSosMock } from "@/features/sos/mock-state";
+import { addSosAction } from "@/features/emergencies/api";
+import { resetSosMock } from "@/features/sos/mock-state";
 import { SosStatus, SosType } from "@/features/sos/schema";
 import { resetStudentMock } from "@/features/subscriptions/mock-state";
 import { getMyTracking } from "@/features/tracking/api";
@@ -232,7 +233,10 @@ describe("driver and supervisor (mock server)", () => {
     expect(again.id).toBe(sos.id);
     expect((await outbound()).sos?.id).toBe(sos.id);
 
-    vi.setSystemTime(SUNDAY_MORNING + MOCK_ACKNOWLEDGE_MS + 1000);
+    expect((await getSos(sos.id)).status).toBe(SosStatus.Open);
+    await signIn("TRN-1001");
+    await addSosAction(sos.id, { action: "acknowledge", note: null });
+    await signIn(DRIVER);
     const followed = await getSos(sos.id);
     expect(followed.status).toBe(SosStatus.Acknowledged);
     expect(followed.actions[0]?.by_name).toBe("كريم فتحي");

@@ -5,6 +5,7 @@ import {
   CHECKOUT_REASON_TEXT,
   crewOutcomeFor,
   isMockServiceDay,
+  todayLineSource,
   type MockCrewOutcome,
 } from "@/features/crew/mock-state";
 import { RiderState } from "@/features/crew/schema";
@@ -138,7 +139,7 @@ export function mockChildDay(studentId: string, language: string, now: number): 
     line: toLineSummary(line, language),
     stop: { name: stopName, pickup_time: pickup },
     campus_arrival: MOCK_CAMPUS_ARRIVAL,
-    bus: toBus(line, language, true),
+    bus: toBus(todayLineSource(line, now), language, true),
   };
   const recent = historyOf(studentId, language, now)
     .filter((record) => record.service_date < cairo.date)

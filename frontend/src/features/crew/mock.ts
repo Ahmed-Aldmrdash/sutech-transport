@@ -5,7 +5,7 @@ import {
   toLineSummary,
 } from "@/features/lines/mock-builders";
 import type { MockLineSource } from "@/features/lines/mock-lines";
-import { sosProgress, findSos } from "@/features/sos/mock-state";
+import { findSos, sosStatusOf } from "@/features/sos/mock-state";
 import { bookingOf, newMockId } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { MOCK_ACCOUNTS } from "@/features/auth/mock-accounts";
@@ -22,6 +22,7 @@ import {
 } from "./api";
 import {
   crewTripOf,
+  crewFleetOf,
   crewTripStatus,
   isMockServiceDay,
   mockRidersOf,
@@ -29,6 +30,7 @@ import {
   requireOwnTrip,
   riderStateOf,
   saveCrewTrip,
+  todayFleetOf,
   type MockCrewTrip,
   type MockRider,
 } from "./mock-state";
@@ -91,6 +93,19 @@ function countsOf(riders: readonly Rider[]): RiderCounts {
   };
 }
 
+function replacementOf(trip: MockCrewTrip, line: MockLineSource, language: string) {
+  const last = trip.replacements?.at(-1);
+  if (!last) return null;
+  const { bus, driver } = crewFleetOf(trip, line);
+  return {
+    bus_type: bus.busType,
+    plate: bus.plate,
+    driver_name: localized(language, driver.nameAr, driver.nameEn),
+    driver_phone: driver.phone,
+    at: new Date(last.at).toISOString(),
+  };
+}
+
 function toCrewTrip(
   trip: MockCrewTrip,
   line: MockLineSource,
@@ -119,11 +134,12 @@ function toCrewTrip(
       note: delay.note,
       reported_at: new Date(delay.reportedAt).toISOString(),
     })),
+    replacement: replacementOf(trip, line, language),
     sos: latestSos
       ? {
           id: latestSos.id,
           type: latestSos.type,
-          status: sosProgress(latestSos, now).status,
+          status: sosStatusOf(latestSos),
           created_at: new Date(latestSos.createdAt).toISOString(),
         }
       : null,
@@ -136,16 +152,17 @@ registerMock(getCrewTodayEndpoint, (_input, { token, language }) => {
   const cairo = cairoNow(new Date(now));
   const isServiceDay = isMockServiceDay(cairo.date, cairo.weekday);
   const directions = isServiceDay ? [TripDirection.Outbound, TripDirection.Return] : [];
+  const fleet = todayFleetOf(line, now);
   return {
     service_date: cairo.date,
     is_service_day: isServiceDay,
     crew_role: account.user.role === Role.Supervisor ? Role.Supervisor : Role.Driver,
     line: toLineSummary(line, language),
     bus: {
-      bus_id: `bus_${line.lineId}`,
-      bus_type: line.busType,
-      plate: line.plate,
-      seats: MOCK_SEATS_BY_BUS[line.busType],
+      bus_id: fleet.bus.busId,
+      bus_type: fleet.bus.busType,
+      plate: fleet.bus.plate,
+      seats: MOCK_SEATS_BY_BUS[fleet.bus.busType],
     },
     stops: line.stops.map(([time, nameAr, nameEn], index) => ({
       order: index + 1,

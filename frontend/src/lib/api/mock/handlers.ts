@@ -9,6 +9,7 @@ import "@/features/attendance/mock";
 import "@/features/auth/mock";
 import "@/features/card/mock";
 import "@/features/children/mock";
+import "@/features/emergencies/mock";
 import "@/features/crew/mock";
 import "@/features/lines/mock";
 import "@/features/notifications/mock";

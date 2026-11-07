@@ -2,6 +2,7 @@ import { findMockAccountById } from "@/features/auth/mock-accounts";
 import {
   crewProgress,
   crewTripStatus,
+  findCrewTrip,
   mockRidersOf,
   requireMockCrew,
   requireOwnTrip,
@@ -10,6 +11,7 @@ import {
 } from "@/features/crew/mock-state";
 import { CrewTripStatus, RiderState } from "@/features/crew/schema";
 import { localized } from "@/features/lines/mock-builders";
+import { mockFleetBus, mockFleetDriver } from "@/features/lines/mock-fleet";
 import { newMockId } from "@/features/subscriptions/mock-state";
 import { pointAlong } from "@/features/tracking/geo";
 import { mockPathOf } from "@/features/tracking/mock-geo";
@@ -18,20 +20,42 @@ import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { Role } from "@/lib/auth/roles";
 import { createSosEndpoint, getSosEndpoint } from "./api";
-import { MOCK_OFFICE_RESPONDER, findSos, saveSos, sosProgress, type MockSos } from "./mock-state";
+import { actionsOf, findSos, saveSos, sosStatusOf, type MockSos } from "./mock-state";
 import { SosErrorCode, type Sos } from "./schema";
 
 const HTTP = { NotFound: 404, Conflict: 409 };
 /** The bus's GPS device reports every few seconds. */
 const GPS_LAG_MS = 3000;
 
-function toSos(sos: MockSos, language: string, now: number): Sos {
+/** A user's name in the request's language, as the server would send it. */
+export function mockUserName(userId: string, language: string): string | null {
+  const user = findMockAccountById(userId)?.user;
+  return user ? localized(language, user.name_ar ?? user.name, user.name) : null;
+}
+
+/** "ن ص ط 7120 · Sayed Abdelhamid", plus the office's note: what the crew is told was sent. */
+function replacementText(
+  tripId: string,
+  replacementId: string,
+  note: string | null,
+  language: string,
+): string | null {
+  const replacement = findCrewTrip(tripId)?.replacements?.find(
+    (item) => item.replacementId === replacementId,
+  );
+  const bus = replacement ? mockFleetBus(replacement.busId) : undefined;
+  const driver = replacement ? mockFleetDriver(replacement.driverId) : undefined;
+  if (!bus || !driver) return note;
+  const sent = `${bus.plate} · ${localized(language, driver.nameAr, driver.nameEn)}`;
+  return note ? `${sent}. ${note}` : sent;
+}
+
+export function toSos(sos: MockSos, language: string): Sos {
   const raiser = findMockAccountById(sos.raisedBy)?.user;
-  const progress = sosProgress(sos, now);
   return {
     id: sos.id,
     type: sos.type,
-    status: progress.status,
+    status: sosStatusOf(sos),
     note: sos.note,
     trip_id: sos.tripId,
     line_id: sos.lineId,
@@ -51,12 +75,14 @@ function toSos(sos: MockSos, language: string, now: number): Sos {
       : null,
     riders_on_board: sos.ridersOnBoard,
     created_at: new Date(sos.createdAt).toISOString(),
-    actions: progress.actions.map((entry) => ({
+    actions: actionsOf(sos).map((entry) => ({
       action: entry.action,
       by: entry.by,
-      by_name: localized(language, MOCK_OFFICE_RESPONDER.nameAr, MOCK_OFFICE_RESPONDER.nameEn),
+      by_name: mockUserName(entry.by, language),
       at: new Date(entry.at).toISOString(),
-      note: null,
+      note: entry.replacementId
+        ? replacementText(sos.tripId, entry.replacementId, entry.note, language)
+        : entry.note,
     })),
   };
 }
@@ -72,7 +98,7 @@ registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) 
   const repeated = trip.sosIds
     .map(findSos)
     .find((item) => item && idempotencyKey && item.idempotencyKey === idempotencyKey);
-  if (repeated) return toSos(repeated, language, now);
+  if (repeated) return toSos(repeated, language);
 
   // The bus's own GPS device: where it is along the line's road path right now.
   const path = mockPathOf(line.lineId);
@@ -95,10 +121,11 @@ registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) 
     ridersOnBoard: onBoard,
     createdAt: now,
     idempotencyKey: idempotencyKey ?? null,
+    actions: [],
   };
   saveSos(sos);
   saveCrewTrip({ ...trip, sosIds: [...trip.sosIds, sos.id] });
-  return toSos(sos, language, now);
+  return toSos(sos, language);
 });
 
 registerMock(getSosEndpoint, ({ params }, { token, language }) => {
@@ -107,5 +134,5 @@ registerMock(getSosEndpoint, ({ params }, { token, language }) => {
   if (!sos || sos.lineId !== line.lineId) {
     throw new MockHttpError(HTTP.NotFound, ServerErrorCode.NotFound, "No such SOS.");
   }
-  return toSos(sos, language, Date.now());
+  return toSos(sos, language);
 });

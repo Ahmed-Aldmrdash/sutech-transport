@@ -9,6 +9,7 @@ import { navigationFor } from "@/features/navigation/nav-config";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { NotificationsWatcher } from "@/features/notifications/components/notifications-watcher";
 import { useUnreadCount } from "@/features/notifications/unread-store";
+import { SosAlarm } from "@/features/emergencies/components/sos-alarm";
 import { Role } from "@/lib/auth/roles";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { SignInReason, canOpen, homePathFor, loginHref } from "../access";
@@ -16,6 +17,9 @@ import { SessionStatus } from "../session/session-store";
 import { SessionWatcher } from "../session/session-watcher";
 import { useSession, useSignOut } from "../session/use-session";
 import { FullPageLoader } from "./full-page-loader";
+
+/** Offices that take SOS alerts, so every page of theirs rings when one arrives. */
+const SOS_DESK_ROLES: readonly Role[] = [Role.SuperAdmin, Role.Transport, Role.Clinic];
 
 /** Roles with a notifications page, and where it is. */
 const NOTIFICATIONS_PATH: Partial<Record<Role, string>> = {
@@ -77,6 +81,7 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
     >
       <SessionWatcher token={session.token} expiresAt={session.expires_at} />
       {notificationsPath ? <NotificationsWatcher /> : null}
+      {SOS_DESK_ROLES.includes(session.user.role) ? <SosAlarm /> : null}
       {children}
     </AppShell>
   );

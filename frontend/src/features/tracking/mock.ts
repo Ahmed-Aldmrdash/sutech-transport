@@ -1,5 +1,5 @@
 import type { MockAccount } from "@/features/auth/mock-accounts";
-import { crewLiveClock } from "@/features/crew/mock-state";
+import { crewLiveClock, todayLineSource } from "@/features/crew/mock-state";
 import { requireMockGuardianOf } from "@/features/children/mock-links";
 import {
   MOCK_CAMPUS_ARRIVAL,
@@ -144,7 +144,7 @@ export function mockTrackingFor(studentId: string, language: string, now: number
       service_date: clock.date,
       direction: TripDirection.Outbound,
       line: toLineSummary(line, language),
-      bus: toBus(line, language, true),
+      bus: toBus(todayLineSource(line, now), language, true),
       stop: { name: localized(language, stopAr, stopEn), pickup_time: pickup },
       campus_arrival: MOCK_CAMPUS_ARRIVAL,
       status,

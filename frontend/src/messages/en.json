@@ -1280,7 +1280,9 @@
       "stopsTitle": "Stops",
       "stopsLead": "Students still to pick up at each stop.",
       "stopsLeadReturn": "Students still to board, by their stop.",
-      "toPickUp": "{count, plural, =0 {None left} one {# to pick up} other {# to pick up}}"
+      "toPickUp": "{count, plural, =0 {None left} one {# to pick up} other {# to pick up}}",
+      "replacedTitle": "The office changed today's bus",
+      "replacedBody": "Now {plate} with driver {name} ({phone})."
     },
     "scan": {
       "title": "Scan cards",
@@ -1415,6 +1417,18 @@
       "transport": "Transportation office",
       "ambulance": "Ambulance",
       "hotline": "University hotline"
+    },
+    "log": {
+      "title": "What the office did",
+      "empty": "Nothing logged yet.",
+      "actions": {
+        "acknowledge": "Took the alert",
+        "ambulance_called": "Called an ambulance",
+        "replacement_sent": "Sent another bus or driver",
+        "note": "Note",
+        "close": "Closed the alert"
+      },
+      "by": "{name} · {time}"
     }
   },
   "violations": {
@@ -1468,6 +1482,114 @@
       "STUDENT_NOT_FOUND": "No student with this university ID.",
       "network": "No connection. Check your internet and try again.",
       "generic": "Something went wrong. Try again."
+    }
+  },
+  "emergencies": {
+    "title": "Emergencies",
+    "lead": "SOS alerts from the buses, live. Take each one, log what you do, and close it with a summary.",
+    "filters": {
+      "label": "Show",
+      "active": "Active",
+      "closed": "Closed",
+      "all": "All"
+    },
+    "emptyActive": {
+      "title": "No active alerts",
+      "body": "When a driver or supervisor presses SOS, it shows here at once with the bus's location."
+    },
+    "emptyClosed": {
+      "title": "No closed alerts",
+      "body": "Alerts you close stay here with their log."
+    },
+    "status": {
+      "open": "Not taken",
+      "acknowledged": "Being handled",
+      "closed": "Closed"
+    },
+    "lineName": "Line {code} · {name}",
+    "direction": {
+      "outbound": "Morning trip",
+      "return": "Return trip"
+    },
+    "raisedAt": "Raised at {time}",
+    "raisedBy": "{role}: {name}",
+    "onBoard": "{count} on board",
+    "open": "Open",
+    "back": "Emergencies",
+    "openBanner": "Nobody has taken this alert yet.",
+    "take": "Take it",
+    "takenBy": "Taken by {name} at {time}",
+    "closedBy": "Closed by {name} at {time}",
+    "location": "Bus location",
+    "openInMaps": "Open in Google Maps",
+    "fromGps": "From the bus GPS at {time}",
+    "noLocation": "The bus's GPS hasn't reported on this trip.",
+    "busTitle": "Bus and crew",
+    "bus": "Bus",
+    "busLine": "{plate} · {type} · {seats} seats",
+    "driver": "Driver",
+    "raisedByTitle": "Raised by",
+    "call": "Call {name}",
+    "ridersOnBoard": "Students on board",
+    "crewNote": "What the crew said",
+    "trip": "Trip",
+    "actionsTitle": "What's being done",
+    "takeFirst": "Take the alert first, then log what you do.",
+    "ambulance": "Ambulance called",
+    "ambulanceTitle": "Log that an ambulance was called?",
+    "ambulanceBody": "This only logs it, with your name and the time. Call {number} first if you haven't.",
+    "replacement": "Send another bus or driver",
+    "addNote": "Add a note",
+    "noteTitle": "Add a note to the log",
+    "noteLabel": "Note",
+    "close": "Close the alert",
+    "closeTitle": "Close this alert?",
+    "closeBody": "Write what was done. The crew sees it's closed, and students and guardians on the line are told it's handled.",
+    "summaryLabel": "What was done",
+    "logged": "Logged",
+    "clinicNote": "The Transportation office sends buses and drivers.",
+    "errors": {
+      "ALREADY_ACKNOWLEDGED": "Someone else took it a moment ago.",
+      "SOS_NOT_ACKNOWLEDGED": "Take the alert first.",
+      "SOS_CLOSED": "This alert is closed.",
+      "NOTE_REQUIRED": "Write a few words first.",
+      "TRIP_ALREADY_ENDED": "This trip has ended.",
+      "BUS_NOT_AVAILABLE": "That bus was just sent elsewhere. Pick another.",
+      "DRIVER_NOT_AVAILABLE": "That driver was just sent elsewhere. Pick another.",
+      "NOTHING_TO_CHANGE": "That's the bus and driver already on the trip.",
+      "network": "No connection. Try again.",
+      "generic": "Something went wrong. Try again."
+    },
+    "alarm": {
+      "title": "New SOS: {type} on line {code}",
+      "body": "{time} · {count} on board",
+      "more": "{count, plural, one {# more open alert} other {# more open alerts}}",
+      "open": "Open"
+    },
+    "replacementDialog": {
+      "title": "Send another bus or driver",
+      "now": "Line {code} now: {plate} with {driver}. {riders} riders on this trip.",
+      "kind": "What to send",
+      "kindBus": "Another bus, with its driver",
+      "kindDriver": "Only another driver",
+      "busOption": "{plate} · {type} · {seats} seats",
+      "busDriver": "Driver: {name}",
+      "seatsWarning": "{seats} seats for {riders} riders: not everyone fits.",
+      "noBuses": "No spare bus is free now. Call Abu El Hol.",
+      "noDrivers": "No spare driver is free now. Call Abu El Hol.",
+      "pickBus": "Pick a bus",
+      "pickDriver": "Pick a driver",
+      "reason": "Why",
+      "reasons": {
+        "breakdown": "The bus broke down",
+        "accident": "Accident",
+        "driver_unavailable": "The driver can't drive",
+        "other": "Other"
+      },
+      "note": "Note for the log",
+      "confirm": "Send",
+      "whoIsTold": "The driver's page, the line's students and their guardians show the new bus and driver at once.",
+      "sent": "Sent: {plate} with {name}"
     }
   }
 }

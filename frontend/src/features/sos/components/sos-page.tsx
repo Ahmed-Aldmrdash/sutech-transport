@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Ambulance,
-  BusFront,
-  CarFront,
-  CircleCheck,
-  HeartPulse,
-  MapPin,
-  Phone,
-  Siren,
-  type LucideIcon,
-} from "lucide-react";
+import { Ambulance, CircleCheck, MapPin, Phone, Siren } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Alert } from "@/components/ui/alert";
@@ -33,25 +23,21 @@ import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { createSos, getSos } from "../api";
 import { EMERGENCY_CONTACTS } from "../contacts";
+import { SosActionLog } from "./sos-action-log";
+import { SOS_TYPE_ICON } from "./sos-type";
 import {
   SOS_NOTE_MAX_LENGTH,
   SOS_TYPES,
   SosAction,
   SosErrorCode,
   SosStatus,
-  SosType,
+  type SosType,
   type Sos,
 } from "../schema";
 
 /** How often an open SOS is re-read until the WebSocket is in place. */
 export const SOS_REFRESH_MS = 5000;
 const SOS_ERRORS = [SosErrorCode.NotYourTrip, SosErrorCode.TripAlreadyEnded] as const;
-
-const TYPE_ICON: Record<SosType, LucideIcon> = {
-  [SosType.Medical]: HeartPulse,
-  [SosType.Breakdown]: BusFront,
-  [SosType.Accident]: CarFront,
-};
 
 /** The emergency button: pick what happened, and the office gets the bus's GPS position. */
 export function SosPage() {
@@ -117,7 +103,7 @@ function SosPicker({ trip, onSent }: { trip: CrewTrip; onSent: (sos: Sos) => voi
       <CardHeader title={t("pickTitle")} description={t("pickLead")} headingLevel={2} />
       <CardBody className="flex flex-col gap-3">
         {SOS_TYPES.map((value) => {
-          const Icon = TYPE_ICON[value];
+          const Icon = SOS_TYPE_ICON[value];
           return (
             <button
               key={value}
@@ -183,7 +169,7 @@ function SosFollow({ sosId }: { sosId: string }) {
     return <ErrorState error={state.error} onRetry={state.reload} />;
   }
   const sos = state.data;
-  const Icon = TYPE_ICON[sos.type];
+  const Icon = SOS_TYPE_ICON[sos.type];
   const taken = sos.actions.find((entry) => entry.action === SosAction.Acknowledge);
 
   return (
@@ -274,6 +260,10 @@ function SosFollow({ sosId }: { sosId: string }) {
             </div>
           ) : null}
         </dl>
+        <div className="flex flex-col gap-3 border-t border-line pt-4">
+          <h3 className="text-body font-bold text-ink-strong">{t("log.title")}</h3>
+          <SosActionLog actions={sos.actions} />
+        </div>
         <p className="text-caption text-ink-muted">{t("whoKnows")}</p>
       </CardBody>
     </Card>

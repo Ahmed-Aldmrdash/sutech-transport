@@ -158,6 +158,16 @@ export const crewTripSchema = z.object({
   delays: z.array(tripDelaySchema),
   /** The latest SOS raised on this trip, if any. */
   sos: sosSummarySchema.nullable(),
+  /** The office's latest change of bus or driver on this trip, if any. */
+  replacement: z
+    .object({
+      bus_type: busTypeSchema,
+      plate: z.string(),
+      driver_name: z.string(),
+      driver_phone: z.string(),
+      at: z.iso.datetime(),
+    })
+    .nullable(),
 });
 export type CrewTrip = z.infer<typeof crewTripSchema>;
 
