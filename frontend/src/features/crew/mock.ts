@@ -264,8 +264,11 @@ registerMock(scanEndpoint, ({ params, body }, { token, language }) => {
       ? studentFromQr(body.qr_token ?? "", now)
       : studentFromIdentifier(body.identifier ?? "", riders);
   const rider = riders.find((item) => item.studentId === studentId);
-  const booking = bookingOf(studentId, now);
-  if (!rider || booking?.status !== SubscriptionStatus.Active) {
+  // Made-up seat fillers are subscribers by construction; demo accounts need a live booking.
+  const subscribed =
+    rider !== undefined &&
+    (!rider.isAccount || bookingOf(studentId, now)?.status === SubscriptionStatus.Active);
+  if (!rider || !subscribed) {
     conflict(CrewErrorCode.NotOnThisTrip, "Not a subscriber of this line.");
   }
   const current = riderStateOf(trip, line, rider, now);

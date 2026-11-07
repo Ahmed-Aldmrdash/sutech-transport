@@ -140,6 +140,19 @@ describe("driver and supervisor (mock server)", () => {
     expect(ended.counts.boarded + ended.counts.absent + ended.counts.not_going).toBe(COASTER_SEATS);
   });
 
+  it("boards any rider on the list by university ID, not only the demo accounts", async () => {
+    const trip = await outbound();
+    await startTrip(trip.trip_id);
+    const waiting = (await outbound()).riders.filter(
+      (item) => item.state === RiderState.Waiting && item.student_id !== OMAR_ID,
+    );
+    expect(waiting.length).toBeGreaterThan(0);
+    for (const item of waiting) {
+      const { rider } = await scanRider(trip.trip_id, manual(item.identifier));
+      expect(rider.state).toBe(RiderState.Boarded);
+    }
+  });
+
   it("checks a student out with a reason, and the guardian's day shows it", async () => {
     const trip = await outbound();
     await startTrip(trip.trip_id);
