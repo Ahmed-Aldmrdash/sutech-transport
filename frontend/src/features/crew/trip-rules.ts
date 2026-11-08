@@ -1,4 +1,46 @@
-import { CrewTripStatus, RiderState, type CrewToday, type CrewTrip, type Rider } from "./schema";
+import { APP_TIME_ZONE } from "@/lib/format";
+import {
+  CrewTripStatus,
+  DELAY_WINDOW_MINUTES,
+  RiderState,
+  type CrewToday,
+  type CrewTrip,
+  type Rider,
+} from "./schema";
+
+const MINUTES_PER_DAY = 24 * 60;
+
+function minuteOfDay(clock: string): number {
+  const [hours = 0, minutes = 0] = clock.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+/** The minute of the day on Cairo's clock. */
+function cairoMinuteOfDay(now: Date): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const part = (type: string) => Number(parts.find((item) => item.type === type)?.value ?? 0);
+  return (part("hour") * 60 + part("minute")) % MINUTES_PER_DAY;
+}
+
+/**
+ * A delay makes sense while the trip runs, or near its pickup time: not hours after a morning
+ * trip that never started. A trip with no time yet (a return trip before the office sets it)
+ * takes one only once it runs. The server checks the same rule.
+ */
+export function canReportDelay(
+  trip: Pick<CrewTrip, "status" | "departure_time">,
+  now: Date,
+): boolean {
+  if (trip.status === CrewTripStatus.InProgress) return true;
+  if (trip.status !== CrewTripStatus.NotStarted || trip.departure_time === null) return false;
+  const gap = cairoMinuteOfDay(now) - minuteOfDay(trip.departure_time);
+  return Math.abs(gap) <= DELAY_WINDOW_MINUTES;
+}
 
 /**
  * The trip the crew is working on: the one running, else the first not ended yet, else the

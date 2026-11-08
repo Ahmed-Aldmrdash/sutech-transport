@@ -75,6 +75,9 @@ export const DELAY_REASONS = Object.values(DelayReason) as [DelayReason, ...Dela
 export const DELAY_MINUTES = [5, 10, 15, 20, 30, 45, 60] as const;
 export const CREW_NOTE_MAX_LENGTH = 200;
 
+/** A trip that hasn't started takes a delay from this long before its pickup time to this long after. */
+export const DELAY_WINDOW_MINUTES = 60;
+
 export const CrewErrorCode = {
   /** The account isn't on any bus today. */
   NoAssignment: "NO_ASSIGNMENT",
@@ -83,6 +86,8 @@ export const CrewErrorCode = {
   TripAlreadyStarted: "TRIP_ALREADY_STARTED",
   TripAlreadyEnded: "TRIP_ALREADY_ENDED",
   TripNotStarted: "TRIP_NOT_STARTED",
+  /** A delay is only for a running trip, or one about to leave (see DELAY_WINDOW_MINUTES). */
+  DelayOutOfWindow: "DELAY_OUT_OF_WINDOW",
   /** Only one trip runs at a time: end the outbound trip before starting the return. */
   OtherTripInProgress: "OTHER_TRIP_IN_PROGRESS",
   /** The QR code isn't a pass, or its signature is wrong. */

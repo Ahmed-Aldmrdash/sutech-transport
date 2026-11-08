@@ -4,6 +4,7 @@ import { BusFront, Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { BackLink } from "@/components/ui/back-link";
+import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -48,7 +49,12 @@ export function EmergencyDetailPage({ sosId }: { sosId: string }) {
     return (
       <div className="flex flex-col gap-6">
         {back}
-        <ErrorState error={state.error} onRetry={state.reload} />
+        <ErrorState
+          error={state.error}
+          onRetry={state.reload}
+          headingLevel={1}
+          action={<ButtonLink href="/admin/emergencies">{t("allAlerts")}</ButtonLink>}
+        />
       </div>
     );
   }
@@ -114,7 +120,9 @@ function SosView({ sos, onChanged }: { sos: AdminSos; onChanged: () => void }) {
           </Card>
         </div>
         <div className="flex flex-col gap-5">
-          {sos.status === SosStatus.Closed ? null : <SosActionsCard sos={sos} onChanged={onChanged} />}
+          {sos.status === SosStatus.Closed ? null : (
+            <SosActionsCard sos={sos} onChanged={onChanged} />
+          )}
           <Card>
             <CardHeader title={tRoot("sos.log.title")} headingLevel={2} />
             <CardBody>

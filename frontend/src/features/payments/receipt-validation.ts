@@ -43,7 +43,7 @@ const MIN_PAYER_LENGTH = 3;
  */
 const MAX_OVER_PRICE = 1.1;
 
-export interface ReceiptRules {
+interface ReceiptRules {
   /** The term's price: the least a receipt may show. */
   minimumPiasters: number;
   maxBytes: number;

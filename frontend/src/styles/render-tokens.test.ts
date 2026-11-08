@@ -71,7 +71,9 @@ describe("design tokens", () => {
   it.each(TEXT_PAIRS.flatMap(([fg, bg]) => (["light", "dark"] as const).map((t) => [fg, bg, t])))(
     "%s on %s reaches 4.5:1 (%s)",
     (fg, bg, theme) => {
-      expect(contrast(hex(fg, theme as ThemeId), hex(bg, theme as ThemeId))).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(hex(fg, theme as ThemeId), hex(bg, theme as ThemeId))).toBeGreaterThanOrEqual(
+        4.5,
+      );
     },
   );
 });

@@ -14,7 +14,7 @@ const iconButtonStyles = cva(
       },
       size: {
         md: "size-12",
-        sm: "size-10",
+        sm: "tap-area size-10",
       },
     },
     defaultVariants: { variant: "ghost", size: "md" },

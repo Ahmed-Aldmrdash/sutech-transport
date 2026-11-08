@@ -10,7 +10,9 @@ import { errorMessageKey } from "@/lib/api/errors";
  * anything else is "network" or "generic".
  */
 export function useSubmit<TCode extends string>(knownCodes: readonly TCode[]) {
-  const [serverError, setServerError] = useState<TCode | "network" | "invalid" | "generic" | null>(null);
+  const [serverError, setServerError] = useState<TCode | "network" | "invalid" | "generic" | null>(
+    null,
+  );
   const [isSending, setIsSending] = useState(false);
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
 

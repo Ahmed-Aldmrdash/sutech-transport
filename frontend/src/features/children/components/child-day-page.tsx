@@ -7,14 +7,15 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TripRow } from "@/features/attendance/components/my-trips-page";
+import { TripRow } from "@/features/attendance/components/trip-row";
 import { firstNameOf } from "@/features/auth/user-text";
 import { BusDriverCard } from "@/features/lines/components/bus-driver-card";
 import { AsyncStatus } from "@/lib/hooks/use-async";
 import type { Child } from "../schema";
 import { ChildSwitcher } from "./child-switcher";
 import { useChildren } from "./children-provider";
-import { DayStatusBanner, DayTimeline, DaysOffList } from "./day-status";
+import { DayStatusBanner, DayTimeline } from "./day-status";
+import { DaysOffList } from "./days-off-list";
 import { useChildDay } from "./use-child-day";
 
 /** "Today's trip": where the child is, what happened so far, the bus, and the last few days. */

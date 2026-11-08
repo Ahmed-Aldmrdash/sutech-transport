@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { ConfirmDialog, Dialog } from "@/components/ui/dialog";
-import { SelectField } from "@/components/ui/input";
+import { SelectField } from "@/components/ui/select-field";
 import { useToast } from "@/components/ui/toast";
 import { GallerySection } from "./gallery-section";
 

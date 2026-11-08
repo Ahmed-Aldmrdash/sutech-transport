@@ -81,7 +81,8 @@ const STATUS_ORDER: Record<SosStatus, number> = {
 function SosList({ items, filter }: { items: AdminSos[]; filter: Filter }) {
   const t = useTranslations("emergencies");
   if (items.length === 0) {
-    const empty = filter === Filter.Closed ? "emptyClosed" : "emptyActive";
+    const empty =
+      filter === Filter.Closed ? "emptyClosed" : filter === Filter.All ? "emptyAll" : "emptyActive";
     return (
       <EmptyState icon={<Siren />} title={t(`${empty}.title`)} description={t(`${empty}.body`)} />
     );

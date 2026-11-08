@@ -175,6 +175,23 @@
 }
 
 /* Focus ring: 2px teal with 2px offset on every control. */
+/*
+ * Grows the touch area of a small control to the 48px minimum without changing how it looks:
+ * an invisible layer, centred on the control, takes the taps.
+ */
+@utility tap-area {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, var(--spacing-tap));
+    height: max(100%, var(--spacing-tap));
+    translate: -50% -50%;
+  }
+}
+
 @utility focus-ring {
   &:focus-visible {
     outline: 2px solid var(--sut-focus);

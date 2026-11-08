@@ -20,6 +20,7 @@ import {
   scanEndpoint,
   startTripEndpoint,
 } from "./api";
+import { canReportDelay } from "./trip-rules";
 import {
   crewTripOf,
   crewFleetOf,
@@ -106,6 +107,11 @@ function replacementOf(trip: MockCrewTrip, line: MockLineSource, language: strin
   };
 }
 
+/** Outbound trips leave at the first stop's pickup time; return times aren't published yet. */
+function departureTimeOf(trip: MockCrewTrip, line: MockLineSource): string | null {
+  return trip.direction === TripDirection.Outbound ? (line.stops[0]?.[0] ?? null) : null;
+}
+
 function toCrewTrip(
   trip: MockCrewTrip,
   line: MockLineSource,
@@ -122,7 +128,7 @@ function toCrewTrip(
     trip_id: trip.tripId,
     direction: trip.direction,
     status: crewTripStatus(trip),
-    departure_time: trip.direction === TripDirection.Outbound ? (line.stops[0]?.[0] ?? null) : null,
+    departure_time: departureTimeOf(trip, line),
     started_at: iso(trip.startedAt),
     ended_at: iso(trip.endedAt),
     riders,
@@ -323,8 +329,10 @@ registerMock(reportDelayEndpoint, ({ params, body }, { token }) => {
   const { line } = requireMockCrew(token);
   const now = Date.now();
   const trip = requireOwnTrip(line, params.trip_id, now);
-  if (crewTripStatus(trip) === CrewTripStatus.Ended) {
-    conflict(CrewErrorCode.TripAlreadyEnded, "Trip ended.");
+  const status = crewTripStatus(trip);
+  if (status === CrewTripStatus.Ended) conflict(CrewErrorCode.TripAlreadyEnded, "Trip ended.");
+  if (!canReportDelay({ status, departure_time: departureTimeOf(trip, line) }, new Date(now))) {
+    conflict(CrewErrorCode.DelayOutOfWindow, "Too far from the trip's time.");
   }
   const delay = {
     delayId: newMockId("dly"),

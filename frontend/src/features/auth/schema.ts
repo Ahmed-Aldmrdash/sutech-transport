@@ -18,9 +18,7 @@ export const IDENTIFIER_MAX_LENGTH = 64;
 
 /** University ID (9 digits), staff ID or email, or a parent's phone number. */
 const identifierSchema = z.string().trim().min(3).max(IDENTIFIER_MAX_LENGTH);
-const otpCodeSchema = z
-  .string()
-  .regex(new RegExp(`^\\d{${OTP_MIN_LENGTH},${OTP_MAX_LENGTH}}$`));
+const otpCodeSchema = z.string().regex(new RegExp(`^\\d{${OTP_MIN_LENGTH},${OTP_MAX_LENGTH}}$`));
 
 /** POST /auth/otp: step 1, ask the server to text a code to the account's registered phone. */
 export const requestOtpBodySchema = z.object({ identifier: identifierSchema });

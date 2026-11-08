@@ -95,4 +95,3 @@ export function LocationCard({ sos }: { sos: AdminSos }) {
     </Card>
   );
 }
-

@@ -10,6 +10,7 @@ import { RECEIPT_CONTENT_TYPES } from "@/features/payments/schema";
 import type { Locale } from "@/i18n/routing";
 import { formatFileSize } from "@/lib/format";
 import { MAX_ATTACHMENTS } from "../schema";
+import { checkPicked } from "./attachment-rules";
 
 interface AttachmentsFieldProps {
   label: string;
@@ -24,27 +25,9 @@ interface AttachmentsFieldProps {
 
 type RejectReason = "fileType" | "fileTooLarge" | "tooManyFiles";
 
-interface Rejected {
+export interface Rejected {
   name: string;
   reason: RejectReason;
-}
-
-/** Splits newly picked files into the ones kept and the ones refused, with why. */
-function checkPicked(current: readonly File[], picked: readonly File[], maxBytes: number) {
-  const kept: File[] = [];
-  const rejected: Rejected[] = [];
-  for (const file of picked) {
-    if (!(RECEIPT_CONTENT_TYPES as readonly string[]).includes(file.type)) {
-      rejected.push({ name: file.name, reason: "fileType" });
-    } else if (file.size > maxBytes) {
-      rejected.push({ name: file.name, reason: "fileTooLarge" });
-    } else if (current.length + kept.length >= MAX_ATTACHMENTS) {
-      rejected.push({ name: file.name, reason: "tooManyFiles" });
-    } else {
-      kept.push(file);
-    }
-  }
-  return { kept, rejected };
 }
 
 /**

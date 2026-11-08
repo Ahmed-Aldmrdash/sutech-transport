@@ -29,29 +29,30 @@ export function BusDriverDetails({ bus }: { bus: Bus }) {
   return (
     <div className="flex flex-col gap-3">
       <dl className="grid gap-x-6 sm:grid-cols-2">
-        <div className="flex items-start gap-3 border-t border-line py-2.5">
-          <BusFront aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-teal" />
-          <div className="min-w-0">
-            <dt className="text-caption text-ink-muted">{t("bus")}</dt>
-            <dd className="text-body-sm font-bold text-ink-strong">
-              {tRoot(`student.busType.${bus.bus_type}`)} ·{" "}
-              <bdi className="whitespace-nowrap">{bus.plate}</bdi>
-            </dd>
-          </div>
+        {/* dt and dd sit right in the row's div (a dl allows one wrapping div, no deeper). */}
+        <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-t border-line py-2.5">
+          <dt className="col-span-2 grid grid-cols-subgrid items-center text-caption text-ink-muted">
+            <BusFront aria-hidden="true" className="size-5 text-teal" />
+            {t("bus")}
+          </dt>
+          <dd className="col-start-2 text-body-sm font-bold text-ink-strong">
+            {tRoot(`student.busType.${bus.bus_type}`)} ·{" "}
+            <bdi className="whitespace-nowrap">{bus.plate}</bdi>
+          </dd>
         </div>
-        <div className="flex items-start gap-3 border-t border-line py-2.5">
-          <UserRound aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-teal" />
-          <div className="min-w-0">
-            <dt className="text-caption text-ink-muted">{t("driver")}</dt>
-            <dd className="text-body-sm font-bold text-ink-strong">
-              {driver ? driver.name : t("noDriver")}
+        <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-t border-line py-2.5">
+          <dt className="col-span-2 grid grid-cols-subgrid items-center text-caption text-ink-muted">
+            <UserRound aria-hidden="true" className="size-5 text-teal" />
+            {t("driver")}
+          </dt>
+          <dd className="col-start-2 text-body-sm font-bold text-ink-strong">
+            {driver ? driver.name : t("noDriver")}
+          </dd>
+          {driver?.phone ? (
+            <dd className="col-start-2 text-caption text-ink-muted">
+              <bdi dir="ltr">{formatPhone(driver.phone)}</bdi>
             </dd>
-            {driver?.phone ? (
-              <dd className="text-caption text-ink-muted">
-                <bdi dir="ltr">{formatPhone(driver.phone)}</bdi>
-              </dd>
-            ) : null}
-          </div>
+          ) : null}
         </div>
       </dl>
       {driver?.phone ? (

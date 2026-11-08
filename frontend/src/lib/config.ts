@@ -33,8 +33,7 @@ const configSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["mapTileUrl"],
-        message:
-          "Set NEXT_PUBLIC_MAP_TILE_URL to the university's tile provider for a live build.",
+        message: "Set NEXT_PUBLIC_MAP_TILE_URL to the university's tile provider for a live build.",
       });
     }
   })

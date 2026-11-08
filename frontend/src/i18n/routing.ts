@@ -3,7 +3,7 @@ import { defineRouting } from "next-intl/routing";
 export const LOCALES = ["ar", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
 
-export const DEFAULT_LOCALE: Locale = "ar";
+const DEFAULT_LOCALE: Locale = "ar";
 
 /** Text direction per locale. Arabic is right-to-left. */
 export const LOCALE_DIRECTION: Record<Locale, "rtl" | "ltr"> = {

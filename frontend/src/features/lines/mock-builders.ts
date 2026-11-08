@@ -57,6 +57,8 @@ function toStops(source: MockLineSource, language: string): Stop[] {
 export function toLine(source: MockLineSource, language: string, seatsHeld: number): Line {
   return {
     ...toLineSummary(source, language),
+    name_ar: source.nameAr,
+    name_en: source.nameEn,
     price_piasters: MOCK_TERM_PRICE_PIASTERS,
     bus_type: source.busType,
     seats_total: MOCK_SEATS_BY_BUS[source.busType],

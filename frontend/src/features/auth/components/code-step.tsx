@@ -1,19 +1,16 @@
 "use client";
 
-import { ArrowLeft, KeyRound, RotateCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type FormEvent } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Field, controlStyles } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
-import { cn } from "@/lib/cn";
-import { isMockMode } from "@/lib/config";
 import { login, requestOtp } from "../api";
 import { loginErrorKey, type LoginErrorKey } from "../auth-errors";
 import { sanitizeCode } from "../identifier";
 import type { OtpChallenge, Session } from "../schema";
-import { formatCountdown, useCountdown } from "../use-countdown";
+import { useCountdown } from "../use-countdown";
+import { CodeFooter, CodeHeading, CodeInput } from "./code-step-parts";
 
 const MS_PER_SECOND = 1000;
 
@@ -50,7 +47,6 @@ export function CodeStep({
   const expiresIn = useCountdown(sentAt + challenge.expires_in_seconds * MS_PER_SECOND);
   const resendIn = useCountdown(sentAt + challenge.resend_after_seconds * MS_PER_SECOND);
   const isExpired = expiresIn === 0;
-  const canResend = resendIn === 0;
 
   async function verify(value: string) {
     if (isVerifying) return;
@@ -119,28 +115,7 @@ export function CodeStep({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <p className="text-label text-teal-text">{t("stepOf", { step: 2, total: 2 })}</p>
-        <h1 className="mt-2 text-h1 text-ink-strong">{t("codeTitle")}</h1>
-        <p className="mt-2 text-body text-ink">
-          {t.rich("codeLead", {
-            name: challenge.name_hint,
-            length,
-            destination: challenge.masked_destination,
-            phone: (chunks) => (
-              <bdi dir="ltr" className="font-bold whitespace-nowrap text-ink-strong">
-                {chunks}
-              </bdi>
-            ),
-          })}
-        </p>
-      </div>
-
-      {isMockMode && challenge.demo_code ? (
-        <p className="self-start rounded-pill bg-teal-soft px-3 py-1 text-body-sm font-bold text-teal-text">
-          {t("demoCode", { code: challenge.demo_code })}
-        </p>
-      ) : null}
+      <CodeHeading challenge={challenge} />
 
       {bannerError ? (
         <Alert tone="danger" title={t(`errors.${bannerError}`, { count: attemptsLeft })} />
@@ -148,37 +123,15 @@ export function CodeStep({
       {isExpired ? <Alert tone="warning" title={t("codeExpired")} /> : null}
 
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <Field label={t("codeLabel")} error={error ?? undefined} required>
-          {(control) => (
-            <div className="relative" dir="ltr">
-              <KeyRound
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 start-3 my-auto size-5 text-ink-muted"
-              />
-              <input
-                ref={inputRef}
-                {...control}
-                name="code"
-                value={code}
-                onChange={(event) => handleChange(event.target.value)}
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                enterKeyHint="done"
-                pattern="[0-9]*"
-                maxLength={length}
-                placeholder={"•".repeat(length)}
-                readOnly={isVerifying}
-                disabled={isExpired}
-                autoFocus
-                className={cn(
-                  controlStyles,
-                  "h-14 ps-[calc(2.5rem+0.6em)] pe-10 text-center text-h1 font-extrabold tracking-[0.6em] tabular-nums",
-                  "placeholder:tracking-[0.6em]",
-                )}
-              />
-            </div>
-          )}
-        </Field>
+        <CodeInput
+          ref={inputRef}
+          length={length}
+          value={code}
+          error={error}
+          isVerifying={isVerifying}
+          isExpired={isExpired}
+          onChange={handleChange}
+        />
 
         <Button
           type="submit"
@@ -192,35 +145,14 @@ export function CodeStep({
         </Button>
       </form>
 
-      <div className="flex flex-col gap-3 border-t border-line pt-5">
-        <p
-          className={cn("text-body-sm text-ink-muted", expiresIn === null && "invisible")}
-          aria-live="off"
-        >
-          {isExpired ? t("codeExpired") : t("expiresIn", { time: formatCountdown(expiresIn ?? 0) })}
-        </p>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ms-4"
-            iconStart={<ArrowLeft className="size-4 rtl:-scale-x-100" />}
-            onClick={() => onBack()}
-          >
-            {t("changeIdentifier")}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            iconStart={<RotateCw className="size-4" />}
-            onClick={() => void resend()}
-            isLoading={isResending}
-            disabled={!canResend || isVerifying}
-          >
-            {resendIn ? t("resendIn", { time: formatCountdown(resendIn) }) : t("resend")}
-          </Button>
-        </div>
-      </div>
+      <CodeFooter
+        expiresIn={expiresIn}
+        resendIn={resendIn}
+        isResending={isResending}
+        isVerifying={isVerifying}
+        onBack={() => onBack()}
+        onResend={() => void resend()}
+      />
     </div>
   );
 }

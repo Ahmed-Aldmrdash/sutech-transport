@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Checkbox, Radio, Switch } from "@/components/ui/choice";
 import { IconButton } from "@/components/ui/icon-button";
-import { SelectField, TextAreaField, TextField } from "@/components/ui/input";
+import { TextAreaField, TextField } from "@/components/ui/input";
+import { SelectField } from "@/components/ui/select-field";
 import { GallerySection } from "./gallery-section";
 
 const Direction = { Outbound: "outbound", Return: "return" } as const;

@@ -63,7 +63,7 @@ export function ThemeSegmented({ className }: { className?: string }) {
             aria-checked={isSelected}
             onClick={() => setPreference(option)}
             className={cn(
-              "inline-flex h-10 items-center gap-2 rounded-sm px-3 text-body-sm font-bold focus-ring transition-colors [&_svg]:size-4",
+              "tap-area inline-flex h-10 items-center gap-2 rounded-sm px-3 text-body-sm font-bold focus-ring transition-colors [&_svg]:size-4",
               isSelected
                 ? "bg-surface-raised text-brand shadow-sm"
                 : "text-ink hover:text-ink-strong",

@@ -43,6 +43,9 @@ export const lineSummarySchema = z.object({
 export type LineSummary = z.infer<typeof lineSummarySchema>;
 
 export const lineSchema = lineSummarySchema.extend({
+  /** The name in both languages whatever the request's language, so search finds either. */
+  name_ar: z.string(),
+  name_en: z.string(),
   /** Price of one term on this line, in piasters (1,500,000 = 15,000 EGP). */
   price_piasters: z.number().int().nonnegative(),
   bus_type: busTypeSchema,

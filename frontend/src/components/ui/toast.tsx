@@ -98,7 +98,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => dismiss(toast.id)}
               aria-label={t("close")}
-              className="-me-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-ink-muted focus-ring hover:bg-surface-alt"
+              className="tap-area -me-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-ink-muted focus-ring hover:bg-surface-alt"
             >
               <X aria-hidden="true" className="size-4" />
             </button>

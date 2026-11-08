@@ -13,12 +13,14 @@ function normalize(text: string): string {
     .trim();
 }
 
-/** Matches a line by its number ("12", "14-2") or any part of its name. */
-export function matchesLineSearch(line: Line, query: string): boolean {
+type Searchable = Pick<Line, "code" | "name" | "name_ar" | "name_en">;
+
+/** Matches a line by its number ("12", "14-2") or any part of its name, in either language. */
+export function matchesLineSearch(line: Searchable, query: string): boolean {
   const wanted = normalize(toLatinDigits(query));
   if (!wanted) return true;
   if (/^\d+(-\d+)?$/.test(wanted)) {
     return line.code === wanted || line.code.startsWith(`${wanted}-`);
   }
-  return normalize(line.name).includes(wanted) || line.code === wanted;
+  return [line.name, line.name_ar, line.name_en].some((name) => normalize(name).includes(wanted));
 }

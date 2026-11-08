@@ -38,7 +38,9 @@ function readStoredPreference(): ThemePreference {
 
 function applyTheme(theme: ResolvedTheme): void {
   document.documentElement.dataset.theme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLOR[theme]);
+  document
+    .querySelectorAll('meta[name="theme-color"]')
+    .forEach((meta) => meta.setAttribute("content", THEME_COLOR[theme]));
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

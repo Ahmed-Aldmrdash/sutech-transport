@@ -45,6 +45,11 @@ export function registerMock<E extends Endpoint>(endpoint: E, handler: MockHandl
   handlers.set(endpoint.id, handler as unknown as MockHandler<Endpoint>);
 }
 
+/** Whether a handler is registered for this endpoint id (for the mock routing test). */
+export function isMocked(endpointId: string): boolean {
+  return handlers.has(endpointId);
+}
+
 function errorResponse(status: number, body: ApiErrorBody): MockResponse {
   return { status, body: JSON.stringify(body) };
 }

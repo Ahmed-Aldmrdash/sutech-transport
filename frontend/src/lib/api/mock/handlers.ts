@@ -1,23 +1,43 @@
+import type { Endpoint } from "../endpoint";
+import { MockFeature, type MockFeatureName } from "./mock-features";
+import { MOCK_FEATURE_OF } from "./mock-routing";
+
 /**
- * Loads every feature's mock handlers. Imported lazily, only in mock mode, so none of the
+ * Loads the mock handlers an endpoint needs. Imported lazily, only in mock mode, so none of the
  * mock data ends up in the production bundle when the app talks to the real server.
- * Add one import line per feature that has a mock.ts.
+ * Add one line per feature that has a mock.ts (and its endpoints to MOCK_FEATURE_OF).
  */
-import "@/features/absences/mock";
-import "@/features/announcements/mock";
-import "@/features/attendance/mock";
-import "@/features/auth/mock";
-import "@/features/card/mock";
-import "@/features/children/mock";
-import "@/features/emergencies/mock";
-import "@/features/crew/mock";
-import "@/features/lines/mock";
-import "@/features/notifications/mock";
-import "@/features/payments/mock";
-import "@/features/requests/mock";
-import "@/features/sos/mock";
-import "@/features/subscriptions/mock";
-import "@/features/system/mock";
-import "@/features/tracking/mock";
-import "@/features/trips/mock";
-import "@/features/violations/mock";
+const LOADERS: Record<MockFeatureName, () => Promise<unknown>> = {
+  [MockFeature.Absences]: () => import("@/features/absences/mock"),
+  [MockFeature.Announcements]: () => import("@/features/announcements/mock"),
+  [MockFeature.Attendance]: () => import("@/features/attendance/mock"),
+  [MockFeature.Auth]: () => import("@/features/auth/mock"),
+  [MockFeature.Card]: () => import("@/features/card/mock"),
+  [MockFeature.Children]: () => import("@/features/children/mock"),
+  [MockFeature.Crew]: () => import("@/features/crew/mock"),
+  [MockFeature.Emergencies]: () => import("@/features/emergencies/mock"),
+  [MockFeature.Lines]: () => import("@/features/lines/mock"),
+  [MockFeature.Notifications]: () => import("@/features/notifications/mock"),
+  [MockFeature.Payments]: () => import("@/features/payments/mock"),
+  [MockFeature.Requests]: () => import("@/features/requests/mock"),
+  [MockFeature.Sos]: () => import("@/features/sos/mock"),
+  [MockFeature.Subscriptions]: () => import("@/features/subscriptions/mock"),
+  [MockFeature.System]: () => import("@/features/system/mock"),
+  [MockFeature.Tracking]: () => import("@/features/tracking/mock"),
+  [MockFeature.Trips]: () => import("@/features/trips/mock"),
+  [MockFeature.Violations]: () => import("@/features/violations/mock"),
+};
+
+export function loadMockFeature(feature: MockFeatureName): Promise<unknown> {
+  return LOADERS[feature]();
+}
+
+/** The mock for this endpoint, or every mock if the endpoint isn't mapped (a new one). */
+export async function loadMocksFor(endpoint: Endpoint): Promise<void> {
+  const feature = MOCK_FEATURE_OF[endpoint.id];
+  if (feature) {
+    await loadMockFeature(feature);
+    return;
+  }
+  await Promise.all(Object.values(LOADERS).map((load) => load()));
+}

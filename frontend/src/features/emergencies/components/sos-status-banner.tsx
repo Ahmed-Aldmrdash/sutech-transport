@@ -73,4 +73,3 @@ export function StatusBanner({ sos, onChanged }: { sos: AdminSos; onChanged: () 
     </div>
   );
 }
-

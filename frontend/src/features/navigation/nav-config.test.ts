@@ -93,7 +93,10 @@ describe("coming soon pages", () => {
     for (const role of ALL_ROLES) {
       const navigation = navigationFor(role);
       expect(readyItems(navigation).length, role).toBeGreaterThan(0);
-      expect(primaryItems(navigation).every((item) => !item.soon), role).toBe(true);
+      expect(
+        primaryItems(navigation).every((item) => !item.soon),
+        role,
+      ).toBe(true);
     }
   });
 

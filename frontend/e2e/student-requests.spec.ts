@@ -181,7 +181,6 @@ test.describe("student requests, notifications and settings", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expectNoSidewaysScroll(page);
     await page.getByRole("main").getByRole("button", { name: "اخرج" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "اخرج" }).click();
     await page.waitForURL(/\/ar\/login/);
     expect(errors).toEqual([]);
   });

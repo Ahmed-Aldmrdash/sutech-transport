@@ -88,10 +88,11 @@ async function sendToMock({
   idempotencyKey,
   signal,
 }: TransportRequest): Promise<MockResponse> {
-  const [{ handleMockRequest }] = await Promise.all([
+  const [{ handleMockRequest }, { loadMocksFor }] = await Promise.all([
     import("./mock/mock-server"),
     import("./mock/handlers"),
   ]);
+  await loadMocksFor(endpoint);
   await sleep(appConfig.mockLatencyMs, signal);
   return handleMockRequest(endpoint, parsed, {
     token: mockToken,

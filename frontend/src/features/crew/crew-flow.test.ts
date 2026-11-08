@@ -220,6 +220,15 @@ describe("driver and supervisor (mock server)", () => {
     expect(items[0]?.line?.line_id).toBe("ln_07");
   });
 
+  it("refuses a delay hours after a trip that never started", async () => {
+    const trip = await outbound();
+    vi.setSystemTime(SUNDAY_MORNING + 5 * 60 * MINUTE);
+    const refused = await errorOf(
+      reportDelay(trip.trip_id, { minutes: 10, reason: DelayReason.Traffic, note: null }),
+    );
+    expect(refused.code).toBe(CrewErrorCode.DelayOutOfWindow);
+  });
+
   it("raises an SOS once per press, with the bus GPS position, and the office takes it", async () => {
     const trip = await outbound();
     await startTrip(trip.trip_id);

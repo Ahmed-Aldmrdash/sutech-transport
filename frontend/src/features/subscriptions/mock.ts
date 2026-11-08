@@ -55,11 +55,7 @@ export function mockTerm(language: string) {
 
 const iso = (time: number | null) => (time === null ? null : new Date(time).toISOString());
 
-function toSubscription(
-  userId: string,
-  booking: MockBooking,
-  language: string,
-): Subscription {
+function toSubscription(userId: string, booking: MockBooking, language: string): Subscription {
   const line = findMockLine(booking.lineId);
   if (!line) throw new Error(`Unknown mock line ${booking.lineId}`);
   const [time, nameAr, nameEn] = line.stops[booking.stopOrder - 1] ?? [];

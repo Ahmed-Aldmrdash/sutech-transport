@@ -57,9 +57,14 @@ export function LineDetailPage({ lineId }: { lineId: string }) {
       <div className="flex flex-col gap-6">
         {back}
         {missing ? (
-          <EmptyState title={t("line.notFoundTitle")} description={t("line.notFoundBody")} />
+          <EmptyState
+            headingLevel={1}
+            title={t("line.notFoundTitle")}
+            description={t("line.notFoundBody")}
+            action={<ButtonLink href="/student/lines">{t("line.back")}</ButtonLink>}
+          />
         ) : (
-          <ErrorState error={line.error} onRetry={line.reload} />
+          <ErrorState error={line.error} onRetry={line.reload} headingLevel={1} />
         )}
       </div>
     );

@@ -68,6 +68,13 @@ describe("ErrorState", () => {
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(onRetry).toHaveBeenCalledOnce();
   });
+
+  it("never offers a retry for something that isn't there", () => {
+    renderWithIntl(
+      <ErrorState error={new ApiError(404, ServerErrorCode.NotFound, "x")} onRetry={vi.fn()} />,
+    );
+    expect(screen.queryByRole("button")).toBeNull();
+  });
 });
 
 describe("Toast", () => {

@@ -3,7 +3,7 @@
     "name": "SUtech Transportation",
     "shortName": "SUtech Transport",
     "tagline": "Transportation",
-    "description": "Book your seat, pay, track your bus and follow every trip at SUTech.",
+    "description": "Book your seat, pay, track your bus and follow every trip at SUtech.",
     "slogan": "Access the Future"
   },
   "common": {
@@ -605,7 +605,16 @@
       "refreshing": "Getting a new code…",
       "expired": "This code has expired. Connect to the internet to get a new one.",
       "getNewCode": "Get a new code",
-      "tip": "The code changes every 30 seconds, so a screenshot won't work. Turn your screen brightness up when you scan."
+      "tip": "The code changes every 30 seconds, so a screenshot won't work. Turn your screen brightness up when you scan.",
+      "offline": {
+        "title": "Your card (saved on this phone)",
+        "name": "Name",
+        "identifier": "University ID",
+        "line": "Line",
+        "stop": "Stop",
+        "validUntilLabel": "Valid until",
+        "noCode": "No internet, so there's no boarding code. Show these details to the driver, or connect to get the code."
+      }
     },
     "requests": {
       "title": "Requests",
@@ -1027,11 +1036,7 @@
     "appearanceHint": "\"Device\" follows your phone or laptop's light or dark setting.",
     "signOutTitle": "Sign out",
     "signOutHint": "You'll need a new code by SMS to sign in again.",
-    "signOut": "Sign out",
-    "signOutConfirmTitle": "Sign out of this device?",
-    "signOutConfirmBody": "Your card and bookings stay safe. Sign in again with your university ID and a new code.",
-    "stay": "Stay signed in",
-    "signOutConfirmBodyParent": "Sign in again with your phone number and a new code."
+    "signOut": "Sign out"
   },
   "bus": {
     "title": "Bus and driver",
@@ -1337,7 +1342,8 @@
         "lead": "The back camera reads the QR code on the student's pass.",
         "denied": "Camera access is blocked. Allow it in the browser settings, or type the ID below.",
         "unavailable": "The camera can't open here. It needs the app's secure (https) address. Type the ID below meanwhile."
-      }
+      },
+      "manualRequired": "Type the student's university ID."
     },
     "passengers": {
       "title": "Passengers",
@@ -1374,13 +1380,16 @@
         "TRIP_ALREADY_ENDED": "This trip already ended.",
         "network": "No connection. Check your internet and try again.",
         "invalid": "Some details aren't right. Check the form and try again.",
-        "generic": "Something went wrong. Try again."
+        "generic": "Something went wrong. Try again.",
+        "DELAY_OUT_OF_WINDOW": "A delay can be sent while the trip runs, or within an hour of its pickup time."
       },
       "submit": "Send the delay",
       "sentTitle": "Delay sent",
       "sentBody": "Students and guardians on your line were told.",
       "sentListTitle": "Sent on this trip",
-      "sentListEmpty": "No delays reported on this trip."
+      "sentListEmpty": "No delays reported on this trip.",
+      "closedTitle": "Too far from the trip's time",
+      "closedBody": "You can report a delay while the trip runs, or from an hour before its pickup time ({time}) to an hour after."
     }
   },
   "sos": {
@@ -1611,7 +1620,12 @@
       "sent": "Sent: {plate} with {name}"
     },
     "noteRequired": "Write a note first.",
-    "summaryRequired": "Write what was done before closing."
+    "summaryRequired": "Write what was done before closing.",
+    "emptyAll": {
+      "title": "No alerts",
+      "body": "No driver or supervisor has pressed SOS yet. A new alert shows here at once with the bus's location."
+    },
+    "allAlerts": "See all alerts"
   },
   "clinic": {
     "title": "Clinic",
