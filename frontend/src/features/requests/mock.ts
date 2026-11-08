@@ -26,7 +26,7 @@ import {
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { formatMoney, todayInCairo } from "@/lib/format";
+import { formatCalendarDate, formatClockTime, formatMoney, todayInCairo } from "@/lib/format";
 import {
   createComplaintEndpoint,
   createLineChangeEndpoint,
@@ -50,6 +50,7 @@ import {
   type MockRequestPayload,
   type MockText,
 } from "./mock-state";
+import { guardianAnswerOf, officeStartOf, statusAt } from "./mock-status";
 import { deductionOn, isRefundWindowOpen, refundAmount } from "./refund-policy";
 import {
   ComplaintCategory,
@@ -88,46 +89,6 @@ const DECIDED_BY: Record<RequestKind, RequestEvent["by"]> = {
   [RequestKind.Complaint]: RequestActor.TransportOffice,
   [RequestKind.ModelPermit]: RequestActor.Safety,
 };
-
-/** The guardian's answer, if any: recorded, or the mock's stand-in for a guardian with no account. */
-function guardianAnswerOf(
-  request: MockRequest,
-  now: number,
-): { at: number; approved: boolean; note: string | null } | null {
-  const step = request.guardian;
-  if (!step) return null;
-  if (step.decidedAt !== null) {
-    return { at: step.decidedAt, approved: step.approved, note: step.note };
-  }
-  const autoAt = request.submittedAt + MOCK_REQUEST_TIMING.guardianAutoApproveAfterMs;
-  if (!step.hasAccount && now >= autoAt) {
-    return { at: autoAt, approved: true, note: null };
-  }
-  return null;
-}
-
-/** When the office got the request: on sending, or once the guardian approved. Null: not yet. */
-function officeStartOf(request: MockRequest, now: number): number | null {
-  if (!request.guardian) return request.submittedAt;
-  const answer = guardianAnswerOf(request, now);
-  return answer?.approved ? answer.at : null;
-}
-
-function statusAt(request: MockRequest, now: number): RequestStatus {
-  if (request.withdrawnAt !== null) return RequestStatus.Withdrawn;
-  if (request.guardian) {
-    const answer = guardianAnswerOf(request, now);
-    if (!answer) return RequestStatus.AwaitingGuardian;
-    if (!answer.approved) return RequestStatus.Rejected;
-  }
-  const start = officeStartOf(request, now) ?? request.submittedAt;
-  const elapsed = now - start;
-  if (elapsed < MOCK_REQUEST_TIMING.inReviewAfterMs) return RequestStatus.Submitted;
-  if (elapsed < MOCK_REQUEST_TIMING.decidedAfterMs || request.outcome === "stays_in_review") {
-    return RequestStatus.InReview;
-  }
-  return request.outcome;
-}
 
 function timelineOf(request: MockRequest, now: number, language: string): RequestEvent[] {
   const note = (text: MockText | null) => (text ? localized(language, text.ar, text.en) : null);
@@ -401,10 +362,18 @@ function addRequest(userId: string, request: Omit<MockRequest, "requestId" | "re
   const stored: MockRequest = {
     ...request,
     requestId: newMockId("req"),
-    reference: nextReference(userId),
+    reference: nextReference(),
   };
   saveRequests(userId, [...requestsOf(userId), stored]);
   return stored;
+}
+
+/** "From Nov 8 to Nov 22" for a temporary change, "From Nov 8" for a permanent one, in words. */
+function changePeriod(startsOn: string, endsOn: string | null): MockText {
+  const from = { ar: formatCalendarDate(startsOn, "ar"), en: formatCalendarDate(startsOn, "en") };
+  if (!endsOn) return { ar: `من يوم ${from.ar}`, en: `From ${from.en}` };
+  const to = { ar: formatCalendarDate(endsOn, "ar"), en: formatCalendarDate(endsOn, "en") };
+  return { ar: `من يوم ${from.ar} لحد يوم ${to.ar}`, en: `From ${from.en} to ${to.en}` };
 }
 
 /** Approved refunds are paid in full pounds: the paid amount minus the day's deduction. */
@@ -463,6 +432,7 @@ registerMock(createLineChangeEndpoint, ({ body }, { token, language }) => {
   const lineNameAr = localized("ar", line.nameAr, line.nameEn);
   const [, stopAr = "", stopEn = ""] = line.stops[stopIndex] ?? [];
   const hasSeat = toLine(line, language, seatsHeldOn(line.lineId)).seats_available > 0;
+  const period = changePeriod(body.starts_on, body.ends_on);
   const stored = addRequest(user.id, {
     submittedAt: now,
     withdrawnAt: null,
@@ -474,10 +444,10 @@ registerMock(createLineChangeEndpoint, ({ body }, { token, language }) => {
     decisionNote: hasSeat
       ? {
           ar:
-            `تمت الموافقة. من يوم ${body.starts_on} اركب خط ${line.code} (${lineNameAr}) من ` +
+            `تمت الموافقة. ${period.ar} اركب خط ${line.code} (${lineNameAr}) من ` +
             `محطة ${stopAr}، ووري الكارت للمشرف زي العادي.`,
           en:
-            `Approved. From ${body.starts_on}, ride line ${line.code} (${lineName}) from ` +
+            `Approved. ${period.en}, ride line ${line.code} (${lineName}) from ` +
             `${stopEn}, and show your card to the supervisor as usual.`,
         }
       : {
@@ -681,10 +651,12 @@ registerMock(createModelPermitEndpoint, ({ body }, { token, language }) => {
     },
     decisionNote: {
       ar:
-        `إدارة السلامة وافقت. يوم ${body.entry_date} الساعة ${body.entry_time} ورّي التصريح ده ` +
+        `إدارة السلامة وافقت. يوم ${formatCalendarDate(body.entry_date, "ar")} الساعة ` +
+        `${formatClockTime(body.entry_time, "ar")} ورّي التصريح ده ` +
         `للسواق والمشرف قبل ما تركب، وخلّي المجسم بعيد عن الممر.`,
       en:
-        `The Safety department approved it. On ${body.entry_date} at ${body.entry_time}, show ` +
+        `The Safety department approved it. On ${formatCalendarDate(body.entry_date, "en")} at ` +
+        `${formatClockTime(body.entry_time, "en")}, show ` +
         `this permit to the driver and supervisor before you board, and keep the model out of ` +
         `the aisle.`,
     },
@@ -766,16 +738,41 @@ export function awaitingGuardianOf(guardianId: string, now = Date.now()) {
   );
 }
 
+/** A guardian may change their answer this long after giving it (and before the office acts). */
+const GUARDIAN_CHANGE_MS = 10 * 60 * 1000;
+
+/** Until when the guardian may still change their answer, or null. */
+function changeableUntil(userId: string, request: MockRequest, now: number): number | null {
+  const step = request.guardian;
+  if (!step || step.decidedAt === null || request.withdrawnAt !== null) return null;
+  const until = step.decidedAt + GUARDIAN_CHANGE_MS;
+  if (now >= until) return null;
+  const status = statusAt(request, now);
+  // Approved: only until the office opens it. Refused: only if no newer request replaced it.
+  if (step.approved) return status === RequestStatus.Submitted ? until : null;
+  const replaced = currentRequestsOf(userId, now).some(
+    (other) =>
+      other.requestId !== request.requestId &&
+      other.payload.kind === RequestKind.LineChange &&
+      other.submittedAt > request.submittedAt,
+  );
+  return status === RequestStatus.Rejected && !replaced ? until : null;
+}
+
 registerMock(listGuardianApprovalsEndpoint, (_input, { token, language }) => {
   const guardian = requireMockGuardian(token);
   const now = Date.now();
   const approvals: GuardianApproval[] = mockChildrenOf(guardian.user.id)
     .flatMap((child) =>
-      lineChangesOf(child.user.id, now).map((request) => ({
-        student_id: child.user.id,
-        student_name: localized(language, child.user.name_ar ?? child.user.name, child.user.name),
-        request: toStudentRequest(request, language, now),
-      })),
+      lineChangesOf(child.user.id, now).map((request) => {
+        const until = changeableUntil(child.user.id, request, now);
+        return {
+          student_id: child.user.id,
+          student_name: localized(language, child.user.name_ar ?? child.user.name, child.user.name),
+          request: toStudentRequest(request, language, now),
+          can_change_until: until === null ? null : iso(until),
+        };
+      }),
     )
     .sort((a, b) => b.request.submitted_at.localeCompare(a.request.submitted_at));
   return { approvals };
@@ -800,7 +797,12 @@ function answerAsGuardian(
   }
   const list = currentRequestsOf(owner.user.id, now);
   const request = list.find((item) => item.requestId === requestId);
-  if (!request?.guardian || statusAt(request, now) !== RequestStatus.AwaitingGuardian) {
+  const isWaiting = request?.guardian && statusAt(request, now) === RequestStatus.AwaitingGuardian;
+  const mayChange =
+    request?.guardian &&
+    request.guardian.approved !== approved &&
+    changeableUntil(owner.user.id, request, now) !== null;
+  if (!request?.guardian || (!isWaiting && !mayChange)) {
     throw new MockHttpError(
       HTTP.Conflict,
       RequestErrorCode.NotAwaitingGuardian,

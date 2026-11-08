@@ -9964,12 +9964,19 @@
                                 "additionalProperties": false
                               }
                             ]
+                          },
+                          "can_change_until": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           }
                         },
                         "required": [
                           "student_id",
                           "student_name",
-                          "request"
+                          "request",
+                          "can_change_until"
                         ],
                         "additionalProperties": false
                       }

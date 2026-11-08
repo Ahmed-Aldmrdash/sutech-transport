@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { CountBadge } from "@/features/notifications/components/count-badge";
 import {
+  badgeLabelKey,
   itemHref,
   type NavBadges,
   type NavItem,
@@ -22,7 +23,6 @@ interface NavLinksProps {
 /** The grouped menu, shared by the laptop sidebar and the phone drawer. */
 export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLinksProps) {
   const t = useTranslations("nav");
-  const tCount = useTranslations("notifications");
   const showGroupTitles = navigation.groups.length > 1;
 
   return (
@@ -52,12 +52,15 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
                   </li>
                 );
               }
+              const count = badges?.[item.key] ?? 0;
+              const label = t(`items.${item.key}`);
               return (
                 <li key={item.key}>
                   <Link
                     href={itemHref(navigation.basePath, item)}
                     onClick={onNavigate}
                     aria-current={isActive ? "page" : undefined}
+                    aria-label={count ? t(badgeLabelKey(item.key), { label, count }) : undefined}
                     className={cn(
                       "flex h-11 items-center gap-3 rounded-md px-3 text-body-sm font-bold focus-ring transition-colors",
                       isActive
@@ -66,15 +69,8 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
                     )}
                   >
                     <Icon aria-hidden="true" className="size-5 shrink-0" />
-                    <span className="truncate">{t(`items.${item.key}`)}</span>
-                    {badges?.[item.key] ? (
-                      <>
-                        <CountBadge count={badges[item.key] ?? 0} className="ms-auto" />
-                        <span className="sr-only">
-                          {tCount("newCount", { count: badges[item.key] ?? 0 })}
-                        </span>
-                      </>
-                    ) : null}
+                    <span className="truncate">{label}</span>
+                    {count ? <CountBadge count={count} className="ms-auto" /> : null}
                   </Link>
                 </li>
               );

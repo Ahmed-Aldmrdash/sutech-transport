@@ -16,10 +16,11 @@ import {
   toBus,
   toLineSummary,
 } from "@/features/lines/mock-builders";
-import { bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { MS_PER_MINUTE, cairoInstant, cairoNow } from "@/lib/api/mock/cairo-clock";
 import { registerMock } from "@/lib/api/mock/mock-server";
+import { todayInCairo } from "@/lib/format";
 import { getChildDayEndpoint, listChildrenEndpoint } from "./api";
 import { mockChildrenOf, requireMockGuardian, requireMockGuardianOf } from "./mock-links";
 import { ChildDayStatus, DayEventKind, type Child, type ChildDay, type DayEvent } from "./schema";
@@ -118,7 +119,7 @@ function crewSteps(
 
 export function mockChildDay(studentId: string, language: string, now: number): ChildDay {
   const cairo = cairoNow(new Date(now));
-  const booking = bookingOf(studentId, now);
+  const booking = bookingOnDate(studentId, cairo.date, now);
   const line = booking && findMockLine(booking.lineId);
   const base = { student_id: studentId, service_date: cairo.date };
   if (!booking || !line || booking.status !== SubscriptionStatus.Active) {
@@ -155,7 +156,10 @@ export function mockChildDay(studentId: string, language: string, now: number): 
     }));
   const day = { ...base, trip, recent, days_off };
 
-  if (!isMockServiceDay(cairo.date, cairo.weekday)) {
+  // Subscribed after today's bus left: today has no trip for them yet, not a made-up ride.
+  const subscribedAfterBusLeft =
+    (booking.activatedAt ?? 0) > cairoInstant(cairo.date, firstTime, cairo.offsetMinutes);
+  if (!isMockServiceDay(cairo.date, cairo.weekday) || subscribedAfterBusLeft) {
     return { ...day, status: ChildDayStatus.NoService, events: [] };
   }
 
@@ -198,7 +202,7 @@ export function mockChildDay(studentId: string, language: string, now: number): 
 registerMock(listChildrenEndpoint, (_input, { token, language }) => {
   const guardian = requireMockGuardian(token);
   const children = mockChildrenOf(guardian.user.id).map(({ user }): Child => {
-    const booking = bookingOf(user.id);
+    const booking = bookingOnDate(user.id, todayInCairo());
     const line = booking && findMockLine(booking.lineId);
     const stop = line?.stops[(booking?.stopOrder ?? 1) - 1];
     return {

@@ -1,9 +1,10 @@
 import { findMockAccountById, type MockAccount } from "@/features/auth/mock-accounts";
 import { requireMockAccount } from "@/features/auth/mock-token";
-import { bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError } from "@/lib/api/mock/mock-server";
+import { todayInCairo } from "@/lib/format";
 import { Role } from "@/lib/auth/roles";
 import { ChildErrorCode } from "./schema";
 
@@ -13,6 +14,8 @@ import { ChildErrorCode } from "./schema";
  */
 const GUARDIAN_CHILDREN: Readonly<Record<string, readonly string[]>> = {
   usr_parent_1: ["usr_student_1", "usr_student_11"],
+  // Seif's father: a guardian with a child on line 7, the demo driver's line (SOS → guardian).
+  usr_parent_2: ["usr_student_2"],
 };
 
 export function mockChildrenOf(guardianId: string): MockAccount[] {
@@ -32,7 +35,7 @@ export function hasMockGuardianAccount(studentId: string): boolean {
 
 /** The line the student rides now, or null without an active subscription. */
 function activeLineOf(studentId: string): string | null {
-  const booking = bookingOf(studentId);
+  const booking = bookingOnDate(studentId, todayInCairo());
   return booking?.status === SubscriptionStatus.Active ? booking.lineId : null;
 }
 

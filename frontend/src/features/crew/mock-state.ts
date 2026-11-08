@@ -8,7 +8,7 @@ import {
   findMockLine,
 } from "@/features/lines/mock-builders";
 import type { MockLineSource } from "@/features/lines/mock-lines";
-import { bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { DEMO_TRIP_MS } from "@/features/tracking/demo-trip";
 import { TripDirection } from "@/features/trips/schema";
@@ -23,6 +23,7 @@ import {
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError } from "@/lib/api/mock/mock-server";
 import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
+import { todayInCairo } from "@/lib/format";
 import {
   lineBusId,
   lineDriverId,
@@ -172,7 +173,17 @@ export function todayFleetOf(
   line: MockLineSource,
   now: number,
 ): { bus: MockFleetBus; driver: MockFleetDriver } {
-  const date = cairoNow(new Date(now)).date;
+  return fleetOnDate(line, cairoNow(new Date(now)).date);
+}
+
+/**
+ * The bus and driver on the line on one day. A replacement belongs to its own day's trip, so
+ * tomorrow's trip shows the line's usual bus again.
+ */
+function fleetOnDate(
+  line: MockLineSource,
+  date: string,
+): { bus: MockFleetBus; driver: MockFleetDriver } {
   const replaced = [TripDirection.Outbound, TripDirection.Return]
     .map((direction) => trips.get(tripIdOf(line.lineId, date, direction)))
     .filter((trip): trip is MockCrewTrip => Boolean(trip?.replacements?.length))
@@ -183,7 +194,12 @@ export function todayFleetOf(
 
 /** The line as students and guardians should see it today (see todayFleetOf). */
 export function todayLineSource(line: MockLineSource, now: number): MockLineSource {
-  const { bus, driver } = todayFleetOf(line, now);
+  return lineSourceOn(line, cairoNow(new Date(now)).date);
+}
+
+/** The line as it runs on `date`: that day's bus and driver. */
+export function lineSourceOn(line: MockLineSource, date: string): MockLineSource {
+  const { bus, driver } = fleetOnDate(line, date);
   return withFleet(line, bus, driver);
 }
 
@@ -315,11 +331,12 @@ function hashOf(text: string): number {
  * Everyone subscribed on the line. Ahmed: every bus is full, so the demo accounts with an
  * active booking on it are joined by made-up students up to the bus's seats.
  */
-export function mockRidersOf(line: MockLineSource): MockRider[] {
+export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockRider[] {
   const riders: MockRider[] = [];
   for (const { user } of MOCK_ACCOUNTS) {
     if (user.role !== Role.Student) continue;
-    const booking = bookingOf(user.id);
+    // The line they ride that day: an approved temporary change puts them on this roster.
+    const booking = bookingOnDate(user.id, date);
     if (booking?.lineId !== line.lineId || booking.status !== SubscriptionStatus.Active) continue;
     riders.push({
       studentId: user.id,

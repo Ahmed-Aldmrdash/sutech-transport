@@ -177,9 +177,20 @@ export function saveRequests(userId: string, list: MockRequest[]): void {
 /** Request numbers continue from the seeded ones, like a real counter. */
 const FIRST_REFERENCE_NUMBER = 42;
 const REFERENCE_DIGITS = 4;
+const REFERENCE_PATTERN = /^REQ-\d{4}-(\d+)$/;
 
-export function nextReference(userId: string): string {
-  const number = FIRST_REFERENCE_NUMBER + requestsOf(userId).length;
+/**
+ * One counter for the whole office, like the server's sequence: two students never get the
+ * same number, whoever sends first.
+ */
+export function nextReference(): string {
+  let highest = FIRST_REFERENCE_NUMBER - 1;
+  const lists = [...requests.values(), ...Object.values(SEED_REQUESTS)];
+  for (const item of lists.flat()) {
+    const match = REFERENCE_PATTERN.exec(item.reference);
+    if (match) highest = Math.max(highest, Number(match[1]));
+  }
+  const number = Math.max(highest + 1, FIRST_REFERENCE_NUMBER);
   return `REQ-2026-${String(number).padStart(REFERENCE_DIGITS, "0")}`;
 }
 

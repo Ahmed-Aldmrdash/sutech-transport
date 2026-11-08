@@ -6,10 +6,10 @@ import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-bu
 import { mockFleetBus, mockFleetDriver } from "@/features/lines/mock-fleet";
 import { actionsOf, allSos } from "@/features/sos/mock-state";
 import { SosAction } from "@/features/sos/schema";
-import { bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
-import { formatPhone } from "@/lib/format";
+import { formatPhone, todayInCairo } from "@/lib/format";
 import { Role } from "@/lib/auth/roles";
 import { listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
@@ -230,7 +230,7 @@ export function mockAnnouncementsFor(
 ): Announcement[] {
   const all = mockAnnouncements(language);
   const lineOf = (studentId: string) => {
-    const booking = bookingOf(studentId);
+    const booking = bookingOnDate(studentId, todayInCairo());
     return booking && SEAT_STATUSES.includes(booking.status) ? booking.lineId : null;
   };
   // Students see their own line's news; guardians their children's lines only.

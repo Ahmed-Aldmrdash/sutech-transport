@@ -205,6 +205,16 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
   ),
   account(
     {
+      id: "usr_parent_2",
+      role: Role.Parent,
+      name: "Hossam Lotfy",
+      name_ar: "حسام لطفي",
+      identifier: "01000002001",
+    },
+    "01000002001",
+  ),
+  account(
+    {
       id: "usr_driver_1",
       role: Role.Driver,
       name: "Kamal Ezzat",

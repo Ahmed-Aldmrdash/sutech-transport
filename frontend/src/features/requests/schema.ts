@@ -423,6 +423,11 @@ export const guardianApprovalSchema = z.object({
   student_id: z.string(),
   student_name: z.string(),
   request: studentRequestSchema,
+  /**
+   * Until when the guardian may change their answer (ISO, UTC): 10 minutes after answering,
+   * and only while the office hasn't opened the request. Null: the answer can't change now.
+   */
+  can_change_until: z.string().nullable(),
 });
 export type GuardianApproval = z.infer<typeof guardianApprovalSchema>;
 export const guardianApprovalListSchema = z.object({ approvals: z.array(guardianApprovalSchema) });

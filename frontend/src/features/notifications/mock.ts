@@ -11,6 +11,7 @@ import { MOCK_CAMPUS_ARRIVAL, findMockLine, localized } from "@/features/lines/m
 import { absencesOf } from "@/features/absences/mock-state";
 import { awaitingGuardianOf, currentRequestsOf, toStudentRequest } from "@/features/requests/mock";
 import { RequestActor, RequestKind, RequestStatus } from "@/features/requests/schema";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { MockPaymentStatus, bookingOf, paymentsOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
@@ -23,6 +24,7 @@ import {
   cairoNow,
 } from "@/lib/api/mock/cairo-clock";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
+import { formatServiceDay } from "@/lib/format";
 import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
 import { Role } from "@/lib/auth/roles";
 import {
@@ -168,14 +170,14 @@ function announcementNotifications(userId: string, role: Role, language: string)
 
 /** "Your bus is 5 minutes away" on each recent service day, from the bus's GPS in real life. */
 function busNearNotifications(userId: string, language: string, now: number): Draft[] {
-  const booking = bookingOf(userId, now);
-  const line = booking && findMockLine(booking.lineId);
-  if (!booking || !line || booking.status !== SubscriptionStatus.Active) return [];
-  const [pickup = "07:00", stopAr = "", stopEn = ""] = line.stops[booking.stopOrder - 1] ?? [];
   const cairo = cairoNow(new Date(now));
   const drafts: Draft[] = [];
   for (let back = 0; back < DAYS_BACK_FOR_BUS; back += 1) {
     const date = addDays(cairo.date, -back);
+    const booking = bookingOnDate(userId, date, now);
+    const line = booking && findMockLine(booking.lineId);
+    if (!booking || !line || booking.status !== SubscriptionStatus.Active) continue;
+    const [pickup = "07:00", stopAr = "", stopEn = ""] = line.stops[booking.stopOrder - 1] ?? [];
     const weekday = (cairo.weekday - back + DAYS_BACK_FOR_BUS) % DAYS_BACK_FOR_BUS;
     const at = cairoInstant(date, pickup, cairoOffsetOn(date)) - BUS_NEAR_MINUTES * MS_PER_MINUTE;
     if (!SERVICE_DAYS.has(weekday) || at > now || at < (booking.activatedAt ?? now)) continue;
@@ -330,12 +332,8 @@ function childNotifications(guardianId: string, language: string, now: number): 
 /** The day a report is for, as the guardian reads it: "today" or the date. */
 function dayPhrase(date: string, today: string, language: string): { ar: string; en: string } {
   if (date === today) return { ar: "النهارده", en: "today" };
-  const shown = new Intl.DateTimeFormat(language === "ar" ? "ar-EG" : "en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  }).format(new Date(`${date}T12:00:00Z`));
+  // Latin digits in Arabic too, like every other date and time in the app.
+  const shown = formatServiceDay(date, language === "ar" ? "ar" : "en");
   return { ar: `يوم ${shown}`, en: `on ${shown}` };
 }
 

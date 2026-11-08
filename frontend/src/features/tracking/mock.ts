@@ -10,7 +10,7 @@ import {
 } from "@/features/lines/mock-builders";
 import type { MockLineSource } from "@/features/lines/mock-lines";
 import { requireMockStudent } from "@/features/subscriptions/mock";
-import { bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { TripDirection, TripStatus } from "@/features/trips/schema";
 import {
@@ -98,7 +98,7 @@ function stopProgress(line: MockLineSource, stopOrder: number): number {
 }
 
 function mockTrackingFor(studentId: string, language: string, now: number): Tracking {
-  const booking = bookingOf(studentId, now);
+  const booking = bookingOnDate(studentId, cairoNow(new Date(now)).date, now);
   const line = booking && findMockLine(booking.lineId);
   if (!booking || !line || booking.status !== SubscriptionStatus.Active) {
     return { trip: null, reason: NoTrackingReason.NoSubscription, next_departure_at: null };

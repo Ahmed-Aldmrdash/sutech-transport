@@ -4,7 +4,12 @@ import { Menu } from "lucide-react";
 import { useMessages, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { itemHref, type NavBadges, type NavItem } from "@/features/navigation/nav-config";
+import {
+  badgeLabelKey,
+  itemHref,
+  type NavBadges,
+  type NavItem,
+} from "@/features/navigation/nav-config";
 import { CountBadge } from "@/features/notifications/components/count-badge";
 
 interface BottomNavProps {
@@ -41,6 +46,14 @@ export function BottomNav({ basePath, items, activeItem, onOpenMenu, badges }: B
               <Link
                 href={itemHref(basePath, item)}
                 aria-current={isActive ? "page" : undefined}
+                aria-label={
+                  count
+                    ? t(`nav.${badgeLabelKey(item.key)}`, {
+                        label: t(`nav.items.${item.key}`),
+                        count,
+                      })
+                    : undefined
+                }
                 className={cn(
                   itemStyles,
                   isActive ? "text-brand" : "text-ink-muted hover:text-ink-strong",
@@ -57,9 +70,6 @@ export function BottomNav({ basePath, items, activeItem, onOpenMenu, badges }: B
                   {count ? <CountBadge count={count} className="absolute end-1 -top-1" /> : null}
                 </span>
                 <span className="max-w-full truncate px-0.5">{shortLabel(item)}</span>
-                {count ? (
-                  <span className="sr-only">{t("notifications.newCount", { count })}</span>
-                ) : null}
               </Link>
             </li>
           );

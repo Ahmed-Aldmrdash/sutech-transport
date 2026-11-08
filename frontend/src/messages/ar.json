@@ -109,7 +109,9 @@
       "sos": "SOS",
       "lines": "الخطوط"
     },
-    "soon": "قريبًا"
+    "soon": "قريبًا",
+    "withBadge": "{label}، {count} جديد",
+    "withWaiting": "{label}، {count} مستني ردك"
   },
   "errors": {
     "retry": "جرّب تاني",
@@ -1181,6 +1183,9 @@
       "refusedToast": "رفضت الطلب",
       "youApproved": "وافقت يوم {date}",
       "youRefused": "رفضت يوم {date}",
+      "changeHint": "تقدر تغيّر رأيك لحد {time}، طالما مكتب النقل لسه ما فتحش الطلب.",
+      "changeToApprove": "غيّرت رأيي، موافق",
+      "changeToRefuse": "غيّرت رأيي، مش موافق",
       "errors": {
         "NOT_AWAITING_GUARDIAN": "الطلب ده اترد عليه أو اتسحب خلاص.",
         "network": "مفيش اتصال. جرب تاني.",

@@ -59,7 +59,6 @@ export function sessionLengthMs(role: Role): number {
   return days * MS_PER_DAY;
 }
 
-
 function throwIfLocked(identifier: string, now: number) {
   const until = lockedUntil.get(identifier) ?? 0;
   if (until > now) {

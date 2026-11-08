@@ -41,10 +41,11 @@ const MARIAM = "240100102"; // Seif, active on line 7 since September
 const AHMED = "240100101"; // no booking
 const YOUSSEF = "260100111"; // active on line 12; his guardian has an account
 const GUARDIAN = "01000002000"; // Ziad's and Yassin's father
+const SEIF_GUARDIAN = "01000002001"; // Seif's father
 const NOV_2 = Date.parse("2026-11-02T08:00:00Z");
 const OCT_1 = Date.parse("2026-10-01T08:00:00Z");
-/** Seif's guardian has no account in the mock, so it "approves" by itself after a while. */
-const OFFICE_GETS_IT = NOV_2 + MOCK_REQUEST_TIMING.guardianAutoApproveAfterMs;
+/** Seif's father approves at once, so the office gets the request then. */
+const OFFICE_GETS_IT = NOV_2;
 
 const DOCUMENT = {
   file_name: "report.pdf",
@@ -64,6 +65,17 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 async function signIn(identifier: string) {
   const challenge = await requestOtp(identifier);
   await login(identifier, challenge.demo_code ?? "");
+}
+
+/** Seif's father approves the request in the app, then Seif is back on his phone. */
+async function seifsFatherApproves(requestId: string) {
+  tokenStore.set(null);
+  resetAuthMock();
+  await signIn(SEIF_GUARDIAN);
+  await approveAsGuardian(requestId, { note: null });
+  tokenStore.set(null);
+  resetAuthMock();
+  await signIn(MARIAM);
 }
 
 function at(time: number) {
@@ -140,6 +152,7 @@ describe("student requests (mock server)", () => {
     expect((await errorOf(createLineChange(lineChange()))).code).toBe(
       RequestErrorCode.RequestAlreadyOpen,
     );
+    await seifsFatherApproves(sent.request_id);
 
     at(OFFICE_GETS_IT + 1);
     expect((await getRequest(sent.request_id)).status).toBe(RequestStatus.Submitted);
@@ -213,6 +226,7 @@ describe("student requests (mock server)", () => {
     const sent = await createLineChange(
       lineChange({ to_line_id: "ln_02", to_stop_id: "ln_02_s1" }),
     );
+    await seifsFatherApproves(sent.request_id);
     at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Rejected);

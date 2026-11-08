@@ -109,7 +109,9 @@
       "sos": "SOS",
       "lines": "Lines"
     },
-    "soon": "Soon"
+    "soon": "Soon",
+    "withBadge": "{label}, {count} new",
+    "withWaiting": "{label}, {count} waiting for you"
   },
   "errors": {
     "retry": "Try again",
@@ -1181,6 +1183,9 @@
       "refusedToast": "You refused the request",
       "youApproved": "You approved it on {date}",
       "youRefused": "You refused it on {date}",
+      "changeHint": "You can change your mind until {time}, as long as the Transportation office hasn't opened the request.",
+      "changeToApprove": "Changed my mind: approve",
+      "changeToRefuse": "Changed my mind: refuse",
       "errors": {
         "NOT_AWAITING_GUARDIAN": "This request was already answered or withdrawn.",
         "network": "No connection. Try again.",
