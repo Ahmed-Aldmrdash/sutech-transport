@@ -45,8 +45,8 @@ test.describe("guardian", () => {
     // One map per bus, named for who rides it.
     await expect(page.getByText("Line 12 · Yassin")).toBeVisible();
     await startDemoTripIfIdle(page);
-    await expect(page.getByText("Hany Abdel Messih").first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Call Hany Abdel Messih" })).toHaveAttribute(
+    await expect(page.getByText("Ehab Riad").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Call Ehab Riad" })).toHaveAttribute(
       "href",
       "tel:01000004013",
     );

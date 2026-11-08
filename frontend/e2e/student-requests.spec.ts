@@ -122,7 +122,7 @@ test.describe("student requests, notifications and settings", () => {
     const entry = isPhone(page)
       ? page
           .getByRole("navigation", { name: "Quick navigation" })
-          .getByRole("link", { name: /Alerts/ })
+          .getByRole("link", { name: /Inbox/ })
       : page.getByRole("link", { name: /Notifications, \d+ new/ });
     await expect(isPhone(page) ? entry.getByText(/new/) : entry).toBeAttached();
     await entry.click();

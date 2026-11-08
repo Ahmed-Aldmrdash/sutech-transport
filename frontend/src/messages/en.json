@@ -644,7 +644,7 @@
       "sent": "Request sent",
       "sentBody": "You'll get a notification when the office answers.",
       "textHint": "At least 10 characters.",
-      "phoneHint": "Egyptian mobile, e.g. 01012345678.",
+      "phoneHint": "Egyptian mobile, e.g. 01000000000.",
       "errors": {
         "required": "Fill in this field.",
         "phoneInvalid": "Enter an 11-digit mobile number starting 010, 011, 012 or 015.",

@@ -57,7 +57,7 @@ test.describe("sign-in", () => {
 
   test("works in Arabic with Arabic digits", async ({ page }) => {
     await page.goto("/ar/login");
-    await page.getByLabel("الرقم الجامعي أو رقم الموظف أو الموبايل").fill("٢٤٠١٠٢٧٩١");
+    await page.getByLabel("الرقم الجامعي أو رقم الموظف أو الموبايل").fill("٢٤٠١٠٠١٠١");
     await page.getByRole("button", { name: "ابعت الكود" }).click();
     await expect(page.getByText("010•••••001")).toBeVisible();
     const arabicCode = (await shownCode(page)).replace(/\d/g, (digit) =>
@@ -163,7 +163,7 @@ test.describe("strict separation", () => {
   test("a student can't open another role's pages", async ({ page }) => {
     await signIn(page, "240100101");
     await expect(page).toHaveURL(/\/en\/student$/);
-    for (const path of ["/en/admin", "/en/admin/users", "/en/parent", "/en/driver/scan"]) {
+    for (const path of ["/en/admin", "/en/admin/emergencies", "/en/parent", "/en/driver/scan"]) {
       await page.goto(path);
       await expect(page).toHaveURL(/\/en\/student$/);
     }
@@ -190,7 +190,7 @@ test.describe("strict separation", () => {
   test("the super admin lands on the emergencies desk", async ({ page }) => {
     await signIn(page, "ADM-1001");
     await expect(page).toHaveURL(/\/en\/admin\/emergencies$/);
-    await page.goto("/en/admin/users");
+    await page.goto("/en/student");
     await expect(page).toHaveURL(/\/en\/admin\/emergencies$/);
   });
 });

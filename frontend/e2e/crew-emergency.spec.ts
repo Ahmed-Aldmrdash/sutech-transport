@@ -54,9 +54,11 @@ test.describe("emergencies", () => {
 
     await switchTo(page, TRANSPORT);
     await page.waitForURL(/\/en\/admin\/emergencies$/);
-    const alarm = page.getByRole("alert").filter({ hasText: "New SOS: Bus problem on line 7" });
-    await expect(alarm).toBeVisible();
-    await alarm.getByRole("link", { name: "Open" }).click();
+    // The office lands on the emergencies desk, where the new alert heads the list.
+    await page
+      .getByRole("link", { name: /Bus problem Not taken Line 7/ })
+      .first()
+      .click();
 
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Line 7");
     await page.getByRole("button", { name: "Take it" }).click();
