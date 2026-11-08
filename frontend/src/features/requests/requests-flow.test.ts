@@ -37,13 +37,13 @@ import {
   type CreateRefundBody,
 } from "./schema";
 
-const MARIAM = "240102684"; // Omar, active on line 7 since September
-const AHMED = "240102791"; // no booking
-const YOUSSEF = "260101207"; // active on line 12; his guardian has an account
-const GUARDIAN = "01098765432"; // Ahmed's and Youssef's father
+const MARIAM = "240100102"; // Seif, active on line 7 since September
+const AHMED = "240100101"; // no booking
+const YOUSSEF = "260100111"; // active on line 12; his guardian has an account
+const GUARDIAN = "01000002000"; // Ziad's and Yassin's father
 const NOV_2 = Date.parse("2026-11-02T08:00:00Z");
 const OCT_1 = Date.parse("2026-10-01T08:00:00Z");
-/** Omar's guardian has no account in the mock, so it "approves" by itself after a while. */
+/** Seif's guardian has no account in the mock, so it "approves" by itself after a while. */
 const OFFICE_GETS_IT = NOV_2 + MOCK_REQUEST_TIMING.guardianAutoApproveAfterMs;
 
 const DOCUMENT = {
@@ -63,8 +63,7 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 
 async function signIn(identifier: string) {
   const challenge = await requestOtp(identifier);
-  const session = await login(identifier, challenge.demo_code ?? "");
-  tokenStore.set(session.token);
+  await login(identifier, challenge.demo_code ?? "");
 }
 
 function at(time: number) {
@@ -79,9 +78,9 @@ function lineChange(overrides: Partial<CreateLineChangeBody> = {}): CreateLineCh
     starts_on: "2026-11-02",
     ends_on: null,
     reason: "We moved to a new flat near this line.",
-    student_phone: "01012340684",
-    guardian_name: "Ahmed Ramadan Ramadan",
-    guardian_phone: "01098760684",
+    student_phone: "01000006684",
+    guardian_name: "Hossam Lotfy",
+    guardian_phone: "01000007684",
     ...overrides,
   };
 }
@@ -111,8 +110,8 @@ function refund(
     subscription_id: subscriptionId,
     reason: "standard",
     explanation: "I will come to campus by car from now on.",
-    guardian_name: "Ahmed Ramadan Ramadan",
-    guardian_phone: "01098760684",
+    guardian_name: "Hossam Lotfy",
+    guardian_phone: "01000007684",
     guardian_consent: true,
     documents: [],
     ...overrides,
@@ -348,7 +347,7 @@ describe("model permit (mock server)", () => {
     expect(sent.kind).toBe(RequestKind.ModelPermit);
     if (sent.kind !== RequestKind.ModelPermit) return;
     expect(sent.details.university_id).toBe(MARIAM);
-    expect(sent.details.student_name).toBe("عمر أحمد رمضان رمضان");
+    expect(sent.details.student_name).toBe("سيف حسام لطفي");
     expect(sent.details.line.line_id).toBe("ln_07");
     expect(sent.details.driver_name).toBeNull();
     expect((await errorOf(createModelPermit(modelPermit()))).code).toBe(

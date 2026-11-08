@@ -25,7 +25,7 @@ export const NotificationKind = {
   ChildCheckedOut: "child_checked_out",
 } as const;
 export type NotificationKind = (typeof NotificationKind)[keyof typeof NotificationKind];
-export const NOTIFICATION_KINDS = Object.values(NotificationKind) as [
+const NOTIFICATION_KINDS = Object.values(NotificationKind) as [
   NotificationKind,
   ...NotificationKind[],
 ];
@@ -71,7 +71,7 @@ export const notificationSchema = z.object({
 });
 export type AppNotification = z.infer<typeof notificationSchema>;
 
-export const NOTIFICATIONS_MAX_PAGE_SIZE = 50;
+const NOTIFICATIONS_MAX_PAGE_SIZE = 50;
 
 export const listNotificationsQuerySchema = z.object({
   page: z.number().int().positive().optional(),

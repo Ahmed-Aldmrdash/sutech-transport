@@ -16,7 +16,7 @@ import { Tone } from "./tone";
 
 type ToastTone = typeof Tone.Info | typeof Tone.Success | typeof Tone.Danger;
 
-export interface ToastOptions {
+interface ToastOptions {
   title: string;
   description?: string;
   tone?: ToastTone;
@@ -43,7 +43,7 @@ const MAX_VISIBLE = 3;
 const TONE_ICON: Record<ToastTone, ReactNode> = {
   info: <Info className="text-teal" />,
   success: <CircleCheck className="text-success" />,
-  danger: <CircleAlert className="text-danger" />,
+  danger: <CircleAlert className="text-danger-text" />,
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {

@@ -70,7 +70,7 @@ import {
 const HTTP = { NotFound: 404, Conflict: 409, TooLarge: 413, Unprocessable: 422 };
 
 /** The Fall 2026 refund table (Refund Policy 2026-2027, first semester). */
-export const MOCK_REFUND_WINDOWS: readonly RefundWindow[] = [
+const MOCK_REFUND_WINDOWS: readonly RefundWindow[] = [
   { from: "2026-09-20", to: "2026-10-08", deduction_percent: 25 },
   { from: "2026-10-11", to: "2026-10-29", deduction_percent: 50 },
   { from: "2026-11-01", to: null, deduction_percent: 100 },

@@ -11,7 +11,7 @@ import { selectedChildStore, useSelectedChildId } from "../selected-child-store"
 import type { Child } from "../schema";
 
 /** A notification can open a page for one child: /parent/day?child=usr_… */
-export const CHILD_QUERY_PARAM = "child";
+const CHILD_QUERY_PARAM = "child";
 
 interface ChildrenContextValue {
   children: readonly Child[];

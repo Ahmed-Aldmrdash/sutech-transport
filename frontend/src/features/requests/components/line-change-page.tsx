@@ -39,6 +39,7 @@ import { REQUEST_SERVER_ERRORS } from "./form-helpers";
 import { GuardianFields } from "./guardian-fields";
 import { REQUESTS_PATH } from "./requests-page";
 import { useSubmit } from "@/lib/hooks/use-submit";
+import { focusFirstError } from "@/lib/forms/focus-first-error";
 
 /** The university's line change form ("طلب تغيير خط السير"), online. */
 export function LineChangePage() {
@@ -147,6 +148,7 @@ function LineChangeForm({ subscription, lines }: { subscription: Subscription; l
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const form = event.currentTarget as HTMLElement;
     const found = validateLineChange(values, {
       today,
       termStartsOn: subscription.term.starts_on,
@@ -154,6 +156,7 @@ function LineChangeForm({ subscription, lines }: { subscription: Subscription; l
       currentLineId: subscription.line.line_id,
     });
     setErrors(found);
+    focusFirstError(form);
     if (Object.keys(found).length > 0) return;
     const isTemporary = values.duration === LineChangeDuration.Temporary;
     const created = await submit((idempotencyKey) =>

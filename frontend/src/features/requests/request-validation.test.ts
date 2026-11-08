@@ -22,7 +22,7 @@ const lineChange: LineChangeValues = {
   reason: "We moved house near this line.",
   studentPhone: "٠١٠١٢٣٤٥٦٧٨",
   guardianName: "Adel Mahmoud",
-  guardianPhone: "+20 109 876 0684",
+  guardianPhone: "+20 100 000 7684",
 };
 
 const modelPermit: ModelPermitValues = {
@@ -67,7 +67,7 @@ describe("request forms", () => {
   });
 
   it("accepts Egyptian mobiles typed in any common way", () => {
-    expect(normalizePhone("+20 109 876 0684")).toBe("01098760684");
+    expect(normalizePhone("+20 100 000 7684")).toBe("01000007684");
     expect(isEgyptianMobile("٠١٠١٢٣٤٥٦٧٨")).toBe(true);
     expect(isEgyptianMobile("0101234567")).toBe(false);
     expect(isEgyptianMobile("01312345678")).toBe(false);
@@ -100,7 +100,7 @@ describe("request forms", () => {
       reason: "standard" as const,
       explanation: "I will drive to campus from now on.",
       guardianName: "Adel Mahmoud",
-      guardianPhone: "01098760684",
+      guardianPhone: "01000007684",
       guardianConsent: true,
       documents: [],
     };

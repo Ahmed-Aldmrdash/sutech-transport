@@ -24,7 +24,7 @@ import { EmergencyErrorCode, ReplacementReason } from "./schema";
 const DRIVER = "DRV-1001";
 const TRANSPORT = "TRN-1001";
 const CLINIC = "CLN-1001";
-const OMAR = "240102684";
+const OMAR = "240100102";
 /** Sunday 8 Nov 2026, 07:30 in Cairo: the line 7 bus is about to leave. */
 const SUNDAY_MORNING = Date.parse("2026-11-08T05:30:00Z");
 
@@ -39,8 +39,7 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 
 async function signIn(identifier: string) {
   const challenge = await requestOtp(identifier);
-  const session = await login(identifier, challenge.demo_code ?? "");
-  tokenStore.set(session.token);
+  await login(identifier, challenge.demo_code ?? "");
 }
 
 /** The line 7 driver starts the outbound trip and raises an SOS. */
@@ -76,7 +75,7 @@ describe("the office takes an SOS (mock server)", () => {
     const alert = items[0];
     expect(alert?.line.line_id).toBe("ln_07");
     expect(alert?.bus.plate).toBe("ج ص 9943");
-    expect(alert?.raised_by_phone).toBe("01006796783");
+    expect(alert?.raised_by_phone).toBe("01000004008");
 
     expect((await errorOf(addSosAction(sos.id, { action: "note", note: "On it" }))).code).toBe(
       EmergencyErrorCode.NotAcknowledged,

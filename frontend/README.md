@@ -23,9 +23,9 @@ Open `/ar` and sign in with one of these mock accounts. Each request makes a new
 
 | Role                  | ID                      | Home                 |
 | --------------------- | ----------------------- | -------------------- |
-| Student (no booking)  | `240102791`             | `/student`           |
-| Student (subscribed)  | `240102684`             | `/student`           |
-| Parent                | `01098765432`           | `/parent`            |
+| Student (no booking)  | `240100101`             | `/student`           |
+| Student (subscribed)  | `240100102`             | `/student`           |
+| Parent                | `01000002000`           | `/parent`            |
 | Driver / supervisor   | `DRV-1001` / `SUP-1001` | `/driver`            |
 | Transportation office | `TRN-1001`              | `/admin`             |
 | Finance               | `FIN-1001`              | `/admin/payments`    |

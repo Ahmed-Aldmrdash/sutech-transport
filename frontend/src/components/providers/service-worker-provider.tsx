@@ -2,8 +2,9 @@
 
 import { SerwistProvider } from "@serwist/turbopack/react";
 import { useEffect, type ReactNode } from "react";
+import { UpdateBanner } from "./update-banner";
 
-export const SERVICE_WORKER_URL = "/serwist/sw.js";
+const SERVICE_WORKER_URL = "/serwist/sw.js";
 
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
@@ -24,6 +25,7 @@ export function ServiceWorkerProvider({ children }: { children: ReactNode }) {
   return (
     <SerwistProvider swUrl={SERVICE_WORKER_URL} disable={!IS_PRODUCTION}>
       {children}
+      <UpdateBanner />
     </SerwistProvider>
   );
 }

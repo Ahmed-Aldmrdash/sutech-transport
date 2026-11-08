@@ -1,8 +1,8 @@
 "use client";
 
-import { FileCheck2, Paperclip, X } from "lucide-react";
+import { FileCheck2, FileX2, Paperclip, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { IconButton } from "@/components/ui/icon-button";
@@ -15,24 +15,58 @@ interface AttachmentsFieldProps {
   label: string;
   hint: string;
   files: readonly File[];
+  /** The largest file accepted, in bytes. */
+  maxBytes: number;
   required?: boolean;
   error?: string;
   onChange: (files: File[]) => void;
 }
 
-/** Up to three photos or PDFs (documents, evidence); on phones it also offers the camera. */
+type RejectReason = "fileType" | "fileTooLarge" | "tooManyFiles";
+
+interface Rejected {
+  name: string;
+  reason: RejectReason;
+}
+
+/** Splits newly picked files into the ones kept and the ones refused, with why. */
+function checkPicked(current: readonly File[], picked: readonly File[], maxBytes: number) {
+  const kept: File[] = [];
+  const rejected: Rejected[] = [];
+  for (const file of picked) {
+    if (!(RECEIPT_CONTENT_TYPES as readonly string[]).includes(file.type)) {
+      rejected.push({ name: file.name, reason: "fileType" });
+    } else if (file.size > maxBytes) {
+      rejected.push({ name: file.name, reason: "fileTooLarge" });
+    } else if (current.length + kept.length >= MAX_ATTACHMENTS) {
+      rejected.push({ name: file.name, reason: "tooManyFiles" });
+    } else {
+      kept.push(file);
+    }
+  }
+  return { kept, rejected };
+}
+
+/**
+ * Up to three photos or PDFs (documents, evidence); on phones it also offers the camera. Each
+ * file is checked the moment it is picked: a wrong type, a file too big or one too many is
+ * refused there, with the reason next to its name, instead of failing at Submit.
+ */
 export function AttachmentsField({
   label,
   hint,
   files,
+  maxBytes,
   required,
   error,
   onChange,
 }: AttachmentsFieldProps) {
   const t = useTranslations("student.requests.attachments");
+  const tErrors = useTranslations("student.requests.errors");
   const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
   const inputRef = useRef<HTMLInputElement>(null);
+  const [rejected, setRejected] = useState<Rejected[]>([]);
   const isFull = files.length >= MAX_ATTACHMENTS;
 
   return (
@@ -53,8 +87,9 @@ export function AttachmentsField({
             accept={RECEIPT_CONTENT_TYPES.join(",")}
             className="sr-only"
             onChange={(event) => {
-              const picked = Array.from(event.target.files ?? []);
-              onChange([...files, ...picked]);
+              const picked = checkPicked(files, Array.from(event.target.files ?? []), maxBytes);
+              setRejected(picked.rejected);
+              if (picked.kept.length > 0) onChange([...files, ...picked.kept]);
               event.target.value = "";
             }}
           />
@@ -80,6 +115,26 @@ export function AttachmentsField({
                     label={t("remove", { name: file.name })}
                     onClick={() => onChange(files.filter((_, at) => at !== index))}
                   />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {rejected.length > 0 ? (
+            <ul role="alert" className="flex flex-col gap-1">
+              {rejected.map((file, index) => (
+                <li
+                  key={`${file.name}-${index}`}
+                  className="flex min-w-0 items-start gap-2 text-body-sm text-danger-text"
+                >
+                  <FileX2 aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold" dir="ltr">
+                      {file.name}
+                    </span>
+                    {t("refused", {
+                      reason: tErrors(file.reason, { size: formatFileSize(maxBytes, locale) }),
+                    })}
+                  </span>
                 </li>
               ))}
             </ul>

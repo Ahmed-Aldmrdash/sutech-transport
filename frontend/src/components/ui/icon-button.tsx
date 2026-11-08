@@ -21,7 +21,7 @@ const iconButtonStyles = cva(
   },
 );
 
-export interface IconButtonProps
+interface IconButtonProps
   extends
     Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children">,
     VariantProps<typeof iconButtonStyles> {

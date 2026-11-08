@@ -55,7 +55,7 @@ export function mockTerm(language: string) {
 
 const iso = (time: number | null) => (time === null ? null : new Date(time).toISOString());
 
-export function toSubscription(
+function toSubscription(
   userId: string,
   booking: MockBooking,
   language: string,

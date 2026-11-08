@@ -5,7 +5,7 @@ import { useAsync } from "@/lib/hooks/use-async";
 import { getCrewToday } from "../api";
 
 /** How often the crew's pages re-read the trip until the WebSocket is in place. */
-export const CREW_REFRESH_MS = 15_000;
+const CREW_REFRESH_MS = 15_000;
 
 /** Today's trip for the signed-in driver or supervisor, kept fresh in the background. */
 export function useCrewToday() {

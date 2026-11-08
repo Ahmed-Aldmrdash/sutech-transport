@@ -21,8 +21,11 @@ export interface ReceiptFormValues {
 export type ReceiptFieldError =
   | "required"
   | "referenceTooShort"
+  | "amountInvalid"
   | "amountTooLow"
+  | "amountTooHigh"
   | "dateInFuture"
+  | "dateTooEarly"
   | "payerTooShort"
   | "fileMissing"
   | "fileType"
@@ -34,6 +37,26 @@ export type ReceiptErrors = Partial<
 
 const MIN_REFERENCE_LENGTH = 3;
 const MIN_PAYER_LENGTH = 3;
+/**
+ * A receipt may be a little over the price (a bank's own fee added to the deposit), never far
+ * over it: a much bigger number is almost always a typo, and money paid twice is a refund.
+ */
+const MAX_OVER_PRICE = 1.1;
+
+export interface ReceiptRules {
+  /** The term's price: the least a receipt may show. */
+  minimumPiasters: number;
+  maxBytes: number;
+  /** Cairo today, "YYYY-MM-DD": no payment date after it. */
+  today: string;
+  /** The day the seat was held, "YYYY-MM-DD": no payment for it can be older. */
+  earliestPaidOn: string;
+}
+
+/** The most a receipt may show for this price. */
+export function maximumPiastersFor(minimumPiasters: number): number {
+  return Math.round(minimumPiasters * MAX_OVER_PRICE);
+}
 
 /** Pounds typed by the student → piasters, or null when it isn't a number. */
 export function poundsToPiasters(amount: string): number | null {
@@ -43,10 +66,7 @@ export function poundsToPiasters(amount: string): number | null {
 }
 
 /** Checks the form like the server will, so most mistakes show before sending. */
-export function validateReceipt(
-  values: ReceiptFormValues,
-  rules: { minimumPiasters: number; maxBytes: number; today: string },
-): ReceiptErrors {
+export function validateReceipt(values: ReceiptFormValues, rules: ReceiptRules): ReceiptErrors {
   const errors: ReceiptErrors = {};
   const reference = values.reference.trim();
   if (!reference) errors.reference = "required";
@@ -55,10 +75,13 @@ export function validateReceipt(
 
   const piasters = poundsToPiasters(values.amount);
   if (!values.amount.trim()) errors.amount = "required";
-  else if (piasters === null || piasters < rules.minimumPiasters) errors.amount = "amountTooLow";
+  else if (piasters === null) errors.amount = "amountInvalid";
+  else if (piasters < rules.minimumPiasters) errors.amount = "amountTooLow";
+  else if (piasters > maximumPiastersFor(rules.minimumPiasters)) errors.amount = "amountTooHigh";
 
   if (!values.paidOn) errors.paidOn = "required";
   else if (values.paidOn > rules.today) errors.paidOn = "dateInFuture";
+  else if (values.paidOn < rules.earliestPaidOn) errors.paidOn = "dateTooEarly";
 
   const payer = values.payer.trim();
   if (!payer) errors.payer = "required";

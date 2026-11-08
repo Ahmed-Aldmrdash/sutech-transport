@@ -44,6 +44,7 @@ import { REQUEST_SERVER_ERRORS, toUploads } from "./form-helpers";
 import { GuardianFields } from "./guardian-fields";
 import { REQUESTS_PATH } from "./requests-page";
 import { useSubmit } from "@/lib/hooks/use-submit";
+import { focusFirstError } from "@/lib/forms/focus-first-error";
 
 /** Cancelling a paid subscription for a refund, under the term's refund policy. */
 export function RefundPage() {
@@ -180,8 +181,10 @@ function RefundForm({ policy }: { policy: RefundPolicy }) {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const form = event.currentTarget as HTMLElement;
     const found = validateRefund(values, { maxBytes: RECEIPT_MAX_BYTES });
     setErrors(found);
+    focusFirstError(form);
     if (Object.keys(found).length > 0 || values.reason === "" || !policy.subscription_id) return;
     const { reason } = values;
     const subscriptionId = policy.subscription_id;
@@ -237,7 +240,7 @@ function RefundForm({ policy }: { policy: RefundPolicy }) {
               );
             })}
             {errors.reason ? (
-              <p role="alert" className="text-body-sm text-danger">
+              <p role="alert" className="text-body-sm text-danger-text">
                 {fieldError("reason")}
               </p>
             ) : null}
@@ -253,6 +256,7 @@ function RefundForm({ policy }: { policy: RefundPolicy }) {
           />
 
           <AttachmentsField
+            maxBytes={RECEIPT_MAX_BYTES}
             label={t("refund.documents")}
             hint={t("refund.documentsHint", { size: formatFileSize(RECEIPT_MAX_BYTES, locale) })}
             required={isExceptional}

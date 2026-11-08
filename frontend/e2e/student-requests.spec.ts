@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { expectNoSidewaysScroll, isPhone, signIn, watchForErrors } from "./helpers";
 
-const MARIAM = "240102684"; // Omar, active on line 7
-const AHMED = "240102791"; // no booking
+const MARIAM = "240100102"; // Seif, active on line 7
+const AHMED = "240100101"; // no booking
 
 test.describe("student requests, notifications and settings", () => {
   test("sends a line change, follows it and withdraws it", async ({ page }) => {
@@ -19,7 +19,7 @@ test.describe("student requests, notifications and settings", () => {
     await page.getByLabel("Temporary").check();
     await page.getByLabel("Until").fill("2027-01-10");
     await page.getByLabel("Why do you need to change?").fill("Staying with my aunt for a while.");
-    await page.getByLabel("Your mobile").fill("01012340684");
+    await page.getByLabel("Your mobile").fill("01000006684");
     await page.getByLabel("Guardian's mobile").fill("0109 876 0684");
     await expect(page.getByText(/your guardian gets it in the app to approve/)).toBeVisible();
     await expectNoSidewaysScroll(page);
@@ -127,7 +127,7 @@ test.describe("student requests, notifications and settings", () => {
     await expect(isPhone(page) ? entry.getByText(/new/) : entry).toBeAttached();
     await entry.click();
     await expect(page.getByRole("heading", { name: "Notifications", level: 1 })).toBeVisible();
-    // Only the student's own line: Omar rides line 7, so line 5's delay never reaches him.
+    // Only the student's own line: Seif rides line 7, so line 5's delay never reaches him.
     await expect(page.getByText("Line 7 is running about 15 minutes late")).toBeVisible();
     await expect(page.getByText("Line 5 is running about 10 minutes late")).toHaveCount(0);
     await page.getByRole("button", { name: "Mark all as read" }).click();
@@ -156,7 +156,7 @@ test.describe("student requests, notifications and settings", () => {
     await signIn(page, AHMED);
     await page.waitForURL(/\/en\/student$/);
     await page.goto("/en/student/settings");
-    await expect(page.getByText("240102791")).toBeVisible();
+    await expect(page.getByText("240100101")).toBeVisible();
     await page.getByRole("radio", { name: "Dark" }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     // The switch happens in place: no reload and no full-page loader in between.

@@ -39,7 +39,7 @@ export type RequestFieldError =
 export type FieldErrors<K extends string> = Partial<Record<K, RequestFieldError>>;
 
 /** The term's dates and today's date (Cairo), all "YYYY-MM-DD". */
-export interface DateRules {
+interface DateRules {
   today: string;
   termStartsOn: string;
   termEndsOn: string;
@@ -81,7 +81,7 @@ function checkName(name: string): RequestFieldError | undefined {
   return name.trim().length < MIN_NAME_LENGTH ? "nameTooShort" : undefined;
 }
 
-export function checkFiles(
+function checkFiles(
   files: readonly File[],
   maxBytes: number,
 ): RequestFieldError | undefined {

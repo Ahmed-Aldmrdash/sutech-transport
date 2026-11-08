@@ -23,12 +23,12 @@ const SPARE_DRIVERS: readonly MockFleetDriver[] = [
     driverId: "drv_spare_1",
     nameAr: "سيد عبد الحميد",
     nameEn: "Sayed Abdelhamid",
-    phone: "01001234561",
+    phone: "01000005001",
   },
-  { driverId: "drv_spare_2", nameAr: "رضا منصور", nameEn: "Reda Mansour", phone: "01001234562" },
-  { driverId: "drv_spare_3", nameAr: "أشرف جمال", nameEn: "Ashraf Gamal", phone: "01001234563" },
-  { driverId: "drv_spare_4", nameAr: "هاني فوزي", nameEn: "Hany Fawzy", phone: "01001234564" },
-  { driverId: "drv_spare_5", nameAr: "وليد سعيد", nameEn: "Walid Said", phone: "01001234565" },
+  { driverId: "drv_spare_2", nameAr: "رضا منصور", nameEn: "Reda Mansour", phone: "01000005002" },
+  { driverId: "drv_spare_3", nameAr: "أشرف جمال", nameEn: "Ashraf Gamal", phone: "01000005003" },
+  { driverId: "drv_spare_4", nameAr: "هاني فوزي", nameEn: "Hany Fawzy", phone: "01000005004" },
+  { driverId: "drv_spare_5", nameAr: "وليد سعيد", nameEn: "Walid Said", phone: "01000005005" },
 ];
 
 /** Spare buses at the Abu El Hol garage, each with its own driver. */

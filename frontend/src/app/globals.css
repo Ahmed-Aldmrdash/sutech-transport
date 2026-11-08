@@ -35,8 +35,11 @@
   --color-coral: var(--sut-coral);
   --color-coral-text: var(--sut-coral-text);
   --color-coral-soft: var(--sut-coral-soft);
+  --color-coral-40: var(--sut-coral-40);
+  --color-on-coral: var(--sut-on-coral);
   --color-danger: var(--sut-danger);
   --color-danger-soft: var(--sut-danger-soft);
+  --color-danger-text: var(--sut-danger-text);
   --color-on-danger: var(--sut-on-danger);
   --color-success: var(--sut-success);
   --color-success-soft: var(--sut-success-soft);

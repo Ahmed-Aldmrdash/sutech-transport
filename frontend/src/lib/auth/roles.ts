@@ -19,17 +19,6 @@ export type Role = (typeof Role)[keyof typeof Role];
 
 export const ALL_ROLES: readonly Role[] = Object.values(Role);
 
-/** Office staff work mostly on a laptop; the rest mostly on a phone. Both layouts work for all. */
-export const OFFICE_ROLES: readonly Role[] = [
-  Role.SuperAdmin,
-  Role.Transport,
-  Role.Finance,
-  Role.Clinic,
-  Role.StudentAffairs,
-  Role.SecretaryGeneral,
-  Role.BusCompany,
-];
-
 export function isRole(value: unknown): value is Role {
   return ALL_ROLES.includes(value as Role);
 }

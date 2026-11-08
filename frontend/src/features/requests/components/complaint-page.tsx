@@ -35,6 +35,7 @@ import { AttachmentsField } from "./attachments-field";
 import { REQUEST_SERVER_ERRORS, toUploads } from "./form-helpers";
 import { COMPLAINTS_PATH } from "./requests-page";
 import { useSubmit } from "@/lib/hooks/use-submit";
+import { focusFirstError } from "@/lib/forms/focus-first-error";
 
 export function ComplaintPage() {
   const t = useTranslations("student.requests.complaint");
@@ -105,6 +106,7 @@ function ComplaintForm({
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const form = event.currentTarget as HTMLElement;
     const found = validateComplaint(values, {
       today,
       termStartsOn: subscription.term.starts_on,
@@ -112,6 +114,7 @@ function ComplaintForm({
       maxBytes: RECEIPT_MAX_BYTES,
     });
     setErrors(found);
+    focusFirstError(form);
     if (Object.keys(found).length > 0 || values.category === "") return;
     const { category } = values;
     const created = await submit(async (idempotencyKey) =>
@@ -188,6 +191,7 @@ function ComplaintForm({
             onChange={(event) => update("description", event.target.value)}
           />
           <AttachmentsField
+            maxBytes={RECEIPT_MAX_BYTES}
             label={tForm("complaint.attachments")}
             hint={tForm("complaint.attachmentsHint", {
               size: formatFileSize(RECEIPT_MAX_BYTES, locale),

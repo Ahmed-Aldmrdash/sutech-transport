@@ -59,7 +59,7 @@ function ButtonContent({ iconStart, iconEnd, withArrow, children }: ButtonConten
   );
 }
 
-export interface ButtonProps
+interface ButtonProps
   extends
     ButtonHTMLAttributes<HTMLButtonElement>,
     ButtonStyleProps,
@@ -101,7 +101,7 @@ export function Button({
   );
 }
 
-export interface ButtonLinkProps
+interface ButtonLinkProps
   extends Omit<ComponentProps<typeof Link>, "children">, ButtonStyleProps, ButtonContentProps {}
 
 /** A link that looks like a button. Uses the locale-aware Link. */

@@ -109,6 +109,7 @@ function ApprovalCard({
 }) {
   const t = useTranslations("parent.approvals");
   const tStudent = useTranslations("student");
+  const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
   const toast = useToast();
   const { request } = item;
@@ -238,7 +239,7 @@ function ApprovalCard({
         <div className="flex flex-col gap-3">
           <TextAreaField
             label={decision === Decision.Refuse ? t("refuseNote", { name }) : t("approveNote")}
-            optionalText={t("optional")}
+            optionalText={tCommon("optional")}
             rows={3}
             maxLength={NOTE_MAX_LENGTH}
             value={note}

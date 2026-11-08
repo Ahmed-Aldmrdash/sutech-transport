@@ -9,7 +9,7 @@ const EARTH_RADIUS_KM = 6371;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const FULL_CIRCLE = 360;
 
-export function distanceKm(a: GeoPoint, b: GeoPoint): number {
+function distanceKm(a: GeoPoint, b: GeoPoint): number {
   const dLat = (b.lat - a.lat) * DEGREES_TO_RADIANS;
   const dLng = (b.lng - a.lng) * DEGREES_TO_RADIANS;
   const h =
@@ -21,7 +21,7 @@ export function distanceKm(a: GeoPoint, b: GeoPoint): number {
 }
 
 /** Compass bearing from a to b: 0 = north, 90 = east. */
-export function bearingDegrees(a: GeoPoint, b: GeoPoint): number {
+function bearingDegrees(a: GeoPoint, b: GeoPoint): number {
   const lat1 = a.lat * DEGREES_TO_RADIANS;
   const lat2 = b.lat * DEGREES_TO_RADIANS;
   const dLng = (b.lng - a.lng) * DEGREES_TO_RADIANS;
@@ -30,7 +30,7 @@ export function bearingDegrees(a: GeoPoint, b: GeoPoint): number {
   return (Math.atan2(y, x) / DEGREES_TO_RADIANS + FULL_CIRCLE) % FULL_CIRCLE;
 }
 
-export function lerpPoint(a: GeoPoint, b: GeoPoint, t: number): GeoPoint {
+function lerpPoint(a: GeoPoint, b: GeoPoint, t: number): GeoPoint {
   return { lat: a.lat + (b.lat - a.lat) * t, lng: a.lng + (b.lng - a.lng) * t };
 }
 

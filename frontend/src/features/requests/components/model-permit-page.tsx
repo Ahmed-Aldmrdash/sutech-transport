@@ -35,6 +35,7 @@ import {
 import { MODEL_PERMIT_PLEDGES, MODEL_PURPOSES, ModelPurpose } from "../schema";
 import { REQUEST_SERVER_ERRORS } from "./form-helpers";
 import { REQUESTS_PATH } from "./requests-page";
+import { focusFirstError } from "@/lib/forms/focus-first-error";
 
 /**
  * The university's safety permit for bringing a project model onto the bus
@@ -138,12 +139,14 @@ function ModelPermitForm({ subscription }: { subscription: Subscription }) {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const form = event.currentTarget as HTMLElement;
     const found = validateModelPermit(values, {
       today,
       termStartsOn: subscription.term.starts_on,
       termEndsOn: subscription.term.ends_on,
     });
     setErrors(found);
+    focusFirstError(form);
     if (Object.keys(found).length > 0) return;
     const purpose = values.purpose as ModelPurpose;
     const created = await submit((idempotencyKey) =>
@@ -234,7 +237,7 @@ function ModelPermitForm({ subscription }: { subscription: Subscription }) {
                 ))}
               </div>
               {errors.purpose ? (
-                <p role="alert" className="text-body-sm text-danger">
+                <p role="alert" className="text-body-sm text-danger-text">
                   {fieldError("purpose")}
                 </p>
               ) : null}
@@ -337,7 +340,7 @@ function ModelPermitForm({ subscription }: { subscription: Subscription }) {
                 onChange={(event) => update("declarationAccepted", event.target.checked)}
               />
               {errors.declarationAccepted ? (
-                <p role="alert" className="text-body-sm text-danger">
+                <p role="alert" className="text-body-sm text-danger-text">
                   {fieldError("declarationAccepted")}
                 </p>
               ) : null}

@@ -199,7 +199,7 @@ function emergencyAnnouncements(language: string): Announcement[] {
 }
 
 /** Every announcement, newest first. Also read by the notifications mock. */
-export function mockAnnouncements(language: string): Announcement[] {
+function mockAnnouncements(language: string): Announcement[] {
   const fixed = MOCK_ANNOUNCEMENTS.map((item) => ({
     announcement_id: item.id,
     kind: item.kind,

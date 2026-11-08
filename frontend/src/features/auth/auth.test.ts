@@ -21,9 +21,9 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 
 describe("identifier input", () => {
   it("accepts Arabic digits, spaces and dashes", () => {
-    expect(normalizeIdentifier(" ٢٤٠ ١٠٢ ٧٩١ ")).toBe("240102791");
-    expect(normalizeIdentifier("010-9876-5432")).toBe("01098765432");
-    expect(normalizeIdentifier("۰۱۰۹۸۷۶۵۴۳۲")).toBe("01098765432");
+    expect(normalizeIdentifier(" ٢٤٠ ١٠٠ ١٠١ ")).toBe("240100101");
+    expect(normalizeIdentifier("010-0000-2000")).toBe("01000002000");
+    expect(normalizeIdentifier("۰۱۰۰۰۰۰۲۰۰۰")).toBe("01000002000");
   });
 
   it("keeps emails lower case and staff IDs upper case", () => {
@@ -42,11 +42,11 @@ describe("role access", () => {
     expect(homePathFor(Role.Parent)).toBe("/parent");
     expect(homePathFor(Role.Driver)).toBe("/driver");
     expect(homePathFor(Role.Supervisor)).toBe("/driver");
-    expect(homePathFor(Role.Transport)).toBe("/admin");
-    expect(homePathFor(Role.SuperAdmin)).toBe("/admin");
-    expect(homePathFor(Role.Finance)).toBe("/admin/payments");
+    expect(homePathFor(Role.Transport)).toBe("/admin/emergencies");
+    expect(homePathFor(Role.SuperAdmin)).toBe("/admin/emergencies");
+    expect(homePathFor(Role.Finance)).toBe("/admin");
     expect(homePathFor(Role.Clinic)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.BusCompany)).toBe("/admin/bus-company");
+    expect(homePathFor(Role.BusCompany)).toBe("/admin");
   });
 
   it("keeps roles out of each other's pages", () => {
@@ -60,20 +60,23 @@ describe("role access", () => {
   });
 
   it("keeps offices apart inside /admin", () => {
-    expect(canOpen(Role.Finance, "/admin/payments")).toBe(true);
-    expect(canOpen(Role.Finance, "/admin")).toBe(false);
-    expect(canOpen(Role.Finance, "/admin/tracking")).toBe(false);
-    expect(canOpen(Role.Transport, "/admin/users")).toBe(false);
+    // Finance has no built page yet: only its "coming soon" home.
+    expect(canOpen(Role.Finance, "/admin")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/payments")).toBe(false);
+    expect(canOpen(Role.Finance, "/admin/emergencies")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/emergencies/sos_1")).toBe(true);
+    expect(canOpen(Role.Clinic, "/admin/clinic")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/payments")).toBe(false);
-    expect(canOpen(Role.SuperAdmin, "/admin/users")).toBe(true);
-    expect(canOpen(Role.SuperAdmin, "/admin/payments")).toBe(true);
+    expect(canOpen(Role.SuperAdmin, "/admin/clinic")).toBe(true);
+    expect(canOpen(Role.SuperAdmin, "/admin/users")).toBe(false);
     expect(canOpen(Role.SuperAdmin, "/student")).toBe(false);
   });
 
   it("returns to the page asked for only if the role may open it", () => {
     expect(landingPathFor(Role.Student, "/student/card")).toBe("/student/card");
     expect(landingPathFor(Role.Student, "/admin/users")).toBe("/student");
-    expect(landingPathFor(Role.Finance, null)).toBe("/admin/payments");
+    expect(landingPathFor(Role.Finance, null)).toBe("/admin");
   });
 
   it("never follows a link off the site", () => {
@@ -99,18 +102,17 @@ describe("two-step login (mock server)", () => {
   });
 
   it("sends a code, signs in and knows who you are", async () => {
-    const challenge = await requestOtp("240102791");
+    const challenge = await requestOtp("240100101");
     expect(challenge).toMatchObject({
-      masked_destination: "010•••••907",
-      name_hint: "أحمد",
+      masked_destination: "010•••••001",
+      name_hint: "زياد",
       attempts_left: MOCK_OTP_RULES.attempts,
       code_length: MOCK_OTP_LENGTH,
     });
-    const session = await login("240102791", challenge.demo_code ?? "");
+    const session = await login("240100101", challenge.demo_code ?? "");
     expect(session.user.role).toBe(Role.Student);
     expect(Date.parse(session.expires_at)).toBeGreaterThan(Date.now());
 
-    tokenStore.set(session.token);
     expect((await getMe()).id).toBe(session.user.id);
     await logout();
     expect((await errorOf(getMe())).status).toBe(401);

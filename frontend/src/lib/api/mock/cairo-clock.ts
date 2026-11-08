@@ -2,7 +2,7 @@ import { APP_TIME_ZONE } from "@/lib/format";
 
 /** Clock helpers for the mocks, which act like a server running on Cairo time. */
 
-export const MINUTES_PER_HOUR = 60;
+const MINUTES_PER_HOUR = 60;
 export const MS_PER_MINUTE = 60_000;
 
 /** Buses run Sunday to Thursday (0 = Sunday). */

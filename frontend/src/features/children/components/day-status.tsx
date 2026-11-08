@@ -41,7 +41,7 @@ const STATUS_STYLE: Record<ChildDayStatus, string> = {
   [ChildDayStatus.Boarded]: "bg-teal-soft text-teal-text",
   [ChildDayStatus.Arrived]: "bg-success-soft text-success-text",
   [ChildDayStatus.CheckedOut]: "bg-warning-soft text-warning-text",
-  [ChildDayStatus.Absent]: "bg-danger-soft text-danger",
+  [ChildDayStatus.Absent]: "bg-danger-soft text-danger-text",
 };
 
 const LIVE_STATUSES: readonly ChildDayStatus[] = [ChildDayStatus.BusOnWay, ChildDayStatus.Boarded];

@@ -46,3 +46,6 @@ next-env.d.ts
 /test-results
 /blob-report
 /playwright/.cache
+
+# state folders some AI tools write (e.g. oh-my-claudecode)
+.omc

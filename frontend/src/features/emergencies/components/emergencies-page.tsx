@@ -118,7 +118,7 @@ function SosRow({ sos }: { sos: AdminSos }) {
             "flex size-12 shrink-0 items-center justify-center rounded-full",
             sos.status === SosStatus.Closed
               ? "bg-surface-alt text-ink-muted"
-              : "bg-danger-soft text-danger",
+              : "bg-danger-soft text-danger-text",
           )}
         >
           <Icon aria-hidden="true" className="size-6" />

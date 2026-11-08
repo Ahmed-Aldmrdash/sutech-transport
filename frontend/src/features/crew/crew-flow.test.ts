@@ -30,9 +30,9 @@ import {
 } from "./schema";
 
 const DRIVER = "DRV-1001";
-const OMAR = "240102684"; // active on line 7, stop 2
+const OMAR = "240100102"; // active on line 7, stop 2
 const OMAR_ID = "usr_student_2";
-const AHMED = "240102791"; // no booking
+const AHMED = "240100101"; // no booking
 const COASTER_SEATS = 28;
 /** Sunday 8 Nov 2026, 07:30 in Cairo (UTC+2): the line 7 bus is about to leave. */
 const SUNDAY_MORNING = Date.parse("2026-11-08T05:30:00Z");
@@ -50,8 +50,7 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 
 async function signIn(identifier: string) {
   const challenge = await requestOtp(identifier);
-  const session = await login(identifier, challenge.demo_code ?? "");
-  tokenStore.set(session.token);
+  await login(identifier, challenge.demo_code ?? "");
 }
 
 async function outbound(): Promise<CrewTrip> {

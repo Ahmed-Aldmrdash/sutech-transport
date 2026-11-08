@@ -1,12 +1,10 @@
 "use client";
 
-import { Hammer, Sparkles } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { findActiveItem, navigationFor, roleHomeHref } from "@/features/navigation/nav-config";
-import { usePathname } from "@/i18n/navigation";
+import { navigationFor, soonItems } from "@/features/navigation/nav-config";
 import type { Locale } from "@/i18n/routing";
 import { formatDateTime } from "@/lib/format";
 import { SessionStatus } from "../session/session-store";
@@ -15,51 +13,48 @@ import type { User } from "../schema";
 import { firstNameOf, userText } from "../user-text";
 
 /**
- * Phase 1 content for every signed-in page: the role's home shows the account, other menu
- * pages say they come in a later phase. Each phase replaces its pages with the real screens.
+ * Home of an office whose pages aren't built yet (finance, student affairs, the Secretary
+ * General, Abu El Hol): who is signed in, and the pages that will open here, marked as coming
+ * soon. An office with a built page lands on that page instead and never sees this one.
  */
-export function SignedInPage() {
+export function OfficeWelcomePage() {
   const locale = useLocale() as Locale;
   const t = useTranslations();
-  const pathname = usePathname();
   const state = useSession();
   if (state.status !== SessionStatus.SignedIn) return null;
 
   const { user, expires_at: expiresAt } = state.session;
-  const navigation = navigationFor(user.role);
-  const activeItem = findActiveItem(navigation, navigation.basePath, pathname);
-  const isHome = pathname === roleHomeHref(navigation);
-
-  if (!isHome) {
-    return (
-      <div className="flex flex-col gap-6">
-        <PageHeader
-          eyebrow={t(`roles.${user.role}`)}
-          title={activeItem ? t(`nav.items.${activeItem.key}`) : ""}
-        />
-        <EmptyState
-          icon={<Hammer />}
-          title={t("preview.pageComing")}
-          description={t("preview.pageComingBody")}
-        />
-      </div>
-    );
-  }
+  const upcoming = soonItems(navigationFor(user.role));
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow={activeItem ? t(`nav.items.${activeItem.key}`) : undefined}
+        eyebrow={t(`roles.${user.role}`)}
         title={t("session.welcome", { name: firstNameOf(userText(user, locale).name) })}
         description={t("session.homeLead")}
       />
       <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <AccountCard user={user} expiresAt={expiresAt} />
         <Card>
-          <CardHeader title={t("session.comingTitle")} />
-          <CardBody className="flex gap-3">
-            <Sparkles aria-hidden="true" className="mt-1 size-5 shrink-0 text-coral" />
-            <p className="text-body text-ink">{t("session.comingBody")}</p>
+          <CardHeader title={t("session.soonTitle")} description={t("session.soonBody")} />
+          <CardBody>
+            <ul className="flex flex-col divide-y divide-line">
+              {upcoming.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <li key={item.key} className="flex items-center gap-3 py-3">
+                    <Icon aria-hidden="true" className="size-5 shrink-0 text-ink-muted" />
+                    <span className="min-w-0 flex-1 text-body-sm font-bold text-ink-strong">
+                      {t(`nav.items.${item.key}`)}
+                    </span>
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-pill bg-surface-alt px-2 py-0.5 text-caption font-bold text-ink-muted">
+                      <Clock aria-hidden="true" className="size-3.5" />
+                      {t("nav.soon")}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </CardBody>
         </Card>
       </div>

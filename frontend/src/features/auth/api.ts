@@ -2,6 +2,7 @@ import { z } from "zod";
 import { callEndpoint, type RequestOptions } from "@/lib/api/client";
 import { HttpMethod, defineEndpoint } from "@/lib/api/endpoint";
 import { ALL_ROLES } from "@/lib/auth/roles";
+import { isMockMode } from "@/lib/config";
 import {
   loginBodySchema,
   loginResponseSchema,
@@ -61,8 +62,17 @@ export const getMeEndpoint = defineEndpoint({
   response: userSchema,
 });
 
-export function requestOtp(identifier: string, options?: RequestOptions): Promise<OtpChallenge> {
-  return callEndpoint(requestOtpEndpoint, { body: { identifier } }, options);
+/**
+ * Step 1. A `demo_code` is only ever kept in mock mode: if a real server sent one by mistake
+ * (say, a staging build), showing it would let anyone sign in as anyone.
+ */
+export async function requestOtp(
+  identifier: string,
+  options?: RequestOptions,
+): Promise<OtpChallenge> {
+  const challenge = await callEndpoint(requestOtpEndpoint, { body: { identifier } }, options);
+  if (isMockMode) return challenge;
+  return { ...challenge, demo_code: undefined };
 }
 
 export function login(

@@ -58,7 +58,7 @@ function weekdayOf(date: string): number {
 }
 
 /** Mock only: the made-up check-out reason. */
-export const MOCK_CHECKOUT_REASON = {
+const MOCK_CHECKOUT_REASON = {
   ar: "تعبان، وولي الأمر استلمه من الطريق",
   en: "Felt unwell; picked up by guardian on the way",
 } as const;

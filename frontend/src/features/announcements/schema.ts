@@ -22,7 +22,7 @@ export const announcementSchema = z.object({
 });
 export type Announcement = z.infer<typeof announcementSchema>;
 
-export const ANNOUNCEMENTS_MAX_PAGE_SIZE = 50;
+const ANNOUNCEMENTS_MAX_PAGE_SIZE = 50;
 
 export const ANNOUNCEMENT_KINDS = [
   AnnouncementKind.Official,

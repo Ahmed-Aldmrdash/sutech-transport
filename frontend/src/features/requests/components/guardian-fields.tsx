@@ -76,7 +76,7 @@ export function GuardianFields({
             onChange={(event) => consent.onChange(event.target.checked)}
           />
           {consent.error ? (
-            <p role="alert" className="text-body-sm text-danger">
+            <p role="alert" className="text-body-sm text-danger-text">
               {consent.error}
             </p>
           ) : null}

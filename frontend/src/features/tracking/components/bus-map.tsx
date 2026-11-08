@@ -6,12 +6,12 @@ import { useTranslations } from "next-intl";
 import { Crosshair, Maximize2, Minimize2, Route } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { appConfig } from "@/lib/config";
 import type { GeoPoint } from "../geo";
 
-/** OpenStreetMap tiles. The university may later switch to a paid tile provider. */
-const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+/** From NEXT_PUBLIC_MAP_TILE_URL: a live build must use the university's own tile provider. */
+const TILE_URL = appConfig.mapTileUrl;
+const TILE_ATTRIBUTION = appConfig.mapAttribution;
 const MAX_ZOOM = 18;
 const START_ZOOM = 11;
 const FIT_MAX_ZOOM = 14;
@@ -37,18 +37,18 @@ function busIconHtml(heading: number | null): string {
   const arrow =
     heading === null
       ? ""
-      : `<span style="position:absolute;inset:-7px;transform:rotate(${heading}deg)"><span style="position:absolute;left:50%;top:0;width:0;height:0;margin-left:-6px;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:8px solid var(--sut-brand)"></span></span>`;
-  return `<span style="position:relative;display:flex;width:40px;height:40px;align-items:center;justify-content:center;border-radius:9999px;background:var(--sut-brand);color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--sut-brand) 25%,transparent),0 2px 6px rgb(0 0 0/.3)">${arrow}<span style="display:flex;width:22px;height:22px">${BUS_SVG}</span></span>`;
+      : `<span style="position:absolute;inset:-7px;transform:rotate(${heading}deg)"><span style="position:absolute;left:50%;top:0;width:0;height:0;margin-left:-6px;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:8px solid var(--sut-coral)"></span></span>`;
+  return `<span style="position:relative;display:flex;width:40px;height:40px;align-items:center;justify-content:center;border-radius:9999px;background:var(--sut-coral);color:var(--sut-on-coral);box-shadow:0 0 0 4px color-mix(in srgb,var(--sut-coral) 30%,transparent),0 2px 6px rgb(0 0 0/.3)">${arrow}<span style="display:flex;width:22px;height:22px">${BUS_SVG}</span></span>`;
 }
 
-const CAMPUS_HTML = `<span style="display:flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:8px;background:var(--sut-teal);color:#fff;box-shadow:0 2px 6px rgb(0 0 0/.3)"><span style="display:flex;width:20px;height:20px">${CAMPUS_SVG}</span></span>`;
+const CAMPUS_HTML = `<span style="display:flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:8px;background:var(--sut-teal);color:var(--sut-on-teal);box-shadow:0 2px 6px rgb(0 0 0/.3)"><span style="display:flex;width:20px;height:20px">${CAMPUS_SVG}</span></span>`;
 
 const STOP_HTML =
-  '<span style="display:block;width:18px;height:18px;border-radius:9999px;background:var(--sut-coral);border:3px solid #fff;box-shadow:0 1px 4px rgb(0 0 0/.35)"></span>';
+  '<span style="display:block;width:18px;height:18px;border-radius:9999px;background:var(--sut-brand);border:3px solid var(--color-white);box-shadow:0 1px 4px rgb(0 0 0/.35)"></span>';
 
 const toTuple = (point: GeoPoint): LatLngTuple => [point.lat, point.lng];
 
-export interface BusMapProps {
+interface BusMapProps {
   bus: (GeoPoint & { heading: number | null }) | null;
   trail: readonly GeoPoint[];
   campus: GeoPoint;

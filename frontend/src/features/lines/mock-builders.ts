@@ -43,7 +43,7 @@ export function toLineSummary(source: MockLineSource, language: string): LineSum
   };
 }
 
-export function toStops(source: MockLineSource, language: string): Stop[] {
+function toStops(source: MockLineSource, language: string): Stop[] {
   return source.stops.map(([time, nameAr, nameEn, noteAr, noteEn], index) => ({
     stop_id: mockStopId(source.lineId, index + 1),
     order: index + 1,

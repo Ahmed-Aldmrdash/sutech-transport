@@ -13,7 +13,7 @@ import { Field, controlStyles, type FieldProps } from "./field";
 
 type FieldOwnProps = Omit<FieldProps, "children" | "className">;
 
-export interface TextFieldProps
+interface TextFieldProps
   extends FieldOwnProps, Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "required"> {
   /** Icon inside the control at the start edge (right in Arabic). */
   icon?: ReactNode;
@@ -66,7 +66,7 @@ export function TextField({
   );
 }
 
-export interface TextAreaFieldProps
+interface TextAreaFieldProps
   extends FieldOwnProps, Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "id" | "required"> {
   containerClassName?: string;
 }
@@ -103,13 +103,13 @@ export function TextAreaField({
   );
 }
 
-export interface SelectOption {
+interface SelectOption {
   value: string;
   label: string;
   disabled?: boolean;
 }
 
-export interface SelectFieldProps
+interface SelectFieldProps
   extends
     FieldOwnProps,
     Omit<SelectHTMLAttributes<HTMLSelectElement>, "id" | "required" | "children"> {

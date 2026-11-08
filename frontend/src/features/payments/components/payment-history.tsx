@@ -49,7 +49,7 @@ export function PaymentHistory({ payments }: { payments: readonly Payment[] }) {
                     })}
                   </p>
                   {payment.rejection_reason ? (
-                    <p className="mt-1 text-body-sm text-danger">
+                    <p className="mt-1 text-body-sm text-danger-text">
                       {t("reason", { reason: payment.rejection_reason })}
                     </p>
                   ) : null}

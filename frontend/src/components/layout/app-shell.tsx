@@ -61,7 +61,7 @@ export function AppShell({
     <button
       type="button"
       onClick={onSignOut}
-      className="flex h-11 w-full items-center gap-3 rounded-md px-3 text-body-sm font-bold text-ink focus-ring hover:bg-danger-soft hover:text-danger"
+      className="flex h-11 w-full items-center gap-3 rounded-md px-3 text-body-sm font-bold text-ink focus-ring hover:bg-danger-soft hover:text-danger-text"
     >
       <LogOut aria-hidden="true" className="size-5 rtl:-scale-x-100" />
       {t("common.signOut")}

@@ -36,6 +36,7 @@ import {
   type ConductRule,
   type Violation,
 } from "../schema";
+import { focusFirstError } from "@/lib/forms/focus-first-error";
 
 const SERVER_ERRORS = Object.values(ViolationErrorCode);
 const STATUS_TONE: Record<Violation["status"], Tone> = {
@@ -105,8 +106,10 @@ function ViolationForm({ today, onSent }: { today: CrewToday; onSent: () => void
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const form = event.currentTarget as HTMLElement;
     const found = validate();
     setErrors(found);
+    focusFirstError(form);
     if (Object.keys(found).length > 0 || !rule || !photo) return;
     const sent = await submit(async (idempotencyKey) =>
       createViolation(

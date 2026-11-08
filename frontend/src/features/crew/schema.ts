@@ -39,7 +39,7 @@ export const RiderState = {
   Absent: "absent",
 } as const;
 export type RiderState = (typeof RiderState)[keyof typeof RiderState];
-export const RIDER_STATES = Object.values(RiderState) as [RiderState, ...RiderState[]];
+const RIDER_STATES = Object.values(RiderState) as [RiderState, ...RiderState[]];
 
 /** Why a student left the bus before the end of the trip. The guardian is told at once. */
 export const CheckoutReason = {
@@ -171,12 +171,11 @@ export const crewTripSchema = z.object({
 });
 export type CrewTrip = z.infer<typeof crewTripSchema>;
 
-export const crewStopSchema = z.object({
+const crewStopSchema = z.object({
   order: z.number().int().positive(),
   name: z.string(),
   pickup_time: clockTimeSchema.nullable(),
 });
-export type CrewStop = z.infer<typeof crewStopSchema>;
 
 export const crewTodaySchema = z.object({
   service_date: calendarDateSchema,

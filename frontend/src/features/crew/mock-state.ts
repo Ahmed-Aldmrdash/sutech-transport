@@ -50,13 +50,13 @@ import {
  * too, so a scan on the driver's phone shows up on theirs, as it would with the real server.
  */
 
-/** Which bus each crew account runs. Both demo accounts are on line 7, Omar's bus. */
-export const MOCK_CREW_LINES: Readonly<Record<string, string>> = {
+/** Which bus each crew account runs. Both demo accounts are on line 7, Seif's bus. */
+const MOCK_CREW_LINES: Readonly<Record<string, string>> = {
   usr_driver_1: "ln_07",
   usr_supervisor_1: "ln_07",
 };
 
-export const CREW_ROLES: readonly Role[] = [Role.Driver, Role.Supervisor];
+const CREW_ROLES: readonly Role[] = [Role.Driver, Role.Supervisor];
 
 /** A start this close to the timetable runs at real speed; any other time is a short test trip. */
 const ON_TIME_WINDOW_MINUTES = 30;
@@ -113,7 +113,7 @@ export function isMockServiceDay(date: string, weekday: number): boolean {
   return SERVICE_DAYS.has(weekday) || isTestDay(date);
 }
 
-export function tripIdOf(lineId: string, date: string, direction: TripDirection): string {
+function tripIdOf(lineId: string, date: string, direction: TripDirection): string {
   return `trp_${lineId}_${date}_${direction === TripDirection.Outbound ? "out" : "ret"}`;
 }
 
@@ -214,7 +214,7 @@ function scheduleOf(line: MockLineSource, date: string) {
  * How long the trip takes. Started near the timetable: the real timetable. Any other time
  * (an evening try-out): a short test trip, like the tracking page's demo trip.
  */
-export function crewTripClock(trip: MockCrewTrip, line: MockLineSource) {
+function crewTripClock(trip: MockCrewTrip, line: MockLineSource) {
   const startsAt = trip.startedAt ?? Date.now();
   const { leavesAt, arrivesAt } = scheduleOf(line, trip.date);
   const window = ON_TIME_WINDOW_MINUTES * MS_PER_MINUTE;
@@ -237,7 +237,7 @@ export function crewProgress(trip: MockCrewTrip, line: MockLineSource, now: numb
 }
 
 /** Where along the outbound trip a stop is (0 to 1), by its pickup time. */
-export function stopShare(line: MockLineSource, stopOrder: number): number {
+function stopShare(line: MockLineSource, stopOrder: number): number {
   const first = toMinutes(line.stops[0]?.[0] ?? "07:00");
   const arrival = toMinutes(MOCK_CAMPUS_ARRIVAL.from);
   const pickup = toMinutes(line.stops[stopOrder - 1]?.[0] ?? "07:00");
@@ -350,7 +350,7 @@ export function mockRidersOf(line: MockLineSource): MockRider[] {
 }
 
 /** The rider's "not going" reason for the day, if they reported one. */
-export function notGoingReasonOf(rider: MockRider, date: string): AbsenceReason | null {
+function notGoingReasonOf(rider: MockRider, date: string): AbsenceReason | null {
   if (rider.isAccount) {
     return absencesOf(rider.studentId).find((item) => item.serviceDate === date)?.reason ?? null;
   }
@@ -428,7 +428,7 @@ export function riderStateOf(
  * Today's outbound crew trip of a line, once the crew started it. The student's tracking,
  * "My trips" and the guardian's day follow it instead of the timetable.
  */
-export function startedOutboundTrip(lineId: string, date: string): MockCrewTrip | null {
+function startedOutboundTrip(lineId: string, date: string): MockCrewTrip | null {
   const trip = trips.get(tripIdOf(lineId, date, TripDirection.Outbound));
   return trip && trip.startedAt !== null ? trip : null;
 }

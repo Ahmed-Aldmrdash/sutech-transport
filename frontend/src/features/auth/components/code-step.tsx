@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field, controlStyles } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
+import { isMockMode } from "@/lib/config";
 import { login, requestOtp } from "../api";
 import { loginErrorKey, type LoginErrorKey } from "../auth-errors";
 import { sanitizeCode } from "../identifier";
@@ -135,7 +136,7 @@ export function CodeStep({
         </p>
       </div>
 
-      {challenge.demo_code ? (
+      {isMockMode && challenge.demo_code ? (
         <p className="self-start rounded-pill bg-teal-soft px-3 py-1 text-body-sm font-bold text-teal-text">
           {t("demoCode", { code: challenge.demo_code })}
         </p>
@@ -171,7 +172,7 @@ export function CodeStep({
                 autoFocus
                 className={cn(
                   controlStyles,
-                  "h-14 ps-[calc(2.5rem+0.6em)] pe-10 text-center text-[26px] font-extrabold tracking-[0.6em] tabular-nums",
+                  "h-14 ps-[calc(2.5rem+0.6em)] pe-10 text-center text-h1 font-extrabold tracking-[0.6em] tabular-nums",
                   "placeholder:tracking-[0.6em]",
                 )}
               />

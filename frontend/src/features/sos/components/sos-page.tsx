@@ -36,7 +36,7 @@ import {
 } from "../schema";
 
 /** How often an open SOS is re-read until the WebSocket is in place. */
-export const SOS_REFRESH_MS = 5000;
+const SOS_REFRESH_MS = 5000;
 const SOS_ERRORS = [SosErrorCode.NotYourTrip, SosErrorCode.TripAlreadyEnded] as const;
 
 /** The emergency button: pick what happened, and the office gets the bus's GPS position. */
@@ -115,7 +115,7 @@ function SosPicker({ trip, onSent }: { trip: CrewTrip; onSent: (sos: Sos) => voi
               key={value}
               type="button"
               onClick={() => setType(value)}
-              className="flex min-h-20 items-center gap-4 rounded-card border-2 border-danger bg-danger-soft p-4 text-start text-danger focus-ring transition-colors hover:bg-danger hover:text-on-danger"
+              className="flex min-h-20 items-center gap-4 rounded-card border-2 border-danger bg-danger-soft p-4 text-start text-danger-text focus-ring transition-colors hover:bg-danger hover:text-on-danger"
             >
               <Icon aria-hidden="true" className="size-8 shrink-0" />
               <span className="min-w-0">
@@ -181,7 +181,7 @@ function SosFollow({ sosId }: { sosId: string }) {
   return (
     <Card elevation="raised">
       <CardBody className="flex flex-col gap-4">
-        <div className="flex items-center gap-3 text-danger">
+        <div className="flex items-center gap-3 text-danger-text">
           <Siren aria-hidden="true" className="size-8 shrink-0" />
           <div className="min-w-0">
             <p className="text-h3">{t("sentTitle", { type: t(`types.${sos.type}.label`) })}</p>

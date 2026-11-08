@@ -135,7 +135,7 @@ export interface MockRequest {
 
 const requests = new StoredMap<MockRequest[]>("sut.mock.requests", MockStorage.Local);
 
-/** Omar had a delay on line 7 in October, which the office answered. */
+/** Seif had a delay on line 7 in October, which the office answered. */
 const SEED_REQUESTS: Record<string, MockRequest[]> = {
   usr_student_2: [
     {

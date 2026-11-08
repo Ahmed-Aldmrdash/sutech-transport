@@ -70,6 +70,7 @@ export function NotGoingPage() {
 
 function ReportForm({ data, onDone }: { data: MyAbsences; onDone: () => void }) {
   const t = useTranslations("student.notGoing");
+  const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
   const toast = useToast();
   const today = todayInCairo();
@@ -176,7 +177,7 @@ function ReportForm({ data, onDone }: { data: MyAbsences; onDone: () => void }) 
           <TextField
             label={t("note")}
             hint={t("noteHint")}
-            optionalText={t("optional")}
+            optionalText={tCommon("optional")}
             maxLength={ABSENCE_NOTE_MAX_LENGTH}
             value={note}
             onChange={(event) => setNote(event.target.value)}

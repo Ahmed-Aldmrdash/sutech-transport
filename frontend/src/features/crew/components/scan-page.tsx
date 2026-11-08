@@ -228,7 +228,7 @@ function ResultBanner({ result }: { result: LastResult }) {
     return (
       <div
         role="alert"
-        className="flex items-center gap-3 rounded-card bg-danger-soft p-4 text-danger"
+        className="flex items-center gap-3 rounded-card bg-danger-soft p-4 text-danger-text"
       >
         <CircleAlert aria-hidden="true" className="size-7 shrink-0" />
         <p className="text-body font-bold">{result.message}</p>

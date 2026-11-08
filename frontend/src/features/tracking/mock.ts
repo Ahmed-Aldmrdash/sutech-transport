@@ -97,7 +97,7 @@ function stopProgress(line: MockLineSource, stopOrder: number): number {
   return (pickup - first) / Math.max(1, arrival - first);
 }
 
-export function mockTrackingFor(studentId: string, language: string, now: number): Tracking {
+function mockTrackingFor(studentId: string, language: string, now: number): Tracking {
   const booking = bookingOf(studentId, now);
   const line = booking && findMockLine(booking.lineId);
   if (!booking || !line || booking.status !== SubscriptionStatus.Active) {

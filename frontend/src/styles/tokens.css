@@ -1,4 +1,4 @@
-/* SUtech Transport design tokens v2. Generated from design/tokens.json by
+/* SUtech Transport design tokens v3. Generated from design/tokens.json by
    scripts/generate-tokens.ts. Do not edit by hand: run `npm run tokens`. */
 
 :root {
@@ -22,8 +22,10 @@
   --sut-coral: #cf644b;
   --sut-coral-text: #b4472e;
   --sut-coral-soft: #fdf0ec;
+  --sut-on-coral: #1f1a24;
   --sut-danger: #c62828;
   --sut-danger-soft: #f9e0e0;
+  --sut-danger-text: #a61f1f;
   --sut-on-danger: #ffffff;
   --sut-success: #1e8752;
   --sut-success-soft: #ddf1e5;
@@ -32,6 +34,7 @@
   --sut-warning-soft: #fbecd3;
   --sut-warning-text: #855108;
   --sut-focus: var(--sut-teal);
+  --sut-qr-ink: #1f1a24;
   --sut-overlay: rgba(22,16,26,0.55);
   --sut-glass: rgba(255,255,255,0.72);
   --sut-skeleton: #eceaee;
@@ -104,8 +107,8 @@
   --sut-ink-strong: #f3f1f5;
   --sut-ink: #dcd8e0;
   --sut-ink-muted: #a7a3ad;
-  --sut-brand: #a583b6;
-  --sut-brand-deep: #bfa1ce;
+  --sut-brand: #bfa1ce;
+  --sut-brand-deep: #d6c4e0;
   --sut-brand-soft: #33243d;
   --sut-on-brand: #16101a;
   --sut-teal: #7ab8c0;
@@ -115,8 +118,10 @@
   --sut-coral: #e69583;
   --sut-coral-text: #f1ae9f;
   --sut-coral-soft: #3a221c;
+  --sut-on-coral: #16101a;
   --sut-danger: #ef7a6e;
   --sut-danger-soft: #3d1f1c;
+  --sut-danger-text: #ef7a6e;
   --sut-on-danger: #16101a;
   --sut-success: #4cc08a;
   --sut-success-soft: #173826;

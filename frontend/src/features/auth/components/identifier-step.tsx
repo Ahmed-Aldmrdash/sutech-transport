@@ -90,7 +90,7 @@ export function IdentifierStep({
           spellCheck={false}
           enterKeyHint="send"
           maxLength={IDENTIFIER_MAX_LENGTH}
-          placeholder="240102791"
+          placeholder="240100101"
           dir="ltr"
           className="text-body"
           autoFocus

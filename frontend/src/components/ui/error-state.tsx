@@ -6,7 +6,7 @@ import { ClientErrorCode, ServerErrorCode, isApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
 import { Button } from "./button";
 
-export type ErrorKind = "network" | "forbidden" | "notFound" | "generic";
+type ErrorKind = "network" | "forbidden" | "notFound" | "generic";
 
 function classify(error: unknown): ErrorKind {
   if (!isApiError(error)) return "generic";
@@ -41,7 +41,7 @@ export function ErrorState({ error, kind: kindProp, onRetry, className }: ErrorS
     >
       <span
         aria-hidden="true"
-        className="mb-4 inline-flex size-14 items-center justify-center rounded-card bg-danger-soft text-danger [&_svg]:size-7"
+        className="mb-4 inline-flex size-14 items-center justify-center rounded-card bg-danger-soft text-danger-text [&_svg]:size-7"
       >
         {kind === "network" ? <CloudOff /> : <TriangleAlert />}
       </span>

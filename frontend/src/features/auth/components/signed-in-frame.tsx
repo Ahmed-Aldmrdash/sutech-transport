@@ -79,7 +79,7 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
       }
       badges={notificationsPath ? { notifications: unreadCount } : undefined}
     >
-      <SessionWatcher token={session.token} expiresAt={session.expires_at} />
+      <SessionWatcher userId={session.user.id} expiresAt={session.expires_at} />
       {notificationsPath ? <NotificationsWatcher /> : null}
       {SOS_DESK_ROLES.includes(session.user.role) ? <SosAlarm /> : null}
       {children}

@@ -22,11 +22,11 @@ import { NoTrackingReason, type LiveTrip, type Tracking } from "../schema";
 import { BusMap } from "./bus-map";
 
 /** How often the page re-reads the bus position until the live WebSocket is in place. */
-export const TRACKING_REFRESH_MS = 5000;
+const TRACKING_REFRESH_MS = 5000;
 const MS_PER_MINUTE = 60_000;
 
-/** Who the page is for: the rider ("your stop") or their guardian ("Youssef's stop"). */
-export type TrackingAudience = { who: "self" } | { who: "child"; name: string };
+/** Who the page is for: the rider ("your stop") or their guardian ("Yassin's stop"). */
+type TrackingAudience = { who: "self" } | { who: "child"; name: string };
 
 interface TrackingPanelProps {
   load: (signal: AbortSignal) => Promise<Tracking>;
