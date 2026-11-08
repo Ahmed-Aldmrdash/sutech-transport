@@ -2,6 +2,7 @@ import { setUnauthorizedHandler } from "@/lib/api/client";
 import { writeCookie } from "@/lib/cookies";
 import { storedSessionSchema, type Session, type User } from "../schema";
 import { SESSION_ROLE_COOKIE, SignInReason } from "../access";
+import { forgetFormDrafts } from "@/lib/forms/form-draft";
 
 const SESSION_STORAGE_KEY = "sut.session";
 const MS_PER_SECOND = 1000;
@@ -69,6 +70,7 @@ function writeRoleCookie(session: Session | null): void {
  * from the server. The mock server's data stays, as a real server's would.
  */
 function clearPersonalData(): void {
+  forgetFormDrafts();
   for (const storage of [window.localStorage, window.sessionStorage]) {
     try {
       const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index));

@@ -7,7 +7,7 @@ import { Radio } from "@/components/ui/choice";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { TextField } from "@/components/ui/input";
 import { Tone } from "@/components/ui/tone";
-import { CHECKOUT_REASONS, CREW_NOTE_MAX_LENGTH, CheckoutReason } from "../schema";
+import { CHECKOUT_REASONS, CREW_NOTE_MAX_LENGTH, type CheckoutReason } from "../schema";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -20,7 +20,12 @@ interface CheckoutDialogProps {
 }
 
 /** A student leaving the bus mid-trip: the reason is required; the guardian is told at once. */
-export function CheckoutDialog({
+export function CheckoutDialog(props: CheckoutDialogProps) {
+  // A fresh form each time it opens: no reason left over from the last student.
+  return <CheckoutForm key={props.open ? "open" : "closed"} {...props} />;
+}
+
+function CheckoutForm({
   open,
   riderName,
   isSending,
@@ -30,14 +35,24 @@ export function CheckoutDialog({
 }: CheckoutDialogProps) {
   const t = useTranslations("crew.checkout");
   const tCommon = useTranslations("common");
-  const [reason, setReason] = useState<CheckoutReason>(CheckoutReason.Unwell);
+  // Nothing is picked for the crew: a hurried tap must not record "unwell" when it wasn't.
+  const [reason, setReason] = useState<CheckoutReason | null>(null);
   const [note, setNote] = useState("");
+  const [missingReason, setMissingReason] = useState(false);
+
+  function confirm() {
+    if (!reason) {
+      setMissingReason(true);
+      return;
+    }
+    onConfirm(reason, note.trim() || null);
+  }
 
   return (
     <ConfirmDialog
       open={open}
       onClose={onClose}
-      onConfirm={() => onConfirm(reason, note.trim() || null)}
+      onConfirm={confirm}
       isConfirming={isSending}
       title={riderName ? t("titleNamed", { name: riderName }) : t("title")}
       description={t("body")}
@@ -53,9 +68,17 @@ export function CheckoutDialog({
               value={value}
               label={t(`reasons.${value}`)}
               checked={reason === value}
-              onChange={() => setReason(value)}
+              onChange={() => {
+                setReason(value);
+                setMissingReason(false);
+              }}
             />
           ))}
+          {missingReason ? (
+            <p role="alert" className="mt-1 text-body-sm font-bold text-danger-text">
+              {t("reasonRequired")}
+            </p>
+          ) : null}
         </fieldset>
         <TextField
           label={t("note")}

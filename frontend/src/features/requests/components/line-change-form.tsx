@@ -46,17 +46,22 @@ export function LineChangeForm({
       : "";
   const today = todayInCairo();
 
-  const { values, setErrors, update, fieldError } = useRequestForm<LineChangeValues>({
-    toLineId: "",
-    toStopId: "",
-    duration: LineChangeDuration.Permanent,
-    startsOn: today,
-    endsOn: "",
-    reason: "",
-    studentPhone: "",
-    guardianName,
-    guardianPhone: "",
-  });
+  const { values, setErrors, update, fieldError, clearDraft } = useRequestForm<LineChangeValues>(
+    "line-change",
+    {
+      toLineId: "",
+      toStopId: "",
+      duration: LineChangeDuration.Permanent,
+      startsOn: today,
+      endsOn: "",
+      reason: "",
+      // The student's own registered mobile, already known to the app.
+      studentPhone:
+        session.status === SessionStatus.SignedIn ? (session.session.user.phone ?? "") : "",
+      guardianName,
+      guardianPhone: "",
+    },
+  );
   const { submit, isSending, serverError } = useSubmit(REQUEST_SERVER_ERRORS);
 
   async function onSubmit(event: FormEvent) {
@@ -89,6 +94,7 @@ export function LineChangeForm({
       ),
     );
     if (created) {
+      clearDraft();
       toast.show({ title: tForm("sent"), description: tForm("sentBody"), tone: Tone.Success });
       router.replace(`${REQUESTS_PATH}/${created.request_id}`);
     }

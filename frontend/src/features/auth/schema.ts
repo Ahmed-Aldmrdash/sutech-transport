@@ -59,6 +59,8 @@ export const userSchema = z.object({
   guardian_name: z.string().nullable().optional(),
   guardian_name_ar: z.string().nullable().optional(),
   masked_phone: z.string().nullable().optional(),
+  /** The user's own registered mobile, to prefill their own forms. Never another person's. */
+  phone: z.string().nullable().optional(),
 });
 export type User = z.infer<typeof userSchema>;
 

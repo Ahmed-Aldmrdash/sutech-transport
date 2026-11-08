@@ -15,7 +15,11 @@ const account = (
   user: Omit<User, "masked_phone">,
   phone: string,
   options: { disabled?: boolean } = {},
-): MockAccount => ({ user: { ...user, masked_phone: maskPhone(phone) }, phone, ...options });
+): MockAccount => ({
+  user: { ...user, masked_phone: maskPhone(phone), phone },
+  phone,
+  ...options,
+});
 
 export function maskPhone(phone: string): string {
   return `${phone.slice(0, 3)}•••••${phone.slice(-3)}`;

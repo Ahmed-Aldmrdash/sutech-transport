@@ -505,6 +505,8 @@
     "payment": {
       "lead": "Pay the term fee to activate your subscription.",
       "amountDue": "Amount due",
+      "amountInReview": "Amount paid (under review)",
+      "amountPaid": "Paid",
       "forLine": "{line} · {term}",
       "noBookingTitle": "Book a seat first",
       "noBookingBody": "Choose a line and a stop, then come back here to pay.",
@@ -593,6 +595,10 @@
       "lead": "Show this to the driver or supervisor when you get on the bus.",
       "lockedTitle": "Your card opens after you subscribe",
       "lockedBody": "Book a seat and pay. Once finance approves your receipt, your card appears here.",
+      "reviewTitle": "Your receipt is being reviewed",
+      "reviewBody": "Your pass appears here as soon as Finance approves the receipt. You'll get a notification.",
+      "payTitle": "Payment is the last step",
+      "payBody": "Your seat is held. Pay and upload the receipt; the pass opens once Finance approves it.",
       "goToLines": "Choose a line",
       "goToPayment": "Go to payment",
       "university": "El Sewedy University of Technology",
@@ -652,6 +658,7 @@
       "errors": {
         "required": "Fill in this field.",
         "phoneInvalid": "Enter an 11-digit mobile number starting 010, 011, 012 or 015.",
+        "guardianSameAsStudent": "That's your own number. Enter your guardian's number.",
         "textTooShort": "Write a little more (at least 10 characters).",
         "textTooLong": "Keep it under 1,000 characters.",
         "nameTooShort": "Write the full name.",
@@ -779,7 +786,11 @@
         "percent": "{percent}%",
         "decidedByUniversity": "Decided by the university",
         "cancelWarning": "If the refund is approved, your subscription ends and your card stops working.",
-        "submit": "Send refund request"
+        "submit": "Send refund request",
+        "confirmTitle": "Cancel your subscription for a refund?",
+        "confirmBody": "If it's approved, your subscription ends, your pass stops working and you can't ride the bus.",
+        "confirmOpenLineChange": "You still have an open line change request ({reference}). If the refund is approved, that line change won't matter any more.",
+        "confirm": "Yes, send the refund request"
       },
       "complaint": {
         "new": "New complaint",
@@ -1226,6 +1237,7 @@
       "body": "Their guardian is told at once. The university's responsibility ends when they leave the bus.",
       "confirm": "Check out",
       "reason": "Why are they leaving?",
+      "reasonRequired": "Choose why the student is leaving first.",
       "reasons": {
         "unwell": "Feels unwell",
         "guardian_pickup": "Guardian picked them up",

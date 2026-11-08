@@ -48,10 +48,10 @@ export function DigitalCard({ card, isRefreshing, onRefresh }: DigitalCardProps)
         </span>
       </header>
 
-      <div className="flex items-center gap-4 px-5 pt-5">
+      <div className="flex items-center gap-4 px-5 pt-4">
         <span
           aria-hidden="true"
-          className="inline-flex size-16 shrink-0 items-center justify-center rounded-card bg-brand-soft text-h2 text-brand"
+          className="inline-flex size-12 shrink-0 items-center justify-center rounded-card bg-brand-soft text-h3 text-brand"
         >
           {initials}
         </span>
@@ -72,25 +72,8 @@ export function DigitalCard({ card, isRefreshing, onRefresh }: DigitalCardProps)
         </div>
       </div>
 
-      <dl className="mx-5 mt-4 grid grid-cols-2 gap-3 rounded-md bg-surface-alt p-3">
-        <div>
-          <dt className="text-caption text-ink-muted">{t("card.line")}</dt>
-          <dd className="text-body-sm font-bold text-ink-strong">
-            {t("lineCode", { code: card.line.code })} · {card.line.name}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-caption text-ink-muted">{t("card.stop")}</dt>
-          <dd className="text-body-sm font-bold text-ink-strong">{card.stop.name}</dd>
-          {card.stop.pickup_time ? (
-            <dd className="text-caption text-ink">
-              {t("card.pickup", { time: formatClockTime(card.stop.pickup_time, locale) })}
-            </dd>
-          ) : null}
-        </div>
-      </dl>
-
-      <div className="flex flex-col items-center gap-3 px-5 py-5">
+      {/* The code comes right after the name, so it is on screen at the bus door without scrolling. */}
+      <div className="flex flex-col items-center gap-3 px-5 pt-4">
         <div className="relative">
           <QrCode
             value={card.qr.token}
@@ -115,11 +98,28 @@ export function DigitalCard({ card, isRefreshing, onRefresh }: DigitalCardProps)
         <p role="timer" aria-live="off" className="text-body-sm font-bold text-teal-text">
           {isExpired ? t("card.refreshing") : t("card.refreshIn", { seconds: secondsLeft })}
         </p>
-        <p className="text-caption text-ink-muted">
-          {t("card.validUntil", { date: formatCalendarDate(card.valid_until, locale) })} ·{" "}
-          {card.term_name}
-        </p>
       </div>
+      <dl className="mx-5 mt-4 grid grid-cols-2 gap-3 rounded-md bg-surface-alt p-3">
+        <div>
+          <dt className="text-caption text-ink-muted">{t("card.line")}</dt>
+          <dd className="text-body-sm font-bold text-ink-strong">
+            {t("lineCode", { code: card.line.code })} · {card.line.name}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-caption text-ink-muted">{t("card.stop")}</dt>
+          <dd className="text-body-sm font-bold text-ink-strong">{card.stop.name}</dd>
+          {card.stop.pickup_time ? (
+            <dd className="text-caption text-ink">
+              {t("card.pickup", { time: formatClockTime(card.stop.pickup_time, locale) })}
+            </dd>
+          ) : null}
+        </div>
+      </dl>
+      <p className="px-5 pt-3 pb-5 text-center text-caption text-ink-muted">
+        {t("card.validUntil", { date: formatCalendarDate(card.valid_until, locale) })} ·{" "}
+        {card.term_name}
+      </p>
     </article>
   );
 }

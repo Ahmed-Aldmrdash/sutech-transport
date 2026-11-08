@@ -39,8 +39,9 @@ export function ModelPermitForm({ subscription }: { subscription: Subscription }
   const user = session.status === SessionStatus.SignedIn ? session.session.user : null;
   const student = user ? userText(user, locale) : null;
 
-  const { values, setErrors, update, fieldError } = useRequestForm<ModelPermitValues>(() =>
-    emptyModelPermit(today),
+  const { values, setErrors, update, fieldError, clearDraft } = useRequestForm<ModelPermitValues>(
+    "model-permit",
+    () => emptyModelPermit(today),
   );
   const { submit, isSending, serverError } = useSubmit(REQUEST_SERVER_ERRORS);
 
@@ -59,6 +60,7 @@ export function ModelPermitForm({ subscription }: { subscription: Subscription }
       createModelPermit(toModelPermitBody(values), { idempotencyKey }),
     );
     if (created) {
+      clearDraft();
       toast.show({ title: tForm("sent"), description: tForm("sentBody"), tone: Tone.Success });
       router.replace(`${REQUESTS_PATH}/${created.request_id}`);
     }

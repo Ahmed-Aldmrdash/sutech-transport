@@ -3,10 +3,11 @@
 import { useRequestForm } from "./use-request-form";
 import { ReasonChoice, RefundEstimate } from "./refund-fields";
 import { useLocale, useTranslations } from "next-intl";
-import { type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/dialog";
 import { TextAreaField } from "@/components/ui/input";
 import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
@@ -17,10 +18,16 @@ import { RECEIPT_MAX_BYTES } from "@/features/payments/schema";
 import { useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { formatFileSize } from "@/lib/format";
-import { createRefund } from "../api";
+import { createRefund, listMyRequests } from "../api";
 import { isRefundWindowOpen } from "../refund-policy";
 import { normalizePhone, validateRefund, type RefundValues } from "../request-validation";
-import { EXCEPTIONAL_REFUND_REASONS, RefundReason, type RefundPolicy } from "../schema";
+import {
+  EXCEPTIONAL_REFUND_REASONS,
+  OPEN_REQUEST_STATUSES,
+  RefundReason,
+  RequestKind,
+  type RefundPolicy,
+} from "../schema";
 import { AttachmentsField } from "./attachments-field";
 import { REQUEST_SERVER_ERRORS, toUploads } from "./form-helpers";
 import { GuardianFields } from "./guardian-fields";
@@ -41,16 +48,22 @@ export function RefundForm({ policy }: { policy: RefundPolicy }) {
   const windowOpen = isRefundWindowOpen(policy.today_deduction_percent);
   const paid = policy.paid_piasters ?? 0;
 
-  const { values, setErrors, update, fieldError } = useRequestForm<RefundValues>({
-    reason: windowOpen ? RefundReason.Standard : "",
-    explanation: "",
-    guardianName,
-    guardianPhone: "",
-    guardianConsent: false,
-    documents: [],
-  });
+  const { values, setErrors, update, fieldError, clearDraft } = useRequestForm<RefundValues>(
+    "refund",
+    {
+      reason: windowOpen ? RefundReason.Standard : "",
+      explanation: "",
+      guardianName,
+      guardianPhone: "",
+      guardianConsent: false,
+      documents: [],
+    },
+  );
   const { submit, isSending, serverError } = useSubmit(REQUEST_SERVER_ERRORS);
   const isExceptional = values.reason !== "" && EXCEPTIONAL_REFUND_REASONS.includes(values.reason);
+  // A refund ends a paid subscription: it is confirmed first, and an open line change is named.
+  const [confirming, setConfirming] = useState(false);
+  const [openLineChange, setOpenLineChange] = useState<string | null>(null);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -59,6 +72,15 @@ export function RefundForm({ policy }: { policy: RefundPolicy }) {
     setErrors(found);
     focusFirstError(form);
     if (Object.keys(found).length > 0 || values.reason === "" || !policy.subscription_id) return;
+    setOpenLineChange(null);
+    setConfirming(true);
+    const lineChanges = await listMyRequests(RequestKind.LineChange).catch(() => []);
+    const open = lineChanges.find((item) => OPEN_REQUEST_STATUSES.includes(item.status));
+    setOpenLineChange(open?.reference ?? null);
+  }
+
+  async function send() {
+    if (values.reason === "" || !policy.subscription_id) return;
     const { reason } = values;
     const subscriptionId = policy.subscription_id;
     const created = await submit(async (idempotencyKey) =>
@@ -75,7 +97,9 @@ export function RefundForm({ policy }: { policy: RefundPolicy }) {
         { idempotencyKey },
       ),
     );
+    setConfirming(false);
     if (created) {
+      clearDraft();
       toast.show({ title: t("sent"), description: t("sentBody"), tone: Tone.Success });
       router.replace(`${REQUESTS_PATH}/${created.request_id}`);
     }
@@ -151,6 +175,23 @@ export function RefundForm({ policy }: { policy: RefundPolicy }) {
           </Button>
         </form>
       </CardBody>
+      <ConfirmDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        onConfirm={() => void send()}
+        isConfirming={isSending}
+        destructive
+        title={t("refund.confirmTitle")}
+        description={t("refund.confirmBody")}
+        confirmLabel={t("refund.confirm")}
+      >
+        {openLineChange ? (
+          <Alert
+            tone={Tone.Warning}
+            title={t("refund.confirmOpenLineChange", { reference: openLineChange })}
+          />
+        ) : null}
+      </ConfirmDialog>
     </Card>
   );
 }

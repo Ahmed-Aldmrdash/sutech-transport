@@ -7,6 +7,9 @@ import { cn } from "@/lib/cn";
 import { Button } from "./button";
 import { IconButton } from "./icon-button";
 
+/** Backdrop taps in this first moment are the rest of a double tap, not "close". */
+const BACKDROP_GRACE_MS = 500;
+
 interface DialogProps {
   open: boolean;
   onClose: () => void;
@@ -36,10 +39,19 @@ export function Dialog({
   const titleId = useId();
   const descriptionId = useId();
 
+  // A double tap on the button that opens the dialog sends its second tap to the new
+  // backdrop. Backdrop taps only close it once it has been open a moment, and only when the
+  // press also started on the backdrop.
+  const openedAt = useRef(0);
+  const pressedBackdrop = useRef(false);
+
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      openedAt.current = performance.now();
+    }
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
@@ -53,9 +65,15 @@ export function Dialog({
         event.preventDefault();
         onClose();
       }}
+      onPointerDown={(event) => {
+        pressedBackdrop.current = event.target === event.currentTarget;
+      }}
       onClick={(event) => {
         // A click on the backdrop lands on the <dialog> element itself.
-        if (event.target === event.currentTarget) onClose();
+        const onBackdrop = event.target === event.currentTarget && pressedBackdrop.current;
+        const settled = performance.now() - openedAt.current > BACKDROP_GRACE_MS;
+        pressedBackdrop.current = false;
+        if (onBackdrop && settled) onClose();
       }}
       className={cn(
         "z-dialog m-0 mt-auto w-full max-w-none rounded-t-lg bg-surface-raised p-0 text-ink shadow-lg",

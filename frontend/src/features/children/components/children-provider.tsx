@@ -67,9 +67,7 @@ export function ChildrenProvider({ children: content }: { children: ReactNode })
     list[0] ??
     null;
   return (
-    <ChildrenContext.Provider
-      value={{ children: list, selected, select, refresh: state.refresh }}
-    >
+    <ChildrenContext.Provider value={{ children: list, selected, select, refresh: state.refresh }}>
       {content}
     </ChildrenContext.Provider>
   );

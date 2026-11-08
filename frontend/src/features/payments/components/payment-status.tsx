@@ -7,6 +7,7 @@ import { Tone } from "@/components/ui/tone";
 import { HoldCountdown } from "@/features/subscriptions/components/hold-countdown";
 import { SubscriptionStatus, type Subscription } from "@/features/subscriptions/schema";
 import type { Locale } from "@/i18n/routing";
+import { cn } from "@/lib/cn";
 import { formatMoney } from "@/lib/format";
 
 export function AmountDue({
@@ -18,10 +19,23 @@ export function AmountDue({
 }) {
   const t = useTranslations("student");
   const locale = useLocale() as Locale;
+  // "Amount due" only while it is still due: after paying it reads "paid" or "under review".
+  const label =
+    subscription.status === SubscriptionStatus.Active
+      ? t("payment.amountPaid")
+      : subscription.status === SubscriptionStatus.PaymentReview
+        ? t("payment.amountInReview")
+        : t("payment.amountDue");
+  const isPaid = subscription.status === SubscriptionStatus.Active;
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 rounded-card bg-brand-soft p-4 sm:p-5">
+    <div
+      className={cn(
+        "flex flex-wrap items-end justify-between gap-4 rounded-card p-4 sm:p-5",
+        isPaid ? "bg-success-soft" : "bg-brand-soft",
+      )}
+    >
       <div>
-        <p className="text-label text-brand">{t("payment.amountDue")}</p>
+        <p className={cn("text-label", isPaid ? "text-success-text" : "text-brand")}>{label}</p>
         <p className="text-numeric text-ink-strong">
           {formatMoney(subscription.price_piasters, locale)}
         </p>
