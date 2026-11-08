@@ -31,22 +31,21 @@ export const SubscriptionErrorCode = {
   NotCancellable: "NOT_CANCELLABLE",
 } as const;
 
-export const termSchema = z.object({
+const termSchema = z.object({
   term_id: z.string(),
   name: z.string(),
   starts_on: calendarDateSchema,
   ends_on: calendarDateSchema,
 });
-export type Term = z.infer<typeof termSchema>;
 
-export const subscriptionStopSchema = z.object({
+const subscriptionStopSchema = z.object({
   stop_id: z.string(),
   name: z.string(),
   pickup_time: clockTimeSchema.nullable(),
 });
 
 /** The latest receipt on this subscription, enough for the home screen. */
-export const latestPaymentSchema = z.object({
+const latestPaymentSchema = z.object({
   payment_id: z.string(),
   status: z.enum(["pending_review", "approved", "rejected"]),
   rejection_reason: z.string().nullable(),

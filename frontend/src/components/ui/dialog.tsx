@@ -109,6 +109,8 @@ interface ConfirmDialogProps {
   /** Red confirm button for destructive actions (cancel subscription, delete). */
   destructive?: boolean;
   isConfirming?: boolean;
+  /** Extra fields the confirmation needs (a reason, a note). */
+  children?: ReactNode;
 }
 
 export function ConfirmDialog({
@@ -121,6 +123,7 @@ export function ConfirmDialog({
   cancelLabel,
   destructive = false,
   isConfirming = false,
+  children,
 }: ConfirmDialogProps) {
   const t = useTranslations("common");
   return (
@@ -143,6 +146,8 @@ export function ConfirmDialog({
           </Button>
         </>
       }
-    />
+    >
+      {children}
+    </Dialog>
   );
 }

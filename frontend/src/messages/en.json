@@ -3,7 +3,7 @@
     "name": "SUtech Transportation",
     "shortName": "SUtech Transport",
     "tagline": "Transportation",
-    "description": "Book your seat, pay, track your bus and follow every trip at SUTech.",
+    "description": "Book your seat, pay, track your bus and follow every trip at SUtech.",
     "slogan": "Access the Future"
   },
   "common": {
@@ -24,7 +24,9 @@
     "switchLanguage": "Switch to Arabic",
     "otherLanguageName": "العربية",
     "optional": "(optional)",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "updateReady": "A new version of the app is ready.",
+    "updateNow": "Update"
   },
   "theme": {
     "label": "Appearance",
@@ -92,18 +94,22 @@
       "events": "Event buses",
       "busCompany": "Bus company portal",
       "users": "Users & permissions",
-      "payment": "Payment"
+      "payment": "Payment",
+      "sos": "SOS"
     },
     "short": {
-      "notifications": "Alerts",
+      "notifications": "Inbox",
       "childDay": "Today",
       "attendanceHistory": "Trips",
       "liveTracking": "Tracking",
       "busCompany": "Portal",
       "secretaryGeneral": "Office",
       "reportDelay": "Delay",
-      "passengers": "Riders"
-    }
+      "passengers": "Riders",
+      "sos": "SOS",
+      "lines": "Lines"
+    },
+    "soon": "Soon"
   },
   "errors": {
     "retry": "Try again",
@@ -135,8 +141,8 @@
   "preview": {
     "title": "Frame preview",
     "sampleUser": "Mariam Hassan",
-    "pageComing": "This page is built in a later phase",
-    "pageComingBody": "The frame, menu and permissions are ready. The page content comes with its phase.",
+    "pageComing": "Coming soon",
+    "pageComingBody": "This page is being built. The frame, menu and permissions are ready.",
     "dashboardTitle": "Sample content",
     "dashboardBody": "Placeholder numbers to check spacing and layout at every screen size.",
     "kpiStudents": "Active subscribers",
@@ -318,13 +324,14 @@
       "otpLocked": "Too many wrong codes. For your safety, try again in 15 minutes.",
       "otpRateLimited": "Please wait a minute before asking for another code.",
       "network": "No connection. Check your internet and try again.",
+      "invalid": "Some details aren't right. Check the form and try again.",
       "generic": "Something went wrong. Try again in a moment."
     }
   },
   "session": {
     "checking": "Checking your session…",
     "welcome": "Welcome, {name}",
-    "homeLead": "You're signed in. Your pages arrive in the next phases.",
+    "homeLead": "You're signed in. Your office's pages are being built and will open here.",
     "accountTitle": "Your account",
     "role": "Role",
     "identifier": "ID",
@@ -333,8 +340,8 @@
     "levelValue": "Level {level}",
     "phone": "Registered phone",
     "expiresAt": "Session ends",
-    "comingTitle": "What's next",
-    "comingBody": "This is your home. The rest of your menu fills in phase by phase; every page you see is only one your role may open."
+    "soonTitle": "Coming soon",
+    "soonBody": "These pages are being built. Each one opens from your menu the day it is ready."
   },
   "student": {
     "status": {
@@ -412,8 +419,8 @@
         "trackBus": "Track the bus"
       },
       "alerts": {
-        "title": "Alerts",
-        "empty": "No alerts right now.",
+        "title": "Announcements",
+        "empty": "No announcements right now.",
         "kind": {
           "official": "Official",
           "delay": "Delay",
@@ -478,6 +485,7 @@
         "STOP_NOT_ON_LINE": "That stop isn't on this line any more. Reload and choose again.",
         "LINE_NOT_FOUND": "This line was removed. Choose another one.",
         "network": "No connection. Your seat wasn't booked; try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "We couldn't book the seat. Try again."
       }
     },
@@ -556,8 +564,12 @@
           "RECEIPT_TOO_LARGE": "The file is too large. Send a smaller photo.",
           "AMOUNT_MISMATCH": "The amount is less than the term price.",
           "network": "No connection. Nothing was sent; try again.",
+          "invalid": "Some details aren't right. Check the form and try again.",
           "generic": "We couldn't send the receipt. Try again."
-        }
+        },
+        "amountInvalid": "Write the amount in pounds, with at most two digits for piasters (for example 15000 or 15000.50).",
+        "amountTooHigh": "That's more than {maximum}. Check the amount on the receipt.",
+        "dateTooEarly": "The date can't be before you held the seat ({date})."
       },
       "history": {
         "title": "Your receipts",
@@ -593,7 +605,16 @@
       "refreshing": "Getting a new code…",
       "expired": "This code has expired. Connect to the internet to get a new one.",
       "getNewCode": "Get a new code",
-      "tip": "The code changes every 30 seconds, so a screenshot won't work. Turn your screen brightness up when you scan."
+      "tip": "The code changes every 30 seconds, so a screenshot won't work. Turn your screen brightness up when you scan.",
+      "offline": {
+        "title": "Your card (saved on this phone)",
+        "name": "Name",
+        "identifier": "University ID",
+        "line": "Line",
+        "stop": "Stop",
+        "validUntilLabel": "Valid until",
+        "noCode": "No internet, so there's no boarding code. Show these details to the driver, or connect to get the code."
+      }
     },
     "requests": {
       "title": "Requests",
@@ -623,7 +644,7 @@
       "sent": "Request sent",
       "sentBody": "You'll get a notification when the office answers.",
       "textHint": "At least 10 characters.",
-      "phoneHint": "Egyptian mobile, e.g. 01012345678.",
+      "phoneHint": "Egyptian mobile, e.g. 01000000000.",
       "errors": {
         "required": "Fill in this field.",
         "phoneInvalid": "Enter an 11-digit mobile number starting 010, 011, 012 or 015.",
@@ -658,6 +679,7 @@
         "STOP_NOT_ON_LINE": "That stop isn't on the line. Choose again.",
         "RECEIPT_TOO_LARGE": "A file is larger than {size}.",
         "network": "No connection. Check the internet and try again; nothing was sent twice.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again in a moment.",
         "NO_SUBSCRIPTION": "Book a seat first: complaints are for students with a booking.",
         "NOT_AWAITING_GUARDIAN": "This request isn't waiting for the guardian any more."
@@ -665,7 +687,8 @@
       "attachments": {
         "add": "Add a file",
         "remove": "Remove {name}",
-        "full": "{count} files attached (the most)"
+        "full": "{count} files attached (the most)",
+        "refused": "Not added: {reason}"
       },
       "guardian": {
         "title": "Guardian's approval",
@@ -822,6 +845,7 @@
         "withdrawErrors": {
           "NOT_WITHDRAWABLE": "The office has already started on it, so it can't be withdrawn.",
           "network": "No connection. Try again.",
+          "invalid": "Some details aren't right. Check the form and try again.",
           "generic": "Couldn't withdraw it. Try again."
         },
         "guardianWaitingTitle": "Waiting for your guardian's approval",
@@ -909,7 +933,6 @@
       },
       "note": "Note for the office",
       "noteHint": "Short, up to 200 characters.",
-      "optional": "optional",
       "whoKnowsTitle": "Who is told",
       "whoKnowsBody": "Your driver and bus supervisor, your guardian and the Transportation office. That day counts as \"not going\", not absent.",
       "submit": "Report the day",
@@ -933,6 +956,7 @@
         "ABSENCE_CUTOFF_PASSED": "The bus already left, so this day can't be changed.",
         "ALREADY_REPORTED": "You already reported this day.",
         "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again."
       }
     },
@@ -1012,11 +1036,7 @@
     "appearanceHint": "\"Device\" follows your phone or laptop's light or dark setting.",
     "signOutTitle": "Sign out",
     "signOutHint": "You'll need a new code by SMS to sign in again.",
-    "signOut": "Sign out",
-    "signOutConfirmTitle": "Sign out of this device?",
-    "signOutConfirmBody": "Your card and bookings stay safe. Sign in again with your university ID and a new code.",
-    "stay": "Stay signed in",
-    "signOutConfirmBodyParent": "Sign in again with your phone number and a new code."
+    "signOut": "Sign out"
   },
   "bus": {
     "title": "Bus and driver",
@@ -1151,7 +1171,6 @@
       "refuseBody": "The request is closed. {name} can send a new one later.",
       "approveNote": "A note for the Transportation office",
       "refuseNote": "Want to tell {name} why?",
-      "optional": "Optional",
       "approveConfirm": "Yes, approve",
       "refuseConfirm": "Yes, refuse",
       "back": "Back",
@@ -1163,6 +1182,7 @@
       "errors": {
         "NOT_AWAITING_GUARDIAN": "This request was already answered or withdrawn.",
         "network": "No connection. Try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again."
       }
     },
@@ -1177,5 +1197,455 @@
       "personal": "Personal reason",
       "other": "Other reason"
     }
+  },
+  "crew": {
+    "gate": {
+      "noBusTitle": "You're not on a bus today",
+      "noBusBody": "The Transportation office hasn't assigned you to a bus. Call them if you think this is wrong.",
+      "noServiceTitle": "No trips today",
+      "noServiceBody": "Buses run Sunday to Thursday. Your trip shows here on the next working day.",
+      "testDay": "Try a test day"
+    },
+    "state": {
+      "waiting": "Not yet",
+      "boarded": "On board",
+      "checked_out": "Left early",
+      "not_going": "Not going",
+      "absent": "Absent"
+    },
+    "checkout": {
+      "title": "Check out a student",
+      "titleNamed": "Check out {name}?",
+      "body": "Their guardian is told at once. The university's responsibility ends when they leave the bus.",
+      "confirm": "Check out",
+      "reason": "Why are they leaving?",
+      "reasons": {
+        "unwell": "Feels unwell",
+        "guardian_pickup": "Guardian picked them up",
+        "personal": "Personal reason",
+        "other": "Other"
+      },
+      "note": "Note"
+    },
+    "trip": {
+      "title": "Today's trip",
+      "sosOpenTitle": "Your SOS is open",
+      "sosOpenAction": "Open",
+      "sosOpenBody": {
+        "open": "Waiting for the Transportation office to take it.",
+        "acknowledged": "The Transportation office has it. Keep your phone close."
+      },
+      "otherTrips": "Today's other trip",
+      "outbound": "Outbound: to campus",
+      "return": "Return: from campus",
+      "status": {
+        "not_started": "Not started",
+        "in_progress": "On the road",
+        "ended": "Ended"
+      },
+      "leavesAt": "Leaves the first stop at {time}",
+      "returnTimeUnknown": "Return time not announced yet",
+      "onTheRoad": "On the road since {time}",
+      "endedAt": "Ended at {time}",
+      "seeList": "See the passenger list",
+      "delaysTitle": "Delays you reported",
+      "delayMinutes": "{minutes} min late",
+      "delayReasons": {
+        "traffic": "Traffic",
+        "breakdown": "Bus problem",
+        "weather": "Weather",
+        "road_closed": "Road closed",
+        "other": "Other"
+      },
+      "countBoarded": "On board",
+      "ofTotal": "of {total}",
+      "countAbsent": "Absent",
+      "countWaiting": "Not yet",
+      "countNotGoing": "Not going",
+      "countCheckedOut": "Left early",
+      "scan": "Scan a card",
+      "passengers": "Passengers",
+      "reportDelay": "Report a delay",
+      "sos": "SOS emergency",
+      "startedToast": "Trip started. Students and guardians were told.",
+      "startOutbound": "Start the outbound trip",
+      "startReturn": "Start the return trip",
+      "blocked": "End the trip on the road first.",
+      "errors": {
+        "TRIP_ALREADY_STARTED": "This trip already started.",
+        "TRIP_ALREADY_ENDED": "This trip already ended.",
+        "TRIP_NOT_STARTED": "Start the trip first.",
+        "OTHER_TRIP_IN_PROGRESS": "End the trip on the road first.",
+        "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
+        "generic": "Something went wrong. Try again."
+      },
+      "startOutboundConfirm": "Start the outbound trip now?",
+      "startReturnConfirm": "Start the return trip now?",
+      "startConfirmBody": "Students and guardians on the line are told the bus left.",
+      "startConfirm": "Start",
+      "endedToast": "Trip ended.",
+      "endOutbound": "End trip at campus",
+      "endReturn": "End the return trip",
+      "endConfirm": "End the trip?",
+      "endConfirmWaiting": "{count, plural, one {# student wasn't scanned and will be marked absent.} other {# students weren't scanned and will be marked absent.}} Their guardians are told.",
+      "endConfirmAll": "Everyone on the list is accounted for.",
+      "endConfirmButton": "End trip",
+      "busTitle": "Your bus",
+      "plate": "Plate",
+      "busType": "Type",
+      "seats": "Seats",
+      "campus": "At campus",
+      "stopsTitle": "Stops",
+      "stopsLead": "Students still to pick up at each stop.",
+      "stopsLeadReturn": "Students still to board, by their stop.",
+      "toPickUp": "{count, plural, =0 {None left} one {# to pick up} other {# to pick up}}",
+      "replacedTitle": "The office changed today's bus",
+      "replacedBody": "Now {plate} with driver {name} ({phone})."
+    },
+    "scan": {
+      "title": "Scan cards",
+      "lead": "Point the camera at the student's pass. Each pass works for 30 seconds only.",
+      "noTripTitle": "No trip on the road",
+      "noTripBody": "Start the trip first, then scan each student as they get on.",
+      "goToTrip": "Go to today's trip",
+      "modeLabel": "What are you scanning for?",
+      "modeBoard": "Boarding",
+      "modeCheckout": "Leaving early",
+      "boardedCount": "{boarded} of {total} on board",
+      "boardHint": "Scan each student as they get on the bus.",
+      "checkoutHint": "Scan a student who is leaving before the end of the trip, then pick the reason.",
+      "manualTitle": "No pass?",
+      "manualLead": "If the student's phone is off, type their university ID. It's recorded as entered by hand.",
+      "manualLabel": "University ID",
+      "manualBoard": "Mark on board",
+      "manualCheckout": "Check out",
+      "boardedResult": "{name} is on board",
+      "checkedOutResult": "{name} left the bus",
+      "errors": {
+        "CARD_INVALID": "This isn't a SUtech bus pass.",
+        "CARD_EXPIRED": "The pass expired. Ask the student to open it again (no screenshots).",
+        "STUDENT_NOT_FOUND": "No student with this university ID.",
+        "NOT_ON_THIS_TRIP": "Not subscribed on this line. Send them to the Transportation office.",
+        "ALREADY_BOARDED": "Already on board.",
+        "NOT_ON_BOARD": "This student isn't on board.",
+        "REASON_REQUIRED": "Pick a reason.",
+        "TRIP_NOT_STARTED": "Start the trip first.",
+        "TRIP_ALREADY_ENDED": "This trip already ended.",
+        "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
+        "generic": "Something went wrong. Try again."
+      },
+      "camera": {
+        "turnOn": "Turn on the camera",
+        "turnOff": "Turn off the camera",
+        "lead": "The back camera reads the QR code on the student's pass.",
+        "denied": "Camera access is blocked. Allow it in the browser settings, or type the ID below.",
+        "unavailable": "The camera can't open here. It needs the app's secure (https) address. Type the ID below meanwhile."
+      },
+      "manualRequired": "Type the student's university ID."
+    },
+    "passengers": {
+      "title": "Passengers",
+      "lead": "Everyone subscribed on your line, by stop.",
+      "filterLabel": "Show",
+      "all": "All ({number})",
+      "search": "Search by name or ID",
+      "emptyTitle": "No one here",
+      "emptyBody": "No student matches this filter.",
+      "boardedAt": "On at {time}",
+      "manual": "by hand",
+      "leftAt": "Left at {time}",
+      "board": "On board",
+      "boardNamed": "Mark {name} on board",
+      "checkout": "Check out",
+      "checkoutNamed": "Check out {name}",
+      "boardConfirm": "Mark {name} on board?",
+      "boardConfirmBody": "Only when the student is on the bus but can't show the pass. It's recorded as entered by hand."
+    },
+    "delay": {
+      "title": "Report a delay",
+      "lead": "Students and guardians on your line get a notice right away.",
+      "endedTitle": "No trip to report on",
+      "endedBody": "Today's trips have ended.",
+      "goToTrip": "Go to today's trip",
+      "howLate": "About how late?",
+      "minutes": "{minutes} min",
+      "why": "Why?",
+      "note": "Note",
+      "noteHint": "Where you are now, or anything students should know.",
+      "whoKnowsTitle": "Who is told",
+      "whoKnowsBody": "A delay notice goes on your line's announcements, and every student and guardian on the line gets a notification.",
+      "errors": {
+        "TRIP_ALREADY_ENDED": "This trip already ended.",
+        "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
+        "generic": "Something went wrong. Try again.",
+        "DELAY_OUT_OF_WINDOW": "A delay can be sent while the trip runs, or within an hour of its pickup time."
+      },
+      "submit": "Send the delay",
+      "sentTitle": "Delay sent",
+      "sentBody": "Students and guardians on your line were told.",
+      "sentListTitle": "Sent on this trip",
+      "sentListEmpty": "No delays reported on this trip.",
+      "closedTitle": "Too far from the trip's time",
+      "closedBody": "You can report a delay while the trip runs, or from an hour before its pickup time ({time}) to an hour after."
+    }
+  },
+  "sos": {
+    "title": "SOS emergency",
+    "lead": "For a real emergency only. The Transportation office gets it at once with the bus's location.",
+    "noTripTitle": "No trip running",
+    "noTripBody": "Today's trips have ended. In an emergency, call the numbers here.",
+    "pickTitle": "What happened?",
+    "pickLead": "Press the one that fits. You'll confirm before it's sent.",
+    "types": {
+      "medical": {
+        "label": "Medical",
+        "hint": "Someone on board needs a doctor. The clinic is told too."
+      },
+      "breakdown": {
+        "label": "Bus problem",
+        "hint": "The bus stopped or can't go on. A replacement may be sent."
+      },
+      "accident": {
+        "label": "Accident",
+        "hint": "An accident on the road. Ambulance if anyone is hurt."
+      }
+    },
+    "gpsNote": "The location comes from the GPS device in the bus, not from your phone.",
+    "confirmTitle": "Send SOS: {type}?",
+    "confirmBody": "The Transportation office is alerted now with the bus's location. Students and guardians on the trip get a calm notice.",
+    "confirm": "Send SOS now",
+    "note": "What's going on",
+    "noteHint": "A few words help the office (e.g. \"student fainted\", \"flat tyre\").",
+    "errors": {
+      "NOT_YOUR_TRIP": "This isn't your bus's trip.",
+      "TRIP_ALREADY_ENDED": "This trip ended. Call the Transportation office.",
+      "network": "No connection. Call the Transportation office now.",
+      "invalid": "Some details aren't right. Check the form and try again.",
+      "generic": "It didn't send. Call the Transportation office now."
+    },
+    "sentTitle": "SOS sent: {type}",
+    "sentAt": "Sent at {time}",
+    "statusOpen": "Sent. Waiting for the Transportation office to take it…",
+    "statusAcknowledged": "The Transportation office has it ({name}, {time}). Keep your phone close.",
+    "statusClosed": "The office closed this alert.",
+    "type": "Type",
+    "location": "Bus location sent",
+    "noLocation": "The bus's GPS hasn't reported yet",
+    "fromGps": "From the bus GPS at {time}",
+    "onBoard": "Students on board",
+    "whoKnows": "Students and guardians on this trip got a calm notice, without details.",
+    "contacts": {
+      "title": "Call for help",
+      "call": "Call {name}",
+      "transport": "Transportation office",
+      "ambulance": "Ambulance",
+      "hotline": "University hotline"
+    },
+    "log": {
+      "title": "What the office did",
+      "empty": "Nothing logged yet.",
+      "actions": {
+        "acknowledge": "Took the alert",
+        "ambulance_called": "Called an ambulance",
+        "replacement_sent": "Sent another bus or driver",
+        "note": "Note",
+        "close": "Closed the alert"
+      },
+      "by": "{name} · {time}"
+    }
+  },
+  "violations": {
+    "title": "Violations",
+    "lead": "Record a breach of the bus Code of Conduct with a photo. It goes to Student Affairs and the Transportation office.",
+    "mineTitle": "You recorded",
+    "mineEmpty": "Nothing recorded yet.",
+    "rule": "Which rule was broken?",
+    "rulePlaceholder": "Choose a rule",
+    "ruleNumbered": "Rule {number}: {name}",
+    "rules": {
+      "unapproved_model": "Project model without approval",
+      "photographing": "Photographing a passenger without permission",
+      "bullying": "Bullying or mocking a passenger",
+      "cleanliness": "Feet on seats, eating or drinking",
+      "smoking": "Smoking (e-cigarettes too)",
+      "noise": "Loud music or films",
+      "unsafe_boarding": "Forcing the door or moving-bus boarding",
+      "refused_id": "Refused to show the student ID",
+      "bad_language": "Offensive language or behaviour",
+      "not_subscribed": "Riding without a subscription",
+      "distracting_driver": "Distracting the driver",
+      "damage": "Damaging the bus or seats",
+      "seating": "Not keeping the assigned seat",
+      "other": "Other"
+    },
+    "student": "Student",
+    "studentHint": "From today's passenger list. Leave it if you don't know who.",
+    "studentUnknown": "Don't know who",
+    "description": "What happened",
+    "descriptionHint": "Where on the trip and what you saw.",
+    "photo": "Photo",
+    "photoHint": "A photo of what happened (JPEG, PNG or WebP, up to 5 MB).",
+    "takePhoto": "Take a photo",
+    "retakePhoto": "Change photo",
+    "removePhoto": "Remove photo",
+    "submit": "Send the violation",
+    "sentTitle": "Violation sent",
+    "sentBody": "Student Affairs and the Transportation office will review it.",
+    "status": {
+      "submitted": "Sent",
+      "under_review": "Under review",
+      "closed": "Closed"
+    },
+    "errors": {
+      "ruleRequired": "Choose the rule.",
+      "descriptionShort": "Write at least {count} characters.",
+      "photoRequired": "Add a photo.",
+      "FILE_TYPE": "Photos only: JPEG, PNG or WebP.",
+      "FILE_TOO_LARGE": "The photo is over 5 MB.",
+      "STUDENT_NOT_FOUND": "No student with this university ID.",
+      "network": "No connection. Check your internet and try again.",
+      "invalid": "Some details aren't right. Check the form and try again.",
+      "generic": "Something went wrong. Try again."
+    }
+  },
+  "emergencies": {
+    "title": "Emergencies",
+    "lead": "SOS alerts from the buses, live. Take each one, log what you do, and close it with a summary.",
+    "filters": {
+      "label": "Show",
+      "active": "Active",
+      "closed": "Closed",
+      "all": "All"
+    },
+    "emptyActive": {
+      "title": "No active alerts",
+      "body": "When a driver or supervisor presses SOS, it shows here at once with the bus's location."
+    },
+    "emptyClosed": {
+      "title": "No closed alerts",
+      "body": "Alerts you close stay here with their log."
+    },
+    "status": {
+      "open": "Not taken",
+      "acknowledged": "Being handled",
+      "closed": "Closed"
+    },
+    "lineName": "Line {code} · {name}",
+    "direction": {
+      "outbound": "Morning trip",
+      "return": "Return trip"
+    },
+    "raisedAt": "Raised at {time}",
+    "raisedBy": "{role}: {name}",
+    "onBoard": "{count} on board",
+    "open": "Open",
+    "back": "Emergencies",
+    "openBanner": "Nobody has taken this alert yet.",
+    "take": "Take it",
+    "takenBy": "Taken by {name} at {time}",
+    "closedBy": "Closed by {name} at {time}",
+    "location": "Bus location",
+    "openInMaps": "Open in Google Maps",
+    "fromGps": "From the bus GPS at {time}",
+    "noLocation": "The bus's GPS hasn't reported on this trip.",
+    "busTitle": "Bus and crew",
+    "bus": "Bus",
+    "busLine": "{plate} · {type} · {seats} seats",
+    "driver": "Driver",
+    "raisedByTitle": "Raised by",
+    "call": "Call {name}",
+    "ridersOnBoard": "Students on board",
+    "crewNote": "What the crew said",
+    "trip": "Trip",
+    "actionsTitle": "What's being done",
+    "takeFirst": "Take the alert first, then log what you do.",
+    "ambulance": "Ambulance called",
+    "ambulanceTitle": "Log that an ambulance was called?",
+    "ambulanceBody": "This only logs it, with your name and the time. Call {number} first if you haven't.",
+    "replacement": "Send another bus or driver",
+    "addNote": "Add a note",
+    "noteTitle": "Add a note to the log",
+    "noteLabel": "Note",
+    "close": "Close the alert",
+    "closeTitle": "Close this alert?",
+    "closeBody": "Write what was done. The crew sees it's closed, and students and guardians on the line are told it's handled.",
+    "summaryLabel": "What was done",
+    "logged": "Logged",
+    "clinicNote": "The Transportation office sends buses and drivers.",
+    "errors": {
+      "ALREADY_ACKNOWLEDGED": "Someone else took it a moment ago.",
+      "SOS_NOT_ACKNOWLEDGED": "Take the alert first.",
+      "SOS_CLOSED": "This alert is closed.",
+      "NOTE_REQUIRED": "Write a few words first.",
+      "TRIP_ALREADY_ENDED": "This trip has ended.",
+      "BUS_NOT_AVAILABLE": "That bus was just sent elsewhere. Pick another.",
+      "DRIVER_NOT_AVAILABLE": "That driver was just sent elsewhere. Pick another.",
+      "NOTHING_TO_CHANGE": "That's the bus and driver already on the trip.",
+      "network": "No connection. Try again.",
+      "invalid": "Some details aren't right. Check the form and try again.",
+      "generic": "Something went wrong. Try again."
+    },
+    "alarm": {
+      "title": "New SOS: {type} on line {code}",
+      "body": "{time} · {count} on board",
+      "more": "{count, plural, one {# more open alert} other {# more open alerts}}",
+      "open": "Open"
+    },
+    "replacementDialog": {
+      "title": "Send another bus or driver",
+      "now": "Line {code} now: {plate} with {driver}. {riders} riders on this trip.",
+      "kind": "What to send",
+      "kindBus": "Another bus, with its driver",
+      "kindDriver": "Only another driver",
+      "busOption": "{plate} · {type} · {seats} seats",
+      "busDriver": "Driver: {name}",
+      "seatsWarning": "{seats} seats for {riders} riders: not everyone fits.",
+      "noBuses": "No spare bus is free now. Call Abu El Hol.",
+      "noDrivers": "No spare driver is free now. Call Abu El Hol.",
+      "pickBus": "Pick a bus",
+      "pickDriver": "Pick a driver",
+      "reason": "Why",
+      "reasons": {
+        "breakdown": "The bus broke down",
+        "accident": "Accident",
+        "driver_unavailable": "The driver can't drive",
+        "other": "Other"
+      },
+      "note": "Note for the log",
+      "confirm": "Send",
+      "whoIsTold": "The driver's page, the line's students and their guardians show the new bus and driver at once.",
+      "sent": "Sent: {plate} with {name}"
+    },
+    "noteRequired": "Write a note first.",
+    "summaryRequired": "Write what was done before closing.",
+    "emptyAll": {
+      "title": "No alerts",
+      "body": "No driver or supervisor has pressed SOS yet. A new alert shows here at once with the bus's location."
+    },
+    "allAlerts": "See all alerts"
+  },
+  "clinic": {
+    "title": "Clinic",
+    "lead": "Medical emergencies and accidents on the buses, live, with what was done for each.",
+    "statActive": "Cases open now",
+    "statWeek": "Cases this week",
+    "statAmbulance": "Ambulances this week",
+    "statAmbulanceCaption": "Logged by the office or the clinic",
+    "nowTitle": "Needs you now",
+    "nowEmptyTitle": "No medical case on the buses now",
+    "nowEmptyBody": "When a crew sends a medical SOS or reports an accident, it shows here at once with the bus's location.",
+    "callDriver": "Call the driver",
+    "historyTitle": "All cases",
+    "historyEmpty": "No medical cases yet.",
+    "colWhen": "When",
+    "colCase": "Case",
+    "colStatus": "Status",
+    "colAmbulance": "Ambulance",
+    "colSummary": "What was done",
+    "yes": "Yes",
+    "no": "No"
   }
 }

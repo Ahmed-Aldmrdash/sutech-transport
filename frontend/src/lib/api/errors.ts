@@ -57,8 +57,11 @@ export function isApiError(error: unknown): error is ApiError {
 export function errorMessageKey<TCode extends string>(
   error: unknown,
   knownCodes: readonly TCode[],
-): TCode | "network" | "generic" {
+): TCode | "network" | "invalid" | "generic" {
   if (!isApiError(error)) return "generic";
   if (error.isNetworkError) return "network";
+  // The form let something through that the request schema refuses: a validation problem
+  // the person can fix, not "something went wrong".
+  if (error.code === ClientErrorCode.InvalidRequest) return "invalid";
   return (knownCodes as readonly string[]).includes(error.code) ? (error.code as TCode) : "generic";
 }

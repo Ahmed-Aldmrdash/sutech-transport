@@ -39,7 +39,7 @@ export type RequestFieldError =
 export type FieldErrors<K extends string> = Partial<Record<K, RequestFieldError>>;
 
 /** The term's dates and today's date (Cairo), all "YYYY-MM-DD". */
-export interface DateRules {
+interface DateRules {
   today: string;
   termStartsOn: string;
   termEndsOn: string;
@@ -81,10 +81,7 @@ function checkName(name: string): RequestFieldError | undefined {
   return name.trim().length < MIN_NAME_LENGTH ? "nameTooShort" : undefined;
 }
 
-export function checkFiles(
-  files: readonly File[],
-  maxBytes: number,
-): RequestFieldError | undefined {
+function checkFiles(files: readonly File[], maxBytes: number): RequestFieldError | undefined {
   if (files.length > MAX_ATTACHMENTS) return "tooManyFiles";
   if (files.some((file) => !(RECEIPT_CONTENT_TYPES as readonly string[]).includes(file.type))) {
     return "fileType";
@@ -154,7 +151,7 @@ export interface RefundValues {
   guardianConsent: boolean;
   documents: File[];
 }
-export type RefundField = keyof RefundValues;
+type RefundField = keyof RefundValues;
 
 export function validateRefund(
   values: RefundValues,
@@ -182,7 +179,7 @@ export interface ComplaintValues {
   description: string;
   attachments: File[];
 }
-export type ComplaintField = keyof ComplaintValues;
+type ComplaintField = keyof ComplaintValues;
 
 export function validateComplaint(
   values: ComplaintValues,

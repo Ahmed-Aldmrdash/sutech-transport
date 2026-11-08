@@ -14,14 +14,14 @@ const iconButtonStyles = cva(
       },
       size: {
         md: "size-12",
-        sm: "size-10",
+        sm: "tap-area size-10",
       },
     },
     defaultVariants: { variant: "ghost", size: "md" },
   },
 );
 
-export interface IconButtonProps
+interface IconButtonProps
   extends
     Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children">,
     VariantProps<typeof iconButtonStyles> {

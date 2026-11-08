@@ -73,8 +73,8 @@ const bookings = new StoredMap<MockBooking>("sut.mock.bookings", MockStorage.Loc
 const payments = new StoredMap<MockPayment[]>("sut.mock.payments", MockStorage.Local);
 
 /**
- * Omar (240102684) is already an active subscriber on line 7 (El Shorouk), to show the card at
- * once. Youssef (260101207, Ahmed's brother in the demo) rides line 12 (Nasr City), so the
+ * Seif (240100102) is already an active subscriber on line 7 (El Shorouk), to show the card at
+ * once. Yassin (260100111, Ziad's brother in the demo) rides line 12 (Nasr City), so the
  * guardian's pages have a child on the bus.
  */
 const SEED_ACTIVATED_AT = Date.parse("2026-09-20T09:12:00Z");
@@ -111,7 +111,7 @@ const SEED_PAYMENTS: Record<string, MockPayment[]> = {
       referenceNumber: "NBE-48213377",
       amountPiasters: MOCK_TERM_PRICE_PIASTERS,
       paidOn: "2026-09-15",
-      payerName: "Ahmed Ramadan Ramadan",
+      payerName: "Hossam Lotfy",
       fileName: "deposit-slip.jpg",
       submittedAt: Date.parse("2026-09-15T08:30:00Z"),
       status: MockPaymentStatus.Approved,
@@ -127,7 +127,7 @@ const SEED_PAYMENTS: Record<string, MockPayment[]> = {
       referenceNumber: "NBE-51902264",
       amountPiasters: MOCK_TERM_PRICE_PIASTERS,
       paidOn: "2026-09-14",
-      payerName: "Mohamed Fathy Aldmrdash",
+      payerName: "Tamer Nour",
       fileName: "transfer.pdf",
       submittedAt: Date.parse("2026-09-14T19:10:00Z"),
       status: MockPaymentStatus.Approved,

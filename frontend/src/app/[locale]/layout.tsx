@@ -29,16 +29,27 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
-  const { locale } = await params;
+  const { locale: asked } = await params;
+  const locale = hasLocale(routing.locales, asked) ? asked : routing.defaultLocale;
   const t = await getTranslations({
-    locale: hasLocale(routing.locales, locale) ? locale : routing.defaultLocale,
+    locale,
     namespace: "app",
   });
   return {
     title: { default: t("name"), template: `%s · ${t("shortName")}` },
     description: t("description"),
     applicationName: t("name"),
-    appleWebApp: { capable: true, title: t("shortName"), statusBarStyle: "default" },
+    manifest: `/${locale}/manifest.webmanifest`,
+    appleWebApp: {
+      capable: true,
+      title: t("shortName"),
+      statusBarStyle: "default",
+      // iPhones show this while the installed app opens (one size, scaled by iOS).
+      startupImage: [
+        { url: "/splash/splash-light-1170x2532.png", media: "(prefers-color-scheme: light)" },
+        { url: "/splash/splash-dark-1170x2532.png", media: "(prefers-color-scheme: dark)" },
+      ],
+    },
     formatDetection: { telephone: false },
     icons: {
       icon: [
@@ -54,7 +65,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: THEME_COLOR.light,
+  // The device's own theme until the person picks one (the theme provider then updates both).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_COLOR.light },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLOR.dark },
+  ],
 };
 
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {

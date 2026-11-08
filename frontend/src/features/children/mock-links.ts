@@ -21,7 +21,7 @@ export function mockChildrenOf(guardianId: string): MockAccount[] {
     .filter((child): child is MockAccount => child !== undefined);
 }
 
-export function isMockGuardianOf(guardianId: string, studentId: string): boolean {
+function isMockGuardianOf(guardianId: string, studentId: string): boolean {
   return (GUARDIAN_CHILDREN[guardianId] ?? []).includes(studentId);
 }
 
@@ -31,7 +31,7 @@ export function hasMockGuardianAccount(studentId: string): boolean {
 }
 
 /** The line the student rides now, or null without an active subscription. */
-export function activeLineOf(studentId: string): string | null {
+function activeLineOf(studentId: string): string | null {
   const booking = bookingOf(studentId);
   return booking?.status === SubscriptionStatus.Active ? booking.lineId : null;
 }

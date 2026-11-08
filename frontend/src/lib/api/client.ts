@@ -50,7 +50,8 @@ function currentLanguage(): string | undefined {
 interface TransportRequest {
   endpoint: Endpoint;
   parsed: ParsedInput<Endpoint>;
-  token: string | null;
+  /** Mock mode only: the mock "cookie", read before the first await (see token-store). */
+  mockToken: string | null;
   idempotencyKey?: string;
   signal?: AbortSignal;
 }
@@ -83,21 +84,26 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 async function sendToMock({
   endpoint,
   parsed,
-  token,
+  mockToken,
+  idempotencyKey,
   signal,
 }: TransportRequest): Promise<MockResponse> {
-  const [{ handleMockRequest }] = await Promise.all([
+  const [{ handleMockRequest }, { loadMocksFor }] = await Promise.all([
     import("./mock/mock-server"),
     import("./mock/handlers"),
   ]);
+  await loadMocksFor(endpoint);
   await sleep(appConfig.mockLatencyMs, signal);
-  return handleMockRequest(endpoint, parsed, { token, language: currentLanguage() ?? "ar" });
+  return handleMockRequest(endpoint, parsed, {
+    token: mockToken,
+    language: currentLanguage() ?? "ar",
+    idempotencyKey: idempotencyKey ?? null,
+  });
 }
 
 async function sendToServer({
   endpoint,
   parsed,
-  token,
   idempotencyKey,
   signal,
 }: TransportRequest): Promise<MockResponse> {
@@ -110,7 +116,6 @@ async function sendToServer({
   const headers: Record<string, string> = { Accept: "application/json" };
   const language = currentLanguage();
   if (language) headers["Accept-Language"] = language;
-  if (token) headers.Authorization = `Bearer ${token}`;
   if (parsed.body !== undefined) headers["Content-Type"] = "application/json";
   if (idempotencyKey) headers[IDEMPOTENCY_HEADER] = idempotencyKey;
 
@@ -122,6 +127,8 @@ async function sendToServer({
       method: endpoint.method,
       headers,
       body: parsed.body === undefined ? undefined : JSON.stringify(parsed.body),
+      // The session is an HttpOnly cookie the server sets at sign-in; scripts never hold it.
+      credentials: "include",
       signal: combined,
     });
     return { status: response.status, body: await response.text() };
@@ -169,22 +176,22 @@ export async function callEndpoint<E extends Endpoint>(
     body: parsePart(endpoint.body, raw.body, "body"),
   } as ParsedInput<Endpoint>;
 
+  const isMock = appConfig.apiMode === ApiMode.Mock;
   const request: TransportRequest = {
     endpoint,
     parsed,
-    token: tokenStore.get(),
+    mockToken: isMock ? tokenStore.get() : null,
     idempotencyKey: endpoint.idempotent
       ? (options.idempotencyKey ?? crypto.randomUUID())
       : undefined,
     signal: options.signal,
   };
-  const { status, body } =
-    appConfig.apiMode === ApiMode.Mock ? await sendToMock(request) : await sendToServer(request);
+  const { status, body } = isMock ? await sendToMock(request) : await sendToServer(request);
 
   const payload = parseJson(body);
   const isSuccess = status >= 200 && status < 300;
   if (!isSuccess) {
-    if (status === HTTP_STATUS_UNAUTHORIZED && endpoint.access !== "public" && request.token) {
+    if (status === HTTP_STATUS_UNAUTHORIZED && endpoint.access !== "public") {
       unauthorizedHandler?.();
     }
     throw toApiError(status, payload);

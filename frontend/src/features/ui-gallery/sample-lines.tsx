@@ -24,7 +24,7 @@ interface SampleLine {
   minutes_late: number;
 }
 
-export const SAMPLE_LINES: readonly SampleLine[] = [
+const SAMPLE_LINES: readonly SampleLine[] = [
   {
     id: "l1",
     number: 1,

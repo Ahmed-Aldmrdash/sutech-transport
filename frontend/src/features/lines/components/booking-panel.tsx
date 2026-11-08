@@ -28,7 +28,7 @@ const BOOKING_ERROR_CODES = [
   SubscriptionErrorCode.StopNotOnLine,
   LineErrorCode.LineNotFound,
 ] as const;
-type BookingErrorKey = (typeof BOOKING_ERROR_CODES)[number] | "network" | "generic";
+type BookingErrorKey = (typeof BOOKING_ERROR_CODES)[number] | "network" | "invalid" | "generic";
 
 interface BookingPanelProps {
   line: LineDetail;

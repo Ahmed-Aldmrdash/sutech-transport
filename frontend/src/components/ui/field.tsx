@@ -43,8 +43,9 @@ export function Field({
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label htmlFor={id} className="text-body-sm font-bold text-ink-strong">
         {label}
+        {/* A real space, so the accessible name reads "Note (optional)", not "Note(optional)". */}
         {!required && optionalText ? (
-          <span className="ms-1 font-normal text-ink-muted">{optionalText}</span>
+          <span className="font-normal text-ink-muted"> {optionalText}</span>
         ) : null}
       </label>
       {children({
@@ -59,7 +60,7 @@ export function Field({
           role={error ? "alert" : undefined}
           className={cn(
             "flex items-start gap-1.5 text-body-sm",
-            error ? "text-danger" : "text-ink-muted",
+            error ? "text-danger-text" : "text-ink-muted",
           )}
         >
           {error ? <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" /> : null}

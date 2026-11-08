@@ -3,12 +3,12 @@
  * the road, so the map can be tried in the evening. The mock server reads this key; the real
  * server never sees it.
  */
-export const DEMO_TRIP_KEY = "sut.mock.demoTripStartedAt";
+const DEMO_TRIP_KEY = "sut.mock.demoTripStartedAt";
 
 /** How long the pretend trip takes, first stop to campus. */
 export const DEMO_TRIP_MS = 4 * 60_000;
 /** It stays "arrived" this long, then the page goes back to "no trip now". */
-export const DEMO_ARRIVED_MS = 60_000;
+const DEMO_ARRIVED_MS = 60_000;
 
 export function startDemoTrip(now = Date.now()): void {
   try {

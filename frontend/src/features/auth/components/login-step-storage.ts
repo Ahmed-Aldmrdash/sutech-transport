@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { writeCookie } from "@/lib/cookies";
 import { otpChallengeSchema, type OtpChallenge } from "../schema";
 
 /** Read by the server too, so a reload or language switch renders the code step directly. */
@@ -43,9 +44,9 @@ export const loginStepStorage = {
   save(step: SavedCodeStep): void {
     const maxAge = Math.max(0, Math.floor((expiresAt(step) - Date.now()) / MS_PER_SECOND));
     const value = encodeURIComponent(JSON.stringify(step));
-    document.cookie = `${LOGIN_STEP_COOKIE}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+    writeCookie(LOGIN_STEP_COOKIE, value, maxAge);
   },
   clear(): void {
-    document.cookie = `${LOGIN_STEP_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+    writeCookie(LOGIN_STEP_COOKIE, "", 0);
   },
 };

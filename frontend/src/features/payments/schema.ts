@@ -6,12 +6,12 @@ import { calendarDateSchema } from "@/features/subscriptions/schema";
  * university's National Bank of Egypt account, with the receipt uploaded here, or a Visa card
  * at the Accounting office (A045), which finance records itself. No Fawry, no InstaPay.
  */
-export const PaymentMethod = {
+const PaymentMethod = {
   BankDeposit: "bank_deposit",
   BankTransfer: "bank_transfer",
   CardAtOffice: "card_at_office",
 } as const;
-export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
+type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
 
 /** The methods a student uploads a receipt for. */
 export const RECEIPT_METHODS = [PaymentMethod.BankDeposit, PaymentMethod.BankTransfer] as const;

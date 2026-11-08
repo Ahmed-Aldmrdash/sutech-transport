@@ -11,6 +11,7 @@ import {
   requireMockAccount,
   revokeMockToken,
 } from "./mock-token";
+import { tokenStore } from "@/lib/api/token-store";
 import { AuthErrorCode } from "./schema";
 
 /** The contract's rules: 5-minute code, 3 attempts, one resend per minute. */
@@ -108,8 +109,9 @@ registerMock(loginEndpoint, ({ body }) => {
   }
   challenges.delete(key);
   const expiresAt = now + MOCK_OTP_RULES.sessionHours * MS_PER_HOUR;
+  // The real server sets an HttpOnly cookie here; the mock keeps its token in the mock jar.
+  tokenStore.set(encodeMockToken(account.user.id, expiresAt));
   return {
-    token: encodeMockToken(account.user.id, expiresAt),
     expires_at: new Date(expiresAt).toISOString(),
     user: account.user,
   };
@@ -118,6 +120,7 @@ registerMock(loginEndpoint, ({ body }) => {
 registerMock(logoutEndpoint, (_input, { token }) => {
   if (!decodeMockToken(token)) mockUnauthorized();
   if (token) revokeMockToken(token);
+  tokenStore.clear();
   return { ok: true as const };
 });
 

@@ -56,6 +56,7 @@ export type NavItemKey =
   | "scan"
   | "passengers"
   | "reportDelay"
+  | "sos"
   | "violations"
   | "overview"
   | "liveTracking"
@@ -75,7 +76,7 @@ export type NavItemKey =
   | "users";
 
 /** Keys under `nav.groups`. */
-export type NavGroupKey =
+type NavGroupKey =
   "main" | "account" | "operations" | "finance" | "followUp" | "otherParties" | "system";
 
 export interface NavItem {
@@ -85,6 +86,11 @@ export interface NavItem {
   segment: string;
   /** Shown in the phone's bottom bar (at most four per role, the rest go in the menu). */
   primary?: boolean;
+  /**
+   * Planned but not built yet: listed in the menu as "coming soon", never a link, and no one
+   * may open it. Removed from an item the day its page ships.
+   */
+  soon?: boolean;
 }
 
 /** A number to show on a menu item (unread notifications). 0 or missing shows nothing. */
@@ -125,7 +131,8 @@ const STUDENT_NAV: RoleNavigation = {
       items: [
         { key: "requests", icon: ClipboardList, segment: "requests" },
         { key: "complaints", icon: MessageSquareWarning, segment: "complaints" },
-        { key: "assistant", icon: MessageCircleQuestion, segment: "assistant" },
+        // The AI team's assistant: not part of the front end phases yet.
+        { key: "assistant", icon: MessageCircleQuestion, segment: "assistant", soon: true },
         { key: "settings", icon: Settings, segment: "settings" },
       ],
     },
@@ -157,7 +164,8 @@ const CREW_NAV: RoleNavigation = {
         { key: "trip", icon: Bus, segment: "", primary: true },
         { key: "scan", icon: ScanLine, segment: "scan", primary: true },
         { key: "passengers", icon: Users, segment: "passengers", primary: true },
-        { key: "reportDelay", icon: Timer, segment: "delay", primary: true },
+        { key: "sos", icon: Siren, segment: "sos", primary: true },
+        { key: "reportDelay", icon: Timer, segment: "delay" },
         { key: "violations", icon: BadgeAlert, segment: "violations" },
       ],
     },
@@ -175,6 +183,12 @@ interface OfficeNavGroup {
 }
 
 const { Transport, Finance, Clinic, StudentAffairs, SecretaryGeneral, BusCompany } = Role;
+
+/** Office pages that are built. Every other office page shows as "coming soon" (phase 6). */
+const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set(["emergencies", "clinic"]);
+
+/** For an office with no built page yet: its home, which lists what is coming. */
+const OFFICE_WELCOME: NavItem = { key: "home", icon: House, segment: "", primary: true };
 
 /** The 20 office pages from the agreed plan, each with the offices that own it. */
 const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
@@ -260,16 +274,30 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
 ];
 
 function toNavItem({ key, icon, segment, primary }: OfficeNavItem): NavItem {
-  return { key, icon, segment, primary };
+  return READY_OFFICE_PAGES.has(key)
+    ? { key, icon, segment, primary }
+    : { key, icon, segment, soon: true };
 }
 
 function officeNavigationFor(role: Role): RoleNavigation {
   const canSee = (item: OfficeNavItem) => role === Role.SuperAdmin || item.roles.includes(role);
-  const groups = OFFICE_GROUPS.map((group) => ({
+  const groups: NavGroup[] = OFFICE_GROUPS.map((group) => ({
     key: group.key,
     items: group.items.filter(canSee).map(toNavItem),
   })).filter((group) => group.items.length > 0);
-  return { basePath: "/admin", groups };
+  const navigation = { basePath: "/admin", groups } as const;
+  if (readyItems(navigation).length > 0) return navigation;
+  return { basePath: "/admin", groups: [{ key: "main", items: [OFFICE_WELCOME] }, ...groups] };
+}
+
+/** The pages a role can open today (everything but "coming soon"). */
+export function readyItems(navigation: RoleNavigation): NavItem[] {
+  return navigation.groups.flatMap((group) => group.items).filter((item) => !item.soon);
+}
+
+/** The planned pages a role will get, shown as "coming soon". */
+export function soonItems(navigation: RoleNavigation): NavItem[] {
+  return navigation.groups.flatMap((group) => group.items).filter((item) => item.soon);
 }
 
 /** The menu each role sees. Strict separation: a role never sees another role's pages. */
@@ -289,8 +317,7 @@ export function navigationFor(role: Role): RoleNavigation {
 
 /** Items for the phone's bottom bar: the role's primary items, capped. */
 export function primaryItems(navigation: RoleNavigation): NavItem[] {
-  return navigation.groups
-    .flatMap((group) => group.items)
+  return readyItems(navigation)
     .filter((item) => item.primary)
     .slice(0, MAX_PRIMARY_ITEMS);
 }
@@ -299,13 +326,13 @@ export function itemHref(basePath: string, item: NavItem): string {
   return item.segment ? `${basePath}/${item.segment}` : basePath;
 }
 
-/** Longest-prefix match so "/admin" is not active on "/admin/payments". */
+/** Longest-prefix match so "/admin" is not active on "/admin/payments". Built pages only. */
 export function findActiveItem(
   navigation: RoleNavigation,
   basePath: string,
   pathname: string,
 ): NavItem | undefined {
-  const items = navigation.groups.flatMap((group) => group.items);
+  const items = readyItems(navigation);
   let best: NavItem | undefined;
   let bestLength = -1;
   for (const item of items) {
@@ -319,9 +346,9 @@ export function findActiveItem(
   return best;
 }
 
-/** Where a role lands after sign-in: its "" page, or its first page when it has none. */
+/** Where a role lands after sign-in: its "" page, or its first built page when it has none. */
 export function roleHomeHref(navigation: RoleNavigation): string {
-  const items = navigation.groups.flatMap((group) => group.items);
+  const items = readyItems(navigation);
   const home = items.find((item) => item.segment === "") ?? items[0];
   return home ? itemHref(navigation.basePath, home) : navigation.basePath;
 }

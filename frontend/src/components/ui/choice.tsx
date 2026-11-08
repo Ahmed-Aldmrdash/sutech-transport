@@ -33,10 +33,12 @@ export function Checkbox({ label, description, className, ...props }: ChoiceProp
   return (
     <div className={cn("flex min-h-tap items-center gap-3", className)}>
       <span className="relative inline-flex size-5 shrink-0">
+        {/* A 48px tap area around the 20px box (a label, so a tap there ticks it), under it. */}
+        <label htmlFor={id} aria-hidden="true" className="absolute -inset-3.5" />
         <input
           id={id}
           type="checkbox"
-          className="peer size-5 cursor-pointer appearance-none rounded-sm border-2 border-line-strong bg-surface-raised focus-ring transition-colors checked:border-brand checked:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
+          className="peer relative size-5 cursor-pointer appearance-none rounded-sm border-2 border-line-strong bg-surface-raised focus-ring transition-colors checked:border-brand checked:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         />
         <Check
@@ -54,12 +56,15 @@ export function Radio({ label, description, className, ...props }: ChoiceProps) 
   const id = useId();
   return (
     <div className={cn("flex min-h-tap items-center gap-3", className)}>
-      <input
-        id={id}
-        type="radio"
-        className="size-5 shrink-0 cursor-pointer appearance-none rounded-full border-2 border-line-strong bg-surface-raised focus-ring transition-colors checked:border-[6px] checked:border-brand disabled:cursor-not-allowed disabled:opacity-50"
-        {...props}
-      />
+      <span className="relative inline-flex size-5 shrink-0">
+        <label htmlFor={id} aria-hidden="true" className="absolute -inset-3.5" />
+        <input
+          id={id}
+          type="radio"
+          className="relative size-5 cursor-pointer appearance-none rounded-full border-2 border-line-strong bg-surface-raised focus-ring transition-colors checked:border-[6px] checked:border-brand disabled:cursor-not-allowed disabled:opacity-50"
+          {...props}
+        />
+      </span>
       <ChoiceText id={id} label={label} description={description} />
     </div>
   );

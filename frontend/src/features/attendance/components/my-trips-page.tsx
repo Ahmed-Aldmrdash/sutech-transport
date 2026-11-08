@@ -3,7 +3,6 @@
 import { BusFront, CalendarCheck, CalendarX2, LogOut, UserX } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -11,23 +10,16 @@ import { FilterChips } from "@/components/ui/filter-chips";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatTile } from "@/components/ui/stat-tile";
-import { Tone } from "@/components/ui/tone";
 import type { Locale } from "@/i18n/routing";
-import { formatCalendarDate, formatNumber, formatTime } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { getMyAttendance } from "../api";
-import { TRIP_OUTCOMES, TripOutcome, type TripRecord } from "../schema";
+import { TRIP_OUTCOMES, type TripOutcome } from "../schema";
+import { TripRow } from "./trip-row";
 
 const PAGE_SIZE = 20;
 const ALL = "all";
 type OutcomeFilter = TripOutcome | typeof ALL;
-
-const OUTCOME_TONE: Record<TripOutcome, Tone> = {
-  [TripOutcome.Rode]: Tone.Success,
-  [TripOutcome.Absent]: Tone.Danger,
-  [TripOutcome.NotGoing]: Tone.Neutral,
-  [TripOutcome.CheckedOut]: Tone.Warning,
-};
 
 /** "My trips": every trip this term with its scans, absences and check-outs. */
 export function MyTripsPage() {
@@ -132,47 +124,5 @@ export function MyTripsPage() {
         </>
       ) : null}
     </div>
-  );
-}
-
-/** One trip with its scans; also used on the guardian's day page. */
-export function TripRow({ item }: { item: TripRecord }) {
-  const t = useTranslations("student.myTrips");
-  const locale = useLocale() as Locale;
-  const time = (iso: string | null) => (iso ? formatTime(iso, locale) : null);
-  const details: string[] = [];
-  const boarded = time(item.boarded_at);
-  const arrived = time(item.arrived_at);
-  const left = time(item.checked_out_at);
-  if (boarded) details.push(t("boardedAt", { time: boarded }));
-  if (arrived) details.push(t("arrivedAt", { time: arrived }));
-  if (left) details.push(t("checkedOutAt", { time: left }));
-
-  return (
-    <li className="flex flex-col gap-1.5 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-      <div className="min-w-0">
-        <p className="text-body font-bold text-ink-strong">
-          {formatCalendarDate(item.service_date, locale, "full")}
-        </p>
-        <p className="text-body-sm text-ink">
-          {t("lineAndStop", {
-            line: item.line.code,
-            stop: item.stop_name,
-            direction: t(`direction.${item.direction}`),
-          })}
-        </p>
-        {details.length > 0 ? (
-          <p className="text-caption text-ink-muted">{details.join(" · ")}</p>
-        ) : null}
-        {item.checkout_reason ? (
-          <p className="text-caption text-ink-muted">
-            {t("reason", { reason: item.checkout_reason })}
-          </p>
-        ) : null}
-      </div>
-      <Badge tone={OUTCOME_TONE[item.outcome]} className="self-start">
-        {t(`outcome.${item.outcome}`)}
-      </Badge>
-    </li>
   );
 }

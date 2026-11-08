@@ -49,7 +49,7 @@ export function LocaleSwitcher({
       lang={target}
       aria-label={t("switchLanguage")}
       className={cn(
-        "inline-flex h-10 items-center gap-2 rounded-md px-3 text-body-sm font-bold focus-ring transition-colors disabled:opacity-60",
+        "tap-area inline-flex h-10 items-center gap-2 rounded-md px-3 text-body-sm font-bold focus-ring transition-colors disabled:opacity-60",
         onBrand ? "text-white hover:bg-white/15" : "text-ink-strong hover:bg-brand-soft",
         className,
       )}
@@ -87,7 +87,7 @@ export function LanguageSegmented({ label, className }: { label: string; classNa
               if (!isSelected) switchTo(option);
             }}
             className={cn(
-              "inline-flex h-10 items-center rounded-sm px-4 text-body-sm font-bold focus-ring transition-colors disabled:opacity-60",
+              "tap-area inline-flex h-10 items-center rounded-sm px-4 text-body-sm font-bold focus-ring transition-colors disabled:opacity-60",
               isSelected
                 ? "bg-surface-raised text-brand shadow-sm"
                 : "text-ink hover:text-ink-strong",

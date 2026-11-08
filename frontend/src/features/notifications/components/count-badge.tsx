@@ -8,7 +8,7 @@ export function CountBadge({ count, className }: { count: number; className?: st
     <span
       aria-hidden="true"
       className={cn(
-        "inline-flex h-5 min-w-5 items-center justify-center rounded-pill bg-brand px-1 text-[11px] leading-none font-bold text-on-brand ring-2 ring-surface-raised",
+        "inline-flex h-5 min-w-5 items-center justify-center rounded-pill bg-brand px-1 text-caption leading-none font-bold text-on-brand ring-2 ring-surface-raised",
         className,
       )}
     >

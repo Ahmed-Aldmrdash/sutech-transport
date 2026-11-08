@@ -8,11 +8,10 @@ export const CardErrorCode = { NotSubscribed: "NOT_SUBSCRIBED" } as const;
  * The code the driver or supervisor scans. Signed by the server and short-lived (30 seconds),
  * so a screenshot can't be shared. The app shows it as a QR code and asks for a new one in time.
  */
-export const cardQrSchema = z.object({
+const cardQrSchema = z.object({
   token: z.string().min(1),
   expires_at: z.iso.datetime(),
 });
-export type CardQr = z.infer<typeof cardQrSchema>;
 
 export const studentCardSchema = z.object({
   card_id: z.string(),

@@ -29,8 +29,7 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 
 async function signIn(identifier: string) {
   const challenge = await requestOtp(identifier);
-  const session = await login(identifier, challenge.demo_code ?? "");
-  tokenStore.set(session.token);
+  await login(identifier, challenge.demo_code ?? "");
 }
 
 function receiptFor(subscriptionId: string, reference = "NBE-12345678") {
@@ -40,7 +39,7 @@ function receiptFor(subscriptionId: string, reference = "NBE-12345678") {
     reference_number: reference,
     amount_piasters: TERM_PRICE,
     paid_on: "2026-11-01",
-    payer_name: "Mohamed Aldmrdash",
+    payer_name: "Tamer Nour",
     receipt: { file_name: "slip.jpg", content_type: "image/jpeg" as const, data_base64: "AAAA" },
   };
 }
@@ -49,7 +48,7 @@ describe("student journey (mock server)", () => {
   beforeEach(async () => {
     resetAuthMock();
     resetStudentMock();
-    await signIn("240102791");
+    await signIn("240100101");
   });
   afterEach(() => {
     vi.useRealTimers();
@@ -103,7 +102,7 @@ describe("student journey (mock server)", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(Date.now() + 24 * 3_600_000 + 1000);
     // The mock session lasts 12h, so sign in again after the jump (bookings survive sign-out).
-    await signIn("240102791");
+    await signIn("240100101");
     const expired = (await getMySubscription()).subscription;
     expect(expired?.status).toBe(SubscriptionStatus.Expired);
     expect((await errorOf(submitReceipt(receiptFor(expired?.subscription_id ?? "")))).code).toBe(
@@ -150,9 +149,9 @@ describe("student journey (mock server)", () => {
     );
   });
 
-  it("shows Omar's card at once: he is an active subscriber on line 7", async () => {
+  it("shows Seif's card at once: he is an active subscriber on line 7", async () => {
     resetAuthMock();
-    await signIn("240102684");
+    await signIn("240100102");
     expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.Active);
     expect((await getMyCard()).stop.pickup_time).toBe("07:50");
   });

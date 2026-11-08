@@ -38,7 +38,7 @@ export const tripRecordSchema = z.object({
 });
 export type TripRecord = z.infer<typeof tripRecordSchema>;
 
-export const ATTENDANCE_MAX_PAGE_SIZE = 50;
+const ATTENDANCE_MAX_PAGE_SIZE = 50;
 
 export const attendanceQuerySchema = z.object({
   outcome: z.enum(TRIP_OUTCOMES).optional(),

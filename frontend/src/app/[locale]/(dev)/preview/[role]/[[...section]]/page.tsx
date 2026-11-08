@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { RolePreview } from "@/features/navigation/components/role-preview";
 import type { Locale } from "@/i18n/routing";
 import { isRole } from "@/lib/auth/roles";
-import { isMockMode } from "@/lib/config";
+import { areDevPagesOn } from "@/lib/config";
 
 type Props = PageProps<"/[locale]/preview/[role]/[[...section]]">;
 
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /** Developer preview of each role's frame and menu. Hidden when the app talks to the real server. */
 export default async function RolePreviewRoute({ params }: Props) {
-  if (!isMockMode) notFound();
+  if (!areDevPagesOn) notFound();
   const { locale, role, section } = await params;
   if (!isRole(role)) notFound();
   setRequestLocale(locale as Locale);

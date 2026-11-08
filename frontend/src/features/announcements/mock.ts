@@ -1,9 +1,15 @@
 import { requireMockAccount } from "@/features/auth/mock-token";
 import { mockChildrenOf } from "@/features/children/mock-links";
+import { allCrewDelays, allReplacements } from "@/features/crew/mock-state";
+import { DelayReason } from "@/features/crew/schema";
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
+import { mockFleetBus, mockFleetDriver } from "@/features/lines/mock-fleet";
+import { actionsOf, allSos } from "@/features/sos/mock-state";
+import { SosAction } from "@/features/sos/schema";
 import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
+import { formatPhone } from "@/lib/format";
 import { Role } from "@/lib/auth/roles";
 import { listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
@@ -89,9 +95,112 @@ function lineOf(item: (typeof MOCK_ANNOUNCEMENTS)[number], language: string) {
   return source ? toLineSummary(source, language) : null;
 }
 
+const DELAY_REASON_TEXT: Record<DelayReason, { ar: string; en: string }> = {
+  [DelayReason.Traffic]: { ar: "زحمة على الطريق", en: "Heavy traffic on the road" },
+  [DelayReason.Breakdown]: { ar: "عطل بسيط في الباص", en: "A minor problem with the bus" },
+  [DelayReason.Weather]: { ar: "الجو", en: "The weather" },
+  [DelayReason.RoadClosed]: { ar: "طريق مقفول", en: "A closed road" },
+  [DelayReason.Other]: { ar: "ظرف على الطريق", en: "Something on the way" },
+};
+
+/** What the server posts when a driver reports a delay (POST /trips/{id}/delay). */
+function crewDelayAnnouncements(language: string): Announcement[] {
+  return allCrewDelays().flatMap(({ lineId, delay }) => {
+    const line = findMockLine(lineId);
+    if (!line) return [];
+    const reason = DELAY_REASON_TEXT[delay.reason];
+    const minutes = String(delay.minutes);
+    return [
+      {
+        announcement_id: `ann_${delay.delayId}`,
+        kind: AnnouncementKind.Delay,
+        title: localized(
+          language,
+          `خط ${line.code} متأخر حوالي ${minutes} دقيقة`,
+          `Line ${line.code} is running about ${minutes} minutes late`,
+        ),
+        body: localized(
+          language,
+          `${reason.ar}. الباص هيعدي على المحطات متأخر حوالي ${minutes} دقيقة.${delay.note ? ` ${delay.note}` : ""}`,
+          `${reason.en}. The bus will reach each stop about ${minutes} minutes late.${delay.note ? ` ${delay.note}` : ""}`,
+        ),
+        line: toLineSummary(line, language),
+        published_at: new Date(delay.reportedAt).toISOString(),
+      },
+    ];
+  });
+}
+
+/**
+ * What the server tells a line's students and guardians when the office handles an emergency:
+ * calm words with no medical details (agreement, "Emergencies (SOS)").
+ */
+function emergencyAnnouncements(language: string): Announcement[] {
+  const notices: Announcement[] = [];
+  const notice = (id: string, lineId: string, at: number, title: string, body: string) => {
+    const line = findMockLine(lineId);
+    if (!line) return;
+    notices.push({
+      announcement_id: id,
+      kind: AnnouncementKind.ServiceChange,
+      title,
+      body,
+      line: toLineSummary(line, language),
+      published_at: new Date(at).toISOString(),
+    });
+  };
+  for (const sos of allSos()) {
+    const code = findMockLine(sos.lineId)?.code ?? "";
+    notice(
+      `ann_${sos.id}`,
+      sos.lineId,
+      sos.createdAt,
+      localized(language, `باص خط ${code} واقف على الطريق`, `Line ${code}'s bus has stopped`),
+      localized(
+        language,
+        "إدارة النقل بتتابع مع الباص دلوقتي، وهنبلغكم بأي جديد.",
+        "The Transportation office is following up with the bus now and will update you.",
+      ),
+    );
+    const closed = actionsOf(sos).find((entry) => entry.action === SosAction.Close);
+    if (closed) {
+      notice(
+        `ann_${sos.id}_closed`,
+        sos.lineId,
+        closed.at,
+        localized(language, `باص خط ${code}: الموقف اتحل`, `Line ${code}'s bus: all sorted`),
+        localized(
+          language,
+          "إدارة النقل حلّت الموقف. شكرًا على صبركم.",
+          "The Transportation office has handled it. Thank you for your patience.",
+        ),
+      );
+    }
+  }
+  for (const { lineId, replacement } of allReplacements()) {
+    const code = findMockLine(lineId)?.code ?? "";
+    const bus = mockFleetBus(replacement.busId);
+    const driver = mockFleetDriver(replacement.driverId);
+    if (!bus || !driver) continue;
+    const name = localized(language, driver.nameAr, driver.nameEn);
+    notice(
+      `ann_${replacement.replacementId}`,
+      lineId,
+      replacement.at,
+      localized(language, `تغيير في باص خط ${code} النهارده`, `Line ${code} has a change today`),
+      localized(
+        language,
+        `الباص دلوقتي ${bus.plate} والسواق ${name} (${formatPhone(driver.phone)}).`,
+        `The bus is now ${bus.plate} with driver ${name} (${formatPhone(driver.phone)}).`,
+      ),
+    );
+  }
+  return notices;
+}
+
 /** Every announcement, newest first. Also read by the notifications mock. */
-export function mockAnnouncements(language: string): Announcement[] {
-  return MOCK_ANNOUNCEMENTS.map((item) => ({
+function mockAnnouncements(language: string): Announcement[] {
+  const fixed = MOCK_ANNOUNCEMENTS.map((item) => ({
     announcement_id: item.id,
     kind: item.kind,
     title: localized(language, item.titleAr, item.titleEn),
@@ -99,6 +208,9 @@ export function mockAnnouncements(language: string): Announcement[] {
     line: lineOf(item, language),
     published_at: item.publishedAt,
   }));
+  return [...crewDelayAnnouncements(language), ...emergencyAnnouncements(language), ...fixed].sort(
+    (a, b) => b.published_at.localeCompare(a.published_at),
+  );
 }
 
 /** Statuses where the student holds a seat on a line, so that line's news is theirs. */

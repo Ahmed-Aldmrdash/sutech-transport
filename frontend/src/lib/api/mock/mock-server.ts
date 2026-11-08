@@ -14,14 +14,16 @@ export class MockHttpError extends Error {
   }
 }
 
-export interface MockContext {
+interface MockContext {
   /** The bearer token the request carried, or null. */
   token: string | null;
   /** The page language ("ar" or "en"), as the real server reads it from Accept-Language. */
   language: string;
+  /** The Idempotency-Key header, for endpoints that send one. */
+  idempotencyKey?: string | null;
 }
 
-export type MockHandler<E extends Endpoint> = (
+type MockHandler<E extends Endpoint> = (
   input: ParsedInput<E>,
   context: MockContext,
 ) => EndpointResponse<E> | Promise<EndpointResponse<E>>;
@@ -43,8 +45,9 @@ export function registerMock<E extends Endpoint>(endpoint: E, handler: MockHandl
   handlers.set(endpoint.id, handler as unknown as MockHandler<Endpoint>);
 }
 
-export function hasMock(endpoint: Endpoint): boolean {
-  return handlers.has(endpoint.id);
+/** Whether a handler is registered for this endpoint id (for the mock routing test). */
+export function isMocked(endpointId: string): boolean {
+  return handlers.has(endpointId);
 }
 
 function errorResponse(status: number, body: ApiErrorBody): MockResponse {

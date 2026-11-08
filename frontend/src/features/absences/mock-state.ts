@@ -24,7 +24,3 @@ export function saveAbsences(userId: string, list: MockAbsence[]): void {
 export function notGoingDatesOf(userId: string): Set<string> {
   return new Set(absencesOf(userId).map((item) => item.serviceDate));
 }
-
-export function resetAbsencesMock(): void {
-  absences.clear();
-}

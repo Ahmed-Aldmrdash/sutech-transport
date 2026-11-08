@@ -16,7 +16,7 @@ interface Operation {
   responses: Record<string, JsonSchema>;
 }
 
-export interface OpenApiDocument {
+interface OpenApiDocument {
   openapi: string;
   info: { title: string; version: string; description: string };
   servers: Array<{ url: string }>;

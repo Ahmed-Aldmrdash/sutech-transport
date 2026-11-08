@@ -21,7 +21,7 @@ export const buttonStyles = cva(
         danger: "bg-danger text-on-danger hover:opacity-90 active:opacity-90",
       },
       size: {
-        sm: "h-10 px-4",
+        sm: "tap-area h-10 px-4",
         md: "h-12 px-5",
         lg: "h-14 px-6 text-body",
       },
@@ -59,7 +59,7 @@ function ButtonContent({ iconStart, iconEnd, withArrow, children }: ButtonConten
   );
 }
 
-export interface ButtonProps
+interface ButtonProps
   extends
     ButtonHTMLAttributes<HTMLButtonElement>,
     ButtonStyleProps,
@@ -101,7 +101,7 @@ export function Button({
   );
 }
 
-export interface ButtonLinkProps
+interface ButtonLinkProps
   extends Omit<ComponentProps<typeof Link>, "children">, ButtonStyleProps, ButtonContentProps {}
 
 /** A link that looks like a button. Uses the locale-aware Link. */

@@ -2,6 +2,14 @@ import { absencesOf } from "@/features/absences/mock-state";
 import { AbsenceReason } from "@/features/absences/schema";
 import { ABSENT_ONE_IN, hashOf, historyOf, tripShiftsOf } from "@/features/attendance/mock";
 import {
+  CHECKOUT_REASON_TEXT,
+  crewOutcomeFor,
+  isMockServiceDay,
+  todayLineSource,
+  type MockCrewOutcome,
+} from "@/features/crew/mock-state";
+import { RiderState } from "@/features/crew/schema";
+import {
   MOCK_CAMPUS_ARRIVAL,
   findMockLine,
   localized,
@@ -10,7 +18,7 @@ import {
 } from "@/features/lines/mock-builders";
 import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
-import { MS_PER_MINUTE, SERVICE_DAYS, cairoInstant, cairoNow } from "@/lib/api/mock/cairo-clock";
+import { MS_PER_MINUTE, cairoInstant, cairoNow } from "@/lib/api/mock/cairo-clock";
 import { registerMock } from "@/lib/api/mock/mock-server";
 import { getChildDayEndpoint, listChildrenEndpoint } from "./api";
 import { mockChildrenOf, requireMockGuardian, requireMockGuardianOf } from "./mock-links";
@@ -38,6 +46,76 @@ const STATUS_AFTER: Record<DayEventKind, ChildDayStatus> = {
   [DayEventKind.Absent]: ChildDayStatus.Absent,
 };
 
+type Step = { kind: DayEventKind; at: number; detail: string | null };
+
+/** Same made-up outcome as the student's "My trips", so both pages agree. */
+function timetableSteps(
+  studentId: string,
+  lineId: string,
+  stopOrder: number,
+  date: string,
+  context: {
+    at: (clock: string, shift?: number) => number;
+    stopName: string;
+    pickup: string;
+    firstTime: string;
+    firstStop: string;
+  },
+): Step[] {
+  const { at, stopName, pickup, firstTime, firstStop } = context;
+  const isAbsent = hashOf(`${studentId}${date}`) % ABSENT_ONE_IN === 0;
+  const { boardShift, arriveShift } = tripShiftsOf(lineId, stopOrder, date);
+  const steps: Step[] = [{ kind: DayEventKind.BusLeft, at: at(firstTime), detail: firstStop }];
+  if (isAbsent) {
+    steps.push({
+      kind: DayEventKind.Absent,
+      at: at(MOCK_CAMPUS_ARRIVAL.from, ABSENT_MARKED_AFTER_MINUTES),
+      detail: null,
+    });
+  } else {
+    steps.push(
+      { kind: DayEventKind.Boarded, at: at(pickup, boardShift), detail: stopName },
+      { kind: DayEventKind.Arrived, at: at(MOCK_CAMPUS_ARRIVAL.from, arriveShift), detail: null },
+    );
+  }
+  return steps;
+}
+
+/** The trip the crew is running from the driver's page: its real start, scans and end. */
+function crewSteps(
+  { trip, rider }: MockCrewOutcome,
+  context: { language: string; stopName: string; firstAr: string; firstEn: string },
+): Step[] {
+  const { language, stopName, firstAr, firstEn } = context;
+  const steps: Step[] = [];
+  if (trip.startedAt !== null) {
+    steps.push({
+      kind: DayEventKind.BusLeft,
+      at: trip.startedAt,
+      detail: localized(language, firstAr, firstEn),
+    });
+  }
+  if (rider.boardedAt !== null) {
+    steps.push({ kind: DayEventKind.Boarded, at: rider.boardedAt, detail: stopName });
+  }
+  if (rider.checkedOutAt !== null) {
+    const reason = rider.reason ? CHECKOUT_REASON_TEXT[rider.reason] : null;
+    steps.push({
+      kind: DayEventKind.CheckedOut,
+      at: rider.checkedOutAt,
+      detail: rider.note ?? (reason ? localized(language, reason.ar, reason.en) : null),
+    });
+  }
+  if (trip.endedAt !== null) {
+    if (rider.state === RiderState.Boarded) {
+      steps.push({ kind: DayEventKind.Arrived, at: trip.endedAt, detail: null });
+    } else if (rider.state === RiderState.Absent) {
+      steps.push({ kind: DayEventKind.Absent, at: trip.endedAt, detail: null });
+    }
+  }
+  return steps;
+}
+
 export function mockChildDay(studentId: string, language: string, now: number): ChildDay {
   const cairo = cairoNow(new Date(now));
   const booking = bookingOf(studentId, now);
@@ -61,7 +139,7 @@ export function mockChildDay(studentId: string, language: string, now: number): 
     line: toLineSummary(line, language),
     stop: { name: stopName, pickup_time: pickup },
     campus_arrival: MOCK_CAMPUS_ARRIVAL,
-    bus: toBus(line, language, true),
+    bus: toBus(todayLineSource(line, now), language, true),
   };
   const recent = historyOf(studentId, language, now)
     .filter((record) => record.service_date < cairo.date)
@@ -77,7 +155,7 @@ export function mockChildDay(studentId: string, language: string, now: number): 
     }));
   const day = { ...base, trip, recent, days_off };
 
-  if (!SERVICE_DAYS.has(cairo.weekday)) {
+  if (!isMockServiceDay(cairo.date, cairo.weekday)) {
     return { ...day, status: ChildDayStatus.NoService, events: [] };
   }
 
@@ -97,31 +175,18 @@ export function mockChildDay(studentId: string, language: string, now: number): 
     };
   }
 
-  // Same made-up outcome as the student's "My trips", so both pages agree.
-  const seed = hashOf(`${studentId}${cairo.date}`);
-  const isAbsent = seed % ABSENT_ONE_IN === 0;
-  const { boardShift, arriveShift } = tripShiftsOf(line.lineId, booking.stopOrder, cairo.date);
   const at = (clock: string, shift = 0) =>
     cairoInstant(cairo.date, clock, cairo.offsetMinutes) + shift * MS_PER_MINUTE;
-  const steps: { kind: DayEventKind; at: number; detail: string | null }[] = [
-    {
-      kind: DayEventKind.BusLeft,
-      at: at(firstTime),
-      detail: localized(language, firstAr, firstEn),
-    },
-  ];
-  if (isAbsent) {
-    steps.push({
-      kind: DayEventKind.Absent,
-      at: at(MOCK_CAMPUS_ARRIVAL.from, ABSENT_MARKED_AFTER_MINUTES),
-      detail: null,
-    });
-  } else {
-    steps.push(
-      { kind: DayEventKind.Boarded, at: at(pickup, boardShift), detail: stopName },
-      { kind: DayEventKind.Arrived, at: at(MOCK_CAMPUS_ARRIVAL.from, arriveShift), detail: null },
-    );
-  }
+  const crew = crewOutcomeFor(studentId, line.lineId, cairo.date, now);
+  const steps = crew
+    ? crewSteps(crew, { language, stopName, firstAr, firstEn })
+    : timetableSteps(studentId, line.lineId, booking.stopOrder, cairo.date, {
+        at,
+        stopName,
+        pickup,
+        firstTime,
+        firstStop: localized(language, firstAr, firstEn),
+      });
   const events: DayEvent[] = steps
     .filter((step) => step.at <= now)
     .map((step) => ({ kind: step.kind, at: new Date(step.at).toISOString(), detail: step.detail }));
