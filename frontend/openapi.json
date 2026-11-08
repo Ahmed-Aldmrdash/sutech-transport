@@ -232,6 +232,12 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "phone": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
                         }
                       },
                       "required": [
@@ -436,6 +442,12 @@
                       ]
                     },
                     "masked_phone": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "phone": {
                       "type": [
                         "string",
                         "null"
