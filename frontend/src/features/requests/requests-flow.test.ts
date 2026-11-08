@@ -26,6 +26,7 @@ import {
   refuseAsGuardian,
   withdrawRequest,
 } from "./api";
+import { bookingOnDate } from "./mock-riding-line";
 import { MOCK_REQUEST_TIMING, resetRequestsMock } from "./mock-state";
 import {
   RequestErrorCode,
@@ -195,6 +196,11 @@ describe("student requests (mock server)", () => {
       by: RequestActor.Guardian,
       note: "Too far from home.",
     });
+    // For 10 minutes the guardian may still change their mind; after that the answer stands.
+    const { approvals: answered } = await listGuardianApprovals();
+    expect(answered[0]?.can_change_until).not.toBeNull();
+    at(Date.now() + 11 * 60 * 1000);
+    expect((await listGuardianApprovals()).approvals[0]?.can_change_until).toBeNull();
     expect((await errorOf(approveAsGuardian(first.request_id, { note: null }))).code).toBe(
       RequestErrorCode.NotAwaitingGuardian,
     );
@@ -219,6 +225,59 @@ describe("student requests (mock server)", () => {
     expect((await errorOf(approveAsGuardian(omars.request_id, { note: null }))).code).toBe(
       "NOT_YOUR_CHILD",
     );
+  });
+
+  it("a guardian who refused by mistake can approve within 10 minutes", async () => {
+    await signIn(YOUSSEF);
+    const sent = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    await refuseAsGuardian(sent.request_id, { note: null });
+    at(NOV_2 + 5 * 60 * 1000);
+    const changed = await approveAsGuardian(sent.request_id, { note: null });
+    expect(changed.status).toBe(RequestStatus.Submitted);
+    // Approving again is not a change: nothing to do.
+    expect((await errorOf(approveAsGuardian(sent.request_id, { note: null }))).code).toBe(
+      RequestErrorCode.NotAwaitingGuardian,
+    );
+  });
+
+  it("an approved temporary change moves the student only for its dates", async () => {
+    await signIn(YOUSSEF);
+    const sent = await createLineChange(
+      lineChange({
+        to_line_id: "ln_06",
+        to_stop_id: "ln_06_s2",
+        duration: "temporary",
+        starts_on: "2026-11-03",
+        ends_on: "2026-11-05",
+      }),
+    );
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    await approveAsGuardian(sent.request_id, { note: null });
+    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    expect(bookingOnDate("usr_student_11", "2026-11-02")?.lineId).toBe("ln_12");
+    expect(bookingOnDate("usr_student_11", "2026-11-03")?.lineId).toBe("ln_06");
+    expect(bookingOnDate("usr_student_11", "2026-11-05")?.lineId).toBe("ln_06");
+    expect(bookingOnDate("usr_student_11", "2026-11-06")?.lineId).toBe("ln_12");
+    // The base subscription stays on line 12.
+    tokenStore.set(null);
+    await signIn(YOUSSEF);
+    expect((await getMySubscription()).subscription?.line.line_id).toBe("ln_12");
+  });
+
+  it("request numbers are unique across students", async () => {
+    await signIn(YOUSSEF);
+    const first = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    tokenStore.set(null);
+    await signIn(MARIAM);
+    const second = await createLineChange(lineChange());
+    expect(second.reference).not.toBe(first.reference);
   });
 
   it("a change to a full line is not approved", async () => {
