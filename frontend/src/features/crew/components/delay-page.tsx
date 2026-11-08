@@ -31,7 +31,11 @@ import { canReportDelay, currentTrip } from "../trip-rules";
 import { CrewGate } from "./crew-gate";
 import { Sent } from "./delay-sent";
 
-const DELAY_ERRORS = [CrewErrorCode.TripAlreadyEnded, CrewErrorCode.DelayOutOfWindow] as const;
+const DELAY_ERRORS = [
+  CrewErrorCode.TripAlreadyEnded,
+  CrewErrorCode.DelayOutOfWindow,
+  CrewErrorCode.DriverRelieved,
+] as const;
 const DEFAULT_MINUTES = 15;
 
 /** "We're running late": students and guardians on the line get a delay notice. */

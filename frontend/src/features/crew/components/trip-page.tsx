@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Tone } from "@/components/ui/tone";
 import { SosStatus } from "@/features/sos/schema";
 import type { Locale } from "@/i18n/routing";
-import { formatPhone, formatServiceDay } from "@/lib/format";
+import { formatPhone, formatServiceDay, formatTime } from "@/lib/format";
 import { type CrewToday } from "../schema";
 import { currentTrip } from "../trip-rules";
 import { CrewGate } from "./crew-gate";
@@ -53,7 +53,15 @@ function TripView({ today, refresh }: { today: CrewToday; refresh: () => void })
           {t(`sosOpenBody.${trip.sos.status}`)}
         </Alert>
       ) : null}
-      {trip?.replacement ? (
+      {today.relieved ? (
+        <Alert tone={Tone.Warning} title={t("relievedTitle")}>
+          {t("relievedBody", {
+            time: formatTime(today.relieved.at, locale),
+            name: today.relieved.driver_name,
+            phone: formatPhone(today.relieved.driver_phone),
+          })}
+        </Alert>
+      ) : trip?.replacement ? (
         <Alert tone={Tone.Info} title={t("replacedTitle")}>
           {t("replacedBody", {
             plate: trip.replacement.plate,

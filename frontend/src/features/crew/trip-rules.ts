@@ -42,6 +42,23 @@ export function canReportDelay(
   return Math.abs(gap) <= DELAY_WINDOW_MINUTES;
 }
 
+/** Starting a trip further than this from its time asks the crew to double-check. */
+const START_WARN_MINUTES = 60;
+
+/**
+ * Minutes between now and the trip's scheduled time when that is far off (positive = late,
+ * negative = early), or null when the time is about right or unknown. A warning, not a rule:
+ * the crew may still start (a test, a late bus), but a morning trip at 5 PM gets a second look.
+ */
+export function startTimeGap(
+  trip: Pick<CrewTrip, "departure_time">,
+  now: Date,
+): number | null {
+  if (trip.departure_time === null) return null;
+  const gap = cairoMinuteOfDay(now) - minuteOfDay(trip.departure_time);
+  return Math.abs(gap) > START_WARN_MINUTES ? gap : null;
+}
+
 /**
  * The trip the crew is working on: the one running, else the first not ended yet, else the
  * last one (to show its summary). null on a day without trips.

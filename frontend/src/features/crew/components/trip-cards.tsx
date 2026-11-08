@@ -70,7 +70,7 @@ export function OtherTripRow({
         <p className="text-body font-bold text-ink-strong">{directionTitle(t, trip)}</p>
         <p className="text-body-sm text-ink-muted">{detail}</p>
       </div>
-      {trip.status === CrewTripStatus.NotStarted ? (
+      {trip.status === CrewTripStatus.NotStarted && today.relieved === null ? (
         <StartButton today={today} trip={trip} onChanged={onChanged} compact />
       ) : (
         <Badge tone={STATUS_TONE[trip.status]}>{t(`status.${trip.status}`)}</Badge>

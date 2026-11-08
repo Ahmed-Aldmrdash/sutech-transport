@@ -24,6 +24,7 @@ import { ResultBanner } from "./scan-result";
 
 export const SCAN_ERRORS = [
   CrewErrorCode.CardInvalid,
+  CrewErrorCode.DriverRelieved,
   CrewErrorCode.CardExpired,
   CrewErrorCode.StudentNotFound,
   CrewErrorCode.NotOnThisTrip,

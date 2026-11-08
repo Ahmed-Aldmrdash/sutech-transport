@@ -29,6 +29,7 @@ import type { MockLineSource } from "@/features/lines/mock-lines";
 import { findMockAccountById } from "@/features/auth/mock-accounts";
 import { mockUserName, toSos } from "@/features/sos/mock";
 import {
+  actionsOf,
   addSosAction,
   allSos,
   findSos,
@@ -124,9 +125,21 @@ function lineAndTripOf(sos: MockSos): { line: MockLineSource; trip: MockCrewTrip
   return { line, trip };
 }
 
+/** The bus and driver the alert was raised on: frozen when it was raised. */
+function fleetOfSos(sos: MockSos, trip: MockCrewTrip, line: MockLineSource) {
+  const bus = sos.fleet ? mockFleetBus(sos.fleet.busId) : undefined;
+  const driver = sos.fleet ? mockFleetDriver(sos.fleet.driverId) : undefined;
+  return bus && driver ? { bus, driver } : crewFleetOf(trip, line);
+}
+
 function toAdminSos(sos: MockSos, language: string): AdminSos {
   const { line, trip } = lineAndTripOf(sos);
-  const fleet = crewFleetOf(trip, line);
+  const fleet = fleetOfSos(sos, trip, line);
+  // Only changes made while this alert was open belong to its record.
+  const closedAt = actionsOf(sos).find((entry) => entry.action === SosAction.Close)?.at;
+  const replacements = (trip.replacements ?? []).filter(
+    (item) => item.at >= sos.createdAt && (closedAt === undefined || item.at <= closedAt),
+  );
   return {
     ...toSos(sos, language),
     bus_id: fleet.bus.busId,
@@ -135,7 +148,7 @@ function toAdminSos(sos: MockSos, language: string): AdminSos {
     bus: toFleetBus(fleet.bus),
     driver: toFleetDriver(fleet.driver, language),
     raised_by_phone: findMockAccountById(sos.raisedBy)?.phone ?? null,
-    replacements: (trip.replacements ?? []).map((item) => toReplacement(item, language)),
+    replacements: replacements.map((item) => toReplacement(item, language)),
     campus_location: MOCK_CAMPUS,
   };
 }

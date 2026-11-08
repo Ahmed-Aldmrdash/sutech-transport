@@ -8,6 +8,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/i18n/routing";
+import { SessionStatus } from "@/features/auth/session/session-store";
+import { useSession } from "@/features/auth/session/use-session";
 import { isMockMode } from "@/lib/config";
 import { formatDateTime } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
@@ -36,6 +38,8 @@ export function TrackingPanel({ load, loadKey, audience, linesHref }: TrackingPa
   const locale = useLocale() as Locale;
   const state = useAsync(load, [loadKey]);
   const { refresh } = state;
+  const session = useSession();
+  const viewerId = session.status === SessionStatus.SignedIn ? session.session.user.id : null;
 
   useEffect(() => {
     const timer = setInterval(refresh, TRACKING_REFRESH_MS);
@@ -84,12 +88,12 @@ export function TrackingPanel({ load, loadKey, audience, linesHref }: TrackingPa
             : t("noTripBodyUnknown")
         }
         action={
-          isMockMode ? (
+          isMockMode && viewerId ? (
             <Button
               variant="secondary"
               iconStart={<Play className="size-4" />}
               onClick={() => {
-                startDemoTrip();
+                startDemoTrip(viewerId);
                 refresh();
               }}
             >

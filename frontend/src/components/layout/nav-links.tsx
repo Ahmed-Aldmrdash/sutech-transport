@@ -41,10 +41,10 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
                   <li key={item.key}>
                     <span
                       aria-disabled="true"
-                      className="flex h-11 items-center gap-3 rounded-md px-3 text-body-sm font-bold text-ink-muted"
+                      className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold text-ink-muted"
                     >
                       <Icon aria-hidden="true" className="size-5 shrink-0" />
-                      <span className="truncate">{t(`items.${item.key}`)}</span>
+                      <span className="min-w-0 leading-tight">{t(`items.${item.key}`)}</span>
                       <span className="ms-auto shrink-0 rounded-pill bg-surface-alt px-2 py-0.5 text-caption font-bold text-ink-muted">
                         {t("soon")}
                       </span>
@@ -62,14 +62,15 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
                     aria-current={isActive ? "page" : undefined}
                     aria-label={count ? t(badgeLabelKey(item.key), { label, count }) : undefined}
                     className={cn(
-                      "flex h-11 items-center gap-3 rounded-md px-3 text-body-sm font-bold focus-ring transition-colors",
+                      "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold focus-ring transition-colors",
                       isActive
                         ? "bg-brand-soft text-brand"
                         : "text-ink hover:bg-surface-alt hover:text-ink-strong",
                     )}
                   >
                     <Icon aria-hidden="true" className="size-5 shrink-0" />
-                    <span className="truncate">{label}</span>
+                    {/* Long labels ("Buses & drivers") wrap to a second line instead of being cut. */}
+                    <span className="min-w-0 leading-tight">{label}</span>
                     {count ? <CountBadge count={count} className="ms-auto" /> : null}
                   </Link>
                 </li>

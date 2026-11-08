@@ -1,6 +1,6 @@
 import { absencesOf } from "@/features/absences/mock-state";
 import type { AbsenceReason } from "@/features/absences/schema";
-import { MOCK_ACCOUNTS } from "@/features/auth/mock-accounts";
+import { MOCK_ACCOUNTS, type MockAccount } from "@/features/auth/mock-accounts";
 import { requireMockAccount } from "@/features/auth/mock-token";
 import {
   MOCK_CAMPUS_ARRIVAL,
@@ -501,6 +501,43 @@ export function requireMockCrew(token: string | null) {
     throw new MockHttpError(HTTP_NOT_FOUND, CrewErrorCode.NoAssignment, "Not on a bus today.");
   }
   return { account, line };
+}
+
+/**
+ * The office's latest change of driver on today's trips, if it took the bus away from this
+ * driver account: they are relieved and can't run the trip any more (the supervisor still
+ * can). A change of bus that keeps the same driver relieves nobody.
+ */
+export function relievedBy(
+  account: MockAccount,
+  line: MockLineSource,
+  now: number,
+): MockReplacement | null {
+  if (account.user.role !== Role.Driver) return null;
+  const date = cairoNow(new Date(now)).date;
+  const last = [TripDirection.Outbound, TripDirection.Return]
+    .flatMap((direction) => trips.get(tripIdOf(line.lineId, date, direction))?.replacements ?? [])
+    .sort((a, b) => a.at - b.at)
+    .at(-1);
+  return last && last.driverId !== lineDriverId(line.lineId) ? last : null;
+}
+
+/** Like requireOwnTrip, for running it (start, scan, end, delay): a relieved driver can't. */
+export function requireRunnableTrip(
+  account: MockAccount,
+  line: MockLineSource,
+  tripId: string,
+  now: number,
+): MockCrewTrip {
+  const trip = requireOwnTrip(line, tripId, now);
+  if (relievedBy(account, line, now)) {
+    throw new MockHttpError(
+      HTTP_FORBIDDEN,
+      CrewErrorCode.DriverRelieved,
+      "The office handed this trip to another driver.",
+    );
+  }
+  return trip;
 }
 
 /** Today's trip of the crew's own bus, or NOT_YOUR_TRIP like the server. */

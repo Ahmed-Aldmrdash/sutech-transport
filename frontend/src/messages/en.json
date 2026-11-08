@@ -107,7 +107,8 @@
       "reportDelay": "Delay",
       "passengers": "Riders",
       "sos": "SOS",
-      "lines": "Lines"
+      "lines": "Lines",
+      "scan": "Scan"
     },
     "soon": "Soon",
     "withBadge": "{label}, {count} new",
@@ -1297,11 +1298,15 @@
         "OTHER_TRIP_IN_PROGRESS": "End the trip on the road first.",
         "network": "No connection. Check your internet and try again.",
         "invalid": "Some details aren't right. Check the form and try again.",
-        "generic": "Something went wrong. Try again."
+        "generic": "Something went wrong. Try again.",
+        "DRIVER_RELIEVED": "The Transportation office handed this trip to another driver, so you can't run it."
       },
       "startOutboundConfirm": "Start the outbound trip now?",
       "startReturnConfirm": "Start the return trip now?",
       "startConfirmBody": "Students and guardians on the line are told the bus left.",
+      "offTimeLate": "This trip is due at {time}, so you're about {hours, plural, =1 {an hour} other {# hours}} late. Make sure it's the right trip before you start.",
+      "offTimeEarly": "This trip is due at {time}, about {hours, plural, =1 {an hour} other {# hours}} from now. Make sure it's the right trip before you start.",
+      "startAnyway": "Start anyway",
       "startConfirm": "Start",
       "endedToast": "Trip ended.",
       "endOutbound": "End trip at campus",
@@ -1320,7 +1325,9 @@
       "stopsLeadReturn": "Students still to board, by their stop.",
       "toPickUp": "{count, plural, =0 {None left} one {# to pick up} other {# to pick up}}",
       "replacedTitle": "The office changed today's bus",
-      "replacedBody": "Now {plate} with driver {name} ({phone})."
+      "replacedBody": "Now {plate} with driver {name} ({phone}).",
+      "relievedTitle": "The office handed your bus to another driver",
+      "relievedBody": "Since {time}, {name} ({phone}) is driving. You can't start or end the trip or scan passes any more. Call the Transportation office if anything is wrong."
     },
     "scan": {
       "title": "Scan cards",
@@ -1353,7 +1360,8 @@
         "TRIP_ALREADY_ENDED": "This trip already ended.",
         "network": "No connection. Check your internet and try again.",
         "invalid": "Some details aren't right. Check the form and try again.",
-        "generic": "Something went wrong. Try again."
+        "generic": "Something went wrong. Try again.",
+        "DRIVER_RELIEVED": "The Transportation office handed this trip to another driver, so you can't scan."
       },
       "camera": {
         "turnOn": "Turn on the camera",
@@ -1400,7 +1408,8 @@
         "network": "No connection. Check your internet and try again.",
         "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again.",
-        "DELAY_OUT_OF_WINDOW": "A delay can be sent while the trip runs, or within an hour of its pickup time."
+        "DELAY_OUT_OF_WINDOW": "A delay can be sent while the trip runs, or within an hour of its pickup time.",
+        "DRIVER_RELIEVED": "The Transportation office handed this trip to another driver. They or the supervisor report delays now."
       },
       "submit": "Send the delay",
       "sentTitle": "Delay sent",

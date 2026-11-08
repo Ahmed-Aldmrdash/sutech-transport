@@ -4,11 +4,12 @@ import {
   localized,
   toLineSummary,
 } from "@/features/lines/mock-builders";
+import { mockFleetDriver } from "@/features/lines/mock-fleet";
 import type { MockLineSource } from "@/features/lines/mock-lines";
 import { findSos, sosStatusOf } from "@/features/sos/mock-state";
 import { bookingOf, newMockId } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
-import { MOCK_ACCOUNTS } from "@/features/auth/mock-accounts";
+import { MOCK_ACCOUNTS, type MockAccount } from "@/features/auth/mock-accounts";
 import { TripDirection } from "@/features/trips/schema";
 import { cairoNow } from "@/lib/api/mock/cairo-clock";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
@@ -28,7 +29,8 @@ import {
   isMockServiceDay,
   mockRidersOf,
   requireMockCrew,
-  requireOwnTrip,
+  requireRunnableTrip,
+  relievedBy,
   riderStateOf,
   saveCrewTrip,
   todayFleetOf,
@@ -152,6 +154,18 @@ function toCrewTrip(
   };
 }
 
+/** Who took the bus over, for a relieved driver's trip page. */
+function relievedNotice(account: MockAccount, line: MockLineSource, language: string, now: number) {
+  const replacement = relievedBy(account, line, now);
+  const driver = replacement ? mockFleetDriver(replacement.driverId) : undefined;
+  if (!replacement || !driver) return null;
+  return {
+    driver_name: localized(language, driver.nameAr, driver.nameEn),
+    driver_phone: driver.phone,
+    at: new Date(replacement.at).toISOString(),
+  };
+}
+
 registerMock(getCrewTodayEndpoint, (_input, { token, language }) => {
   const { account, line } = requireMockCrew(token);
   const now = Date.now();
@@ -176,6 +190,7 @@ registerMock(getCrewTodayEndpoint, (_input, { token, language }) => {
       pickup_time: time,
     })),
     campus_arrival: MOCK_CAMPUS_ARRIVAL,
+    relieved: relievedNotice(account, line, language, now),
     trips: directions.map((direction) =>
       toCrewTrip(crewTripOf(line.lineId, cairo.date, direction), line, language, now),
     ),
@@ -183,9 +198,9 @@ registerMock(getCrewTodayEndpoint, (_input, { token, language }) => {
 });
 
 registerMock(startTripEndpoint, ({ params }, { token, language }) => {
-  const { line } = requireMockCrew(token);
+  const { account, line } = requireMockCrew(token);
   const now = Date.now();
-  const trip = requireOwnTrip(line, params.trip_id, now);
+  const trip = requireRunnableTrip(account, line, params.trip_id, now);
   const status = crewTripStatus(trip);
   if (status === CrewTripStatus.InProgress) {
     conflict(CrewErrorCode.TripAlreadyStarted, "The trip already started.");
@@ -205,9 +220,9 @@ registerMock(startTripEndpoint, ({ params }, { token, language }) => {
 });
 
 registerMock(endTripEndpoint, ({ params }, { token, language }) => {
-  const { line } = requireMockCrew(token);
+  const { account, line } = requireMockCrew(token);
   const now = Date.now();
-  const trip = requireOwnTrip(line, params.trip_id, now);
+  const trip = requireRunnableTrip(account, line, params.trip_id, now);
   const status = crewTripStatus(trip);
   if (status === CrewTripStatus.NotStarted) {
     conflict(CrewErrorCode.TripNotStarted, "Start the trip first.");
@@ -272,9 +287,9 @@ function studentFromIdentifier(identifier: string, riders: readonly MockRider[])
 }
 
 registerMock(scanEndpoint, ({ params, body }, { token, language }) => {
-  const { line } = requireMockCrew(token);
+  const { account, line } = requireMockCrew(token);
   const now = Date.now();
-  const trip = requireOwnTrip(line, params.trip_id, now);
+  const trip = requireRunnableTrip(account, line, params.trip_id, now);
   const status = crewTripStatus(trip);
   if (status === CrewTripStatus.NotStarted) {
     conflict(CrewErrorCode.TripNotStarted, "Start the trip first.");
@@ -326,9 +341,9 @@ registerMock(scanEndpoint, ({ params, body }, { token, language }) => {
 });
 
 registerMock(reportDelayEndpoint, ({ params, body }, { token }) => {
-  const { line } = requireMockCrew(token);
+  const { account, line } = requireMockCrew(token);
   const now = Date.now();
-  const trip = requireOwnTrip(line, params.trip_id, now);
+  const trip = requireRunnableTrip(account, line, params.trip_id, now);
   const status = crewTripStatus(trip);
   if (status === CrewTripStatus.Ended) conflict(CrewErrorCode.TripAlreadyEnded, "Trip ended.");
   if (!canReportDelay({ status, departure_time: departureTimeOf(trip, line) }, new Date(now))) {
