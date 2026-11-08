@@ -1,5 +1,6 @@
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { StoredMap } from "@/lib/api/mock/stored-map";
+import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
+import { Role } from "@/lib/auth/roles";
 import { getMeEndpoint, loginEndpoint, logoutEndpoint, requestOtpEndpoint } from "./api";
 import { MOCK_OTP_LENGTH, findMockAccount, maskPhone } from "./mock-accounts";
 import { firstNameOf, userText } from "./user-text";
@@ -20,12 +21,16 @@ export const MOCK_OTP_RULES = {
   attempts: 3,
   resendAfterSeconds: 60,
   lockSeconds: 15 * 60,
-  sessionHours: 12,
+  /**
+   * Students, guardians and crew sign in once and stay signed in (30 days),
+   * so nobody needs an SMS code at 6 AM before the bus. Office sessions end after 12 hours.
+   */
+  sessionDays: { long: 30, office: 0.5 },
 } as const;
 
 const HTTP = { BadRequest: 400, Forbidden: 403, NotFound: 404, TooMany: 429 };
 const MS_PER_SECOND = 1000;
-const MS_PER_HOUR = 3_600_000;
+const MS_PER_DAY = 86_400_000;
 
 interface Challenge {
   code: string;
@@ -34,8 +39,26 @@ interface Challenge {
   sentAt: number;
 }
 
-const challenges = new StoredMap<Challenge>("sut.mock.otp-challenges");
-const lockedUntil = new StoredMap<number>("sut.mock.otp-locks");
+// Kept in localStorage like a server cache: closing the app on the code step and coming back
+// must still accept the code that was sent (the code step itself survives in a cookie).
+const challenges = new StoredMap<Challenge>("sut.mock.otp-challenges", MockStorage.Local);
+const lockedUntil = new StoredMap<number>("sut.mock.otp-locks", MockStorage.Local);
+
+const LONG_SESSION_ROLES: ReadonlySet<Role> = new Set([
+  Role.Student,
+  Role.Parent,
+  Role.Driver,
+  Role.Supervisor,
+]);
+
+/** How long a session lasts for this role. */
+export function sessionLengthMs(role: Role): number {
+  const days = LONG_SESSION_ROLES.has(role)
+    ? MOCK_OTP_RULES.sessionDays.long
+    : MOCK_OTP_RULES.sessionDays.office;
+  return days * MS_PER_DAY;
+}
+
 
 function throwIfLocked(identifier: string, now: number) {
   const until = lockedUntil.get(identifier) ?? 0;
@@ -90,8 +113,12 @@ registerMock(loginEndpoint, ({ body }) => {
   const key = account?.user.identifier ?? body.identifier;
   throwIfLocked(key, now);
   const challenge = challenges.get(key);
-  if (!account || !challenge) {
+  if (!account) {
     throw new MockHttpError(HTTP.BadRequest, AuthErrorCode.InvalidOtp, "Ask for a code first.");
+  }
+  if (!challenge) {
+    // No live code (used, replaced or forgotten): tell them to ask for a new one, not "wrong".
+    throw new MockHttpError(HTTP.BadRequest, AuthErrorCode.OtpExpired, "Ask for a new code.");
   }
   if (challenge.expiresAt <= now) {
     challenges.delete(key);
@@ -108,7 +135,7 @@ registerMock(loginEndpoint, ({ body }) => {
     throw new MockHttpError(HTTP.BadRequest, AuthErrorCode.InvalidOtp, "Wrong code.");
   }
   challenges.delete(key);
-  const expiresAt = now + MOCK_OTP_RULES.sessionHours * MS_PER_HOUR;
+  const expiresAt = now + sessionLengthMs(account.user.role);
   // The real server sets an HttpOnly cookie here; the mock keeps its token in the mock jar.
   tokenStore.set(encodeMockToken(account.user.id, expiresAt));
   return {

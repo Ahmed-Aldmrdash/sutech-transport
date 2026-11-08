@@ -5,8 +5,8 @@ import { Role } from "@/lib/auth/roles";
 import { canOpen, homePathFor, landingPathFor, loginHref, safeNextPath } from "./access";
 import { getMe, login, logout, requestOtp } from "./api";
 import { loginErrorKey } from "./auth-errors";
-import { normalizeIdentifier, sanitizeCode } from "./identifier";
-import { MOCK_OTP_RULES, resetAuthMock } from "./mock";
+import { identifierShapeError, normalizeIdentifier, sanitizeCode } from "./identifier";
+import { MOCK_OTP_RULES, resetAuthMock, sessionLengthMs } from "./mock";
 import { MOCK_OTP_LENGTH } from "./mock-accounts";
 import { AuthErrorCode } from "./schema";
 
@@ -24,6 +24,21 @@ describe("identifier input", () => {
     expect(normalizeIdentifier(" ٢٤٠ ١٠٠ ١٠١ ")).toBe("240100101");
     expect(normalizeIdentifier("010-0000-2000")).toBe("01000002000");
     expect(normalizeIdentifier("۰۱۰۰۰۰۰۲۰۰۰")).toBe("01000002000");
+  });
+
+  it("accepts Egyptian phones typed with the country code", () => {
+    expect(normalizeIdentifier("+201000002000")).toBe("01000002000");
+    expect(normalizeIdentifier("+20 100 000 2000")).toBe("01000002000");
+    expect(normalizeIdentifier("00201000002000")).toBe("01000002000");
+    expect(normalizeIdentifier("(010) 0000-2000")).toBe("01000002000");
+  });
+
+  it("explains a number of the wrong length", () => {
+    expect(identifierShapeError("24010010")).toBe("studentIdLength");
+    expect(identifierShapeError("240100101")).toBeNull();
+    expect(identifierShapeError("0100000200")).toBe("phoneLength");
+    expect(identifierShapeError("01000002000")).toBeNull();
+    expect(identifierShapeError("DRV-1001")).toBeNull();
   });
 
   it("keeps emails lower case and staff IDs upper case", () => {
@@ -141,7 +156,8 @@ describe("two-step login (mock server)", () => {
   it("uses a code only once", async () => {
     const { demo_code: code = "" } = await requestOtp("ADM-1001");
     await login("ADM-1001", code);
-    expect((await errorOf(login("ADM-1001", code))).code).toBe(AuthErrorCode.InvalidOtp);
+    // The used code is gone: "ask for a new one", not "wrong code".
+    expect((await errorOf(login("ADM-1001", code))).code).toBe(AuthErrorCode.OtpExpired);
   });
 
   it("a new code replaces the old one", async () => {
@@ -155,6 +171,21 @@ describe("two-step login (mock server)", () => {
       );
     }
     expect((await login("CLN-1001", second.demo_code ?? "")).user.role).toBe(Role.Clinic);
+  });
+
+  it("keeps students, guardians and crew signed in through the night", () => {
+    const night = 24 * 3_600_000;
+    for (const role of [Role.Student, Role.Parent, Role.Driver, Role.Supervisor]) {
+      expect(sessionLengthMs(role)).toBeGreaterThan(night);
+    }
+    expect(sessionLengthMs(Role.Finance)).toBeLessThanOrEqual(night / 2);
+  });
+
+  it("still accepts the code after the app is closed and reopened", async () => {
+    const { demo_code: code = "" } = await requestOtp("STA-1001");
+    // A reopened app starts a fresh session store; the codes live in localStorage.
+    sessionStorage.clear();
+    expect((await login("STA-1001", code)).user.role).toBe(Role.StudentAffairs);
   });
 
   it("refuses an expired code", async () => {

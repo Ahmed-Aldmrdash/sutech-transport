@@ -296,6 +296,8 @@
     "identifierHint": "Students: your 9-digit university ID. Parents: the phone number registered with the university.",
     "identifierRequired": "Enter your ID or phone number.",
     "identifierTooShort": "This looks too short. Check it and try again.",
+    "phoneLength": "Phone numbers are 11 digits starting with 01. Check it and try again.",
+    "studentIdLength": "Student IDs are 9 digits. Check it and try again.",
     "sendCode": "Send code",
     "sendingCode": "Sending…",
     "codeTitle": "Enter the code",
