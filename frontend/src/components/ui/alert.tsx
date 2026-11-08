@@ -9,7 +9,7 @@ const ALERT_STYLES: Record<AlertTone, { box: string; icon: ReactNode }> = {
   info: { box: "bg-teal-soft text-teal-text", icon: <Info /> },
   success: { box: "bg-success-soft text-success-text", icon: <CircleCheck /> },
   warning: { box: "bg-warning-soft text-warning-text", icon: <TriangleAlert /> },
-  danger: { box: "bg-danger-soft text-danger", icon: <CircleAlert /> },
+  danger: { box: "bg-danger-soft text-danger-text", icon: <CircleAlert /> },
 };
 
 interface AlertProps {

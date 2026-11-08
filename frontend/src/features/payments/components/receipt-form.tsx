@@ -11,8 +11,19 @@ import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
 import type { Subscription } from "@/features/subscriptions/schema";
 import type { Locale } from "@/i18n/routing";
-import { PIASTERS_PER_POUND, formatFileSize, formatMoney, todayInCairo } from "@/lib/format";
-import type { ReceiptErrors, ReceiptFormValues } from "../receipt-validation";
+import { focusFirstError } from "@/lib/forms/focus-first-error";
+import {
+  PIASTERS_PER_POUND,
+  formatCalendarDate,
+  formatFileSize,
+  formatMoney,
+  todayInCairo,
+} from "@/lib/format";
+import {
+  maximumPiastersFor,
+  type ReceiptErrors,
+  type ReceiptFormValues,
+} from "../receipt-validation";
 import { RECEIPT_METHODS, type PaymentInstructions } from "../schema";
 import { ReceiptFileField } from "./receipt-file-field";
 import { useSendReceipt } from "./use-send-receipt";
@@ -47,6 +58,8 @@ export function ReceiptForm({ subscription, instructions, onSent }: ReceiptFormP
     if (!error) return undefined;
     return t(error, {
       amount: formatMoney(subscription.price_piasters, locale),
+      maximum: formatMoney(maximumPiastersFor(subscription.price_piasters), locale),
+      date: formatCalendarDate(todayInCairo(new Date(subscription.reserved_at)), locale),
       size: formatFileSize(instructions.receipt_max_bytes, locale),
     });
   };
@@ -71,6 +84,7 @@ export function ReceiptForm({ subscription, instructions, onSent }: ReceiptFormP
           onSubmit={(event: FormEvent) => {
             event.preventDefault();
             void send(values);
+            focusFirstError(event.currentTarget as HTMLElement);
           }}
           className="flex flex-col gap-4"
         >
@@ -114,6 +128,7 @@ export function ReceiptForm({ subscription, instructions, onSent }: ReceiptFormP
               error={fieldError("paidOn")}
               required
               type="date"
+              min={todayInCairo(new Date(subscription.reserved_at))}
               max={today}
               value={values.paidOn}
               onChange={(event) => update("paidOn", event.target.value)}

@@ -55,7 +55,7 @@ export function Logo({ name, tagline, variant = "color", className }: LogoProps)
       <span className="flex flex-col leading-none">
         <span
           className={cn(
-            "text-[17px] font-extrabold tracking-[-0.3px] [&:lang(ar)]:tracking-normal",
+            "text-h3 font-extrabold tracking-[-0.3px] [&:lang(ar)]:tracking-normal",
             variant === "white" ? "text-white" : "text-ink-strong",
           )}
         >

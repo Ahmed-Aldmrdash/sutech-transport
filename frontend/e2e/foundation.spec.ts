@@ -93,7 +93,7 @@ test.describe("pages render cleanly", () => {
 
 test.describe("app frame", () => {
   test("shows the role's menu and marks the current page", async ({ page }) => {
-    await page.goto("/en/preview/transport_admin/lines");
+    await page.goto("/en/preview/student/lines");
     if (isPhone(page)) {
       await page.getByRole("button", { name: "Open menu" }).click();
       const menu = page.getByRole("dialog", { name: "Menu" });
@@ -101,7 +101,7 @@ test.describe("app frame", () => {
         "aria-current",
         "page",
       );
-      await menu.getByRole("link", { name: "Students" }).click();
+      await menu.getByRole("link", { name: "Requests" }).click();
       await expect(menu).toBeHidden();
     } else {
       const sidebar = page.getByRole("complementary");
@@ -109,17 +109,19 @@ test.describe("app frame", () => {
         "aria-current",
         "page",
       );
-      await sidebar.getByRole("link", { name: "Students" }).click();
+      await sidebar.getByRole("link", { name: "Requests" }).click();
     }
-    await expect(page).toHaveURL(/\/en\/preview\/transport_admin\/students$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Students");
+    await expect(page).toHaveURL(/\/en\/preview\/student\/requests$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Requests");
   });
 
   test("keeps offices apart: finance never sees tracking or users", async ({ page }) => {
     await page.goto("/en/preview/finance");
     if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
     const nav = page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true });
-    await expect(nav.getByRole("link", { name: "Payments" })).toBeVisible();
+    // Finance's pages aren't built yet: listed as "coming soon", never as links.
+    await expect(nav.getByText("Payments")).toBeVisible();
+    await expect(nav.getByRole("link", { name: /Payments/ })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "Live tracking" })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "Users & permissions" })).toHaveCount(0);
   });
@@ -129,7 +131,7 @@ test.describe("app frame", () => {
     await page.goto("/en/preview/student");
     const bar = page.getByRole("navigation", { name: "Quick navigation" });
     await expect(bar).toBeVisible();
-    await bar.getByRole("link", { name: "Lines & booking" }).click();
+    await bar.getByRole("link", { name: "Lines" }).click();
     await expect(page).toHaveURL(/\/en\/preview\/student\/lines$/);
   });
 });

@@ -17,7 +17,7 @@ export function BackLink({
     <Link
       href={href}
       className={cn(
-        "inline-flex h-10 items-center gap-1 self-start rounded-md pe-2 text-body-sm font-bold text-brand focus-ring hover:underline",
+        "tap-area inline-flex h-10 items-center gap-1 self-start rounded-md pe-2 text-body-sm font-bold text-brand focus-ring hover:underline",
         className,
       )}
     >

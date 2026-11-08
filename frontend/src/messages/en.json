@@ -3,7 +3,7 @@
     "name": "SUtech Transportation",
     "shortName": "SUtech Transport",
     "tagline": "Transportation",
-    "description": "Book your seat, pay, track your bus and follow every trip at SUTech.",
+    "description": "Book your seat, pay, track your bus and follow every trip at SUtech.",
     "slogan": "Access the Future"
   },
   "common": {
@@ -24,7 +24,9 @@
     "switchLanguage": "Switch to Arabic",
     "otherLanguageName": "العربية",
     "optional": "(optional)",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "updateReady": "A new version of the app is ready.",
+    "updateNow": "Update"
   },
   "theme": {
     "label": "Appearance",
@@ -96,7 +98,7 @@
       "sos": "SOS"
     },
     "short": {
-      "notifications": "Alerts",
+      "notifications": "Inbox",
       "childDay": "Today",
       "attendanceHistory": "Trips",
       "liveTracking": "Tracking",
@@ -104,8 +106,10 @@
       "secretaryGeneral": "Office",
       "reportDelay": "Delay",
       "passengers": "Riders",
-      "sos": "SOS"
-    }
+      "sos": "SOS",
+      "lines": "Lines"
+    },
+    "soon": "Soon"
   },
   "errors": {
     "retry": "Try again",
@@ -137,8 +141,8 @@
   "preview": {
     "title": "Frame preview",
     "sampleUser": "Mariam Hassan",
-    "pageComing": "This page is built in a later phase",
-    "pageComingBody": "The frame, menu and permissions are ready. The page content comes with its phase.",
+    "pageComing": "Coming soon",
+    "pageComingBody": "This page is being built. The frame, menu and permissions are ready.",
     "dashboardTitle": "Sample content",
     "dashboardBody": "Placeholder numbers to check spacing and layout at every screen size.",
     "kpiStudents": "Active subscribers",
@@ -320,13 +324,14 @@
       "otpLocked": "Too many wrong codes. For your safety, try again in 15 minutes.",
       "otpRateLimited": "Please wait a minute before asking for another code.",
       "network": "No connection. Check your internet and try again.",
+      "invalid": "Some details aren't right. Check the form and try again.",
       "generic": "Something went wrong. Try again in a moment."
     }
   },
   "session": {
     "checking": "Checking your session…",
     "welcome": "Welcome, {name}",
-    "homeLead": "You're signed in. Your pages arrive in the next phases.",
+    "homeLead": "You're signed in. Your office's pages are being built and will open here.",
     "accountTitle": "Your account",
     "role": "Role",
     "identifier": "ID",
@@ -335,8 +340,8 @@
     "levelValue": "Level {level}",
     "phone": "Registered phone",
     "expiresAt": "Session ends",
-    "comingTitle": "What's next",
-    "comingBody": "This is your home. The rest of your menu fills in phase by phase; every page you see is only one your role may open."
+    "soonTitle": "Coming soon",
+    "soonBody": "These pages are being built. Each one opens from your menu the day it is ready."
   },
   "student": {
     "status": {
@@ -414,8 +419,8 @@
         "trackBus": "Track the bus"
       },
       "alerts": {
-        "title": "Alerts",
-        "empty": "No alerts right now.",
+        "title": "Announcements",
+        "empty": "No announcements right now.",
         "kind": {
           "official": "Official",
           "delay": "Delay",
@@ -480,6 +485,7 @@
         "STOP_NOT_ON_LINE": "That stop isn't on this line any more. Reload and choose again.",
         "LINE_NOT_FOUND": "This line was removed. Choose another one.",
         "network": "No connection. Your seat wasn't booked; try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "We couldn't book the seat. Try again."
       }
     },
@@ -558,8 +564,12 @@
           "RECEIPT_TOO_LARGE": "The file is too large. Send a smaller photo.",
           "AMOUNT_MISMATCH": "The amount is less than the term price.",
           "network": "No connection. Nothing was sent; try again.",
+          "invalid": "Some details aren't right. Check the form and try again.",
           "generic": "We couldn't send the receipt. Try again."
-        }
+        },
+        "amountInvalid": "Write the amount in pounds, with at most two digits for piasters (for example 15000 or 15000.50).",
+        "amountTooHigh": "That's more than {maximum}. Check the amount on the receipt.",
+        "dateTooEarly": "The date can't be before you held the seat ({date})."
       },
       "history": {
         "title": "Your receipts",
@@ -595,7 +605,16 @@
       "refreshing": "Getting a new code…",
       "expired": "This code has expired. Connect to the internet to get a new one.",
       "getNewCode": "Get a new code",
-      "tip": "The code changes every 30 seconds, so a screenshot won't work. Turn your screen brightness up when you scan."
+      "tip": "The code changes every 30 seconds, so a screenshot won't work. Turn your screen brightness up when you scan.",
+      "offline": {
+        "title": "Your card (saved on this phone)",
+        "name": "Name",
+        "identifier": "University ID",
+        "line": "Line",
+        "stop": "Stop",
+        "validUntilLabel": "Valid until",
+        "noCode": "No internet, so there's no boarding code. Show these details to the driver, or connect to get the code."
+      }
     },
     "requests": {
       "title": "Requests",
@@ -625,7 +644,7 @@
       "sent": "Request sent",
       "sentBody": "You'll get a notification when the office answers.",
       "textHint": "At least 10 characters.",
-      "phoneHint": "Egyptian mobile, e.g. 01012345678.",
+      "phoneHint": "Egyptian mobile, e.g. 01000000000.",
       "errors": {
         "required": "Fill in this field.",
         "phoneInvalid": "Enter an 11-digit mobile number starting 010, 011, 012 or 015.",
@@ -660,6 +679,7 @@
         "STOP_NOT_ON_LINE": "That stop isn't on the line. Choose again.",
         "RECEIPT_TOO_LARGE": "A file is larger than {size}.",
         "network": "No connection. Check the internet and try again; nothing was sent twice.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again in a moment.",
         "NO_SUBSCRIPTION": "Book a seat first: complaints are for students with a booking.",
         "NOT_AWAITING_GUARDIAN": "This request isn't waiting for the guardian any more."
@@ -667,7 +687,8 @@
       "attachments": {
         "add": "Add a file",
         "remove": "Remove {name}",
-        "full": "{count} files attached (the most)"
+        "full": "{count} files attached (the most)",
+        "refused": "Not added: {reason}"
       },
       "guardian": {
         "title": "Guardian's approval",
@@ -824,6 +845,7 @@
         "withdrawErrors": {
           "NOT_WITHDRAWABLE": "The office has already started on it, so it can't be withdrawn.",
           "network": "No connection. Try again.",
+          "invalid": "Some details aren't right. Check the form and try again.",
           "generic": "Couldn't withdraw it. Try again."
         },
         "guardianWaitingTitle": "Waiting for your guardian's approval",
@@ -911,7 +933,6 @@
       },
       "note": "Note for the office",
       "noteHint": "Short, up to 200 characters.",
-      "optional": "optional",
       "whoKnowsTitle": "Who is told",
       "whoKnowsBody": "Your driver and bus supervisor, your guardian and the Transportation office. That day counts as \"not going\", not absent.",
       "submit": "Report the day",
@@ -935,6 +956,7 @@
         "ABSENCE_CUTOFF_PASSED": "The bus already left, so this day can't be changed.",
         "ALREADY_REPORTED": "You already reported this day.",
         "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again."
       }
     },
@@ -1014,11 +1036,7 @@
     "appearanceHint": "\"Device\" follows your phone or laptop's light or dark setting.",
     "signOutTitle": "Sign out",
     "signOutHint": "You'll need a new code by SMS to sign in again.",
-    "signOut": "Sign out",
-    "signOutConfirmTitle": "Sign out of this device?",
-    "signOutConfirmBody": "Your card and bookings stay safe. Sign in again with your university ID and a new code.",
-    "stay": "Stay signed in",
-    "signOutConfirmBodyParent": "Sign in again with your phone number and a new code."
+    "signOut": "Sign out"
   },
   "bus": {
     "title": "Bus and driver",
@@ -1153,7 +1171,6 @@
       "refuseBody": "The request is closed. {name} can send a new one later.",
       "approveNote": "A note for the Transportation office",
       "refuseNote": "Want to tell {name} why?",
-      "optional": "Optional",
       "approveConfirm": "Yes, approve",
       "refuseConfirm": "Yes, refuse",
       "back": "Back",
@@ -1165,6 +1182,7 @@
       "errors": {
         "NOT_AWAITING_GUARDIAN": "This request was already answered or withdrawn.",
         "network": "No connection. Try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again."
       }
     },
@@ -1259,6 +1277,7 @@
         "TRIP_NOT_STARTED": "Start the trip first.",
         "OTHER_TRIP_IN_PROGRESS": "End the trip on the road first.",
         "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again."
       },
       "startOutboundConfirm": "Start the outbound trip now?",
@@ -1314,6 +1333,7 @@
         "TRIP_NOT_STARTED": "Start the trip first.",
         "TRIP_ALREADY_ENDED": "This trip already ended.",
         "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again."
       },
       "camera": {
@@ -1322,7 +1342,8 @@
         "lead": "The back camera reads the QR code on the student's pass.",
         "denied": "Camera access is blocked. Allow it in the browser settings, or type the ID below.",
         "unavailable": "The camera can't open here. It needs the app's secure (https) address. Type the ID below meanwhile."
-      }
+      },
+      "manualRequired": "Type the student's university ID."
     },
     "passengers": {
       "title": "Passengers",
@@ -1358,13 +1379,17 @@
       "errors": {
         "TRIP_ALREADY_ENDED": "This trip already ended.",
         "network": "No connection. Check your internet and try again.",
-        "generic": "Something went wrong. Try again."
+        "invalid": "Some details aren't right. Check the form and try again.",
+        "generic": "Something went wrong. Try again.",
+        "DELAY_OUT_OF_WINDOW": "A delay can be sent while the trip runs, or within an hour of its pickup time."
       },
       "submit": "Send the delay",
       "sentTitle": "Delay sent",
       "sentBody": "Students and guardians on your line were told.",
       "sentListTitle": "Sent on this trip",
-      "sentListEmpty": "No delays reported on this trip."
+      "sentListEmpty": "No delays reported on this trip.",
+      "closedTitle": "Too far from the trip's time",
+      "closedBody": "You can report a delay while the trip runs, or from an hour before its pickup time ({time}) to an hour after."
     }
   },
   "sos": {
@@ -1398,6 +1423,7 @@
       "NOT_YOUR_TRIP": "This isn't your bus's trip.",
       "TRIP_ALREADY_ENDED": "This trip ended. Call the Transportation office.",
       "network": "No connection. Call the Transportation office now.",
+      "invalid": "Some details aren't right. Check the form and try again.",
       "generic": "It didn't send. Call the Transportation office now."
     },
     "sentTitle": "SOS sent: {type}",
@@ -1481,6 +1507,7 @@
       "FILE_TOO_LARGE": "The photo is over 5 MB.",
       "STUDENT_NOT_FOUND": "No student with this university ID.",
       "network": "No connection. Check your internet and try again.",
+      "invalid": "Some details aren't right. Check the form and try again.",
       "generic": "Something went wrong. Try again."
     }
   },
@@ -1558,6 +1585,7 @@
       "DRIVER_NOT_AVAILABLE": "That driver was just sent elsewhere. Pick another.",
       "NOTHING_TO_CHANGE": "That's the bus and driver already on the trip.",
       "network": "No connection. Try again.",
+      "invalid": "Some details aren't right. Check the form and try again.",
       "generic": "Something went wrong. Try again."
     },
     "alarm": {
@@ -1590,7 +1618,14 @@
       "confirm": "Send",
       "whoIsTold": "The driver's page, the line's students and their guardians show the new bus and driver at once.",
       "sent": "Sent: {plate} with {name}"
-    }
+    },
+    "noteRequired": "Write a note first.",
+    "summaryRequired": "Write what was done before closing.",
+    "emptyAll": {
+      "title": "No alerts",
+      "body": "No driver or supervisor has pressed SOS yet. A new alert shows here at once with the bus's location."
+    },
+    "allAlerts": "See all alerts"
   },
   "clinic": {
     "title": "Clinic",

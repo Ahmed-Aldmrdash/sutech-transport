@@ -152,10 +152,6 @@
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "token": {
-                      "type": "string",
-                      "minLength": 1
-                    },
                     "expires_at": {
                       "type": "string",
                       "format": "date-time",
@@ -248,7 +244,6 @@
                     }
                   },
                   "required": [
-                    "token",
                     "expires_at",
                     "user"
                   ],
@@ -560,6 +555,12 @@
                       "name": {
                         "type": "string"
                       },
+                      "name_ar": {
+                        "type": "string"
+                      },
+                      "name_en": {
+                        "type": "string"
+                      },
                       "price_piasters": {
                         "type": "integer",
                         "minimum": 0,
@@ -634,6 +635,8 @@
                       "line_id",
                       "code",
                       "name",
+                      "name_ar",
+                      "name_en",
                       "price_piasters",
                       "bus_type",
                       "seats_total",
@@ -707,6 +710,12 @@
                       "type": "string"
                     },
                     "name": {
+                      "type": "string"
+                    },
+                    "name_ar": {
+                      "type": "string"
+                    },
+                    "name_en": {
                       "type": "string"
                     },
                     "price_piasters": {
@@ -900,6 +909,8 @@
                     "line_id",
                     "code",
                     "name",
+                    "name_ar",
+                    "name_en",
                     "price_piasters",
                     "bus_type",
                     "seats_total",

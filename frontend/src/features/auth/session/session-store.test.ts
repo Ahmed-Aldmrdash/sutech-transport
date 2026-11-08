@@ -6,18 +6,16 @@ const HOUR_MS = 3_600_000;
 
 async function freshStore() {
   vi.resetModules();
-  // The client and the token store must be the same module instances the store uses.
+  // The client must be the same module instance the store uses.
   const store = await import("./session-store");
-  const tokens = await import("@/lib/api/token-store");
   const api = await import("../api");
-  return { ...store, tokenStore: tokens.tokenStore, api };
+  return { ...store, api };
 }
 
 function sampleSession(expiresInMs: number): Session {
   return {
-    token: "tok",
     expires_at: new Date(Date.now() + expiresInMs).toISOString(),
-    user: { id: "u1", role: "student", name: "Ahmed", identifier: "240102791" },
+    user: { id: "u1", role: "student", name: "Ahmed", identifier: "240100101" },
   };
 }
 
@@ -32,7 +30,7 @@ describe("session store", () => {
     expect(sessionStore.getSnapshot()).toEqual({ status: SessionStatus.SignedOut, reason: null });
   });
 
-  it("keeps the session across a reload and sends its token", async () => {
+  it("keeps the session across a reload, with no token in page storage", async () => {
     const first = await freshStore();
     first.sessionStore.getSnapshot();
     first.sessionStore.start(sampleSession(HOUR_MS));
@@ -40,7 +38,19 @@ describe("session store", () => {
     const second = await freshStore();
     const state = second.sessionStore.getSnapshot();
     expect(state.status).toBe(second.SessionStatus.SignedIn);
-    expect(second.tokenStore.get()).toBe("tok");
+    expect(window.localStorage.getItem("sut.session")).not.toMatch(/token/);
+  });
+
+  it("forgets the person's saved picks when they sign out", async () => {
+    const { sessionStore } = await freshStore();
+    sessionStore.getSnapshot();
+    sessionStore.start(sampleSession(HOUR_MS));
+    window.localStorage.setItem("sut.parent.child", "usr_student_11");
+    window.localStorage.setItem("sut.mock.bookings", "{}");
+    sessionStore.end("signed-out");
+    expect(window.localStorage.getItem("sut.parent.child")).toBeNull();
+    // The mock server's own data is the "server", not the person's device data.
+    expect(window.localStorage.getItem("sut.mock.bookings")).toBe("{}");
   });
 
   it("drops an expired session and says why", async () => {

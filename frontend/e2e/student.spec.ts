@@ -17,7 +17,7 @@ test.describe("student", () => {
   }) => {
     test.setTimeout(90_000);
     const errors = watchForErrors(page);
-    await signIn(page, "240102791");
+    await signIn(page, "240100101");
     await expect(
       page.getByText("You're not subscribed yet", { exact: true }).first(),
     ).toBeVisible();
@@ -38,8 +38,10 @@ test.describe("student", () => {
     await expect(page.getByText("Attach the receipt.")).toBeVisible();
 
     await page.getByLabel("Reference number").fill("NBE-55512345");
-    await page.getByLabel("Payment date").fill("2026-11-01");
-    await page.getByLabel("Account holder or depositor").fill("Mohamed Aldmrdash");
+    // Paid today: a receipt can't be older than the seat it pays for.
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo" }).format(new Date());
+    await page.getByLabel("Payment date").fill(today);
+    await page.getByLabel("Account holder or depositor").fill("Tamer Nour");
     await page.locator("input[type=file]").setInputFiles(RECEIPT);
     await page.getByRole("button", { name: "Send receipt" }).click();
     await expect(
@@ -51,23 +53,27 @@ test.describe("student", () => {
       page.getByText("Your card opens after you subscribe", { exact: true }).first(),
     ).toBeVisible();
 
-    // The mock finance office approves a receipt 20 seconds after it arrives.
-    await page.waitForTimeout(21_000);
-    await page.reload();
-    await expect(page.getByRole("img", { name: /Boarding code for/ })).toBeVisible();
+    // The mock finance office approves a receipt 20 seconds after it arrives: reload until then.
+    test.slow();
+    await expect(async () => {
+      await page.reload();
+      await expect(page.getByRole("img", { name: /Boarding code for/ })).toBeVisible({
+        timeout: 2_000,
+      });
+    }).toPass({ timeout: 40_000, intervals: [5_000] });
     await expectNoSidewaysScroll(page);
     expect(errors).toEqual([]);
   });
 
   test("an active subscriber sees the line, the next trip and the card", async ({ page }) => {
     const errors = watchForErrors(page);
-    await signIn(page, "240102684");
+    await signIn(page, "240100102");
     await expect(page.getByText("You're subscribed", { exact: true }).first()).toBeVisible();
     await expectNoSidewaysScroll(page);
 
     await page.goto("/en/student/card");
     await expect(page.getByRole("img", { name: /Boarding code for/ })).toBeVisible();
-    await expect(page.getByText("240102684")).toBeVisible();
+    await expect(page.getByText("240100102")).toBeVisible();
     expect(errors).toEqual([]);
   });
 });

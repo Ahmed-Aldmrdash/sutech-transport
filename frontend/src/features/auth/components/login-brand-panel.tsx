@@ -22,7 +22,7 @@ export function LoginBrandPanel() {
       <div className="relative flex w-full flex-col justify-between gap-12 p-12">
         <Logo name={t("app.shortName")} tagline={t("app.tagline")} variant="white" />
         <div className="max-w-md">
-          <p className="mb-4 text-label text-[#f1ae9f]">{t("app.slogan")}</p>
+          <p className="mb-4 text-label text-coral-40">{t("app.slogan")}</p>
           <p className="text-display text-white">{t("login.brandTitle")}</p>
           <p className="mt-4 text-body-lg text-white/85">{t("login.brandLead")}</p>
           <ul className="mt-10 flex flex-col gap-4">

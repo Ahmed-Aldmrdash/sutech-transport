@@ -1,19 +1,12 @@
 "use client";
 
-import type {
-  InputHTMLAttributes,
-  ReactNode,
-  Ref,
-  SelectHTMLAttributes,
-  TextareaHTMLAttributes,
-} from "react";
-import { ChevronDown } from "lucide-react";
+import type { InputHTMLAttributes, ReactNode, Ref, TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 import { Field, controlStyles, type FieldProps } from "./field";
 
-type FieldOwnProps = Omit<FieldProps, "children" | "className">;
+export type FieldOwnProps = Omit<FieldProps, "children" | "className">;
 
-export interface TextFieldProps
+interface TextFieldProps
   extends FieldOwnProps, Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "required"> {
   /** Icon inside the control at the start edge (right in Arabic). */
   icon?: ReactNode;
@@ -66,7 +59,7 @@ export function TextField({
   );
 }
 
-export interface TextAreaFieldProps
+interface TextAreaFieldProps
   extends FieldOwnProps, Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "id" | "required"> {
   containerClassName?: string;
 }
@@ -98,68 +91,6 @@ export function TextAreaField({
           rows={rows}
           className={cn(controlStyles, "min-h-24 px-3 py-2.5", className)}
         />
-      )}
-    </Field>
-  );
-}
-
-export interface SelectOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
-}
-
-export interface SelectFieldProps
-  extends
-    FieldOwnProps,
-    Omit<SelectHTMLAttributes<HTMLSelectElement>, "id" | "required" | "children"> {
-  options: readonly SelectOption[];
-  /** First, empty choice such as "Choose a line". */
-  placeholder?: string;
-  containerClassName?: string;
-}
-
-/** Native select: best on phones (system picker) and fully accessible. */
-export function SelectField({
-  label,
-  hint,
-  error,
-  required,
-  optionalText,
-  options,
-  placeholder,
-  className,
-  containerClassName,
-  ...selectProps
-}: SelectFieldProps) {
-  return (
-    <Field
-      label={label}
-      hint={hint}
-      error={error}
-      required={required}
-      optionalText={optionalText}
-      className={containerClassName}
-    >
-      {(control) => (
-        <div className="relative">
-          <select
-            {...control}
-            {...selectProps}
-            className={cn(controlStyles, "h-12 appearance-none ps-3 pe-10", className)}
-          >
-            {placeholder !== undefined ? <option value="">{placeholder}</option> : null}
-            {options.map((option) => (
-              <option key={option.value} value={option.value} disabled={option.disabled}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 end-3 my-auto size-5 text-ink-muted"
-          />
-        </div>
       )}
     </Field>
   );

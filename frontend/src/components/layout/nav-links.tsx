@@ -36,6 +36,22 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
             {group.items.map((item) => {
               const isActive = item === activeItem;
               const Icon = item.icon;
+              if (item.soon) {
+                return (
+                  <li key={item.key}>
+                    <span
+                      aria-disabled="true"
+                      className="flex h-11 items-center gap-3 rounded-md px-3 text-body-sm font-bold text-ink-muted"
+                    >
+                      <Icon aria-hidden="true" className="size-5 shrink-0" />
+                      <span className="truncate">{t(`items.${item.key}`)}</span>
+                      <span className="ms-auto shrink-0 rounded-pill bg-surface-alt px-2 py-0.5 text-caption font-bold text-ink-muted">
+                        {t("soon")}
+                      </span>
+                    </span>
+                  </li>
+                );
+              }
               return (
                 <li key={item.key}>
                   <Link

@@ -2,17 +2,15 @@
 
 import { Languages, LogOut, Palette, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { LanguageSegmented } from "@/components/layout/locale-switcher";
 import { ThemeSegmented } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { ConfirmDialog } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/ui/page-header";
 import type { User } from "@/features/auth/schema";
 import { userText } from "@/features/auth/user-text";
 import type { Locale } from "@/i18n/routing";
-import { Role } from "@/lib/auth/roles";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession, useSignOut } from "@/features/auth/session/use-session";
 
@@ -21,7 +19,6 @@ export function SettingsPage() {
   const t = useTranslations("settings");
   const session = useSession();
   const signOut = useSignOut();
-  const [isConfirming, setIsConfirming] = useState(false);
   const user = session.status === SessionStatus.SignedIn ? session.session.user : null;
 
   return (
@@ -37,24 +34,13 @@ export function SettingsPage() {
             <ThemeSegmented />
           </SettingCard>
           <SettingCard icon={<LogOut />} title={t("signOutTitle")} description={t("signOutHint")}>
-            <Button variant="secondary" onClick={() => setIsConfirming(true)}>
+            {/* Same as the menu's sign out: one tap, no confirm (signing in again is quick). */}
+            <Button variant="secondary" onClick={signOut}>
               {t("signOut")}
             </Button>
           </SettingCard>
         </div>
       </div>
-      <ConfirmDialog
-        open={isConfirming}
-        onClose={() => setIsConfirming(false)}
-        onConfirm={signOut}
-        title={t("signOutConfirmTitle")}
-        description={
-          user?.role === Role.Parent ? t("signOutConfirmBodyParent") : t("signOutConfirmBody")
-        }
-        confirmLabel={t("signOut")}
-        cancelLabel={t("stay")}
-        destructive
-      />
     </div>
   );
 }

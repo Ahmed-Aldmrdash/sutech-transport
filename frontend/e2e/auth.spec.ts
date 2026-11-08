@@ -9,11 +9,13 @@ import {
   wrongCodeFor,
 } from "./helpers";
 
-/** Mock answers take ~150ms; let the home page's own session check finish before editing. */
-const SESSION_CHECK_SETTLE_MS = 1000;
+/** Lets the page's own session check (GET /me) finish before the test edits the session. */
+async function sessionChecked(page: Page) {
+  await page.locator("html[data-session-checked]").waitFor({ state: "attached" });
+}
 
 async function editSavedSession(page: Page, change: string, value: string) {
-  await page.waitForTimeout(SESSION_CHECK_SETTLE_MS);
+  await sessionChecked(page);
   await page.evaluate(
     ({ key, next }) => {
       const session = JSON.parse(localStorage.getItem("sut.session") ?? "{}");
@@ -37,13 +39,13 @@ async function signOut(page: Page) {
 test.describe("sign-in", () => {
   test("a student signs in, stays signed in, and signs out", async ({ page }) => {
     const errors = watchForErrors(page);
-    await signIn(page, "240102791");
+    await signIn(page, "240100101");
     await expect(page).toHaveURL(/\/en\/student$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ahmed");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ziad");
     await expectNoSidewaysScroll(page);
 
     await page.reload();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ahmed");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ziad");
 
     await signOut(page);
     await expect(page).toHaveURL(/\/en\/login\?reason=signed-out$/);
@@ -55,15 +57,15 @@ test.describe("sign-in", () => {
 
   test("works in Arabic with Arabic digits", async ({ page }) => {
     await page.goto("/ar/login");
-    await page.getByLabel("الرقم الجامعي أو رقم الموظف أو الموبايل").fill("٢٤٠١٠٢٧٩١");
+    await page.getByLabel("الرقم الجامعي أو رقم الموظف أو الموبايل").fill("٢٤٠١٠٠١٠١");
     await page.getByRole("button", { name: "ابعت الكود" }).click();
-    await expect(page.getByText("010•••••907")).toBeVisible();
+    await expect(page.getByText("010•••••001")).toBeVisible();
     const arabicCode = (await shownCode(page)).replace(/\d/g, (digit) =>
       String.fromCharCode(0x0660 + Number(digit)),
     );
     await page.getByLabel("كود الدخول").fill(arabicCode);
     await expect(page).toHaveURL(/\/ar\/student$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("أهلًا، أحمد");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("أهلًا، زياد");
   });
 
   test("explains an unknown ID", async ({ page }) => {
@@ -94,7 +96,7 @@ test.describe("sign-in", () => {
 
   test("keeps the code step when the language, theme or page changes", async ({ page }) => {
     await page.goto("/en/login");
-    await requestCode(page, "240102791");
+    await requestCode(page, "240100101");
     const code = await shownCode(page);
 
     await page
@@ -123,26 +125,27 @@ test.describe("sign-in", () => {
 
   test("lets the user go back and use a different ID", async ({ page }) => {
     await page.goto("/en/login");
-    await requestCode(page, "240102791");
+    await requestCode(page, "240100101");
     await page.getByRole("button", { name: "Use a different ID" }).click();
-    await expect(page.getByLabel("University ID, staff ID or phone")).toHaveValue("240102791");
+    await expect(page.getByLabel("University ID, staff ID or phone")).toHaveValue("240100101");
     await expect(page.getByRole("button", { name: /Resend/ })).toHaveCount(0);
   });
 });
 
 test.describe("each role goes to its own home", () => {
   const homes = [
-    { id: "240102791", path: "/en/student" },
-    { id: "01098765432", path: "/en/parent" },
+    { id: "240100101", path: "/en/student" },
+    { id: "01000002000", path: "/en/parent" },
     { id: "DRV-1001", path: "/en/driver" },
     { id: "SUP-1001", path: "/en/driver" },
-    { id: "TRN-1001", path: "/en/admin" },
-    { id: "FIN-1001", path: "/en/admin/payments" },
+    // Offices land on their first built page; one with none yet gets its "coming soon" home.
+    { id: "TRN-1001", path: "/en/admin/emergencies" },
+    { id: "FIN-1001", path: "/en/admin" },
     { id: "CLN-1001", path: "/en/admin/emergencies" },
-    { id: "STA-1001", path: "/en/admin/violations" },
-    { id: "SGO-1001", path: "/en/admin/reports" },
-    { id: "BUS-1001", path: "/en/admin/bus-company" },
-    { id: "ADM-1001", path: "/en/admin" },
+    { id: "STA-1001", path: "/en/admin" },
+    { id: "SGO-1001", path: "/en/admin" },
+    { id: "BUS-1001", path: "/en/admin" },
+    { id: "ADM-1001", path: "/en/admin/emergencies" },
   ];
   for (const { id, path } of homes) {
     test(`${id} → ${path}`, async ({ page }) => {
@@ -158,9 +161,9 @@ test.describe("each role goes to its own home", () => {
 
 test.describe("strict separation", () => {
   test("a student can't open another role's pages", async ({ page }) => {
-    await signIn(page, "240102791");
+    await signIn(page, "240100101");
     await expect(page).toHaveURL(/\/en\/student$/);
-    for (const path of ["/en/admin", "/en/admin/users", "/en/parent", "/en/driver/scan"]) {
+    for (const path of ["/en/admin", "/en/admin/emergencies", "/en/parent", "/en/driver/scan"]) {
       await page.goto(path);
       await expect(page).toHaveURL(/\/en\/student$/);
     }
@@ -168,74 +171,84 @@ test.describe("strict separation", () => {
 
   test("finance can't open transport or super admin pages", async ({ page }) => {
     await signIn(page, "FIN-1001");
-    await expect(page).toHaveURL(/\/en\/admin\/payments$/);
-    await page.goto("/en/admin/tracking");
-    await expect(page).toHaveURL(/\/en\/admin\/payments$/);
-    await page.goto("/en/admin/users");
-    await expect(page).toHaveURL(/\/en\/admin\/payments$/);
-    await page.goto("/en/admin/refunds");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Requests & refunds");
+    await expect(page).toHaveURL(/\/en\/admin$/);
+    await page.goto("/en/admin/emergencies");
+    await expect(page).toHaveURL(/\/en\/admin$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Nadia");
   });
 
-  test("only the super admin sees users and permissions", async ({ page }) => {
+  test("pages that aren't built show as coming soon and never open", async ({ page }) => {
+    await signIn(page, "FIN-1001");
+    await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
+    // An unbuilt page is a real 404 for the server, and the menu shows it without a link.
+    const response = await page.request.get("/en/admin/payments");
+    expect(response.status()).toBe(404);
+    if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
+    await expect(page.getByRole("link", { name: /^Payments/ })).toHaveCount(0);
+  });
+
+  test("the super admin lands on the emergencies desk", async ({ page }) => {
     await signIn(page, "ADM-1001");
-    await expect(page).toHaveURL(/\/en\/admin$/);
-    await page.goto("/en/admin/users");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Users & permissions");
+    await expect(page).toHaveURL(/\/en\/admin\/emergencies$/);
+    await page.goto("/en/student");
+    await expect(page).toHaveURL(/\/en\/admin\/emergencies$/);
   });
 });
 
 test.describe("session", () => {
   test("an expired session sends the user to sign in, then back", async ({ page }) => {
-    await signIn(page, "240102791");
+    await signIn(page, "240100101");
     await expect(page).toHaveURL(/\/en\/student$/);
     await editSavedSession(page, "expires_at", "past");
     await page.goto("/en/student/card");
     await expect(page).toHaveURL(/\/en\/login\?next=%2Fstudent%2Fcard&reason=expired$/);
     await expect(page.getByText("Your session ended. Sign in again to continue.")).toBeVisible();
 
-    await requestCode(page, "240102791");
+    await requestCode(page, "240100101");
     await page.getByLabel("One-time code").fill(await shownCode(page));
     await expect(page).toHaveURL(/\/en\/student\/card$/);
   });
 
   test("signs out the moment the session expires", async ({ page }) => {
-    await signIn(page, "240102791");
+    await signIn(page, "240100101");
     await expect(page).toHaveURL(/\/en\/student$/);
     await editSavedSession(page, "expires_at", "soon");
     await page.reload();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ahmed");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ziad");
     await expect(page).toHaveURL(/reason=expired/, { timeout: 10_000 });
   });
 
-  test("a revoked token is caught by the server check", async ({ page }) => {
-    await signIn(page, "240102791");
+  test("a revoked session is caught by the server check", async ({ page }) => {
+    await signIn(page, "240100101");
     await expect(page).toHaveURL(/\/en\/student$/);
-    await editSavedSession(page, "token", "forged");
+    // The page never holds the session token; this forges the mock's stand-in cookie.
+    await sessionChecked(page);
+    await page.evaluate(() => localStorage.setItem("sut.mock.cookie", "forged"));
+    expect(await page.evaluate(() => localStorage.getItem("sut.session"))).not.toContain("token");
     await page.reload();
     await expect(page).toHaveURL(/reason=expired/);
   });
 
   test("signing out in one tab signs out the others", async ({ page, context }) => {
-    await signIn(page, "240102791");
+    await signIn(page, "240100101");
     await expect(page).toHaveURL(/\/en\/student$/);
     const other = await context.newPage();
     await other.goto("/en/student");
-    await expect(other.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ahmed");
+    await expect(other.getByRole("heading", { level: 1 })).toHaveText("Welcome, Ziad");
     await signOut(page);
     await expect(other).toHaveURL(/\/en\/login/);
   });
 
   test("a signed-in user opening sign-in goes home", async ({ page }) => {
     await signIn(page, "TRN-1001");
-    await expect(page).toHaveURL(/\/en\/admin$/);
+    await expect(page).toHaveURL(/\/en\/admin\/emergencies$/);
     // The server redirects before any HTML, so Back to the sign-in page never shows the form.
     const response = await page.request.get("/en/login?reason=signed-out", { maxRedirects: 0 });
     expect(response.status()).toBe(307);
-    expect(response.headers()["location"]).toMatch(/\/en\/admin$/);
+    expect(response.headers()["location"]).toMatch(/\/en\/admin\/emergencies$/);
     await page.goto("/en/login");
-    await expect(page).toHaveURL(/\/en\/admin$/);
+    await expect(page).toHaveURL(/\/en\/admin\/emergencies$/);
     await page.goto("/en");
-    await expect(page).toHaveURL(/\/en\/admin$/);
+    await expect(page).toHaveURL(/\/en\/admin\/emergencies$/);
   });
 });

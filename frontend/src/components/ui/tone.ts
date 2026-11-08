@@ -15,5 +15,5 @@ export const SOFT_TONE_CLASSES: Record<Tone, string> = {
   info: "bg-teal-soft text-teal-text border-teal-soft",
   success: "bg-success-soft text-success-text border-success-soft",
   warning: "bg-warning-soft text-warning-text border-warning-soft",
-  danger: "bg-danger-soft text-danger border-danger-soft",
+  danger: "bg-danger-soft text-danger-text border-danger-soft",
 };

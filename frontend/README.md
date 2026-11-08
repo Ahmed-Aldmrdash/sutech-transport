@@ -5,7 +5,13 @@ and every university office (transport, finance, clinic, student affairs, secret
 the bus company, super admin). One Next.js app, Arabic (RTL, default) and English, light and dark.
 
 It runs today on an in-browser mock server. When the FastAPI server is ready, set
-`NEXT_PUBLIC_API_MODE=live` and `NEXT_PUBLIC_API_BASE_URL`; screens do not change.
+`NEXT_PUBLIC_API_MODE=live`, `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_MAP_TILE_URL`; screens
+do not change. A production build refuses to start without `NEXT_PUBLIC_API_MODE` (it never
+falls back to the mock), and a live production build refuses to start without a map tile
+provider (OpenStreetMap's own servers are for development only). See `.env.example`.
+
+All names, IDs and phone numbers in the mock are made up (fake mobiles start `0100000`);
+`src/lib/demo-data-privacy.test.ts` fails if a real-looking one is added.
 
 ## Run it
 
@@ -23,18 +29,22 @@ Open `/ar` and sign in with one of these mock accounts. Each request makes a new
 
 | Role                  | ID                      | Home                 |
 | --------------------- | ----------------------- | -------------------- |
-| Student (no booking)  | `240102791`             | `/student`           |
-| Student (subscribed)  | `240102684`             | `/student`           |
-| Parent                | `01098765432`           | `/parent`            |
+| Student (no booking)  | `240100101`             | `/student`           |
+| Student (subscribed)  | `240100102`             | `/student`           |
+| Parent                | `01000002000`           | `/parent`            |
 | Driver / supervisor   | `DRV-1001` / `SUP-1001` | `/driver`            |
-| Transportation office | `TRN-1001`              | `/admin`             |
-| Finance               | `FIN-1001`              | `/admin/payments`    |
+| Transportation office | `TRN-1001`              | `/admin/emergencies` |
+| Finance               | `FIN-1001`              | `/admin`             |
 | Clinic                | `CLN-1001`              | `/admin/emergencies` |
-| Student affairs       | `STA-1001`              | `/admin/violations`  |
-| Secretary General     | `SGO-1001`              | `/admin/reports`     |
-| Abu El Hol            | `BUS-1001`              | `/admin/bus-company` |
-| Super admin           | `ADM-1001`              | `/admin`             |
-| Disabled account      | `240100000`             | (refused)            |
+| Student affairs       | `STA-1001`              | `/admin`             |
+| Secretary General     | `SGO-1001`              | `/admin`             |
+| Abu El Hol            | `BUS-1001`              | `/admin`             |
+| Super admin           | `ADM-1001`              | `/admin/emergencies` |
+
+Each office lands on its first built page. An office with none yet gets `/admin`: its account
+and the list of its pages marked "Coming soon". Menu items that aren't built show as "Soon",
+never as links, and their URLs are a real 404.
+| Disabled account | `240100000` | (refused) |
 
 Student pages in mock mode (phase 2):
 
@@ -44,13 +54,13 @@ Student pages in mock mode (phase 2):
 - Only lines 5, 6, 9, 12 and 15 have free seats; every other bus is full.
 - To start over, clear the site data in the browser.
 
-While in mock mode, two developer pages are available:
+Two developer pages (on in `npm run dev`; in a build only with `NEXT_PUBLIC_DEV_PAGES=true`):
 
 - `/ar/ui` (or `/en/ui`): every base component in both languages and themes.
 - `/ar/preview/<role>`: each role's real frame and menu, e.g. `/ar/preview/student`,
-  `/en/preview/transport`, `/ar/preview/finance`.
+  `/en/preview/transport_admin`, `/ar/preview/finance`.
 
-Both return 404 in live mode.
+Both return 404 in live mode and in a normal production build.
 
 ## Scripts
 
@@ -130,8 +140,11 @@ Design rules that the code enforces:
 
 - Two steps for every role (contract: `POST /auth/otp`, then `POST /auth/login`), then
   `GET /me` once per visit and `POST /auth/logout`. Code in `features/auth`.
-- The session (token, `expires_at`, user) is kept in `localStorage` (`sut.session`) so it
-  survives closing the app. It ends at `expires_at`, on any `401`, on sign-out, and in every
+- The session token never reaches the page: in live mode the server sets an HttpOnly, Secure
+  cookie and every request uses `credentials: "include"`. The page keeps only `expires_at` and the
+  user in `localStorage` (`sut.session`), so the frame shows at once after closing the app; `GET /me`
+  checks it with the server. Signing out also removes the person's saved picks (`sut.*` keys) and
+  the service worker's caches. The service worker never caches `/api/` answers. It ends at `expires_at`, on any `401`, on sign-out, and in every
   open tab at once. An expired session returns the user to the page they were on after sign-in.
 - `app/[locale]/(app)/` holds every signed-in page. `SignedInFrame` renders nothing until the
   session is read and `canOpen(role, path)` passes; any other role's page redirects to the user's
@@ -165,12 +178,14 @@ export const linesEndpoints = [listLinesEndpoint];
 registerMock(listLinesEndpoint, () => mockLines);
 ```
 
-Then add `linesEndpoints` to `lib/api/registry.ts`, add `import "@/features/lines/mock"` to
-`lib/api/mock/handlers.ts`, and run `npm run openapi`.
+Then add `linesEndpoints` to `lib/api/registry.ts`, map each endpoint id to its feature in
+`lib/api/mock/mock-routing.ts` (and the feature's loader in `lib/api/mock/handlers.ts`, if new),
+and run `npm run openapi`. In mock mode the client loads only the mock of the feature it calls;
+a test checks every endpoint is mapped.
 
 The contract, shared with the Back End team: everything under `/api/v1/`, `snake_case` fields,
-ISO 8601 UTC times, money in integer piasters, errors as `{ code, message }`, and a bearer token
-on every request except public ones. Responses are validated in both modes, so a mock or a server
+ISO 8601 UTC times, money in integer piasters, errors as `{ code, message }`, and the session cookie
+on every request except public ones. `openapi.json` is the source of truth for fields. Responses are validated in both modes, so a mock or a server
 that drifts from the schema fails loudly instead of showing wrong data.
 
 ## Brand assets

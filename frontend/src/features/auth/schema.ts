@@ -12,21 +12,19 @@ export const AuthErrorCode = {
 } as const;
 export type AuthErrorCode = (typeof AuthErrorCode)[keyof typeof AuthErrorCode];
 
-export const OTP_MIN_LENGTH = 4;
-export const OTP_MAX_LENGTH = 6;
+const OTP_MIN_LENGTH = 4;
+const OTP_MAX_LENGTH = 6;
 export const IDENTIFIER_MAX_LENGTH = 64;
 
 /** University ID (9 digits), staff ID or email, or a parent's phone number. */
-export const identifierSchema = z.string().trim().min(3).max(IDENTIFIER_MAX_LENGTH);
-export const otpCodeSchema = z
-  .string()
-  .regex(new RegExp(`^\\d{${OTP_MIN_LENGTH},${OTP_MAX_LENGTH}}$`));
+const identifierSchema = z.string().trim().min(3).max(IDENTIFIER_MAX_LENGTH);
+const otpCodeSchema = z.string().regex(new RegExp(`^\\d{${OTP_MIN_LENGTH},${OTP_MAX_LENGTH}}$`));
 
 /** POST /auth/otp: step 1, ask the server to text a code to the account's registered phone. */
 export const requestOtpBodySchema = z.object({ identifier: identifierSchema });
 
 export const otpChallengeSchema = z.object({
-  /** The registered phone, masked, e.g. "010•••••907". The code only ever goes there. */
+  /** The registered phone, masked, e.g. "010•••••001". The code only ever goes there. */
   masked_destination: z.string(),
   /** First name only, to greet the user and confirm it's their account. */
   name_hint: z.string(),
@@ -64,14 +62,17 @@ export const userSchema = z.object({
 });
 export type User = z.infer<typeof userSchema>;
 
+/**
+ * The server also sets the session cookie (HttpOnly, Secure, SameSite=Strict) on this answer.
+ * The body never carries the token, so page scripts can't read or leak it.
+ */
 export const loginResponseSchema = z.object({
-  token: z.string().min(1),
-  /** When the token stops working (ISO 8601, UTC). The app signs out at that moment. */
+  /** When the session cookie stops working (ISO 8601, UTC). The app signs out at that moment. */
   expires_at: z.iso.datetime(),
   user: userSchema,
 });
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
-/** What the browser keeps between visits. Same shape as the login response. */
-export const storedSessionSchema = loginResponseSchema;
+/** What the browser keeps between visits: the login answer (no token in it). */
+export const storedSessionSchema = loginResponseSchema.extend({});
 export type Session = LoginResponse;

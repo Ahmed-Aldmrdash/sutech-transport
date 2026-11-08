@@ -2,7 +2,7 @@ const ARABIC_INDIC_ZERO = 0x0660;
 const EASTERN_ARABIC_INDIC_ZERO = 0x06f0;
 
 /** Turns ٠١٢٣ and ۰۱۲۳ (Arabic keyboards) into 0123. */
-export function toLatinDigits(value: string): string {
+function toLatinDigits(value: string): string {
   return value.replace(/[٠-٩۰-۹]/g, (digit) => {
     const code = digit.charCodeAt(0);
     const zero = code >= EASTERN_ARABIC_INDIC_ZERO ? EASTERN_ARABIC_INDIC_ZERO : ARABIC_INDIC_ZERO;
@@ -12,7 +12,7 @@ export function toLatinDigits(value: string): string {
 
 /**
  * Cleans what the user typed before it is sent: Latin digits, no spaces or dashes inside
- * numbers, and emails in lower case. "٢٤٠ ١٠٢ ٧٩١" becomes "240102791".
+ * numbers, and emails in lower case. "٢٤٠ ١٠٠ ١٠١" becomes "240100101".
  */
 export function normalizeIdentifier(raw: string): string {
   const value = toLatinDigits(raw).trim();

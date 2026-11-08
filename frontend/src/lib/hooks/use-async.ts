@@ -9,7 +9,7 @@ export const AsyncStatus = {
 } as const;
 export type AsyncStatus = (typeof AsyncStatus)[keyof typeof AsyncStatus];
 
-export type AsyncState<T> =
+type AsyncState<T> =
   | { status: typeof AsyncStatus.Loading; data: undefined; error: undefined }
   | { status: typeof AsyncStatus.Success; data: T; error: undefined }
   | { status: typeof AsyncStatus.Error; data: undefined; error: unknown };

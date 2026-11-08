@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isApiError } from "@/lib/api/errors";
+import { saveCard } from "../saved-card";
 import { getMyCard } from "../api";
 import { CardErrorCode, type StudentCard } from "../schema";
 
@@ -44,6 +45,7 @@ export function useRotatingCard() {
       if (current.signal.aborted) return;
       setCard(next);
       setState(CardLoadState.Ready);
+      saveCard(next);
       const delay = Date.parse(next.qr.expires_at) - Date.now() - REFRESH_LEAD_MS;
       timer.current = setTimeout(
         () => void loadRef.current(),

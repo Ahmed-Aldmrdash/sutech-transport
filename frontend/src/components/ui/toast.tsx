@@ -16,7 +16,7 @@ import { Tone } from "./tone";
 
 type ToastTone = typeof Tone.Info | typeof Tone.Success | typeof Tone.Danger;
 
-export interface ToastOptions {
+interface ToastOptions {
   title: string;
   description?: string;
   tone?: ToastTone;
@@ -43,7 +43,7 @@ const MAX_VISIBLE = 3;
 const TONE_ICON: Record<ToastTone, ReactNode> = {
   info: <Info className="text-teal" />,
   success: <CircleCheck className="text-success" />,
-  danger: <CircleAlert className="text-danger" />,
+  danger: <CircleAlert className="text-danger-text" />,
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -98,7 +98,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => dismiss(toast.id)}
               aria-label={t("close")}
-              className="-me-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-ink-muted focus-ring hover:bg-surface-alt"
+              className="tap-area -me-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-ink-muted focus-ring hover:bg-surface-alt"
             >
               <X aria-hidden="true" className="size-4" />
             </button>

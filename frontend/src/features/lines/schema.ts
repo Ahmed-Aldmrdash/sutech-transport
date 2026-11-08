@@ -43,6 +43,9 @@ export const lineSummarySchema = z.object({
 export type LineSummary = z.infer<typeof lineSummarySchema>;
 
 export const lineSchema = lineSummarySchema.extend({
+  /** The name in both languages whatever the request's language, so search finds either. */
+  name_ar: z.string(),
+  name_en: z.string(),
   /** Price of one term on this line, in piasters (1,500,000 = 15,000 EGP). */
   price_piasters: z.number().int().nonnegative(),
   bus_type: busTypeSchema,
@@ -70,12 +73,11 @@ export const stopSchema = z.object({
 export type Stop = z.infer<typeof stopSchema>;
 
 /** The line's regular driver. The mobile goes only to the line's own subscribers and guardians. */
-export const driverSchema = z.object({
+const driverSchema = z.object({
   name: z.string(),
   /** null when the caller isn't subscribed on this line. */
   phone: z.string().nullable(),
 });
-export type Driver = z.infer<typeof driverSchema>;
 
 /** The bus that runs the line, as registered with the bus company. */
 export const busSchema = z.object({

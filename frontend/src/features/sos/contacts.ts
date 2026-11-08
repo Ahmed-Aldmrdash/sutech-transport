@@ -8,4 +8,3 @@ export const EMERGENCY_CONTACTS = [
   { key: "ambulance", phone: "123" },
   { key: "hotline", phone: "15755" },
 ] as const;
-export type EmergencyContactKey = (typeof EMERGENCY_CONTACTS)[number]["key"];

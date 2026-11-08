@@ -1,10 +1,18 @@
 import { setUnauthorizedHandler } from "@/lib/api/client";
-import { tokenStore } from "@/lib/api/token-store";
+import { writeCookie } from "@/lib/cookies";
 import { storedSessionSchema, type Session, type User } from "../schema";
 import { SESSION_ROLE_COOKIE, SignInReason } from "../access";
 
-export const SESSION_STORAGE_KEY = "sut.session";
+const SESSION_STORAGE_KEY = "sut.session";
 const MS_PER_SECOND = 1000;
+/** Keys the app saves for the signed-in person (not the mock server's own data). */
+const PERSONAL_KEY_PREFIX = "sut.";
+const MOCK_KEY_PREFIX = "sut.mock.";
+/**
+ * Service worker caches that could hold an answer meant for one person (Serwist's defaults).
+ * The app's own files (scripts, styles, fonts, pages) are the same for everyone and stay.
+ */
+const PERSONAL_CACHES = ["apis", "cross-origin", "others", "next-data", "static-data-assets"];
 
 export const SessionStatus = {
   /** On the server and during hydration: the browser's storage hasn't been read yet. */
@@ -44,23 +52,54 @@ function writeStorage(session: Session | null): void {
   }
 }
 
-export function isExpired(session: Session, now = Date.now()): boolean {
+function isExpired(session: Session, now = Date.now()): boolean {
   return Date.parse(session.expires_at) <= now;
 }
 
 function writeRoleCookie(session: Session | null): void {
-  if (typeof document === "undefined") return;
   const maxAge = session
     ? Math.max(0, Math.floor((Date.parse(session.expires_at) - Date.now()) / MS_PER_SECOND))
     : 0;
-  const value = session ? session.user.role : "";
-  document.cookie = `${SESSION_ROLE_COOKIE}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+  writeCookie(SESSION_ROLE_COOKIE, session ? session.user.role : "", maxAge);
+}
+
+/**
+ * Forgets everything this device kept for the person who just signed out: the app's own saved
+ * picks (the guardian's selected child, …) and any runtime cache that could hold an answer
+ * from the server. The mock server's data stays, as a real server's would.
+ */
+function clearPersonalData(): void {
+  for (const storage of [window.localStorage, window.sessionStorage]) {
+    try {
+      const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index));
+      keys
+        .filter(
+          (key): key is string =>
+            key !== null &&
+            key.startsWith(PERSONAL_KEY_PREFIX) &&
+            !key.startsWith(MOCK_KEY_PREFIX) &&
+            key !== SESSION_STORAGE_KEY,
+        )
+        .forEach((key) => storage.removeItem(key));
+    } catch {
+      // Blocked storage: nothing was saved.
+    }
+  }
+  if ("caches" in window) {
+    void caches
+      .keys()
+      .then((names) =>
+        Promise.all(
+          names.filter((name) => PERSONAL_CACHES.includes(name)).map((name) => caches.delete(name)),
+        ),
+      )
+      .catch(() => undefined);
+  }
 }
 
 function apply(next: SessionState): void {
   state = next;
   writeRoleCookie(next.status === SessionStatus.SignedIn ? next.session : null);
-  tokenStore.set(next.status === SessionStatus.SignedIn ? next.session.token : null);
   listeners.forEach((listener) => listener());
 }
 
@@ -87,8 +126,8 @@ function initialize(): void {
 }
 
 /**
- * The signed-in session, kept in localStorage so it survives closing the app, and mirrored
- * into the token store that adds `Authorization: Bearer` to every request.
+ * Who is signed in and until when, kept in localStorage so it survives closing the app. It
+ * holds no token: the server's HttpOnly cookie is the credential (see token-store).
  */
 export const sessionStore = {
   getSnapshot(): SessionState {
@@ -116,6 +155,7 @@ export const sessionStore = {
   end(reason: SignInReason): void {
     if (state.status === SessionStatus.SignedOut) return;
     writeStorage(null);
+    clearPersonalData();
     apply({ status: SessionStatus.SignedOut, reason });
   },
 };

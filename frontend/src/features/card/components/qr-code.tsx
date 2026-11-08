@@ -32,8 +32,8 @@ export function QrCode({ value, label, className }: QrCodeProps) {
       shapeRendering="crispEdges"
       className={className}
     >
-      <rect width={size} height={size} fill="#ffffff" />
-      <path d={path} fill="#1a1a1a" />
+      <rect width={size} height={size} fill="var(--color-white)" />
+      <path d={path} fill="var(--sut-qr-ink)" />
     </svg>
   );
 }

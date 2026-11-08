@@ -35,8 +35,11 @@
   --color-coral: var(--sut-coral);
   --color-coral-text: var(--sut-coral-text);
   --color-coral-soft: var(--sut-coral-soft);
+  --color-coral-40: var(--sut-coral-40);
+  --color-on-coral: var(--sut-on-coral);
   --color-danger: var(--sut-danger);
   --color-danger-soft: var(--sut-danger-soft);
+  --color-danger-text: var(--sut-danger-text);
   --color-on-danger: var(--sut-on-danger);
   --color-success: var(--sut-success);
   --color-success-soft: var(--sut-success-soft);
@@ -172,6 +175,23 @@
 }
 
 /* Focus ring: 2px teal with 2px offset on every control. */
+/*
+ * Grows the touch area of a small control to the 48px minimum without changing how it looks:
+ * an invisible layer, centred on the control, takes the taps.
+ */
+@utility tap-area {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, var(--spacing-tap));
+    height: max(100%, var(--spacing-tap));
+    translate: -50% -50%;
+  }
+}
+
 @utility focus-ring {
   &:focus-visible {
     outline: 2px solid var(--sut-focus);

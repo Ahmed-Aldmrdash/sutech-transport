@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { expectNoSidewaysScroll, isPhone, signIn } from "./helpers";
 
-const DRIVER = "DRV-1001"; // Mohamed Hassan, line 7
+const DRIVER = "DRV-1001"; // Kamal Ezzat, line 7
 const TRANSPORT = "TRN-1001"; // Karim Fathy, Transportation office
 const CLINIC = "CLN-1001"; // Dr. Salma Nabil
 const TILE_HOST = "tile.openstreetmap.org";
@@ -53,10 +53,12 @@ test.describe("emergencies", () => {
     await driverRaisesSos(page);
 
     await switchTo(page, TRANSPORT);
-    await page.waitForURL(/\/en\/admin$/);
-    const alarm = page.getByRole("alert").filter({ hasText: "New SOS: Bus problem on line 7" });
-    await expect(alarm).toBeVisible();
-    await alarm.getByRole("link", { name: "Open" }).click();
+    await page.waitForURL(/\/en\/admin\/emergencies$/);
+    // The office lands on the emergencies desk, where the new alert heads the list.
+    await page
+      .getByRole("link", { name: /Bus problem Not taken Line 7/ })
+      .first()
+      .click();
 
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Line 7");
     await page.getByRole("button", { name: "Take it" }).click();

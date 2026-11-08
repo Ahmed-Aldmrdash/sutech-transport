@@ -1,13 +1,16 @@
 "use client";
 
-import { IdCard, Info } from "lucide-react";
+import { IdCard, Info, RotateCw } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ClientErrorCode, isApiError } from "@/lib/api/errors";
+import { readSavedCard } from "../saved-card";
 import { DigitalCard } from "./digital-card";
+import { SavedCardView } from "./saved-card-view";
 import { CardLoadState, useRotatingCard } from "./use-rotating-card";
 
 /** The digital bus pass. Locked until the subscription is active. */
@@ -21,7 +24,7 @@ export function CardPage() {
       {state === CardLoadState.Loading ? (
         <Skeleton className="mx-auto h-[36rem] w-full max-w-md" />
       ) : null}
-      {state === CardLoadState.Error ? <ErrorState error={error} onRetry={reload} /> : null}
+      {state === CardLoadState.Error ? <CardError error={error} onRetry={reload} /> : null}
       {state === CardLoadState.Locked ? (
         <EmptyState
           icon={<IdCard />}
@@ -46,6 +49,24 @@ export function CardPage() {
           </p>
         </>
       ) : null}
+    </div>
+  );
+}
+
+/** Without internet, the last card seen (details only: the code needs the server). */
+function CardError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+  const t = useTranslations("errors");
+  const offline =
+    isApiError(error) &&
+    (error.code === ClientErrorCode.Network || error.code === ClientErrorCode.Timeout);
+  const saved = offline ? readSavedCard() : null;
+  if (!saved) return <ErrorState error={error} onRetry={onRetry} />;
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <SavedCardView card={saved} />
+      <Button variant="secondary" iconStart={<RotateCw className="size-4" />} onClick={onRetry}>
+        {t("retry")}
+      </Button>
     </div>
   );
 }

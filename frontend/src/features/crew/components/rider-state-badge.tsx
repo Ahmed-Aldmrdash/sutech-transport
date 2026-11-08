@@ -14,7 +14,7 @@ const STATE_TONE: Record<RiderState, Tone> = {
   [RiderState.Absent]: Tone.Danger,
 };
 
-export const RIDER_STATE_ICON: Record<RiderState, LucideIcon> = {
+const RIDER_STATE_ICON: Record<RiderState, LucideIcon> = {
   [RiderState.Waiting]: Clock,
   [RiderState.Boarded]: CircleCheck,
   [RiderState.CheckedOut]: LogOut,

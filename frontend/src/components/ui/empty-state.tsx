@@ -9,6 +9,8 @@ interface EmptyStateProps {
   action?: ReactNode;
   /** Shows the logo's three-shape pattern behind the content, as the brand book asks. */
   withPattern?: boolean;
+  /** 1 when the state is the whole page (nothing else gives the page its heading). */
+  headingLevel?: 1 | 2;
   className?: string;
 }
 
@@ -18,8 +20,10 @@ export function EmptyState({
   description,
   action,
   withPattern = true,
+  headingLevel = 2,
   className,
 }: EmptyStateProps) {
+  const Heading = headingLevel === 1 ? "h1" : "h2";
   return (
     <div
       className={cn(
@@ -36,7 +40,7 @@ export function EmptyState({
           {icon}
         </span>
       ) : null}
-      <h2 className="text-h3 text-ink-strong">{title}</h2>
+      <Heading className="text-h3 text-ink-strong">{title}</Heading>
       {description ? (
         <p className="mt-1 max-w-md text-body-sm text-ink-muted">{description}</p>
       ) : null}

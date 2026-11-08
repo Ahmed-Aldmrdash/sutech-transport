@@ -9,16 +9,16 @@ import { sessionStore } from "./session-store";
 const MAX_TIMEOUT_MS = 2_147_483_647;
 
 interface SessionWatcherProps {
-  token: string;
+  userId: string;
   expiresAt: string;
 }
 
 /**
- * While signed in: ends the session the moment the token expires (also after the phone wakes
- * up), and checks once with the server that the token is still valid and the role unchanged.
+ * While signed in: ends the session the moment it expires (also after the phone wakes up), and
+ * checks once with the server that the session is still valid and the role unchanged.
  * A 401 from any request ends the session too (see setUnauthorizedHandler).
  */
-export function SessionWatcher({ token, expiresAt }: SessionWatcherProps) {
+export function SessionWatcher({ userId, expiresAt }: SessionWatcherProps) {
   useEffect(() => {
     const expiresAtMs = Date.parse(expiresAt);
     const check = () => {
@@ -38,9 +38,14 @@ export function SessionWatcher({ token, expiresAt }: SessionWatcherProps) {
   useEffect(() => {
     const controller = new AbortController();
     // A 401 is handled centrally; offline or a server hiccup keeps the saved session.
-    getMe({ signal: controller.signal }).then(sessionStore.updateUser, () => undefined);
+    getMe({ signal: controller.signal })
+      .then(sessionStore.updateUser, () => undefined)
+      // Lets end-to-end tests wait for this check instead of sleeping.
+      .finally(() => {
+        if (!controller.signal.aborted) document.documentElement.dataset.sessionChecked = "true";
+      });
     return () => controller.abort();
-  }, [token]);
+  }, [userId]);
 
   return null;
 }

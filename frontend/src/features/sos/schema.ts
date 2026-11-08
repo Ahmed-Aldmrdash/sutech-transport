@@ -36,7 +36,7 @@ export const SosAction = {
   Close: "close",
 } as const;
 export type SosAction = (typeof SosAction)[keyof typeof SosAction];
-export const SOS_ACTIONS = Object.values(SosAction) as [SosAction, ...SosAction[]];
+const SOS_ACTIONS = Object.values(SosAction) as [SosAction, ...SosAction[]];
 
 export const SosErrorCode = {
   /** The trip isn't today's trip of the caller's bus. */
@@ -48,7 +48,7 @@ export const SosErrorCode = {
 export const SOS_NOTE_MAX_LENGTH = 300;
 
 /** Where the bus was when the SOS was raised: the latest fix of its GPS device. */
-export const sosLocationSchema = z.object({
+const sosLocationSchema = z.object({
   lat: z.number(),
   lng: z.number(),
   fix_at: z.iso.datetime(),
@@ -104,4 +104,3 @@ export const sosSummarySchema = sosSchema.pick({
   status: true,
   created_at: true,
 });
-export type SosSummary = z.infer<typeof sosSummarySchema>;

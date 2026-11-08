@@ -9,3 +9,4 @@ design
 next-env.d.ts
 openapi.json
 src/features/tracking/mock-road-paths.ts
+.omc

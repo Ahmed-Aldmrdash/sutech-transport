@@ -78,13 +78,12 @@ export const VIOLATION_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 export const VIOLATION_DESCRIPTION_MIN_LENGTH = 10;
 export const VIOLATION_DESCRIPTION_MAX_LENGTH = 500;
 
-export const violationPhotoSchema = z.object({
+const violationPhotoSchema = z.object({
   file_name: z.string().min(1).max(200),
   content_type: z.enum(VIOLATION_PHOTO_TYPES),
   /** The photo itself, base64 (no "data:" prefix). At most 5 MB before encoding. */
   data_base64: z.string().min(1),
 });
-export type ViolationPhoto = z.infer<typeof violationPhotoSchema>;
 
 export const createViolationBodySchema = z.object({
   /** Today's trip, when it happened on one. */

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Subscription } from "@/features/subscriptions/schema";
 import { errorMessageKey } from "@/lib/api/errors";
+import { todayInCairo } from "@/lib/format";
 import { submitReceipt } from "../api";
 import {
   poundsToPiasters,
@@ -14,8 +15,8 @@ import {
 import { PaymentErrorCode, type PaymentInstructions, type ReceiptFile } from "../schema";
 
 const SERVER_ERROR_CODES = Object.values(PaymentErrorCode);
-export type ReceiptServerErrorKey =
-  (typeof PaymentErrorCode)[keyof typeof PaymentErrorCode] | "network" | "generic";
+type ReceiptServerErrorKey =
+  (typeof PaymentErrorCode)[keyof typeof PaymentErrorCode] | "network" | "invalid" | "generic";
 
 interface Options {
   subscription: Subscription;
@@ -37,6 +38,7 @@ export function useSendReceipt({ subscription, instructions, today, onInvalid, o
       minimumPiasters: subscription.price_piasters,
       maxBytes: instructions.receipt_max_bytes,
       today,
+      earliestPaidOn: todayInCairo(new Date(subscription.reserved_at)),
     });
     onInvalid(found);
     setServerError(null);

@@ -25,7 +25,7 @@ export function FilterChips<T extends string>({
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "inline-flex h-10 items-center rounded-pill border px-4 text-body-sm font-bold focus-ring transition-colors",
+            "tap-area inline-flex h-10 items-center rounded-pill border px-4 text-body-sm font-bold focus-ring transition-colors",
             value === option.value
               ? "border-brand bg-brand text-on-brand"
               : "border-line-strong text-ink hover:bg-surface-alt",

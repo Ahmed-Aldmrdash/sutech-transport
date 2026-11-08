@@ -17,7 +17,7 @@ export const RequestKind = {
   ModelPermit: "model_permit",
 } as const;
 export type RequestKind = (typeof RequestKind)[keyof typeof RequestKind];
-export const REQUEST_KINDS = [
+const REQUEST_KINDS = [
   RequestKind.LineChange,
   RequestKind.Refund,
   RequestKind.Complaint,
@@ -172,7 +172,7 @@ export const REQUEST_TEXT_MIN_LENGTH = 10;
 export const MAX_ATTACHMENTS = 3;
 
 /** An Egyptian mobile number: 11 digits starting 010, 011, 012 or 015. */
-export const egyptianMobileSchema = z.string().regex(/^01[0125]\d{8}$/);
+const egyptianMobileSchema = z.string().regex(/^01[0125]\d{8}$/);
 const personNameSchema = z.string().trim().min(3).max(100);
 const requestTextSchema = z
   .string()
@@ -201,9 +201,9 @@ export const attachmentSchema = z.object({
 });
 export type Attachment = z.infer<typeof attachmentSchema>;
 
-export const requestStopSchema = z.object({ stop_id: z.string(), name: z.string() });
+const requestStopSchema = z.object({ stop_id: z.string(), name: z.string() });
 
-export const lineChangeDetailsSchema = z.object({
+const lineChangeDetailsSchema = z.object({
   from_line: lineSummarySchema,
   to_line: lineSummarySchema,
   /** The pickup or drop-off point on the new line. */
@@ -218,7 +218,7 @@ export const lineChangeDetailsSchema = z.object({
   guardian_phone: z.string(),
 });
 
-export const refundDetailsSchema = z.object({
+const refundDetailsSchema = z.object({
   subscription_id: z.string(),
   reason: z.enum(REFUND_REASONS),
   explanation: z.string(),
@@ -235,7 +235,7 @@ export const refundDetailsSchema = z.object({
   attachments: z.array(attachmentSchema),
 });
 
-export const complaintDetailsSchema = z.object({
+const complaintDetailsSchema = z.object({
   category: z.enum(COMPLAINT_CATEGORIES),
   /** The line it happened on, if any. */
   line: lineSummarySchema.nullable(),
@@ -244,7 +244,7 @@ export const complaintDetailsSchema = z.object({
   attachments: z.array(attachmentSchema),
 });
 
-export const modelPermitDetailsSchema = z.object({
+const modelPermitDetailsSchema = z.object({
   /** The student's details as the permit prints them, filled from the account. */
   student_name: z.string(),
   university_id: z.string(),
@@ -322,9 +322,6 @@ export const studentRequestSchema = z.discriminatedUnion("kind", [
 ]);
 export type StudentRequest = z.infer<typeof studentRequestSchema>;
 export type LineChangeRequest = Extract<StudentRequest, { kind: "line_change" }>;
-export type RefundRequest = Extract<StudentRequest, { kind: "refund" }>;
-export type ComplaintRequest = Extract<StudentRequest, { kind: "complaint" }>;
-export type ModelPermitRequest = Extract<StudentRequest, { kind: "model_permit" }>;
 
 export const listMyRequestsQuerySchema = z.object({
   kind: z.enum(REQUEST_KINDS).optional(),

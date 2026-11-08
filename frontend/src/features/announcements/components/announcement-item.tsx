@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { AnnouncementKind, type Announcement } from "../schema";
 
-export const ANNOUNCEMENT_TONE: Record<AnnouncementKind, Tone> = {
+const ANNOUNCEMENT_TONE: Record<AnnouncementKind, Tone> = {
   [AnnouncementKind.Official]: Tone.Brand,
   [AnnouncementKind.Delay]: Tone.Warning,
   [AnnouncementKind.ServiceChange]: Tone.Info,

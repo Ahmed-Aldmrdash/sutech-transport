@@ -13,13 +13,12 @@ import { TripDirection, TripStatus } from "@/features/trips/schema";
  * One GPS fix from the device installed in the bus (not the driver's phone). The server keeps
  * the latest one per bus and pushes new ones on the WebSocket as `bus.location`.
  */
-export const busPositionSchema = geoPointSchema.extend({
+const busPositionSchema = geoPointSchema.extend({
   /** Compass direction of travel, 0 = north, clockwise. null when standing still. */
   heading: z.number().min(0).max(360).nullable(),
   speed_kmh: z.number().nonnegative(),
   recorded_at: z.iso.datetime(),
 });
-export type BusPosition = z.infer<typeof busPositionSchema>;
 
 /** Why there's no bus to follow right now. */
 export const NoTrackingReason = {

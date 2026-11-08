@@ -1,13 +1,25 @@
 import { describe, expect, it } from "vitest";
-import { ALL_ROLES, OFFICE_ROLES, Role } from "@/lib/auth/roles";
+import { ALL_ROLES, Role } from "@/lib/auth/roles";
 import {
   MAX_PRIMARY_ITEMS,
   findActiveItem,
   navigationFor,
   primaryItems,
+  readyItems,
   roleHomeHref,
+  soonItems,
   type NavItemKey,
 } from "./nav-config";
+
+const OFFICE_ROLES: readonly Role[] = [
+  Role.SuperAdmin,
+  Role.Transport,
+  Role.Finance,
+  Role.Clinic,
+  Role.StudentAffairs,
+  Role.SecretaryGeneral,
+  Role.BusCompany,
+];
 
 function itemKeys(role: Role): NavItemKey[] {
   return navigationFor(role).groups.flatMap((group) => group.items.map((item) => item.key));
@@ -33,14 +45,17 @@ describe("role navigation", () => {
   it("gives the super admin every office page", () => {
     const superKeys = new Set(itemKeys(Role.SuperAdmin));
     for (const role of OFFICE_ROLES) {
-      for (const key of itemKeys(role)) expect(superKeys.has(key), `${role}:${key}`).toBe(true);
+      for (const key of itemKeys(role)) {
+        // "home" is the welcome page of an office with no built page; the super admin has some.
+        if (key !== "home") expect(superKeys.has(key), `${role}:${key}`).toBe(true);
+      }
     }
   });
 
   it("keeps offices apart", () => {
-    expect(itemKeys(Role.Finance)).toEqual(["payments", "refunds", "reports"]);
+    expect(itemKeys(Role.Finance)).toEqual(["home", "payments", "refunds", "reports"]);
     expect(itemKeys(Role.Clinic)).toEqual(["emergencies", "clinic"]);
-    expect(itemKeys(Role.BusCompany)).toEqual(["busCompany"]);
+    expect(itemKeys(Role.BusCompany)).toEqual(["home", "busCompany"]);
     expect(itemKeys(Role.Finance)).not.toContain("liveTracking");
   });
 
@@ -50,26 +65,56 @@ describe("role navigation", () => {
 });
 
 describe("findActiveItem", () => {
-  const navigation = navigationFor(Role.Transport);
+  const navigation = navigationFor(Role.Student);
 
   it("matches the home only on the exact path", () => {
-    expect(findActiveItem(navigation, "/admin", "/admin")?.key).toBe("overview");
-    expect(findActiveItem(navigation, "/admin", "/admin/lines")?.key).toBe("lines");
+    expect(findActiveItem(navigation, "/student", "/student")?.key).toBe("home");
+    expect(findActiveItem(navigation, "/student", "/student/lines")?.key).toBe("lines");
   });
 
   it("keeps the parent page active on nested pages", () => {
-    expect(findActiveItem(navigation, "/admin", "/admin/lines/3/stops")?.key).toBe("lines");
+    expect(findActiveItem(navigation, "/student", "/student/lines/ln_07")?.key).toBe("lines");
   });
 
   it("returns nothing for paths outside the menu", () => {
-    expect(findActiveItem(navigation, "/admin", "/admin/linesx")).toBeUndefined();
+    expect(findActiveItem(navigation, "/student", "/student/linesx")).toBeUndefined();
+  });
+
+  it("never matches a page that isn't built yet", () => {
+    expect(findActiveItem(navigation, "/student", "/student/assistant")).toBeUndefined();
+    const office = navigationFor(Role.Transport);
+    expect(findActiveItem(office, "/admin", "/admin/lines")).toBeUndefined();
+    expect(findActiveItem(office, "/admin", "/admin/emergencies/sos_1")?.key).toBe("emergencies");
+  });
+});
+
+describe("coming soon pages", () => {
+  it("keeps unbuilt pages out of the bottom bar and the role's home", () => {
+    for (const role of ALL_ROLES) {
+      const navigation = navigationFor(role);
+      expect(readyItems(navigation).length, role).toBeGreaterThan(0);
+      expect(
+        primaryItems(navigation).every((item) => !item.soon),
+        role,
+      ).toBe(true);
+    }
+  });
+
+  it("lists what each office will get", () => {
+    expect(soonItems(navigationFor(Role.Finance)).map((item) => item.key)).toEqual([
+      "payments",
+      "refunds",
+      "reports",
+    ]);
+    expect(soonItems(navigationFor(Role.Clinic))).toEqual([]);
   });
 });
 
 describe("roleHomeHref", () => {
-  it("uses the first page for offices without an overview", () => {
-    expect(roleHomeHref(navigationFor(Role.Finance))).toBe("/admin/payments");
-    expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin");
+  it("lands each role on its first built page", () => {
+    expect(roleHomeHref(navigationFor(Role.Finance))).toBe("/admin");
+    expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin/emergencies");
+    expect(roleHomeHref(navigationFor(Role.Clinic))).toBe("/admin/emergencies");
     expect(roleHomeHref(navigationFor(Role.Student))).toBe("/student");
   });
 });

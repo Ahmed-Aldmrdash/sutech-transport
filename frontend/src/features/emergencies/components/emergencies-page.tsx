@@ -81,7 +81,8 @@ const STATUS_ORDER: Record<SosStatus, number> = {
 function SosList({ items, filter }: { items: AdminSos[]; filter: Filter }) {
   const t = useTranslations("emergencies");
   if (items.length === 0) {
-    const empty = filter === Filter.Closed ? "emptyClosed" : "emptyActive";
+    const empty =
+      filter === Filter.Closed ? "emptyClosed" : filter === Filter.All ? "emptyAll" : "emptyActive";
     return (
       <EmptyState icon={<Siren />} title={t(`${empty}.title`)} description={t(`${empty}.body`)} />
     );
@@ -118,7 +119,7 @@ function SosRow({ sos }: { sos: AdminSos }) {
             "flex size-12 shrink-0 items-center justify-center rounded-full",
             sos.status === SosStatus.Closed
               ? "bg-surface-alt text-ink-muted"
-              : "bg-danger-soft text-danger",
+              : "bg-danger-soft text-danger-text",
           )}
         >
           <Icon aria-hidden="true" className="size-6" />

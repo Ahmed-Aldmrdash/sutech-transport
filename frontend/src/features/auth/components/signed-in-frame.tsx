@@ -16,7 +16,7 @@ import { SignInReason, canOpen, homePathFor, loginHref } from "../access";
 import { SessionStatus } from "../session/session-store";
 import { SessionWatcher } from "../session/session-watcher";
 import { useSession, useSignOut } from "../session/use-session";
-import { FullPageLoader } from "./full-page-loader";
+import { ShellSkeleton } from "./shell-skeleton";
 
 /** Offices that take SOS alerts, so every page of theirs rings when one arrives. */
 const SOS_DESK_ROLES: readonly Role[] = [Role.SuperAdmin, Role.Transport, Role.Clinic];
@@ -59,7 +59,7 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
   }, [state, user, isAllowed, pathname, router]);
 
   if (state.status !== SessionStatus.SignedIn || !isAllowed) {
-    return <FullPageLoader label={t("session.checking")} />;
+    return <ShellSkeleton />;
   }
 
   const { session } = state;
@@ -79,7 +79,7 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
       }
       badges={notificationsPath ? { notifications: unreadCount } : undefined}
     >
-      <SessionWatcher token={session.token} expiresAt={session.expires_at} />
+      <SessionWatcher userId={session.user.id} expiresAt={session.expires_at} />
       {notificationsPath ? <NotificationsWatcher /> : null}
       {SOS_DESK_ROLES.includes(session.user.role) ? <SosAlarm /> : null}
       {children}
