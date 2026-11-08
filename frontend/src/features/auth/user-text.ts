@@ -1,4 +1,5 @@
 import type { Locale } from "@/i18n/routing";
+import { Role } from "@/lib/auth/roles";
 import type { User } from "./schema";
 
 type NamedUser = Pick<
@@ -14,6 +15,15 @@ export function userText(user: NamedUser, locale: Locale) {
     faculty: (arabic && user.faculty_ar) || user.faculty || null,
     guardianName: (arabic && user.guardian_name_ar) || user.guardian_name || null,
   };
+}
+
+/** Accounts that are a desk, not a person: greeted by the whole name ("Abu El Hol desk"). */
+const DESK_ROLES: readonly User["role"][] = [Role.BusCompany];
+
+/** The name to greet the account by: a person's first name, a desk's full name. */
+export function greetingNameOf(user: NamedUser & Pick<User, "role">, locale: Locale): string {
+  const { name } = userText(user, locale);
+  return DESK_ROLES.includes(user.role) ? name : firstNameOf(name);
 }
 
 /** First name for greetings ("Dr." is skipped). */

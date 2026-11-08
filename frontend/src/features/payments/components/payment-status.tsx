@@ -8,6 +8,7 @@ import { HoldCountdown } from "@/features/subscriptions/components/hold-countdow
 import { SubscriptionStatus, type Subscription } from "@/features/subscriptions/schema";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
+import { isMockMode } from "@/lib/config";
 import { formatMoney } from "@/lib/format";
 
 export function AmountDue({
@@ -68,6 +69,7 @@ export function StatusAlert({ subscription }: { subscription: Subscription }) {
       return (
         <Alert tone={Tone.Info} title={t("reviewTitle")}>
           {t("reviewBody")}
+          {isMockMode ? <span className="mt-1 block text-caption">{t("reviewDemo")}</span> : null}
         </Alert>
       );
     case SubscriptionStatus.Active:

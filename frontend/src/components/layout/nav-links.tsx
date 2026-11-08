@@ -37,18 +37,33 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
               const isActive = item === activeItem;
               const Icon = item.icon;
               if (item.soon) {
+                const content = (
+                  <>
+                    <Icon aria-hidden="true" className="size-5 shrink-0" />
+                    <span className="min-w-0 leading-tight">{t(`items.${item.key}`)}</span>
+                    <span className="ms-auto shrink-0 rounded-pill bg-surface-alt px-2 py-0.5 text-caption font-bold text-ink-muted">
+                      {t("soon")}
+                    </span>
+                  </>
+                );
+                const soonStyles =
+                  "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold text-ink-muted";
+                // A planned page opens a short "being built" page; an office home has none.
                 return (
                   <li key={item.key}>
-                    <span
-                      aria-disabled="true"
-                      className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold text-ink-muted"
-                    >
-                      <Icon aria-hidden="true" className="size-5 shrink-0" />
-                      <span className="min-w-0 leading-tight">{t(`items.${item.key}`)}</span>
-                      <span className="ms-auto shrink-0 rounded-pill bg-surface-alt px-2 py-0.5 text-caption font-bold text-ink-muted">
-                        {t("soon")}
+                    {item.segment ? (
+                      <Link
+                        href={itemHref(navigation.basePath, item)}
+                        onClick={onNavigate}
+                        className={cn(soonStyles, "focus-ring hover:bg-surface-alt")}
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <span aria-disabled="true" className={soonStyles}>
+                        {content}
                       </span>
-                    </span>
+                    )}
                   </li>
                 );
               }

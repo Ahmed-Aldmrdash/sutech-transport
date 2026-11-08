@@ -75,16 +75,18 @@ describe("role access", () => {
   });
 
   it("keeps offices apart inside /admin", () => {
-    // Finance has no built page yet: only its "coming soon" home.
+    // Finance has no built page yet: its home, and its own planned pages as "being built".
     expect(canOpen(Role.Finance, "/admin")).toBe(true);
-    expect(canOpen(Role.Finance, "/admin/payments")).toBe(false);
+    expect(canOpen(Role.Finance, "/admin/payments")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/payments/pay_1")).toBe(false);
     expect(canOpen(Role.Finance, "/admin/emergencies")).toBe(false);
     expect(canOpen(Role.Transport, "/admin")).toBe(false);
     expect(canOpen(Role.Transport, "/admin/emergencies/sos_1")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/clinic")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/payments")).toBe(false);
     expect(canOpen(Role.SuperAdmin, "/admin/clinic")).toBe(true);
-    expect(canOpen(Role.SuperAdmin, "/admin/users")).toBe(false);
+    expect(canOpen(Role.SuperAdmin, "/admin/users")).toBe(true);
+    expect(canOpen(Role.SuperAdmin, "/admin/not-a-page")).toBe(false);
     expect(canOpen(Role.SuperAdmin, "/student")).toBe(false);
   });
 

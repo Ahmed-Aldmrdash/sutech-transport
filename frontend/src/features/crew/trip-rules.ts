@@ -50,10 +50,7 @@ const START_WARN_MINUTES = 60;
  * negative = early), or null when the time is about right or unknown. A warning, not a rule:
  * the crew may still start (a test, a late bus), but a morning trip at 5 PM gets a second look.
  */
-export function startTimeGap(
-  trip: Pick<CrewTrip, "departure_time">,
-  now: Date,
-): number | null {
+export function startTimeGap(trip: Pick<CrewTrip, "departure_time">, now: Date): number | null {
   if (trip.departure_time === null) return null;
   const gap = cairoMinuteOfDay(now) - minuteOfDay(trip.departure_time);
   return Math.abs(gap) > START_WARN_MINUTES ? gap : null;

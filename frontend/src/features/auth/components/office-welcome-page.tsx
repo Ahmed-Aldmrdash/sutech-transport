@@ -10,7 +10,7 @@ import { formatDateTime } from "@/lib/format";
 import { SessionStatus } from "../session/session-store";
 import { useSession } from "../session/use-session";
 import type { User } from "../schema";
-import { firstNameOf, userText } from "../user-text";
+import { greetingNameOf, userText } from "../user-text";
 
 /**
  * Home of an office whose pages aren't built yet (finance, student affairs, the Secretary
@@ -30,7 +30,7 @@ export function OfficeWelcomePage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow={t(`roles.${user.role}`)}
-        title={t("session.welcome", { name: firstNameOf(userText(user, locale).name) })}
+        title={t("session.welcome", { name: greetingNameOf(user, locale) })}
         description={t("session.homeLead")}
       />
       <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">

@@ -346,7 +346,11 @@
     "phone": "Registered phone",
     "expiresAt": "Session ends",
     "soonTitle": "Coming soon",
-    "soonBody": "These pages are being built. Each one opens from your menu the day it is ready."
+    "soonBody": "These pages are being built. Each one opens from your menu the day it is ready.",
+    "plannedTitle": "This page is still being built",
+    "plannedBody": "{page} is one of your office's coming pages and will open here once it's ready. Until then, this work is done at the office as usual.",
+    "plannedHome": "Go to your home page",
+    "plannedDemoNote": "In test mode, the decisions this office makes (approving receipts and requests, for example) happen automatically after a short while so the demo can go on."
   },
   "student": {
     "status": {
@@ -515,6 +519,7 @@
       "expiredBody": "No receipt arrived in time, so the seat was released. Book again to pay.",
       "reviewTitle": "Your receipt is under review",
       "reviewBody": "Finance is checking it. Your seat stays held until they decide.",
+      "reviewDemo": "Test mode: the Finance page isn't built yet, so the receipt is approved automatically after about 20 seconds.",
       "paidTitle": "Paid",
       "paidBody": "Your subscription is active.",
       "rejectedTitle": "Your receipt wasn't accepted",

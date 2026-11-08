@@ -87,8 +87,8 @@ export interface NavItem {
   /** Shown in the phone's bottom bar (at most four per role, the rest go in the menu). */
   primary?: boolean;
   /**
-   * Planned but not built yet: listed in the menu as "coming soon", never a link, and no one
-   * may open it. Removed from an item the day its page ships.
+   * Planned but not built yet: listed in the menu as "coming soon". Its link opens a "being
+   * built" page for the offices that own it (see findSoonItem). Removed the day it ships.
    */
   soon?: boolean;
 }
@@ -301,6 +301,16 @@ function officeNavigationFor(role: Role): RoleNavigation {
 /** The pages a role can open today (everything but "coming soon"). */
 export function readyItems(navigation: RoleNavigation): NavItem[] {
   return navigation.groups.flatMap((group) => group.items).filter((item) => !item.soon);
+}
+
+/**
+ * The planned page at this path, if the role owns one there: it opens as "being built".
+ * Office homes ("") are left out: those paths belong to the office's welcome page.
+ */
+export function findSoonItem(navigation: RoleNavigation, pathname: string): NavItem | undefined {
+  return soonItems(navigation).find(
+    (item) => item.segment !== "" && itemHref(navigation.basePath, item) === pathname,
+  );
 }
 
 /** The planned pages a role will get, shown as "coming soon". */
