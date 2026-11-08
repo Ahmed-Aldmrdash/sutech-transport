@@ -36,7 +36,10 @@ async function driverRaisesSos(page: Page, type: RegExp = /Bus problem/) {
   await expect(start.or(onTheRoad)).toBeVisible();
   if (await start.isVisible()) {
     await start.click();
-    await page.getByRole("dialog").getByRole("button", { name: "Start", exact: true }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^Start( anyway)?$/ })
+      .click();
     await expect(onTheRoad).toBeVisible();
   }
   await page.goto("/en/driver/sos");
@@ -78,7 +81,8 @@ test.describe("emergencies", () => {
 
     await switchTo(page, DRIVER);
     await page.waitForURL(/\/en\/driver$/);
-    await expect(page.getByText("The office changed today's bus")).toBeVisible();
+    // The spare driver took over: the first driver is told and can't run the trip any more.
+    await expect(page.getByText("The office handed your bus to another driver")).toBeVisible();
     await expect(page.getByText(/Sayed Abdelhamid/)).toBeVisible();
     if (isPhone(page)) await expectNoSidewaysScroll(page);
     expect(errors).toEqual([]);

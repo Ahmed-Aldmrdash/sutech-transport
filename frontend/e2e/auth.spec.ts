@@ -177,14 +177,16 @@ test.describe("strict separation", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Nadia");
   });
 
-  test("pages that aren't built show as coming soon and never open", async ({ page }) => {
+  test("pages that aren't built show as coming soon inside the app", async ({ page }) => {
     await signIn(page, "FIN-1001");
     await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
-    // An unbuilt page is a real 404 for the server, and the menu shows it without a link.
-    const response = await page.request.get("/en/admin/payments");
-    expect(response.status()).toBe(404);
+    // A coming page opens a short "being built" page in the office's own frame.
     if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
-    await expect(page.getByRole("link", { name: /^Payments/ })).toHaveCount(0);
+    await page.getByRole("link", { name: /^Payments/ }).click();
+    await page.waitForURL(/\/en\/admin\/payments$/);
+    await expect(
+      page.getByRole("heading", { name: "This page is still being built" }),
+    ).toBeVisible();
   });
 
   test("the super admin lands on the emergencies desk", async ({ page }) => {

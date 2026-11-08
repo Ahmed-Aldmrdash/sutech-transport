@@ -56,7 +56,7 @@ export function ChildrenProvider({ children: content }: { children: ReactNode })
     const url = new URL(window.location.href);
     if (url.searchParams.get(CHILD_QUERY_PARAM) === studentId) return;
     url.searchParams.set(CHILD_QUERY_PARAM, studentId);
-    window.history.replaceState(window.history.state, "", url);
+    window.history.replaceState(window.history.state, "", url.toString());
   }
 
   const list = state.data.children;

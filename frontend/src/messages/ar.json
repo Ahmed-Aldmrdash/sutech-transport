@@ -108,7 +108,8 @@
       "passengers": "الركاب",
       "sos": "SOS",
       "lines": "الخطوط",
-      "scan": "امسح"
+      "scan": "امسح",
+      "approvals": "موافقات"
     },
     "soon": "قريبًا",
     "withBadge": "{label}، {count} جديد",

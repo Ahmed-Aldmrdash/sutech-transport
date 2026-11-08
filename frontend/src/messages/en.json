@@ -108,7 +108,8 @@
       "passengers": "Riders",
       "sos": "SOS",
       "lines": "Lines",
-      "scan": "Scan"
+      "scan": "Scan",
+      "approvals": "Approve"
     },
     "soon": "Soon",
     "withBadge": "{label}, {count} new",

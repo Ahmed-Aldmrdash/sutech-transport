@@ -50,7 +50,7 @@ test.describe("student", () => {
 
     await page.goto("/en/student/card");
     await expect(
-      page.getByText("Your card opens after you subscribe", { exact: true }).first(),
+      page.getByText("Your receipt is being reviewed", { exact: true }).first(),
     ).toBeVisible();
 
     // The mock finance office approves a receipt 20 seconds after it arrives: reload until then.
