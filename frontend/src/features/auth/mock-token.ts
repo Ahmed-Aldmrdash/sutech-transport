@@ -1,4 +1,5 @@
 import { ServerErrorCode } from "@/lib/api/errors";
+import { Role } from "@/lib/auth/roles";
 import { MockHttpError } from "@/lib/api/mock/mock-server";
 import { findMockAccountById, type MockAccount } from "./mock-accounts";
 
@@ -39,4 +40,23 @@ export function requireMockAccount(token: string | null): MockAccount {
   const payload = decodeMockToken(token);
   if (!payload || payload.exp <= Date.now()) mockUnauthorized();
   return findMockAccountById(payload.sub) ?? mockUnauthorized();
+}
+
+const HTTP_FORBIDDEN = 403;
+
+/**
+ * The signed-in office member, if their office owns this work; the super admin always does.
+ * Anyone else gets 403, as the server's role check would answer.
+ */
+export function requireMockOffice(token: string | null, roles: readonly Role[]): MockAccount {
+  const account = requireMockAccount(token);
+  if (account.user.role !== Role.SuperAdmin && !roles.includes(account.user.role)) {
+    throw new MockHttpError(HTTP_FORBIDDEN, ServerErrorCode.Forbidden, "Not your office.");
+  }
+  return account;
+}
+
+/** "نادية سمير" / "Nadia Samir": a staff member's name in both languages, for logs. */
+export function mockNameOf(account: MockAccount): { ar: string; en: string } {
+  return { ar: account.user.name_ar ?? account.user.name, en: account.user.name };
 }

@@ -10,6 +10,10 @@ import { notificationsEndpoints } from "@/features/notifications/api";
 import { paymentsEndpoints } from "@/features/payments/api";
 import { requestsEndpoints } from "@/features/requests/api";
 import { emergenciesEndpoints } from "@/features/emergencies/api";
+import { financeDeskEndpoints } from "@/features/finance-desk/api";
+import { reportsEndpoints } from "@/features/reports/api";
+import { requestDeskEndpoints } from "@/features/request-desk/api";
+import { violationDeskEndpoints } from "@/features/violation-desk/api";
 import { sosEndpoints } from "@/features/sos/api";
 import { subscriptionsEndpoints } from "@/features/subscriptions/api";
 import { systemEndpoints } from "@/features/system/api";
@@ -41,4 +45,8 @@ export const allEndpoints: readonly Endpoint[] = [
   ...sosEndpoints,
   ...emergenciesEndpoints,
   ...violationsEndpoints,
+  ...financeDeskEndpoints,
+  ...requestDeskEndpoints,
+  ...violationDeskEndpoints,
+  ...reportsEndpoints,
 ];

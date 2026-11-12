@@ -192,13 +192,23 @@ interface OfficeNavGroup {
 
 const { Transport, Finance, Clinic, StudentAffairs, SecretaryGeneral, BusCompany } = Role;
 
-/** Office pages that are built. Every other office page shows as "coming soon" (phase 6). */
-const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set(["emergencies", "clinic"]);
+/** Office pages that are built. Every other office page shows as "coming soon" (phase 7). */
+const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
+  "emergencies",
+  "clinic",
+  "announcements",
+  "payments",
+  "refunds",
+  "requests",
+  "complaints",
+  "violations",
+  "reports",
+]);
 
 /** For an office with no built page yet: its home, which lists what is coming. */
 const OFFICE_WELCOME: NavItem = { key: "home", icon: House, segment: "", primary: true };
 
-/** The 20 office pages from the agreed plan, each with the offices that own it. */
+/** The 21 office pages from the agreed plan, each with the offices that own it. */
 const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
   {
     key: "operations",
@@ -230,7 +240,7 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
     key: "finance",
     items: [
       { key: "payments", icon: CreditCard, segment: "payments", roles: [Finance], primary: true },
-      { key: "refunds", icon: Receipt, segment: "refunds", roles: [Finance] },
+      { key: "refunds", icon: Receipt, segment: "refunds", roles: [Finance], primary: true },
     ],
   },
   {
@@ -243,7 +253,13 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
         roles: [Transport, StudentAffairs],
         primary: true,
       },
-      { key: "complaints", icon: MessageSquareWarning, segment: "complaints", roles: [Transport] },
+      { key: "requests", icon: ClipboardList, segment: "requests", roles: [Transport] },
+      {
+        key: "complaints",
+        icon: MessageSquareWarning,
+        segment: "complaints",
+        roles: [Transport, Finance],
+      },
       {
         key: "reports",
         icon: FileBarChart,

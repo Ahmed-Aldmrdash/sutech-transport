@@ -11,8 +11,13 @@ import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
 import { formatPhone, todayInCairo } from "@/lib/format";
 import { Role } from "@/lib/auth/roles";
-import { listAnnouncementsEndpoint } from "./api";
+import { createAnnouncementEndpoint, listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
+import { requireMockOffice } from "@/features/auth/mock-token";
+import { newMockId } from "@/features/subscriptions/mock-state";
+import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
+import { LineErrorCode } from "@/features/lines/schema";
+import { MockHttpError } from "@/lib/api/mock/mock-server";
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -198,6 +203,42 @@ function emergencyAnnouncements(language: string): Announcement[] {
   return notices;
 }
 
+interface MockOfficeAnnouncement {
+  id: string;
+  kind: typeof AnnouncementKind.Official | typeof AnnouncementKind.ServiceChange;
+  lineId: string | null;
+  titleAr: string;
+  titleEn: string;
+  bodyAr: string;
+  bodyEn: string;
+  publishedAt: number;
+}
+
+/** What the Transportation office posted from its announcements page. */
+const officeAnnouncements = new StoredMap<MockOfficeAnnouncement>(
+  "sut.mock.announcements",
+  MockStorage.Local,
+);
+
+function postedByOffice(language: string): Announcement[] {
+  return [...officeAnnouncements.values()].map((item) => {
+    const line = item.lineId ? findMockLine(item.lineId) : undefined;
+    return {
+      announcement_id: item.id,
+      kind: item.kind,
+      title: localized(language, item.titleAr, item.titleEn),
+      body: localized(language, item.bodyAr, item.bodyEn),
+      line: line ? toLineSummary(line, language) : null,
+      published_at: new Date(item.publishedAt).toISOString(),
+    };
+  });
+}
+
+/** Test helper. */
+export function resetOfficeAnnouncementsMock(): void {
+  officeAnnouncements.clear();
+}
+
 /** Every announcement, newest first. Also read by the notifications mock. */
 function mockAnnouncements(language: string): Announcement[] {
   const fixed = MOCK_ANNOUNCEMENTS.map((item) => ({
@@ -208,9 +249,12 @@ function mockAnnouncements(language: string): Announcement[] {
     line: lineOf(item, language),
     published_at: item.publishedAt,
   }));
-  return [...crewDelayAnnouncements(language), ...emergencyAnnouncements(language), ...fixed].sort(
-    (a, b) => b.published_at.localeCompare(a.published_at),
-  );
+  return [
+    ...postedByOffice(language),
+    ...crewDelayAnnouncements(language),
+    ...emergencyAnnouncements(language),
+    ...fixed,
+  ].sort((a, b) => b.published_at.localeCompare(a.published_at));
 }
 
 /** Statuses where the student holds a seat on a line, so that line's news is theirs. */
@@ -250,4 +294,25 @@ registerMock(listAnnouncementsEndpoint, ({ query }, { token, language }) => {
     (item) => !query.kind || item.kind === query.kind,
   );
   return { items: items.slice((page - 1) * pageSize, page * pageSize), total: items.length };
+});
+
+registerMock(createAnnouncementEndpoint, ({ body }, { token, language }) => {
+  requireMockOffice(token, [Role.Transport]);
+  if (body.line_id !== null && !findMockLine(body.line_id)) {
+    throw new MockHttpError(404, LineErrorCode.LineNotFound, "No such line.");
+  }
+  const item: MockOfficeAnnouncement = {
+    id: newMockId("ann"),
+    kind: body.kind,
+    lineId: body.line_id,
+    titleAr: body.title_ar.trim(),
+    titleEn: body.title_en.trim(),
+    bodyAr: body.body_ar.trim(),
+    bodyEn: body.body_en.trim(),
+    publishedAt: Date.now(),
+  };
+  officeAnnouncements.set(item.id, item);
+  const created = postedByOffice(language).find((entry) => entry.announcement_id === item.id);
+  if (!created) throw new Error("unreachable");
+  return created;
 });

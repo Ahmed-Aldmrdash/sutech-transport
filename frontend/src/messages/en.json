@@ -86,7 +86,7 @@
       "students": "Students",
       "departures": "Departure trips",
       "payments": "Payments",
-      "refunds": "Requests & refunds",
+      "refunds": "Refunds",
       "reports": "Reports",
       "auditLog": "Activity log",
       "clinic": "Clinic",
@@ -350,8 +350,7 @@
     "soonBody": "These pages are being built. Each one opens from your menu the day it is ready.",
     "plannedTitle": "This page is still being built",
     "plannedBody": "{page} is one of your office's coming pages and will open here once it's ready. Until then, this work is done at the office as usual.",
-    "plannedHome": "Go to your home page",
-    "plannedDemoNote": "In test mode, the decisions this office makes (approving receipts and requests, for example) happen automatically after a short while so the demo can go on."
+    "plannedHome": "Go to your home page"
   },
   "student": {
     "status": {
@@ -520,7 +519,7 @@
       "expiredBody": "No receipt arrived in time, so the seat was released. Book again to pay.",
       "reviewTitle": "Your receipt is under review",
       "reviewBody": "Finance is checking it. Your seat stays held until they decide.",
-      "reviewDemo": "Test mode: the Finance page isn't built yet, so the receipt is approved automatically after about 20 seconds.",
+      "reviewDemo": "Test mode: to decide it, sign in as Finance (FIN-1001) and open Payments.",
       "paidTitle": "Paid",
       "paidBody": "Your subscription is active.",
       "rejectedTitle": "Your receipt wasn't accepted",
@@ -790,6 +789,7 @@
         "paid": "You paid",
         "deduction": "Deduction",
         "estimate": "Expected refund",
+        "approvedAmount": "Approved refund",
         "percent": "{percent}%",
         "decidedByUniversity": "Decided by the university",
         "cancelWarning": "If the refund is approved, your subscription ends and your card stops working.",
@@ -1681,5 +1681,417 @@
     "colSummary": "What was done",
     "yes": "Yes",
     "no": "No"
+  },
+  "desk": {
+    "common": {
+      "search": "Search",
+      "pager": {
+        "label": "Pages",
+        "range": "{from}–{to} of {total}",
+        "previous": "Previous",
+        "next": "Next"
+      }
+    },
+    "payments": {
+      "title": "Payments",
+      "lead": "Check the receipts students upload, and record Visa payments taken at office A045. Approving a receipt activates the student's seat.",
+      "back": "All payments",
+      "searchHint": "University ID, name or receipt number",
+      "filters": {
+        "label": "Show",
+        "pending_review": "Waiting",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "all": "All"
+      },
+      "empty": {
+        "pending_review": "No receipts waiting. You're all caught up.",
+        "approved": "No approved payments yet.",
+        "rejected": "No rejected receipts.",
+        "all": "No payments yet.",
+        "searchTitle": "Nothing matches your search.",
+        "searchBody": "Check the university ID or the receipt number."
+      },
+      "status": {
+        "pending_review": "Waiting",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "methods": {
+        "bank_deposit": "Bank deposit",
+        "bank_transfer": "Bank transfer",
+        "card_at_office": "Visa at A045"
+      },
+      "row": {
+        "summary": "{amount} · {method} · {reference}",
+        "line": "Line {code} · {name}",
+        "sent": "Sent {time}",
+        "by": "by {name}"
+      },
+      "detail": {
+        "eyebrow": "Receipt {reference}",
+        "approvedTitle": "Approved: the seat is active.",
+        "rejectedTitle": "Rejected. The student was told why and has 24 hours to upload again.",
+        "decidedBy": "{name} · {time}",
+        "receipt": "The receipt",
+        "amount": "Amount paid",
+        "price": "Term price",
+        "method": "How they paid",
+        "reference": "Reference number",
+        "paidOn": "Paid on",
+        "payer": "Paid by",
+        "sent": "Sent",
+        "file": "Receipt file",
+        "openFile": "Open the file",
+        "noFile": "No file (paid at the office)",
+        "fileDemo": "Test mode doesn't keep uploaded files.",
+        "shortAmount": "The amount is less than the term price. Check it before approving.",
+        "student": "The student",
+        "identifier": "University ID",
+        "phone": "Phone",
+        "seat": "Seat",
+        "seatValue": "Line {code} · {line} · {stop}",
+        "subscription": "Subscription",
+        "subscriptionStatus": {
+          "reserved": "Seat held, waiting for payment",
+          "payment_review": "Receipt being checked",
+          "active": "Active",
+          "expired": "Hold ran out",
+          "cancelled": "Cancelled"
+        },
+        "others": "The student's other receipts"
+      },
+      "review": {
+        "title": "Your decision",
+        "lead": "Check that the amount, the reference number and the date match the bank's records.",
+        "approve": "Approve",
+        "reject": "Reject",
+        "approveTitle": "Approve this receipt?",
+        "approveBody": "{name}'s subscription becomes active and they get their card.",
+        "rejectTitle": "Reject this receipt?",
+        "rejectBody": "The seat stays held for 24 more hours so the student can upload a correct receipt.",
+        "reasonLabel": "What's wrong (the student reads this)",
+        "reasonHint": "For example: \"The amount is 1,500 EGP short\" or \"The photo isn't clear\".",
+        "reasonRequired": "Tell the student what to fix (at least 5 letters).",
+        "approvedToast": "Approved. The seat is active.",
+        "rejectedToast": "Rejected. The student was told why."
+      },
+      "errors": {
+        "PAYMENT_ALREADY_REVIEWED": "Someone in finance already decided this receipt.",
+        "REASON_REQUIRED": "Tell the student what to fix.",
+        "STUDENT_NOT_FOUND": "No student with this university ID.",
+        "NOT_AWAITING_PAYMENT": "This student has no seat waiting for a payment.",
+        "HOLD_EXPIRED": "The student's 24-hour hold ran out. They need to book again.",
+        "AMOUNT_MISMATCH": "The amount is less than the term price.",
+        "RECEIPT_ALREADY_USED": "This slip number is already recorded.",
+        "network": "No connection. Try again.",
+        "invalid": "Some details aren't right. Check them and try again.",
+        "generic": "Something went wrong. Try again."
+      },
+      "visa": {
+        "open": "Record a Visa payment",
+        "title": "Visa payment at office A045",
+        "lead": "Find the student's booking, then enter the card machine's slip.",
+        "identifier": "Student's university ID",
+        "identifierHint": "The booking must be waiting for a payment.",
+        "find": "Find the booking",
+        "cancel": "Cancel",
+        "back": "Another student",
+        "record": "Record payment",
+        "seat": "Line {code} · {line} · {stop}",
+        "price": "Term price: {amount}",
+        "holdUntil": "Seat held until {time}",
+        "reference": "Slip number",
+        "referenceHint": "The number printed on the card machine's slip.",
+        "referenceRequired": "Enter the slip number.",
+        "amount": "Amount (EGP)",
+        "amountRequired": "Enter the amount paid.",
+        "payer": "Card holder",
+        "payerHint": "Often a parent.",
+        "payerRequired": "Enter the card holder's name.",
+        "recorded": "Payment recorded. {name}'s seat is active."
+      }
+    },
+    "requests": {
+      "sections": {
+        "requests": {
+          "title": "Requests",
+          "lead": "Line changes (after the guardian approved) and model entry permits. Open a request, then approve or reject it with a note the student reads.",
+          "back": "All requests"
+        },
+        "refunds": {
+          "title": "Refunds",
+          "lead": "Refund requests. An ordinary refund follows the policy; an exceptional one (medical, bereavement, transfer) needs the amount the university decided.",
+          "back": "All refunds"
+        },
+        "complaints": {
+          "title": "Complaints",
+          "lead": "Complaints from students. Open one while you look into it, then answer it with what was done.",
+          "back": "All complaints"
+        }
+      },
+      "searchHint": "University ID, name or request number",
+      "filters": {
+        "label": "Show",
+        "new": "New",
+        "in_review": "Being handled",
+        "closed": "Answered",
+        "all": "All"
+      },
+      "empty": {
+        "new": "Nothing new. You're all caught up.",
+        "in_review": "Nothing being handled right now.",
+        "closed": "Nothing answered yet.",
+        "all": "Nothing here yet.",
+        "searchTitle": "Nothing matches your search.",
+        "searchBody": "Check the university ID or the request number."
+      },
+      "stages": {
+        "new": "New",
+        "in_review": "Being handled",
+        "closed": "Answered"
+      },
+      "kinds": {
+        "line_change": "Line change",
+        "refund": "Refund",
+        "complaint": "Complaint",
+        "model_permit": "Model permit"
+      },
+      "row": {
+        "received": "Received {time}",
+        "by": "by {name}"
+      },
+      "detail": {
+        "asked": "What the student sent",
+        "student": "The student",
+        "name": "Name",
+        "identifier": "University ID",
+        "phone": "Phone",
+        "faculty": "Program",
+        "facultyLevel": "{faculty} · Level {level}",
+        "line": "Line now",
+        "lineValue": "Line {code} · {name}",
+        "noLine": "No booking",
+        "subscription": "Subscription",
+        "subscriptionStatus": {
+          "reserved": "Seat held, waiting for payment",
+          "payment_review": "Receipt being checked",
+          "active": "Active",
+          "expired": "Hold ran out",
+          "cancelled": "Cancelled"
+        },
+        "handledBy": "Handled by"
+      },
+      "act": {
+        "title": "Your answer",
+        "lead": {
+          "line_change": "The guardian already approved. Approving moves the student's seat on the date they asked for.",
+          "refund": "Approving tells the student the amount; finance then pays it back.",
+          "complaint": "Open it while you look into it, then answer with what was done.",
+          "model_permit": "Approving sends the student the permit to show at the gate on that day."
+        },
+        "seatsFree": "{count} free seats on the new line now.",
+        "seatsNone": "The new line has no free seat now. Reject, or wait until one frees up.",
+        "actions": {
+          "open": "Open",
+          "approve": "Approve",
+          "reject": "Reject",
+          "resolve": "Answer and close"
+        },
+        "done": {
+          "open": "Opened. The student sees it's being handled.",
+          "approve": "Approved. The student was told.",
+          "reject": "Rejected. The student was told why.",
+          "resolve": "Answered. The student was told."
+        },
+        "dialog": {
+          "open": {
+            "title": "Open this request?",
+            "body": "The student sees that the office is handling it. You can add a note."
+          },
+          "approve": {
+            "title": "Approve this request?",
+            "body": "The student gets your answer straight away."
+          },
+          "reject": {
+            "title": "Reject this request?",
+            "body": "Tell the student why, so they know what to do next."
+          },
+          "resolve": {
+            "title": "Answer and close?",
+            "body": "Tell the student what was done about their complaint."
+          }
+        },
+        "noteLabel": "Note to the student",
+        "noteHint": "A suggested answer is filled in. Change it as you need.",
+        "noteHintRequired": "Required. A suggested answer is filled in; change it as you need.",
+        "noteRequired": "Write a note for the student (at least 5 letters).",
+        "optional": "Optional",
+        "amountLabel": "Amount to refund (EGP)",
+        "amountHint": "As the university decided. The student paid {paid}.",
+        "amountInvalid": "Enter an amount from 0 up to {max}.",
+        "amountFixed": "Refund by the policy: {amount}"
+      },
+      "errors": {
+        "REQUEST_CLOSED": "This request is already answered or withdrawn.",
+        "NOTE_REQUIRED": "Write a note for the student first.",
+        "ACTION_NOT_ALLOWED": "That answer doesn't fit this request.",
+        "SEAT_UNAVAILABLE": "The new line has no free seat now.",
+        "REFUND_AMOUNT_INVALID": "The amount must be between 0 and what the student paid.",
+        "network": "No connection. Try again.",
+        "invalid": "Some details aren't right. Check them and try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "violations": {
+      "title": "Violations",
+      "lead": "Breaches of the Code of Conduct reported by drivers and bus supervisors. Student Affairs opens each one and closes it with a decision.",
+      "back": "All violations",
+      "searchHint": "University ID or student's name",
+      "rule": "Rule",
+      "allRules": "All rules",
+      "filters": {
+        "label": "Show",
+        "submitted": "New",
+        "under_review": "Under review",
+        "closed": "Closed",
+        "all": "All"
+      },
+      "empty": {
+        "submitted": "No new reports.",
+        "under_review": "Nothing under review.",
+        "closed": "Nothing closed yet.",
+        "all": "No reports yet.",
+        "searchTitle": "Nothing matches."
+      },
+      "status": {
+        "submitted": "New",
+        "under_review": "Under review",
+        "closed": "Closed"
+      },
+      "unknownStudent": "Student not identified",
+      "lineValue": "Line {code} · {name}",
+      "reportedBy": "Reported by {name} ({role})",
+      "reportedByValue": "{name} ({role})",
+      "outcomes": {
+        "warning": {
+          "label": "Warning",
+          "hint": "Recorded on the student's file."
+        },
+        "investigation": {
+          "label": "Sent for investigation",
+          "hint": "Under the university's discipline rules."
+        },
+        "dismissed": {
+          "label": "Dismissed",
+          "hint": "Not a violation, or the student couldn't be identified."
+        }
+      },
+      "detail": {
+        "eyebrow": "Code of Conduct, rule {number}",
+        "eyebrowOther": "Code of Conduct",
+        "readOnly": "Student Affairs decides on violations. You can follow it here.",
+        "openedBy": "Under review by {name}.",
+        "closedTitle": "Closed: {outcome}",
+        "decidedBy": "{name} · {time}",
+        "report": "The report",
+        "student": "Student",
+        "line": "Line",
+        "reportedBy": "Reported by",
+        "when": "When",
+        "photo": "Photo",
+        "photoAlt": "The photo the crew took",
+        "photoDemo": "Test mode doesn't keep photos."
+      },
+      "act": {
+        "title": "Your decision",
+        "lead": "Open the report while you look into it, then close it with the outcome.",
+        "open": "Open",
+        "close": "Close with a decision",
+        "openTitle": "Open this report?",
+        "openBody": "The crew sees that Student Affairs is looking into it.",
+        "closeTitle": "Close with a decision",
+        "closeBody": "The decision is final and goes on the record.",
+        "outcome": "Outcome",
+        "outcomeRequired": "Pick an outcome.",
+        "note": "Note for the file",
+        "noteHint": "What you found and what was done.",
+        "noteRequired": "Write a note (at least 5 letters).",
+        "opened": "Opened.",
+        "closed": "Closed with your decision."
+      },
+      "errors": {
+        "VIOLATION_CLOSED": "This report is already closed.",
+        "DECISION_REQUIRED": "Pick an outcome and write a note.",
+        "network": "No connection. Try again.",
+        "invalid": "Some details aren't right. Check them and try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "announcements": {
+      "title": "Announcements",
+      "lead": "Post news for students and guardians. Write it in Arabic and English: each reader sees their own language.",
+      "posted": "Posted announcements",
+      "empty": "Nothing posted yet.",
+      "form": {
+        "title": "New announcement",
+        "kind": "Type",
+        "kinds": {
+          "official": {
+            "label": "Official",
+            "hint": "News from the office, like \"Booking for next term is open\"."
+          },
+          "service_change": {
+            "label": "Service change",
+            "hint": "A change to a line, a stop or a time."
+          }
+        },
+        "audience": "Who sees it",
+        "audienceHint": "One line: only its students and their guardians.",
+        "everyone": "Everyone",
+        "lineOption": "Line {code} · {name}",
+        "titleAr": "Title (Arabic)",
+        "titleEn": "Title (English)",
+        "bodyAr": "Text (Arabic)",
+        "bodyEn": "Text (English)",
+        "titleShort": "Write a title (at least 5 letters).",
+        "bodyShort": "Write the text (at least 10 letters).",
+        "note": "It's posted straight away. Students and guardians see it in their announcements.",
+        "submit": "Post",
+        "posted": "Posted."
+      },
+      "errors": {
+        "network": "No connection. Try again.",
+        "invalid": "Some details aren't right. Check them and try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "lead": "Pick a report, filter it by line and period, then download it as Excel or PDF. The file has the same rows and numbers as the screen.",
+      "none": "No reports for your office.",
+      "pick": "Report",
+      "line": "Line",
+      "allLines": "All lines",
+      "lineOption": "Line {code} · {name}",
+      "from": "From",
+      "to": "To",
+      "noPeriod": "The roster is as of today.",
+      "period": "{from} to {to}",
+      "made": "Made {time}",
+      "empty": "No rows for this filter.",
+      "excel": "Excel",
+      "pdf": "PDF",
+      "pdfTooBig": "Over {max} rows: pick one line or a shorter period for a PDF, or use Excel.",
+      "downloaded": "Downloaded.",
+      "errors": {
+        "INVALID_RANGE": "The end date is before the start date.",
+        "REPORT_RANGE_TOO_LONG": "Attendance covers a month at most. Pick a shorter period.",
+        "REPORT_TOO_LARGE_FOR_PDF": "Too many rows for a PDF. Pick one line or a shorter period, or use Excel.",
+        "network": "No connection. Try again.",
+        "invalid": "Some details aren't right. Check them and try again.",
+        "generic": "Couldn't make the file. Try again."
+      }
+    }
   }
 }

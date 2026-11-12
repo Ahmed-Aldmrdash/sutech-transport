@@ -59,7 +59,9 @@ describe("role access", () => {
     expect(homePathFor(Role.Supervisor)).toBe("/driver");
     expect(homePathFor(Role.Transport)).toBe("/admin/emergencies");
     expect(homePathFor(Role.SuperAdmin)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.Finance)).toBe("/admin");
+    expect(homePathFor(Role.Finance)).toBe("/admin/payments");
+    expect(homePathFor(Role.StudentAffairs)).toBe("/admin/violations");
+    expect(homePathFor(Role.SecretaryGeneral)).toBe("/admin/reports");
     expect(homePathFor(Role.Clinic)).toBe("/admin/emergencies");
     expect(homePathFor(Role.BusCompany)).toBe("/admin");
   });
@@ -75,11 +77,18 @@ describe("role access", () => {
   });
 
   it("keeps offices apart inside /admin", () => {
-    // Finance has no built page yet: its home, and its own planned pages as "being built".
-    expect(canOpen(Role.Finance, "/admin")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin")).toBe(false);
     expect(canOpen(Role.Finance, "/admin/payments")).toBe(true);
-    expect(canOpen(Role.Finance, "/admin/payments/pay_1")).toBe(false);
+    expect(canOpen(Role.Finance, "/admin/payments/pay_1")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/complaints/req_1")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/requests")).toBe(false);
     expect(canOpen(Role.Finance, "/admin/emergencies")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/refunds")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/violations/vio_1")).toBe(true);
+    expect(canOpen(Role.StudentAffairs, "/admin/reports")).toBe(false);
+    // A bus company account has no built page yet: its home, and its planned page.
+    expect(canOpen(Role.BusCompany, "/admin")).toBe(true);
+    expect(canOpen(Role.BusCompany, "/admin/bus-company")).toBe(true);
     expect(canOpen(Role.Transport, "/admin")).toBe(false);
     expect(canOpen(Role.Transport, "/admin/emergencies/sos_1")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/clinic")).toBe(true);
@@ -93,7 +102,8 @@ describe("role access", () => {
   it("returns to the page asked for only if the role may open it", () => {
     expect(landingPathFor(Role.Student, "/student/card")).toBe("/student/card");
     expect(landingPathFor(Role.Student, "/admin/users")).toBe("/student");
-    expect(landingPathFor(Role.Finance, null)).toBe("/admin");
+    expect(landingPathFor(Role.Finance, null)).toBe("/admin/payments");
+    expect(landingPathFor(Role.Finance, "/admin/refunds/req_9")).toBe("/admin/refunds/req_9");
   });
 
   it("never follows a link off the site", () => {

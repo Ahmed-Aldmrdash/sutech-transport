@@ -140,10 +140,10 @@ test.describe("each role goes to its own home", () => {
     { id: "SUP-1001", path: "/en/driver" },
     // Offices land on their first built page; one with none yet gets its "coming soon" home.
     { id: "TRN-1001", path: "/en/admin/emergencies" },
-    { id: "FIN-1001", path: "/en/admin" },
+    { id: "FIN-1001", path: "/en/admin/payments" },
     { id: "CLN-1001", path: "/en/admin/emergencies" },
-    { id: "STA-1001", path: "/en/admin" },
-    { id: "SGO-1001", path: "/en/admin" },
+    { id: "STA-1001", path: "/en/admin/violations" },
+    { id: "SGO-1001", path: "/en/admin/reports" },
     { id: "BUS-1001", path: "/en/admin" },
     { id: "ADM-1001", path: "/en/admin/emergencies" },
   ];
@@ -171,19 +171,24 @@ test.describe("strict separation", () => {
 
   test("finance can't open transport or super admin pages", async ({ page }) => {
     await signIn(page, "FIN-1001");
-    await expect(page).toHaveURL(/\/en\/admin$/);
-    await page.goto("/en/admin/emergencies");
-    await expect(page).toHaveURL(/\/en\/admin$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Nadia");
+    await expect(page).toHaveURL(/\/en\/admin\/payments$/);
+    for (const path of ["/en/admin/emergencies", "/en/admin/requests", "/en/admin/users"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/en\/admin\/payments$/);
+    }
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Payments");
   });
 
   test("pages that aren't built show as coming soon inside the app", async ({ page }) => {
-    await signIn(page, "FIN-1001");
-    await expect(page.getByText("Coming soon", { exact: true })).toBeVisible();
+    await signIn(page, "SGO-1001");
+    await page.waitForURL(/\/en\/admin\/reports$/);
     // A coming page opens a short "being built" page in the office's own frame.
     if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
-    await page.getByRole("link", { name: /^Payments/ }).click();
-    await page.waitForURL(/\/en\/admin\/payments$/);
+    await page
+      .getByRole("link", { name: /^Secretary General/ })
+      .filter({ visible: true })
+      .click();
+    await page.waitForURL(/\/en\/admin\/secretary-general$/);
     await expect(
       page.getByRole("heading", { name: "This page is still being built" }),
     ).toBeVisible();

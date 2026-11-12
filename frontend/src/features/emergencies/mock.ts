@@ -1,4 +1,4 @@
-import { requireMockAccount } from "@/features/auth/mock-token";
+import { requireMockOffice } from "@/features/auth/mock-token";
 import {
   crewFleetOf,
   crewTripStatus,
@@ -62,13 +62,7 @@ const HTTP = { Forbidden: 403, NotFound: 404, Conflict: 409, Unprocessable: 422 
 /** The clinic follows medical alerts and accidents, never a breakdown. */
 const CLINIC_TYPES: readonly SosType[] = [SosType.Medical, SosType.Accident];
 
-function requireOffice(token: string | null, roles: readonly Role[]) {
-  const account = requireMockAccount(token);
-  if (account.user.role !== Role.SuperAdmin && !roles.includes(account.user.role)) {
-    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Not your office.");
-  }
-  return account;
-}
+const requireOffice = requireMockOffice;
 
 const requireSosDesk = (token: string | null) =>
   requireOffice(token, [Role.Transport, Role.Clinic]);

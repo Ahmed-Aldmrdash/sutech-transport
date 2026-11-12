@@ -1,10 +1,4 @@
-import {
-  findMockLine,
-  localized,
-  mockStopId,
-  toLine,
-  toLineSummary,
-} from "@/features/lines/mock-builders";
+import { findMockLine, localized, mockStopId, toLineSummary } from "@/features/lines/mock-builders";
 import {
   hasMockGuardianAccount,
   requireMockGuardian,
@@ -21,12 +15,11 @@ import {
   newMockId,
   paymentsOf,
   saveBooking,
-  seatsHeldOn,
 } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { formatCalendarDate, formatClockTime, formatMoney, todayInCairo } from "@/lib/format";
+import { todayInCairo } from "@/lib/format";
 import {
   createComplaintEndpoint,
   createLineChangeEndpoint,
@@ -41,7 +34,6 @@ import {
   withdrawRequestEndpoint,
 } from "./api";
 import {
-  MOCK_REQUEST_TIMING,
   nextReference,
   requestsOf,
   saveRequests,
@@ -78,21 +70,27 @@ const MOCK_REFUND_WINDOWS: readonly RefundWindow[] = [
 ];
 const PAYOUT_DAYS = 45;
 const PROCESSING_DAYS = 3;
-const TRANSPORT_ROOM = "A039";
 
 const iso = (time: number) => new Date(time).toISOString();
 
-/** Who gives the final answer for each kind. The office always opens the request first. */
-const DECIDED_BY: Record<RequestKind, RequestEvent["by"]> = {
-  [RequestKind.LineChange]: RequestActor.TransportOffice,
-  [RequestKind.Refund]: RequestActor.Finance,
-  [RequestKind.Complaint]: RequestActor.TransportOffice,
-  [RequestKind.ModelPermit]: RequestActor.Safety,
-};
+/**
+ * The office that handles a request: finance for refunds and payment complaints, the
+ * Transportation office for the rest.
+ */
+export function officeActorOf(payload: MockRequestPayload): RequestEvent["by"] {
+  const isFinance =
+    payload.kind === RequestKind.Refund ||
+    (payload.kind === RequestKind.Complaint && payload.category === ComplaintCategory.Payment);
+  return isFinance ? RequestActor.Finance : RequestActor.TransportOffice;
+}
+
+/** Who gives the final answer: the handling office, or Safety for a model permit. */
+function deciderOf(payload: MockRequestPayload): RequestEvent["by"] {
+  return payload.kind === RequestKind.ModelPermit ? RequestActor.Safety : officeActorOf(payload);
+}
 
 function timelineOf(request: MockRequest, now: number, language: string): RequestEvent[] {
   const note = (text: MockText | null) => (text ? localized(language, text.ar, text.en) : null);
-  const office = DECIDED_BY[request.payload.kind];
   const events: RequestEvent[] = [
     {
       status: request.guardian ? RequestStatus.AwaitingGuardian : RequestStatus.Submitted,
@@ -119,27 +117,20 @@ function timelineOf(request: MockRequest, now: number, language: string): Reques
     });
     return events;
   }
-  const status = statusAt(request, now);
-  const start = officeStartOf(request, now);
-  if (
-    start === null ||
-    status === RequestStatus.Submitted ||
-    status === RequestStatus.AwaitingGuardian
-  ) {
-    return events;
-  }
+  const step = request.office;
+  if (!step || officeStartOf(request, now) === null) return events;
   events.push({
     status: RequestStatus.InReview,
-    at: iso(start + MOCK_REQUEST_TIMING.inReviewAfterMs),
-    by: RequestActor.TransportOffice,
-    note: note(request.reviewNote),
+    at: iso(step.openedAt),
+    by: officeActorOf(request.payload),
+    note: note(step.openNote),
   });
-  if (status !== RequestStatus.InReview) {
+  if (step.decision && step.decidedAt !== null) {
     events.push({
-      status,
-      at: iso(start + MOCK_REQUEST_TIMING.decidedAfterMs),
-      by: office,
-      note: note(request.decisionNote),
+      status: step.decision,
+      at: iso(step.decidedAt),
+      by: deciderOf(request.payload),
+      note: note(step.note),
     });
   }
   return events;
@@ -160,7 +151,8 @@ function toAttachments(list: readonly MockAttachment[]) {
   }));
 }
 
-function detailsOf(payload: MockRequestPayload, language: string) {
+function detailsOf(request: MockRequest, language: string) {
+  const { payload } = request;
   switch (payload.kind) {
     case RequestKind.LineChange: {
       const line = findMockLine(payload.toLineId);
@@ -194,6 +186,10 @@ function detailsOf(payload: MockRequestPayload, language: string) {
           paid_piasters: payload.paidPiasters,
           deduction_percent: payload.deductionPercent,
           estimated_refund_piasters: payload.estimatedRefundPiasters,
+          approved_refund_piasters:
+            request.office?.decision === RequestStatus.Approved
+              ? request.office.refundPiasters
+              : null,
           guardian_name: payload.guardianName,
           guardian_phone: payload.guardianPhone,
           attachments: toAttachments(payload.attachments),
@@ -257,7 +253,7 @@ export function toStudentRequest(
     submitted_at: iso(request.submittedAt),
     updated_at: timeline.at(-1)?.at ?? iso(request.submittedAt),
     timeline,
-    ...detailsOf(request.payload, language),
+    ...detailsOf(request, language),
   } as StudentRequest;
 }
 
@@ -368,14 +364,6 @@ function addRequest(userId: string, request: Omit<MockRequest, "requestId" | "re
   return stored;
 }
 
-/** "From Nov 8 to Nov 22" for a temporary change, "From Nov 8" for a permanent one, in words. */
-function changePeriod(startsOn: string, endsOn: string | null): MockText {
-  const from = { ar: formatCalendarDate(startsOn, "ar"), en: formatCalendarDate(startsOn, "en") };
-  if (!endsOn) return { ar: `من يوم ${from.ar}`, en: `From ${from.en}` };
-  const to = { ar: formatCalendarDate(endsOn, "ar"), en: formatCalendarDate(endsOn, "en") };
-  return { ar: `من يوم ${from.ar} لحد يوم ${to.ar}`, en: `From ${from.en} to ${to.en}` };
-}
-
 /** Approved refunds are paid in full pounds: the paid amount minus the day's deduction. */
 function paidThisTerm(userId: string, subscriptionId: string): number {
   return paymentsOf(userId)
@@ -428,36 +416,9 @@ registerMock(createLineChangeEndpoint, ({ body }, { token, language }) => {
     throw invalidDates("The dates are after the end of the term.");
   }
 
-  const lineName = localized("en", line.nameAr, line.nameEn);
-  const lineNameAr = localized("ar", line.nameAr, line.nameEn);
-  const [, stopAr = "", stopEn = ""] = line.stops[stopIndex] ?? [];
-  const hasSeat = toLine(line, language, seatsHeldOn(line.lineId)).seats_available > 0;
-  const period = changePeriod(body.starts_on, body.ends_on);
   const stored = addRequest(user.id, {
     submittedAt: now,
     withdrawnAt: null,
-    outcome: hasSeat ? RequestStatus.Approved : RequestStatus.Rejected,
-    reviewNote: {
-      ar: "استلمنا الاستمارة بعد موافقة ولي الأمر، وبنشوف الأماكن على الخط.",
-      en: "We got your form with your guardian's approval and are checking seats on the line.",
-    },
-    decisionNote: hasSeat
-      ? {
-          ar:
-            `تمت الموافقة. ${period.ar} اركب خط ${line.code} (${lineNameAr}) من ` +
-            `محطة ${stopAr}، ووري الكارت للمشرف زي العادي.`,
-          en:
-            `Approved. ${period.en}, ride line ${line.code} (${lineName}) from ` +
-            `${stopEn}, and show your card to the supervisor as usual.`,
-        }
-      : {
-          ar:
-            `للأسف خط ${line.code} مليان دلوقتي ومفيش كرسي فاضي. جرّب خط فيه أماكن، أو ` +
-            `كلمنا في مكتب ${TRANSPORT_ROOM}.`,
-          en:
-            `Sorry, line ${line.code} is full and has no free seat now. Try a line with free ` +
-            `seats, or see us at office ${TRANSPORT_ROOM}.`,
-        },
     appliedAt: null,
     guardian: {
       hasAccount: hasMockGuardianAccount(user.id),
@@ -511,33 +472,6 @@ registerMock(createRefundEndpoint, ({ body }, { token, language }) => {
   const stored = addRequest(user.id, {
     submittedAt: now,
     withdrawnAt: null,
-    outcome: isExceptional ? "stays_in_review" : RequestStatus.Approved,
-    reviewNote: isExceptional
-      ? {
-          ar:
-            `بعتنا المستندات لإدارة الجامعة تقرر. هات أصل إيصال الدفع لمكتب النقل ${TRANSPORT_ROOM}. ` +
-            `القرار بياخد حوالي ${PROCESSING_DAYS} أيام عمل.`,
-          en:
-            `We sent your documents to the university administration to decide. Bring the original ` +
-            `payment receipt to the Transportation office, ${TRANSPORT_ROOM}. A decision takes about ` +
-            `${PROCESSING_DAYS} working days.`,
-        }
-      : {
-          ar: `هات أصل إيصال الدفع لمكتب النقل ${TRANSPORT_ROOM}.`,
-          en: `Bring the original payment receipt to the Transportation office, ${TRANSPORT_ROOM}.`,
-        },
-    decisionNote:
-      estimate === null
-        ? null
-        : {
-            ar:
-              `تمت الموافقة على استرداد ${formatMoney(estimate, "ar")}. الشيك هيبقى باسم ولي ` +
-              `الأمر في خلال ${PAYOUT_DAYS} يوم، وهنبلغك أول ما يجهز. الاشتراك اتلغى.`,
-            en:
-              `A refund of ${formatMoney(estimate, "en")} is approved. The cheque will be in your ` +
-              `guardian's name within ${PAYOUT_DAYS} days; we'll tell you when it's ready. The ` +
-              `subscription is cancelled.`,
-          },
     appliedAt: null,
     payload: {
       kind: RequestKind.Refund,
@@ -554,37 +488,6 @@ registerMock(createRefundEndpoint, ({ body }, { token, language }) => {
   });
   return toStudentRequest(stored, language, now);
 });
-
-const COMPLAINT_REPLY: Record<ComplaintCategory, MockText> = {
-  [ComplaintCategory.DriverBehaviour]: {
-    ar: "اتكلمنا مع السواق وشركة أبو الهول، واتنبه عليه. لو اتكرر بلغنا فورًا.",
-    en: "We spoke to the driver and Abu El Hol, and he has been warned. Tell us at once if it happens again.",
-  },
-  [ComplaintCategory.Delay]: {
-    ar: "راجعنا مواعيد الخط مع الشركة وهنتابع الوصول الأيام الجاية.",
-    en: "We reviewed the line's timings with the bus company and will watch arrivals over the next days.",
-  },
-  [ComplaintCategory.BusCondition]: {
-    ar: "بلغنا الشركة والباص هيتراجع (تكييف ونضافة وكراسي) قبل الأسبوع الجاي.",
-    en: "We told the bus company; the bus (air conditioning, cleaning, seats) will be checked before next week.",
-  },
-  [ComplaintCategory.Crowding]: {
-    ar: "راجعنا عدد المشتركين على الخط، وكل طالب ليه كرسي. المشرف هيتأكد من الكروت عند الركوب.",
-    en: "We checked the line's subscribers: every student has a seat. The supervisor will check cards when boarding.",
-  },
-  [ComplaintCategory.Safety]: {
-    ar: "شكرًا إنك بلغت. اتعمل تحقيق مع الشركة، ولو في خطر دلوقتي استخدم زر الطوارئ.",
-    en: "Thank you for reporting it. We opened an investigation with the bus company. If you are in danger now, use the emergency button.",
-  },
-  [ComplaintCategory.Payment]: {
-    ar: "راجعنا الإيصال مع المالية. لو لسه في مشكلة، عدّي على مكتب الحسابات A045 ومعاك أصل الإيصال.",
-    en: "We checked your receipt with Finance. If there is still a problem, visit the Accounting office, A045, with the original receipt.",
-  },
-  [ComplaintCategory.Other]: {
-    ar: "شكرًا لملاحظتك، اتسجلت وبنتابعها.",
-    en: "Thank you, your note is recorded and we are following it up.",
-  },
-};
 
 registerMock(createComplaintEndpoint, ({ body }, { token, language }) => {
   const { user } = requireMockStudent(token);
@@ -610,9 +513,6 @@ registerMock(createComplaintEndpoint, ({ body }, { token, language }) => {
   const stored = addRequest(user.id, {
     submittedAt: now,
     withdrawnAt: null,
-    outcome: RequestStatus.Resolved,
-    reviewNote: null,
-    decisionNote: COMPLAINT_REPLY[body.category],
     appliedAt: null,
     payload: {
       kind: RequestKind.Complaint,
@@ -640,26 +540,6 @@ registerMock(createModelPermitEndpoint, ({ body }, { token, language }) => {
   const stored = addRequest(user.id, {
     submittedAt: now,
     withdrawnAt: null,
-    outcome: RequestStatus.Approved,
-    reviewNote: {
-      ar:
-        `استلمنا التصريح، وبعتناه لـ ${body.supervisor_name} يوقّع عليه، وبعدها لإدارة ` +
-        `السلامة (Safety).`,
-      en:
-        `We got your permit and sent it to ${body.supervisor_name} to sign, then to the Safety ` +
-        `department.`,
-    },
-    decisionNote: {
-      ar:
-        `إدارة السلامة وافقت. يوم ${formatCalendarDate(body.entry_date, "ar")} الساعة ` +
-        `${formatClockTime(body.entry_time, "ar")} ورّي التصريح ده ` +
-        `للسواق والمشرف قبل ما تركب، وخلّي المجسم بعيد عن الممر.`,
-      en:
-        `The Safety department approved it. On ${formatCalendarDate(body.entry_date, "en")} at ` +
-        `${formatClockTime(body.entry_time, "en")}, show ` +
-        `this permit to the driver and supervisor before you board, and keep the model out of ` +
-        `the aisle.`,
-    },
     appliedAt: null,
     payload: {
       kind: RequestKind.ModelPermit,

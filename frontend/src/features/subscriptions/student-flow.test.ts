@@ -6,11 +6,12 @@ import { resetAuthMock } from "@/features/auth/mock";
 import { getLine, listLines } from "@/features/lines/api";
 import { getPaymentInstructions, listMyPayments, submitReceipt } from "@/features/payments/api";
 import { PaymentErrorCode, PaymentStatus } from "@/features/payments/schema";
+import { reviewPayment } from "@/features/finance-desk/api";
 import { getMyNextTrip } from "@/features/trips/api";
 import { type ApiError, isApiError } from "@/lib/api/errors";
 import { tokenStore } from "@/lib/api/token-store";
 import { cancelSubscription, createSubscription, getMySubscription } from "./api";
-import { MOCK_REJECTED_REFERENCE_SUFFIX, MOCK_REVIEW_MS, resetStudentMock } from "./mock-state";
+import { resetStudentMock } from "./mock-state";
 import { SubscriptionErrorCode, SubscriptionStatus } from "./schema";
 
 const FULL_LINE = "ln_02";
@@ -30,6 +31,13 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 async function signIn(identifier: string) {
   const challenge = await requestOtp(identifier);
   await login(identifier, challenge.demo_code ?? "");
+}
+
+/** Finance (FIN-1001) decides the receipt, then Ziad signs back in. */
+async function financeDecides(paymentId: string, reason: string | null) {
+  await signIn("FIN-1001");
+  await reviewPayment(paymentId, { decision: reason ? "reject" : "approve", reason });
+  await signIn("240100101");
 }
 
 function receiptFor(subscriptionId: string, reference = "NBE-12345678") {
@@ -110,7 +118,7 @@ describe("student journey (mock server)", () => {
     );
   });
 
-  it("activates the subscription and opens the card once finance approves the receipt", async () => {
+  it("activates the subscription and opens the card only once finance approves the receipt", async () => {
     const instructions = await getPaymentInstructions();
     expect(instructions.bank.iban).toBe("EG080003000130715542035020200");
     expect(instructions.cashier_room).toBe("A045");
@@ -120,8 +128,9 @@ describe("student journey (mock server)", () => {
     expect(sent.status).toBe(PaymentStatus.PendingReview);
     expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.PaymentReview);
 
-    vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(Date.now() + MOCK_REVIEW_MS + 1000);
+    // Nothing happens by itself: the subscription waits for finance.
+    expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.PaymentReview);
+    await financeDecides(sent.payment_id, null);
     expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.Active);
     expect((await listMyPayments())[0]?.status).toBe(PaymentStatus.Approved);
     const card = await getMyCard();
@@ -132,18 +141,14 @@ describe("student journey (mock server)", () => {
 
   it("puts a rejected receipt's booking back on hold, and refuses a reused receipt", async () => {
     const booked = await createSubscription(OPEN_LINE, OPEN_STOP);
-    await submitReceipt(
-      receiptFor(booked.subscription_id, `NBE-${MOCK_REJECTED_REFERENCE_SUFFIX}`),
-    );
-    vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(Date.now() + MOCK_REVIEW_MS + 1000);
+    const first = await submitReceipt(receiptFor(booked.subscription_id, "NBE-0000"));
+    await financeDecides(first.payment_id, "The number isn't on the bank statement.");
     const back = (await getMySubscription()).subscription;
     expect(back?.status).toBe(SubscriptionStatus.Reserved);
     expect(back?.latest_payment?.status).toBe(PaymentStatus.Rejected);
     expect(back?.latest_payment?.rejection_reason).toBeTruthy();
 
     await submitReceipt(receiptFor(booked.subscription_id, "NBE-777"));
-    vi.setSystemTime(Date.now() + 1000);
     expect((await errorOf(submitReceipt(receiptFor(booked.subscription_id, "nbe-777")))).code).toBe(
       PaymentErrorCode.NotAwaitingPayment,
     );

@@ -12,7 +12,7 @@ import { resetStudentMock } from "@/features/subscriptions/mock-state";
 import { getMyTracking } from "@/features/tracking/api";
 import { TripDirection } from "@/features/trips/schema";
 import { createViolation, listMyViolations } from "@/features/violations/api";
-import { resetViolationsMock } from "@/features/violations/mock";
+import { resetViolationsMock } from "@/features/violations/mock-state";
 import { ConductRule } from "@/features/violations/schema";
 import { type ApiError, isApiError } from "@/lib/api/errors";
 import { tokenStore } from "@/lib/api/token-store";
@@ -260,8 +260,11 @@ describe("driver and supervisor (mock server)", () => {
       photo: { file_name: "photo.jpg", content_type: "image/jpeg", data_base64: "AAAA" },
     });
     const { items } = await listMyViolations();
-    expect(items).toHaveLength(1);
+    // Newest first, after the one line 7's driver recorded before the demo.
+    expect(items).toHaveLength(2);
     expect(items[0]?.student?.student_id).toBe(OMAR_ID);
+    // It waits for Student Affairs to open it.
+    expect(items[0]?.status).toBe("submitted");
   });
 
   it("keeps other roles out", async () => {

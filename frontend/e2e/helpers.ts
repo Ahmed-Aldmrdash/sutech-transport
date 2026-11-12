@@ -44,3 +44,10 @@ export async function signIn(page: Page, identifier: string, path = "/en/login")
   await expect(page.getByRole("heading", { name: "Enter the code" })).toBeVisible();
   await page.getByLabel("One-time code").fill(await shownCode(page));
 }
+
+/** The mock keeps its data in this browser, so the next role signs in on the same page. */
+export async function switchTo(page: Page, identifier: string) {
+  await page.evaluate(() => localStorage.removeItem("sut.session"));
+  await page.context().clearCookies();
+  await signIn(page, identifier);
+}

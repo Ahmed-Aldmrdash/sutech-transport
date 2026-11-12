@@ -53,7 +53,8 @@ describe("role navigation", () => {
   });
 
   it("keeps offices apart", () => {
-    expect(itemKeys(Role.Finance)).toEqual(["home", "payments", "refunds", "reports"]);
+    expect(itemKeys(Role.Finance)).toEqual(["payments", "refunds", "complaints", "reports"]);
+    expect(itemKeys(Role.StudentAffairs)).toEqual(["violations"]);
     expect(itemKeys(Role.Clinic)).toEqual(["emergencies", "clinic"]);
     expect(itemKeys(Role.BusCompany)).toEqual(["home", "busCompany"]);
     expect(itemKeys(Role.Finance)).not.toContain("liveTracking");
@@ -101,10 +102,9 @@ describe("coming soon pages", () => {
   });
 
   it("lists what each office will get", () => {
-    expect(soonItems(navigationFor(Role.Finance)).map((item) => item.key)).toEqual([
-      "payments",
-      "refunds",
-      "reports",
+    expect(soonItems(navigationFor(Role.Finance))).toEqual([]);
+    expect(soonItems(navigationFor(Role.SecretaryGeneral)).map((item) => item.key)).toEqual([
+      "secretaryGeneral",
     ]);
     expect(soonItems(navigationFor(Role.Clinic))).toEqual([]);
   });
@@ -112,7 +112,10 @@ describe("coming soon pages", () => {
 
 describe("roleHomeHref", () => {
   it("lands each role on its first built page", () => {
-    expect(roleHomeHref(navigationFor(Role.Finance))).toBe("/admin");
+    expect(roleHomeHref(navigationFor(Role.Finance))).toBe("/admin/payments");
+    expect(roleHomeHref(navigationFor(Role.StudentAffairs))).toBe("/admin/violations");
+    expect(roleHomeHref(navigationFor(Role.SecretaryGeneral))).toBe("/admin/reports");
+    expect(roleHomeHref(navigationFor(Role.BusCompany))).toBe("/admin");
     expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin/emergencies");
     expect(roleHomeHref(navigationFor(Role.Clinic))).toBe("/admin/emergencies");
     expect(roleHomeHref(navigationFor(Role.Student))).toBe("/student");

@@ -40,7 +40,7 @@ export const RequestStatus = {
   Withdrawn: "withdrawn",
 } as const;
 export type RequestStatus = (typeof RequestStatus)[keyof typeof RequestStatus];
-const requestStatusSchema = z.enum([
+export const requestStatusSchema = z.enum([
   RequestStatus.AwaitingGuardian,
   RequestStatus.Submitted,
   RequestStatus.InReview,
@@ -230,6 +230,8 @@ const refundDetailsSchema = z.object({
    * university decides.
    */
   estimated_refund_piasters: z.number().int().nonnegative().nullable(),
+  /** The amount finance approved; null until a refund is approved. */
+  approved_refund_piasters: z.number().int().nonnegative().nullable(),
   guardian_name: z.string(),
   guardian_phone: z.string(),
   attachments: z.array(attachmentSchema),

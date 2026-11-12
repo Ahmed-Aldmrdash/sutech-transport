@@ -1,3 +1,4 @@
+import { MOCK_DESK_STUDENTS } from "@/features/subscriptions/mock-desk-students";
 import { absencesOf } from "@/features/absences/mock-state";
 import type { AbsenceReason } from "@/features/absences/schema";
 import { MOCK_ACCOUNTS, type MockAccount } from "@/features/auth/mock-accounts";
@@ -345,6 +346,19 @@ export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockR
       identifier: user.identifier,
       stopOrder: booking.stopOrder,
       isAccount: true,
+    });
+  }
+  // The made-up students the offices work with ride too, scanned like the seat fillers.
+  for (const student of MOCK_DESK_STUDENTS) {
+    const booking = bookingOnDate(student.id, date);
+    if (booking?.lineId !== line.lineId || booking.status !== SubscriptionStatus.Active) continue;
+    riders.push({
+      studentId: student.id,
+      nameAr: student.nameAr,
+      nameEn: student.nameEn,
+      identifier: student.identifier,
+      stopOrder: booking.stopOrder,
+      isAccount: false,
     });
   }
   const seats = MOCK_SEATS_BY_BUS[line.busType];

@@ -119,7 +119,7 @@ test.describe("app frame", () => {
     await page.goto("/en/preview/finance");
     if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
     const nav = page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true });
-    // Finance's own pages are listed (coming soon); other offices' pages never are.
+    // Finance's own pages are listed; other offices' pages never are.
     await expect(nav.getByText("Payments")).toBeVisible();
     await expect(nav.getByRole("link", { name: "Live tracking" })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "Users & permissions" })).toHaveCount(0);

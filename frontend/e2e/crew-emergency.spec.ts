@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoSidewaysScroll, isPhone, signIn } from "./helpers";
+import { expectNoSidewaysScroll, isPhone, signIn, switchTo } from "./helpers";
 
 const DRIVER = "DRV-1001"; // Kamal Ezzat, line 7
 const TRANSPORT = "TRN-1001"; // Karim Fathy, Transportation office
@@ -16,13 +16,6 @@ function watchForAppErrors(page: Page): string[] {
     }
   });
   return errors;
-}
-
-/** The mock keeps its data in this browser, so the next role signs in on the same page. */
-async function switchTo(page: Page, identifier: string) {
-  await page.evaluate(() => localStorage.removeItem("sut.session"));
-  await page.context().clearCookies();
-  await signIn(page, identifier);
 }
 
 async function driverRaisesSos(page: Page, type: RegExp = /Bus problem/) {
