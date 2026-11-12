@@ -97,6 +97,13 @@ export function todayInCairo(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: APP_TIME_ZONE }).format(now);
 }
 
+/** A calendar day ("YYYY-MM-DD") moved by whole days, e.g. tomorrow for a date picker's min. */
+export function addCalendarDays(day: string, days: number): string {
+  const date = new Date(`${day}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 /** Arabic-Indic digits (٠-٩) and the Arabic decimal mark become Latin, for typed numbers. */
 export function toLatinDigits(text: string): string {
   return text

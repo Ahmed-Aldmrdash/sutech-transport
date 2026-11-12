@@ -113,6 +113,8 @@ export interface RoleNavigation {
   /** Where this role's pages live, e.g. "/student". */
   basePath: `/${string}`;
   groups: readonly NavGroup[];
+  /** The page the role lands on after sign-in, when it isn't the first one in the menu. */
+  landing?: NavItemKey;
 }
 
 export const MAX_PRIMARY_ITEMS = 4;
@@ -192,7 +194,7 @@ interface OfficeNavGroup {
 
 const { Transport, Finance, Clinic, StudentAffairs, SecretaryGeneral, BusCompany } = Role;
 
-/** Office pages that are built. Every other office page shows as "coming soon" (phase 7). */
+/** Office pages that are built. Every other office page shows as "coming soon". */
 const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
   "emergencies",
   "clinic",
@@ -203,7 +205,15 @@ const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
   "complaints",
   "violations",
   "reports",
+  "secretaryGeneral",
+  "events",
+  "busCompany",
 ]);
+
+/** Offices whose own page isn't the first in their menu: they land on it after sign-in. */
+const OFFICE_LANDING: Partial<Record<Role, NavItemKey>> = {
+  [SecretaryGeneral]: "secretaryGeneral",
+};
 
 /** For an office with no built page yet: its home, which lists what is coming. */
 const OFFICE_WELCOME: NavItem = { key: "home", icon: House, segment: "", primary: true };
@@ -309,7 +319,7 @@ function officeNavigationFor(role: Role): RoleNavigation {
     key: group.key,
     items: group.items.filter(canSee).map(toNavItem),
   })).filter((group) => group.items.length > 0);
-  const navigation = { basePath: "/admin", groups } as const;
+  const navigation: RoleNavigation = { basePath: "/admin", groups, landing: OFFICE_LANDING[role] };
   if (readyItems(navigation).length > 0) return navigation;
   return { basePath: "/admin", groups: [{ key: "main", items: [OFFICE_WELCOME] }, ...groups] };
 }
@@ -380,9 +390,15 @@ export function findActiveItem(
   return best;
 }
 
-/** Where a role lands after sign-in: its "" page, or its first built page when it has none. */
+/**
+ * Where a role lands after sign-in: its landing page if it has one, else its "" page, else
+ * its first built page.
+ */
 export function roleHomeHref(navigation: RoleNavigation): string {
   const items = readyItems(navigation);
-  const home = items.find((item) => item.segment === "") ?? items[0];
+  const home =
+    items.find((item) => item.key === navigation.landing) ??
+    items.find((item) => item.segment === "") ??
+    items[0];
   return home ? itemHref(navigation.basePath, home) : navigation.basePath;
 }

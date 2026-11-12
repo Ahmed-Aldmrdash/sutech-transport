@@ -10,9 +10,11 @@ import { notificationsEndpoints } from "@/features/notifications/api";
 import { paymentsEndpoints } from "@/features/payments/api";
 import { requestsEndpoints } from "@/features/requests/api";
 import { emergenciesEndpoints } from "@/features/emergencies/api";
+import { eventBusesEndpoints } from "@/features/event-buses/api";
 import { financeDeskEndpoints } from "@/features/finance-desk/api";
 import { reportsEndpoints } from "@/features/reports/api";
 import { requestDeskEndpoints } from "@/features/request-desk/api";
+import { sgOfficeEndpoints } from "@/features/sg-office/api";
 import { violationDeskEndpoints } from "@/features/violation-desk/api";
 import { sosEndpoints } from "@/features/sos/api";
 import { subscriptionsEndpoints } from "@/features/subscriptions/api";
@@ -49,4 +51,6 @@ export const allEndpoints: readonly Endpoint[] = [
   ...requestDeskEndpoints,
   ...violationDeskEndpoints,
   ...reportsEndpoints,
+  ...eventBusesEndpoints,
+  ...sgOfficeEndpoints,
 ];

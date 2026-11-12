@@ -143,8 +143,8 @@ test.describe("each role goes to its own home", () => {
     { id: "FIN-1001", path: "/en/admin/payments" },
     { id: "CLN-1001", path: "/en/admin/emergencies" },
     { id: "STA-1001", path: "/en/admin/violations" },
-    { id: "SGO-1001", path: "/en/admin/reports" },
-    { id: "BUS-1001", path: "/en/admin" },
+    { id: "SGO-1001", path: "/en/admin/secretary-general" },
+    { id: "BUS-1001", path: "/en/admin/bus-company" },
     { id: "ADM-1001", path: "/en/admin/emergencies" },
   ];
   for (const { id, path } of homes) {
@@ -180,15 +180,15 @@ test.describe("strict separation", () => {
   });
 
   test("pages that aren't built show as coming soon inside the app", async ({ page }) => {
-    await signIn(page, "SGO-1001");
-    await page.waitForURL(/\/en\/admin\/reports$/);
+    await signIn(page, "TRN-1001");
+    await page.waitForURL(/\/en\/admin\/emergencies$/);
     // A coming page opens a short "being built" page in the office's own frame.
     if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
     await page
-      .getByRole("link", { name: /^Secretary General/ })
+      .getByRole("link", { name: /^Lines/ })
       .filter({ visible: true })
       .click();
-    await page.waitForURL(/\/en\/admin\/secretary-general$/);
+    await page.waitForURL(/\/en\/admin\/lines$/);
     await expect(
       page.getByRole("heading", { name: "This page is still being built" }),
     ).toBeVisible();
