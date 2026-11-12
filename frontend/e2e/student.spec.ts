@@ -58,6 +58,13 @@ test.describe("student", () => {
     await page.waitForURL(/\/en\/admin\/payments$/);
     await page.getByRole("searchbox", { name: "Search" }).fill("240100101");
     await page.getByRole("link", { name: /Ziad/ }).click();
+    // Finance sees the very file the student uploaded, and can open it full size.
+    await expect(page.getByRole("img", { name: "Receipt file" })).toHaveAttribute("src", /^blob:/);
+    await page.getByRole("button", { name: /Enlarge/ }).click();
+    const viewer = page.getByRole("dialog", { name: "slip.png" });
+    await expect(viewer.getByRole("img", { name: "Receipt file" })).toBeVisible();
+    await expect(viewer.getByRole("link", { name: "Download" })).toBeVisible();
+    await viewer.getByRole("button", { name: "Close" }).click();
     await page.getByRole("button", { name: "Approve" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Approve" }).click();
     await expect(page.getByText("Approved: the seat is active.")).toBeVisible();

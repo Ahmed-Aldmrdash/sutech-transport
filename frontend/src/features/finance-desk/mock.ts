@@ -19,7 +19,9 @@ import {
 } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
+import { mockFileUrl } from "@/lib/api/mock/file-store";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
+import { sampleReceiptImage } from "@/lib/api/mock/sample-files";
 import { Role } from "@/lib/auth/roles";
 import {
   findAwaitingPaymentEndpoint,
@@ -77,6 +79,24 @@ function seatOf(booking: MockBooking, language: string) {
   return { line: toLineSummary(line, language), stop_name: localized(language, stopAr, stopEn) };
 }
 
+const PIASTERS_PER_POUND = 100;
+
+/** The uploaded file, or a sample slip for a seeded receipt that was never really uploaded. */
+function fileOf(payment: MockPayment): { url: string; contentType: string } | null {
+  if (payment.fileName === null) return null;
+  return (
+    mockFileUrl(payment.paymentId) ?? {
+      url: sampleReceiptImage({
+        reference: payment.referenceNumber,
+        amount: `EGP ${(payment.amountPiasters / PIASTERS_PER_POUND).toLocaleString("en-US")}`,
+        payer: payment.payerName,
+        paidOn: payment.paidOn,
+      }),
+      contentType: "image/svg+xml",
+    }
+  );
+}
+
 function toOfficePayment({ student, payment }: Owned, language: string): OfficePayment {
   const booking = bookingOf(student.id);
   if (!booking) throw new Error(`No booking for ${student.id}`);
@@ -89,7 +109,8 @@ function toOfficePayment({ student, payment }: Owned, language: string): OfficeP
     reviewed_by_name: payment.reviewedBy
       ? localized(language, payment.reviewedBy.ar, payment.reviewedBy.en)
       : null,
-    file_url: null,
+    file_url: fileOf(payment)?.url ?? null,
+    file_content_type: fileOf(payment)?.contentType ?? null,
   };
 }
 

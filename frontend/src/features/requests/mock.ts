@@ -18,7 +18,9 @@ import {
 } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
+import { mockFileUrl, saveMockFile } from "@/lib/api/mock/file-store";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
+import { sampleDocumentImage, samplePhotoImage } from "@/lib/api/mock/sample-files";
 import { todayInCairo } from "@/lib/format";
 import {
   createComplaintEndpoint,
@@ -148,6 +150,12 @@ function toAttachments(list: readonly MockAttachment[]) {
     file_name: item.fileName,
     content_type: item.contentType,
     size_bytes: item.sizeBytes,
+    // A seeded attachment was never uploaded: it gets a sample picture.
+    url:
+      mockFileUrl(item.attachmentId)?.url ??
+      (item.contentType.startsWith("image/")
+        ? samplePhotoImage(item.fileName)
+        : sampleDocumentImage(item.fileName)),
   }));
 }
 
@@ -345,12 +353,9 @@ function storeFiles(files: readonly ReceiptFile[]): MockAttachment[] {
     if (sizeBytes > RECEIPT_MAX_BYTES) {
       throw new MockHttpError(HTTP.TooLarge, PaymentErrorCode.ReceiptTooLarge, "File too large.");
     }
-    return {
-      attachmentId: newMockId("att"),
-      fileName: file.file_name,
-      contentType: file.content_type,
-      sizeBytes,
-    };
+    const attachmentId = newMockId("att");
+    saveMockFile(attachmentId, file.content_type, file.data_base64);
+    return { attachmentId, fileName: file.file_name, contentType: file.content_type, sizeBytes };
   });
 }
 

@@ -10,7 +10,9 @@ import {
 import { toViolation, violationStatusOf } from "@/features/violations/mock";
 import { ViolationStatus } from "@/features/violations/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
+import { mockFileUrl } from "@/lib/api/mock/file-store";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
+import { samplePhotoImage } from "@/lib/api/mock/sample-files";
 import { Role } from "@/lib/auth/roles";
 import {
   actOnViolationEndpoint,
@@ -67,7 +69,8 @@ function toDeskViolation({ crewId, item }: Owned, role: Role, language: string):
       role: reporter?.role === Role.Supervisor ? Role.Supervisor : Role.Driver,
     },
     line: line ? toLineSummary(line, language) : null,
-    photo_url: null,
+    // A seeded violation's photo was never uploaded: it gets a sample picture.
+    photo_url: mockFileUrl(item.violationId)?.url ?? samplePhotoImage(item.photoName),
     opened_by_name: name(office?.openedBy),
     decision:
       office?.closedAt !== null &&

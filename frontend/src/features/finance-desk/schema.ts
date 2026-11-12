@@ -73,11 +73,10 @@ export const officePaymentSchema = paymentSchema.extend({
   subscription_status: z.enum(SUBSCRIPTION_STATUSES),
   /** The finance officer who decided or recorded it; null while waiting. */
   reviewed_by_name: z.string().nullable(),
-  /**
-   * A short-lived link to the uploaded file (image or PDF). Null for a Visa payment and in the
-   * demo, which doesn't keep files.
-   */
+  /** A short-lived link to the uploaded file (image or PDF). Null for a Visa payment. */
   file_url: z.url().nullable(),
+  /** The file's type, so the page shows an image inline and opens a PDF. */
+  file_content_type: z.string().nullable(),
 });
 export type OfficePayment = z.infer<typeof officePaymentSchema>;
 

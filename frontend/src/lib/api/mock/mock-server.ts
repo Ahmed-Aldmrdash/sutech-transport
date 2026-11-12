@@ -1,5 +1,6 @@
 import type { Endpoint, EndpointResponse, ParsedInput } from "../endpoint";
 import { ServerErrorCode, type ApiErrorBody } from "../errors";
+import { mockFilesReady } from "./file-store";
 
 /** Thrown inside a mock handler to answer with an HTTP error, exactly like FastAPI would. */
 export class MockHttpError extends Error {
@@ -71,6 +72,7 @@ export async function handleMockRequest<E extends Endpoint>(
     });
   }
   try {
+    await mockFilesReady();
     const result = await handler(input as ParsedInput<Endpoint>, context);
     return { status: HTTP_OK, body: JSON.stringify(result) };
   } catch (error) {

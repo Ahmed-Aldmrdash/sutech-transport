@@ -3,6 +3,7 @@
 import { Paperclip } from "lucide-react";
 import { useLocale } from "next-intl";
 import { type ReactNode } from "react";
+import { FilePreview } from "@/components/ui/file-preview";
 import type { Locale } from "@/i18n/routing";
 import { formatFileSize } from "@/lib/format";
 import { type Attachment } from "../schema";
@@ -19,15 +20,21 @@ export function Row({ label, children }: { label: string; children: ReactNode })
 export function Attachments({ items }: { items: readonly Attachment[] }) {
   const locale = useLocale() as Locale;
   return (
-    <ul className="flex flex-col gap-1">
+    <ul className="flex flex-col gap-3">
       {items.map((item) => (
-        <li key={item.attachment_id} className="flex items-center gap-2 font-normal">
-          <Paperclip aria-hidden="true" className="size-4 shrink-0 text-ink-muted" />
-          <span className="truncate" dir="ltr">
-            {item.file_name}
-          </span>
-          <span className="shrink-0 text-ink-muted">
-            ({formatFileSize(item.size_bytes, locale)})
+        <li key={item.attachment_id} className="flex flex-col gap-1 font-normal">
+          {item.url ? (
+            <FilePreview url={item.url} name={item.file_name} contentType={item.content_type} />
+          ) : (
+            <span className="flex items-center gap-2">
+              <Paperclip aria-hidden="true" className="size-4 shrink-0 text-ink-muted" />
+              <span className="truncate" dir="ltr">
+                {item.file_name}
+              </span>
+            </span>
+          )}
+          <span className="text-caption text-ink-muted">
+            {formatFileSize(item.size_bytes, locale)}
           </span>
         </li>
       ))}

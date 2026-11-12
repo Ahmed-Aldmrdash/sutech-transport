@@ -48,7 +48,7 @@ export const deskViolationSchema = violationSchema.extend({
     role: z.enum([Role.Driver, Role.Supervisor]),
   }),
   line: lineSummarySchema.nullable(),
-  /** A short-lived link to the photo; null in the demo, which doesn't keep photos. */
+  /** A short-lived link to the photo. */
   photo_url: z.url().nullable(),
   opened_by_name: z.string().nullable(),
   decision: z

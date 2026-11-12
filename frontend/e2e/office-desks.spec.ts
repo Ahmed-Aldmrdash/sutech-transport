@@ -36,6 +36,11 @@ test.describe("finance", () => {
     await landOn(page, "FIN-1001", /\/en\/admin\/payments$/);
     await page.getByRole("link", { name: /Mariam Saad El Din/ }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Mariam Saad El Din" })).toBeVisible();
+    // A seeded receipt was never uploaded: a sample slip stands in for it.
+    await expect(page.getByRole("img", { name: "Receipt file" })).toHaveAttribute(
+      "src",
+      /^data:image\/svg\+xml/,
+    );
     const dialog = page.getByRole("dialog");
     await expect(async () => {
       await page.getByRole("button", { name: "Reject" }).click();
@@ -72,6 +77,7 @@ test.describe("requests and violations", () => {
   test("student affairs closes a violation with a decision", async ({ page }) => {
     await landOn(page, "STA-1001", /\/en\/admin\/violations$/);
     await page.getByRole("link", { name: /Habiba Ashraf Kamal/ }).click();
+    await expect(page.getByRole("img", { name: "The photo the crew took" })).toBeVisible();
     await page.getByRole("button", { name: "Close with a decision" }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: "Close with a decision" }).click();

@@ -2,6 +2,7 @@ import { MOCK_ACCOUNTS } from "@/features/auth/mock-accounts";
 import { mockRidersOf, requireMockCrew } from "@/features/crew/mock-state";
 import { localized } from "@/features/lines/mock-builders";
 import { newMockId } from "@/features/subscriptions/mock-state";
+import { saveMockFile } from "@/lib/api/mock/file-store";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { Role } from "@/lib/auth/roles";
 import { createViolationEndpoint, listMyViolationsEndpoint } from "./api";
@@ -67,8 +68,10 @@ registerMock(createViolationEndpoint, ({ body }, { token, language }) => {
       );
     }
   }
+  const violationId = newMockId("vio");
+  saveMockFile(violationId, body.photo.content_type, body.photo.data_base64);
   const item: MockViolation = {
-    violationId: newMockId("vio"),
+    violationId,
     rule: body.rule,
     student,
     tripId: body.trip_id,

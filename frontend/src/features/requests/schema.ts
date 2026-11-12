@@ -198,6 +198,8 @@ export const attachmentSchema = z.object({
   file_name: z.string(),
   content_type: z.string(),
   size_bytes: z.number().int().nonnegative(),
+  /** A short-lived link to open the file (the student who sent it and the office). */
+  url: z.url().nullable(),
 });
 export type Attachment = z.infer<typeof attachmentSchema>;
 

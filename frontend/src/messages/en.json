@@ -26,7 +26,15 @@
     "optional": "(optional)",
     "backHome": "Back to home",
     "updateReady": "A new version of the app is ready.",
-    "updateNow": "Update"
+    "updateNow": "Update",
+    "file": {
+      "open": "Open",
+      "openInTab": "Open in a new tab",
+      "download": "Download",
+      "enlarge": "Enlarge",
+      "fit": "Fit to screen",
+      "actualSize": "Show actual size"
+    }
   },
   "theme": {
     "label": "Appearance",
@@ -1742,9 +1750,7 @@
         "payer": "Paid by",
         "sent": "Sent",
         "file": "Receipt file",
-        "openFile": "Open the file",
         "noFile": "No file (paid at the office)",
-        "fileDemo": "Test mode doesn't keep uploaded files.",
         "shortAmount": "The amount is less than the term price. Check it before approving.",
         "student": "The student",
         "identifier": "University ID",
@@ -2000,8 +2006,7 @@
         "reportedBy": "Reported by",
         "when": "When",
         "photo": "Photo",
-        "photoAlt": "The photo the crew took",
-        "photoDemo": "Test mode doesn't keep photos."
+        "photoAlt": "The photo the crew took"
       },
       "act": {
         "title": "Your decision",

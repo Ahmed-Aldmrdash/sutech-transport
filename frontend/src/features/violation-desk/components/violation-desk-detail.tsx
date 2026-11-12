@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { BackLink } from "@/components/ui/back-link";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ErrorState } from "@/components/ui/error-state";
+import { FilePreview } from "@/components/ui/file-preview";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tone } from "@/components/ui/tone";
@@ -129,19 +130,14 @@ function Report({ item }: { item: DeskViolation }) {
           </Fact>
           <Fact label={t("desk.violations.detail.photo")} icon={<Camera />}>
             {item.photo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element -- a short-lived signed link
-              <img
-                src={item.photo_url}
+              <FilePreview
+                url={item.photo_url}
+                name={item.photo_name}
+                contentType="image/jpeg"
                 alt={t("desk.violations.detail.photoAlt")}
-                className="mt-2 max-h-72 rounded-md border border-line"
               />
             ) : (
-              <>
-                <bdi>{item.photo_name}</bdi>
-                <span className="block text-caption font-normal text-ink-muted">
-                  {t("desk.violations.detail.photoDemo")}
-                </span>
-              </>
+              <bdi>{item.photo_name}</bdi>
             )}
           </Fact>
         </dl>

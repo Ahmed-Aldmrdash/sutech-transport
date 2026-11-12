@@ -3232,13 +3232,25 @@
                                       "type": "integer",
                                       "minimum": 0,
                                       "maximum": 9007199254740991
+                                    },
+                                    "url": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string",
+                                          "format": "uri"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
                                     "attachment_id",
                                     "file_name",
                                     "content_type",
-                                    "size_bytes"
+                                    "size_bytes",
+                                    "url"
                                   ],
                                   "additionalProperties": false
                                 }
@@ -3423,13 +3435,25 @@
                                       "type": "integer",
                                       "minimum": 0,
                                       "maximum": 9007199254740991
+                                    },
+                                    "url": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string",
+                                          "format": "uri"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
                                     "attachment_id",
                                     "file_name",
                                     "content_type",
-                                    "size_bytes"
+                                    "size_bytes",
+                                    "url"
                                   ],
                                   "additionalProperties": false
                                 }
@@ -4221,13 +4245,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -4412,13 +4448,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -5091,13 +5139,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -5282,13 +5342,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -6035,13 +6107,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -6226,13 +6310,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -6989,13 +7085,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -7180,13 +7288,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -7943,13 +8063,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -8134,13 +8266,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -8911,13 +9055,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -9102,13 +9258,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -9785,13 +9953,25 @@
                                               "type": "integer",
                                               "minimum": 0,
                                               "maximum": 9007199254740991
+                                            },
+                                            "url": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "string",
+                                                  "format": "uri"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
                                             }
                                           },
                                           "required": [
                                             "attachment_id",
                                             "file_name",
                                             "content_type",
-                                            "size_bytes"
+                                            "size_bytes",
+                                            "url"
                                           ],
                                           "additionalProperties": false
                                         }
@@ -9976,13 +10156,25 @@
                                               "type": "integer",
                                               "minimum": 0,
                                               "maximum": 9007199254740991
+                                            },
+                                            "url": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "string",
+                                                  "format": "uri"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
                                             }
                                           },
                                           "required": [
                                             "attachment_id",
                                             "file_name",
                                             "content_type",
-                                            "size_bytes"
+                                            "size_bytes",
+                                            "url"
                                           ],
                                           "additionalProperties": false
                                         }
@@ -10686,13 +10878,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -10877,13 +11081,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -11592,13 +11808,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -11783,13 +12011,25 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9007199254740991
+                                  },
+                                  "url": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "format": "uri"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "attachment_id",
                                   "file_name",
                                   "content_type",
-                                  "size_bytes"
+                                  "size_bytes",
+                                  "url"
                                 ],
                                 "additionalProperties": false
                               }
@@ -19007,6 +19247,12 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "file_content_type": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
                           }
                         },
                         "required": [
@@ -19028,7 +19274,8 @@
                           "price_piasters",
                           "subscription_status",
                           "reviewed_by_name",
-                          "file_url"
+                          "file_url",
+                          "file_content_type"
                         ],
                         "additionalProperties": false
                       }
@@ -19263,6 +19510,12 @@
                         }
                       ]
                     },
+                    "file_content_type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "other_payments": {
                       "type": "array",
                       "items": {
@@ -19374,6 +19627,7 @@
                     "subscription_status",
                     "reviewed_by_name",
                     "file_url",
+                    "file_content_type",
                     "other_payments"
                   ],
                   "additionalProperties": false
@@ -19575,6 +19829,12 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "file_content_type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     }
                   },
                   "required": [
@@ -19596,7 +19856,8 @@
                     "price_piasters",
                     "subscription_status",
                     "reviewed_by_name",
-                    "file_url"
+                    "file_url",
+                    "file_content_type"
                   ],
                   "additionalProperties": false
                 }
@@ -19960,6 +20221,12 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "file_content_type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     }
                   },
                   "required": [
@@ -19981,7 +20248,8 @@
                     "price_piasters",
                     "subscription_status",
                     "reviewed_by_name",
-                    "file_url"
+                    "file_url",
+                    "file_content_type"
                   ],
                   "additionalProperties": false
                 }
@@ -20670,13 +20938,25 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "maximum": 9007199254740991
+                                      },
+                                      "url": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
                                       "attachment_id",
                                       "file_name",
                                       "content_type",
-                                      "size_bytes"
+                                      "size_bytes",
+                                      "url"
                                     ],
                                     "additionalProperties": false
                                   }
@@ -20861,13 +21141,25 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "maximum": 9007199254740991
+                                      },
+                                      "url": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
                                       "attachment_id",
                                       "file_name",
                                       "content_type",
-                                      "size_bytes"
+                                      "size_bytes",
+                                      "url"
                                     ],
                                     "additionalProperties": false
                                   }
@@ -21728,13 +22020,25 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "maximum": 9007199254740991
+                                      },
+                                      "url": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
                                       "attachment_id",
                                       "file_name",
                                       "content_type",
-                                      "size_bytes"
+                                      "size_bytes",
+                                      "url"
                                     ],
                                     "additionalProperties": false
                                   }
@@ -21919,13 +22223,25 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "maximum": 9007199254740991
+                                      },
+                                      "url": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "format": "uri"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
                                       "attachment_id",
                                       "file_name",
                                       "content_type",
-                                      "size_bytes"
+                                      "size_bytes",
+                                      "url"
                                     ],
                                     "additionalProperties": false
                                   }

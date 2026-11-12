@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { BackLink } from "@/components/ui/back-link";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ErrorState } from "@/components/ui/error-state";
+import { FilePreview } from "@/components/ui/file-preview";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tone } from "@/components/ui/tone";
@@ -113,23 +114,14 @@ function ReceiptCard({ payment }: { payment: OfficePaymentDetail }) {
           <Fact label={t("detail.sent")}>{formatDateTime(payment.submitted_at, locale)}</Fact>
           <Fact label={t("detail.file")} icon={<FileText />}>
             {payment.file_url ? (
-              <a
-                href={payment.file_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-brand underline focus-ring"
-              >
-                {payment.file_name ?? t("detail.openFile")}
-              </a>
+              <FilePreview
+                url={payment.file_url}
+                name={payment.file_name ?? t("detail.file")}
+                contentType={payment.file_content_type ?? ""}
+                alt={t("detail.file")}
+              />
             ) : (
-              <>
-                <bdi>{payment.file_name ?? t("detail.noFile")}</bdi>
-                {payment.file_name ? (
-                  <span className="block text-caption font-normal text-ink-muted">
-                    {t("detail.fileDemo")}
-                  </span>
-                ) : null}
-              </>
+              <bdi>{payment.file_name ?? t("detail.noFile")}</bdi>
             )}
           </Fact>
         </dl>
