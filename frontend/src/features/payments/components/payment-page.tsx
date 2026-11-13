@@ -85,16 +85,17 @@ export function PaymentPage() {
             <ShieldCheck aria-hidden="true" className="size-5 shrink-0 text-teal" />
             {t("student.payment.onlyTheseMethods")}
           </p>
-          <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          {/* Where to pay comes first; the receipt form is for after paying. */}
+          <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+            <div className="flex flex-col gap-5">
+              <BankDetailsCard instructions={instructions} />
+              <OfficePaymentCard instructions={instructions} />
+            </div>
             <ReceiptForm
               subscription={subscription}
               instructions={instructions}
               onSent={data.refresh}
             />
-            <div className="flex flex-col gap-5">
-              <BankDetailsCard instructions={instructions} />
-              <OfficePaymentCard instructions={instructions} />
-            </div>
           </div>
         </>
       ) : null}

@@ -1,5 +1,6 @@
 import { findMockAccountById } from "@/features/auth/mock-accounts";
 import {
+  crewFleetOf,
   crewProgress,
   crewTripStatus,
   findCrewTrip,
@@ -110,8 +111,10 @@ registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) 
   const onBoard = mockRidersOf(line).filter(
     (rider) => riderStateOf(trip, line, rider, now).state === RiderState.Boarded,
   ).length;
+  const fleet = crewFleetOf(trip, line);
   const sos: MockSos = {
     id: newMockId("sos"),
+    fleet: { busId: fleet.bus.busId, driverId: fleet.driver.driverId },
     type: body.type,
     note: body.note,
     tripId: trip.tripId,

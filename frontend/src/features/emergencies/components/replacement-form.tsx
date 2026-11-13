@@ -33,7 +33,7 @@ export function ReplacementForm({
   onSent,
 }: {
   options: ReplacementOptions;
-  sosId: string;
+  sosId: string | null;
   defaultReason: ReplacementReason;
   onClose: () => void;
   onSent: (replacement: TripReplacement) => void;

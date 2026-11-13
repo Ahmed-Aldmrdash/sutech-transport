@@ -5,8 +5,8 @@ import { Role } from "@/lib/auth/roles";
 import { canOpen, homePathFor, landingPathFor, loginHref, safeNextPath } from "./access";
 import { getMe, login, logout, requestOtp } from "./api";
 import { loginErrorKey } from "./auth-errors";
-import { normalizeIdentifier, sanitizeCode } from "./identifier";
-import { MOCK_OTP_RULES, resetAuthMock } from "./mock";
+import { identifierShapeError, normalizeIdentifier, sanitizeCode } from "./identifier";
+import { MOCK_OTP_RULES, resetAuthMock, sessionLengthMs } from "./mock";
 import { MOCK_OTP_LENGTH } from "./mock-accounts";
 import { AuthErrorCode } from "./schema";
 
@@ -26,6 +26,21 @@ describe("identifier input", () => {
     expect(normalizeIdentifier("۰۱۰۰۰۰۰۲۰۰۰")).toBe("01000002000");
   });
 
+  it("accepts Egyptian phones typed with the country code", () => {
+    expect(normalizeIdentifier("+201000002000")).toBe("01000002000");
+    expect(normalizeIdentifier("+20 100 000 2000")).toBe("01000002000");
+    expect(normalizeIdentifier("00201000002000")).toBe("01000002000");
+    expect(normalizeIdentifier("(010) 0000-2000")).toBe("01000002000");
+  });
+
+  it("explains a number of the wrong length", () => {
+    expect(identifierShapeError("24010010")).toBe("studentIdLength");
+    expect(identifierShapeError("240100101")).toBeNull();
+    expect(identifierShapeError("0100000200")).toBe("phoneLength");
+    expect(identifierShapeError("01000002000")).toBeNull();
+    expect(identifierShapeError("DRV-1001")).toBeNull();
+  });
+
   it("keeps emails lower case and staff IDs upper case", () => {
     expect(normalizeIdentifier("Karim@SUT.edu.eg")).toBe("karim@sut.edu.eg");
     expect(normalizeIdentifier("drv-1001")).toBe("DRV-1001");
@@ -42,11 +57,13 @@ describe("role access", () => {
     expect(homePathFor(Role.Parent)).toBe("/parent");
     expect(homePathFor(Role.Driver)).toBe("/driver");
     expect(homePathFor(Role.Supervisor)).toBe("/driver");
-    expect(homePathFor(Role.Transport)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.SuperAdmin)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.Finance)).toBe("/admin");
+    expect(homePathFor(Role.Transport)).toBe("/admin");
+    expect(homePathFor(Role.SuperAdmin)).toBe("/admin");
+    expect(homePathFor(Role.Finance)).toBe("/admin/payments");
+    expect(homePathFor(Role.StudentAffairs)).toBe("/admin/violations");
+    expect(homePathFor(Role.SecretaryGeneral)).toBe("/admin/secretary-general");
     expect(homePathFor(Role.Clinic)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.BusCompany)).toBe("/admin");
+    expect(homePathFor(Role.BusCompany)).toBe("/admin/bus-company");
   });
 
   it("keeps roles out of each other's pages", () => {
@@ -60,23 +77,44 @@ describe("role access", () => {
   });
 
   it("keeps offices apart inside /admin", () => {
-    // Finance has no built page yet: only its "coming soon" home.
-    expect(canOpen(Role.Finance, "/admin")).toBe(true);
-    expect(canOpen(Role.Finance, "/admin/payments")).toBe(false);
+    expect(canOpen(Role.Finance, "/admin")).toBe(false);
+    expect(canOpen(Role.Finance, "/admin/payments")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/payments/pay_1")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/complaints/req_1")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/requests")).toBe(false);
     expect(canOpen(Role.Finance, "/admin/emergencies")).toBe(false);
-    expect(canOpen(Role.Transport, "/admin")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/refunds")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/violations/vio_1")).toBe(true);
+    expect(canOpen(Role.StudentAffairs, "/admin/reports")).toBe(false);
+    // Abu El Hol sees its portal only: no student, office or report page.
+    expect(canOpen(Role.BusCompany, "/admin")).toBe(false);
+    expect(canOpen(Role.BusCompany, "/admin/bus-company")).toBe(true);
+    expect(canOpen(Role.BusCompany, "/admin/bus-company/fleet")).toBe(true);
+    expect(canOpen(Role.BusCompany, "/admin/events")).toBe(false);
+    expect(canOpen(Role.BusCompany, "/admin/reports")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/events/new")).toBe(true);
+    expect(canOpen(Role.Transport, "/admin/bus-company")).toBe(false);
+    expect(canOpen(Role.SecretaryGeneral, "/admin/secretary-general")).toBe(true);
+    expect(canOpen(Role.SecretaryGeneral, "/admin/events")).toBe(false);
+    // The overview is the Transportation office's home; other offices have none there.
+    expect(canOpen(Role.Transport, "/admin")).toBe(true);
+    expect(canOpen(Role.Transport, "/admin/students/usr_student_2")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/students")).toBe(false);
+    expect(canOpen(Role.SecretaryGeneral, "/admin/tracking")).toBe(false);
     expect(canOpen(Role.Transport, "/admin/emergencies/sos_1")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/clinic")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/payments")).toBe(false);
     expect(canOpen(Role.SuperAdmin, "/admin/clinic")).toBe(true);
-    expect(canOpen(Role.SuperAdmin, "/admin/users")).toBe(false);
+    expect(canOpen(Role.SuperAdmin, "/admin/users")).toBe(true);
+    expect(canOpen(Role.SuperAdmin, "/admin/not-a-page")).toBe(false);
     expect(canOpen(Role.SuperAdmin, "/student")).toBe(false);
   });
 
   it("returns to the page asked for only if the role may open it", () => {
     expect(landingPathFor(Role.Student, "/student/card")).toBe("/student/card");
     expect(landingPathFor(Role.Student, "/admin/users")).toBe("/student");
-    expect(landingPathFor(Role.Finance, null)).toBe("/admin");
+    expect(landingPathFor(Role.Finance, null)).toBe("/admin/payments");
+    expect(landingPathFor(Role.Finance, "/admin/refunds/req_9")).toBe("/admin/refunds/req_9");
   });
 
   it("never follows a link off the site", () => {
@@ -141,7 +179,8 @@ describe("two-step login (mock server)", () => {
   it("uses a code only once", async () => {
     const { demo_code: code = "" } = await requestOtp("ADM-1001");
     await login("ADM-1001", code);
-    expect((await errorOf(login("ADM-1001", code))).code).toBe(AuthErrorCode.InvalidOtp);
+    // The used code is gone: "ask for a new one", not "wrong code".
+    expect((await errorOf(login("ADM-1001", code))).code).toBe(AuthErrorCode.OtpExpired);
   });
 
   it("a new code replaces the old one", async () => {
@@ -155,6 +194,21 @@ describe("two-step login (mock server)", () => {
       );
     }
     expect((await login("CLN-1001", second.demo_code ?? "")).user.role).toBe(Role.Clinic);
+  });
+
+  it("keeps students, guardians and crew signed in through the night", () => {
+    const night = 24 * 3_600_000;
+    for (const role of [Role.Student, Role.Parent, Role.Driver, Role.Supervisor]) {
+      expect(sessionLengthMs(role)).toBeGreaterThan(night);
+    }
+    expect(sessionLengthMs(Role.Finance)).toBeLessThanOrEqual(night / 2);
+  });
+
+  it("still accepts the code after the app is closed and reopened", async () => {
+    const { demo_code: code = "" } = await requestOtp("STA-1001");
+    // A reopened app starts a fresh session store; the codes live in localStorage.
+    sessionStorage.clear();
+    expect((await login("STA-1001", code)).user.role).toBe(Role.StudentAffairs);
   });
 
   it("refuses an expired code", async () => {

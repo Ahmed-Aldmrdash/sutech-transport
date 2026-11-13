@@ -10,6 +10,7 @@ import {
   type MockPayment,
 } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
+import { saveMockFile } from "@/lib/api/mock/file-store";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import {
   getPaymentInstructionsEndpoint,
@@ -130,6 +131,7 @@ registerMock(submitReceiptEndpoint, ({ body }, { token, language }) => {
     rejectionReason: null,
     reviewedAt: null,
   };
+  saveMockFile(payment.paymentId, body.receipt.content_type, body.receipt.data_base64);
   savePayments(user.id, [...paymentsOf(user.id), payment]);
   saveBooking(user.id, {
     ...booking,

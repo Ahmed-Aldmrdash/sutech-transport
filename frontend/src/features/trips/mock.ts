@@ -5,9 +5,10 @@ import {
   toBus,
   toLineSummary,
 } from "@/features/lines/mock-builders";
-import { todayLineSource } from "@/features/crew/mock-state";
+import { lineSourceOn } from "@/features/crew/mock-state";
+import { mockReturnTime } from "@/features/lines/mock-timetable";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { requireMockStudent } from "@/features/subscriptions/mock";
-import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import {
   MS_PER_MINUTE,
@@ -34,20 +35,20 @@ function nextServiceDate(date: string, weekday: number, runsToday: boolean): str
 
 registerMock(getMyNextTripEndpoint, (_input, { token, language }) => {
   const { user } = requireMockStudent(token);
-  const booking = bookingOf(user.id);
+  const now = new Date();
+  const cairo = cairoNow(now);
+  const campusMinute = toMinutes(MOCK_CAMPUS_ARRIVAL.to);
+  const isToday = SERVICE_DAYS.has(cairo.weekday) && cairo.minute < campusMinute;
+  const serviceDate = nextServiceDate(cairo.date, cairo.weekday, isToday);
+  // That day's line (an approved change moves it) and that day's bus, not today's.
+  const booking = bookingOnDate(user.id, serviceDate, now.getTime());
   const line = booking && findMockLine(booking.lineId);
   if (!booking || !line || booking.status !== SubscriptionStatus.Active) return { trip: null };
 
   const stops = line.stops;
-  const stopIndex = booking.stopOrder - 1;
-  const [pickup = "07:00", nameAr = "", nameEn = ""] = stops[stopIndex] ?? [];
-  const now = new Date();
-  const cairo = cairoNow(now);
+  const [pickup = "07:00", nameAr = "", nameEn = ""] = stops[booking.stopOrder - 1] ?? [];
   const pickupMinute = toMinutes(pickup);
-  const campusMinute = toMinutes(MOCK_CAMPUS_ARRIVAL.to);
   const firstMinute = toMinutes(stops[0]?.[0] ?? pickup);
-  const isToday = SERVICE_DAYS.has(cairo.weekday) && cairo.minute < campusMinute;
-  const serviceDate = nextServiceDate(cairo.date, cairo.weekday, isToday);
 
   let status: NextTrip["status"] = TripStatus.Scheduled;
   let eta: number | null = null;
@@ -72,8 +73,8 @@ registerMock(getMyNextTripEndpoint, (_input, { token, language }) => {
       line: toLineSummary(line, language),
       stop: { name: localized(language, nameAr, nameEn), pickup_time: pickup },
       campus_arrival: MOCK_CAMPUS_ARRIVAL,
-      return_departure_time: null,
-      bus: toBus(todayLineSource(line, now.getTime()), language, true),
+      return_departure_time: mockReturnTime(line.lineId),
+      bus: toBus(lineSourceOn(line, serviceDate), language, true),
       status,
       eta_minutes: eta,
       near_stop: nearStop,

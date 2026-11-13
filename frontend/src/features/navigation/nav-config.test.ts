@@ -53,9 +53,13 @@ describe("role navigation", () => {
   });
 
   it("keeps offices apart", () => {
-    expect(itemKeys(Role.Finance)).toEqual(["home", "payments", "refunds", "reports"]);
+    expect(itemKeys(Role.Finance)).toEqual(["payments", "refunds", "complaints", "reports"]);
+    expect(itemKeys(Role.StudentAffairs)).toEqual(["violations"]);
     expect(itemKeys(Role.Clinic)).toEqual(["emergencies", "clinic"]);
-    expect(itemKeys(Role.BusCompany)).toEqual(["home", "busCompany"]);
+    expect(itemKeys(Role.BusCompany)).toEqual(["busCompany"]);
+    expect(itemKeys(Role.SecretaryGeneral)).toEqual(["reports", "secretaryGeneral"]);
+    expect(itemKeys(Role.Transport)).toContain("events");
+    expect(itemKeys(Role.Finance)).not.toContain("events");
     expect(itemKeys(Role.Finance)).not.toContain("liveTracking");
   });
 
@@ -83,7 +87,8 @@ describe("findActiveItem", () => {
   it("never matches a page that isn't built yet", () => {
     expect(findActiveItem(navigation, "/student", "/student/assistant")).toBeUndefined();
     const office = navigationFor(Role.Transport);
-    expect(findActiveItem(office, "/admin", "/admin/lines")).toBeUndefined();
+    expect(findActiveItem(office, "/admin", "/admin/departures")).toBeUndefined();
+    expect(findActiveItem(office, "/admin", "/admin/lines/ln_07")?.key).toBe("lineDirectory");
     expect(findActiveItem(office, "/admin", "/admin/emergencies/sos_1")?.key).toBe("emergencies");
   });
 });
@@ -101,19 +106,20 @@ describe("coming soon pages", () => {
   });
 
   it("lists what each office will get", () => {
-    expect(soonItems(navigationFor(Role.Finance)).map((item) => item.key)).toEqual([
-      "payments",
-      "refunds",
-      "reports",
-    ]);
+    expect(soonItems(navigationFor(Role.Finance))).toEqual([]);
+    expect(soonItems(navigationFor(Role.SecretaryGeneral))).toEqual([]);
+    expect(soonItems(navigationFor(Role.BusCompany))).toEqual([]);
     expect(soonItems(navigationFor(Role.Clinic))).toEqual([]);
   });
 });
 
 describe("roleHomeHref", () => {
   it("lands each role on its first built page", () => {
-    expect(roleHomeHref(navigationFor(Role.Finance))).toBe("/admin");
-    expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin/emergencies");
+    expect(roleHomeHref(navigationFor(Role.Finance))).toBe("/admin/payments");
+    expect(roleHomeHref(navigationFor(Role.StudentAffairs))).toBe("/admin/violations");
+    expect(roleHomeHref(navigationFor(Role.SecretaryGeneral))).toBe("/admin/secretary-general");
+    expect(roleHomeHref(navigationFor(Role.BusCompany))).toBe("/admin/bus-company");
+    expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin");
     expect(roleHomeHref(navigationFor(Role.Clinic))).toBe("/admin/emergencies");
     expect(roleHomeHref(navigationFor(Role.Student))).toBe("/student");
   });

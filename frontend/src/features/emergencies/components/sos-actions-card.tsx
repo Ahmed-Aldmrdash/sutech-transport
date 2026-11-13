@@ -10,7 +10,7 @@ import { Tone } from "@/components/ui/tone";
 import { SosAction, SosStatus, SosType } from "@/features/sos/schema";
 import { type AdminSos, type OfficeSosAction } from "../schema";
 import { ReplacementDialog } from "./replacement-dialog";
-import { useCanSendReplacement } from "./use-office-role";
+import { useCanSendReplacement, useIsViewOnly } from "./use-office-role";
 import { LogDialog } from "./sos-log-dialog";
 /** Types where someone may be hurt, so "ambulance called" is offered. */
 const AMBULANCE_TYPES: readonly SosType[] = [SosType.Medical, SosType.Accident];
@@ -22,6 +22,7 @@ export function SosActionsCard({ sos, onChanged }: { sos: AdminSos; onChanged: (
   const t = useTranslations("emergencies");
   const toast = useToast();
   const canReplace = useCanSendReplacement();
+  const viewOnly = useIsViewOnly();
   const [pending, setPending] = useState<Pending>(null);
   const isTaken = sos.status === SosStatus.Acknowledged;
   const ambulanceLogged = sos.actions.some((entry) => entry.action === SosAction.AmbulanceCalled);
@@ -31,6 +32,17 @@ export function SosActionsCard({ sos, onChanged }: { sos: AdminSos; onChanged: (
     setPending(null);
     toast.show({ title: t("logged"), tone: Tone.Success });
     onChanged();
+  }
+
+  if (viewOnly) {
+    return (
+      <Card elevation="raised">
+        <CardHeader title={t("actionsTitle")} headingLevel={2} />
+        <CardBody>
+          <p className="text-body-sm text-ink-muted">{t("viewOnly")}</p>
+        </CardBody>
+      </Card>
+    );
   }
 
   return (

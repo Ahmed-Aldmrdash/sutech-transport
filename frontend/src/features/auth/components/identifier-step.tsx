@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
 import { requestOtp } from "../api";
 import { loginErrorKey, type LoginErrorKey } from "../auth-errors";
-import { normalizeIdentifier } from "../identifier";
+import { identifierShapeError, normalizeIdentifier } from "../identifier";
 import { IDENTIFIER_MAX_LENGTH, type OtpChallenge } from "../schema";
 
 const MIN_IDENTIFIER_LENGTH = 3;
@@ -42,6 +42,8 @@ export function IdentifierStep({
     setBannerError(null);
     if (value === "") return showFieldError(t("identifierRequired"));
     if (value.length < MIN_IDENTIFIER_LENGTH) return showFieldError(t("identifierTooShort"));
+    const shapeError = identifierShapeError(value);
+    if (shapeError) return showFieldError(t(shapeError));
 
     setFieldError(null);
     setIsSending(true);

@@ -1,7 +1,7 @@
 "use client";
 
 import { ApprovalDetails } from "./approval-details";
-import { Check, X } from "lucide-react";
+import { Check, Undo2, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Alert } from "@/components/ui/alert";
@@ -13,7 +13,8 @@ import { useToast } from "@/components/ui/toast";
 import { Tone } from "@/components/ui/tone";
 import { firstNameOf } from "@/features/auth/user-text";
 import type { Locale } from "@/i18n/routing";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatTime } from "@/lib/format";
+import { useNow } from "@/lib/hooks/use-now";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { approveAsGuardian, refuseAsGuardian } from "../api";
 import {
@@ -29,6 +30,8 @@ import { Decision } from "./guardian-approvals-page";
 const DECISION_ERRORS = [RequestErrorCode.NotAwaitingGuardian] as const;
 
 const NOTE_MAX_LENGTH = 300;
+/** How often the "you can change your mind" window is re-checked. */
+const CHANGE_TICK_MS = 15_000;
 
 export function ApprovalCard({
   item,
@@ -47,6 +50,10 @@ export function ApprovalCard({
   const name = firstNameOf(item.student_name);
   const isWaiting = request.status === RequestStatus.AwaitingGuardian;
   const guardianEvent = request.timeline.find((event) => event.by === RequestActor.Guardian);
+  const now = useNow(CHANGE_TICK_MS);
+  const changeUntil = item.can_change_until;
+  const canChange = changeUntil !== null && Date.parse(changeUntil) > now;
+  const refused = guardianEvent?.status === RequestStatus.Rejected;
   const [decision, setDecision] = useState<Decision | null>(null);
   const [note, setNote] = useState("");
   const { submit, isSending, serverError, clearServerError } = useSubmit(DECISION_ERRORS);
@@ -111,16 +118,34 @@ export function ApprovalCard({
             </div>
           </div>
         ) : guardianEvent ? (
-          <Alert
-            tone={guardianEvent.status === RequestStatus.Rejected ? Tone.Info : Tone.Success}
-            title={
-              guardianEvent.status === RequestStatus.Rejected
-                ? t("youRefused", { date: formatDateTime(guardianEvent.at, locale) })
-                : t("youApproved", { date: formatDateTime(guardianEvent.at, locale) })
-            }
-          >
-            {guardianEvent.note ?? null}
-          </Alert>
+          <div className="flex flex-col gap-3">
+            <Alert
+              tone={refused ? Tone.Info : Tone.Success}
+              title={
+                refused
+                  ? t("youRefused", { date: formatDateTime(guardianEvent.at, locale) })
+                  : t("youApproved", { date: formatDateTime(guardianEvent.at, locale) })
+              }
+            >
+              {guardianEvent.note ?? null}
+            </Alert>
+            {canChange && changeUntil ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-body-sm text-ink">
+                  {t("changeHint", { time: formatTime(changeUntil, locale) })}
+                </p>
+                <div>
+                  <Button
+                    variant="secondary"
+                    iconStart={<Undo2 className="size-4" />}
+                    onClick={() => setDecision(refused ? Decision.Approve : Decision.Refuse)}
+                  >
+                    {refused ? t("changeToApprove") : t("changeToRefuse")}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </div>
         ) : null}
       </CardBody>
 

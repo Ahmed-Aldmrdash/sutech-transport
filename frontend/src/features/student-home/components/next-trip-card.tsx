@@ -14,7 +14,7 @@ import { getMyNextTrip } from "@/features/trips/api";
 import { TripStatus, type NextTrip } from "@/features/trips/schema";
 import { useDurationLabel } from "@/features/subscriptions/components/use-duration-label";
 import type { Locale } from "@/i18n/routing";
-import { formatCalendarDate, formatClockTime, formatTime } from "@/lib/format";
+import { formatArrival, formatCalendarDate, formatClockTime, formatTime } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 
 const MS_PER_MINUTE = 60_000;
@@ -71,10 +71,7 @@ function TripDetails({ trip }: { trip: NextTrip }) {
     },
     {
       label: t("arrival"),
-      value: tStudent("arrivalWindow", {
-        from: formatClockTime(trip.campus_arrival.from, locale),
-        to: formatClockTime(trip.campus_arrival.to, locale),
-      }),
+      value: formatArrival(trip.campus_arrival, locale),
     },
     {
       label: t("returnTime"),
@@ -110,7 +107,7 @@ function TripDetails({ trip }: { trip: NextTrip }) {
         </div>
       </div>
 
-      <dl className="grid gap-x-6 sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
         {rows.map((row) => (
           <div key={row.label} className="flex flex-col gap-0.5 border-t border-line py-2.5">
             <dt className="text-caption text-ink-muted">{row.label}</dt>

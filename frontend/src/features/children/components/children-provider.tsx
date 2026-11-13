@@ -50,6 +50,15 @@ export function ChildrenProvider({ children: content }: { children: ReactNode })
     return <ErrorState error={state.error} onRetry={state.reload} />;
   }
 
+  /** The pick also goes in the address, so a refresh or a shared link shows the same child. */
+  function select(studentId: string) {
+    selectedChildStore.set(studentId);
+    const url = new URL(window.location.href);
+    if (url.searchParams.get(CHILD_QUERY_PARAM) === studentId) return;
+    url.searchParams.set(CHILD_QUERY_PARAM, studentId);
+    window.history.replaceState(window.history.state, "", url.toString());
+  }
+
   const list = state.data.children;
   // First visit: open on a child who rides the bus, if any.
   const selected =
@@ -58,9 +67,7 @@ export function ChildrenProvider({ children: content }: { children: ReactNode })
     list[0] ??
     null;
   return (
-    <ChildrenContext.Provider
-      value={{ children: list, selected, select: selectedChildStore.set, refresh: state.refresh }}
-    >
+    <ChildrenContext.Provider value={{ children: list, selected, select, refresh: state.refresh }}>
       {content}
     </ChildrenContext.Provider>
   );

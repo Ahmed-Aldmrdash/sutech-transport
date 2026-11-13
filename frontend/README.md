@@ -32,6 +32,7 @@ Open `/ar` and sign in with one of these mock accounts. Each request makes a new
 | Student (no booking)  | `240100101`             | `/student`           |
 | Student (subscribed)  | `240100102`             | `/student`           |
 | Parent                | `01000002000`           | `/parent`            |
+| Parent (line 7 child) | `01000002001`           | `/parent`            |
 | Driver / supervisor   | `DRV-1001` / `SUP-1001` | `/driver`            |
 | Transportation office | `TRN-1001`              | `/admin/emergencies` |
 | Finance               | `FIN-1001`              | `/admin`             |

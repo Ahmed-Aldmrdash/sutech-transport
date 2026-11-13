@@ -56,6 +56,14 @@ export function AppShell({
   const totalItems = navigation.groups.reduce((count, group) => count + group.items.length, 0);
   const hasOverflow = totalItems > bottomItems.length;
   const logo = <Logo name={t("app.shortName")} tagline={t("app.tagline")} />;
+  // Phones under ~400px: the name alone, on one line, so the top bar never wraps.
+  const barLogo = (
+    <Logo
+      name={t("app.shortName")}
+      tagline={t("app.tagline")}
+      taglineClassName="max-[25rem]:hidden"
+    />
+  );
 
   const signOut = onSignOut ? (
     <button
@@ -102,7 +110,7 @@ export function AppShell({
               onClick={() => setIsMenuOpen(true)}
             />
             <Link href={homeHref} className="min-w-0 rounded-sm focus-ring desktop:hidden">
-              {logo}
+              {barLogo}
             </Link>
             <p className="hidden min-w-0 truncate text-body-sm font-bold text-ink-muted desktop:block">
               {activeItem ? t(`nav.items.${activeItem.key}`) : null}

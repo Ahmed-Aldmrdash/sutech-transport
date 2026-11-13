@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import type { Locale } from "@/i18n/routing";
-import { formatClockTime, formatNumber, formatTime } from "@/lib/format";
+import { formatArrival, formatClockTime, formatNumber, formatTime } from "@/lib/format";
 import { CrewTripStatus, type CrewToday, type CrewTrip } from "../schema";
 import { StartButton } from "./trip-buttons";
 import { STATUS_TONE, directionTitle } from "./current-trip-card";
@@ -14,7 +14,7 @@ import { STATUS_TONE, directionTitle } from "./current-trip-card";
 export function QuickActions() {
   const t = useTranslations("crew.trip");
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <ButtonLink
         href="/driver/scan"
         size="lg"
@@ -70,7 +70,7 @@ export function OtherTripRow({
         <p className="text-body font-bold text-ink-strong">{directionTitle(t, trip)}</p>
         <p className="text-body-sm text-ink-muted">{detail}</p>
       </div>
-      {trip.status === CrewTripStatus.NotStarted ? (
+      {trip.status === CrewTripStatus.NotStarted && today.relieved === null ? (
         <StartButton today={today} trip={trip} onChanged={onChanged} compact />
       ) : (
         <Badge tone={STATUS_TONE[trip.status]}>{t(`status.${trip.status}`)}</Badge>
@@ -108,10 +108,7 @@ export function BusCard({ today }: { today: CrewToday }) {
           <div>
             <dt className="text-caption text-ink-muted">{t("campus")}</dt>
             <dd className="font-bold text-ink-strong">
-              {tRoot("student.arrivalWindow", {
-                from: formatClockTime(today.campus_arrival.from, locale),
-                to: formatClockTime(today.campus_arrival.to, locale),
-              })}
+              {formatArrival(today.campus_arrival, locale)}
             </dd>
           </div>
         </dl>

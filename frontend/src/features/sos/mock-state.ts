@@ -21,6 +21,11 @@ export interface MockSos {
   raisedBy: string;
   location: { lat: number; lng: number; fixAt: number } | null;
   ridersOnBoard: number;
+  /**
+   * The bus and driver at the moment of the alert. A later replacement on the same trip must
+   * not rewrite the record. Missing on alerts stored before this was kept.
+   */
+  fleet?: { busId: string; driverId: string };
   createdAt: number;
   idempotencyKey: string | null;
   /** Oldest first. Missing on alerts stored before the office page existed. */

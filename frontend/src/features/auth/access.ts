@@ -1,4 +1,9 @@
-import { findActiveItem, navigationFor, roleHomeHref } from "@/features/navigation/nav-config";
+import {
+  findActiveItem,
+  findSoonItem,
+  navigationFor,
+  roleHomeHref,
+} from "@/features/navigation/nav-config";
 import type { Role } from "@/lib/auth/roles";
 
 /** Where the sign-in screen lives (without the locale prefix). */
@@ -29,7 +34,10 @@ export function canOpen(role: Role, pathname: string): boolean {
   const navigation = navigationFor(role);
   const { basePath } = navigation;
   if (pathname !== basePath && !pathname.startsWith(`${basePath}/`)) return false;
-  return findActiveItem(navigation, basePath, pathname) !== undefined;
+  return (
+    findActiveItem(navigation, basePath, pathname) !== undefined ||
+    findSoonItem(navigation, pathname) !== undefined
+  );
 }
 
 /** Accepts only same-site paths like "/student/card", never "//evil.com" or "https://…". */

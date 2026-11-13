@@ -10,7 +10,7 @@ import {
 } from "@/features/lines/mock-builders";
 import type { MockLineSource } from "@/features/lines/mock-lines";
 import { requireMockStudent } from "@/features/subscriptions/mock";
-import { bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { TripDirection, TripStatus } from "@/features/trips/schema";
 import {
@@ -45,7 +45,7 @@ interface TripClock {
 }
 
 /** Today's trip if the bus is on the road now (or the test-mode demo trip), else null. */
-function liveClock(line: MockLineSource, now: number): TripClock | null {
+function liveClock(line: MockLineSource, now: number, viewerId: string): TripClock | null {
   const cairo = cairoNow(new Date(now));
   // Once the crew starts today's trip from the driver's page, the map follows that trip.
   const crew = crewLiveClock(line.lineId, now);
@@ -55,7 +55,7 @@ function liveClock(line: MockLineSource, now: number): TripClock | null {
     const closesAt = arrivesAt + ARRIVED_SHOW_MINUTES * MS_PER_MINUTE;
     return now <= closesAt ? { date: crew.date, startsAt: crew.startsAt, arrivesAt } : null;
   }
-  const demoStart = demoTripStartedAt(now);
+  const demoStart = demoTripStartedAt(viewerId, now);
   if (demoStart !== null) {
     return { date: cairo.date, startsAt: demoStart, arrivesAt: demoStart + DEMO_TRIP_MS };
   }
@@ -97,13 +97,18 @@ function stopProgress(line: MockLineSource, stopOrder: number): number {
   return (pickup - first) / Math.max(1, arrival - first);
 }
 
-function mockTrackingFor(studentId: string, language: string, now: number): Tracking {
-  const booking = bookingOf(studentId, now);
+function mockTrackingFor(
+  studentId: string,
+  viewerId: string,
+  language: string,
+  now: number,
+): Tracking {
+  const booking = bookingOnDate(studentId, cairoNow(new Date(now)).date, now);
   const line = booking && findMockLine(booking.lineId);
   if (!booking || !line || booking.status !== SubscriptionStatus.Active) {
     return { trip: null, reason: NoTrackingReason.NoSubscription, next_departure_at: null };
   }
-  const clock = liveClock(line, now);
+  const clock = liveClock(line, now, viewerId);
   if (!clock) {
     return {
       trip: null,
@@ -165,14 +170,16 @@ function mockTrackingFor(studentId: string, language: string, now: number): Trac
   };
 }
 
-function trackingFor(student: MockAccount, language: string): Tracking {
-  return mockTrackingFor(student.user.id, language, Date.now());
+function trackingFor(student: MockAccount, viewerId: string, language: string): Tracking {
+  return mockTrackingFor(student.user.id, viewerId, language, Date.now());
 }
 
-registerMock(getMyTrackingEndpoint, (_input, { token, language }) =>
-  trackingFor(requireMockStudent(token), language),
-);
+registerMock(getMyTrackingEndpoint, (_input, { token, language }) => {
+  const student = requireMockStudent(token);
+  return trackingFor(student, student.user.id, language);
+});
 
-registerMock(getChildTrackingEndpoint, ({ params }, { token, language }) =>
-  trackingFor(requireMockGuardianOf(token, params.student_id).child, language),
-);
+registerMock(getChildTrackingEndpoint, ({ params }, { token, language }) => {
+  const { guardian, child } = requireMockGuardianOf(token, params.student_id);
+  return trackingFor(child, guardian.user.id, language);
+});

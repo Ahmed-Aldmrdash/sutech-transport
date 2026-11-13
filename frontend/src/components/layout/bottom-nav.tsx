@@ -4,7 +4,12 @@ import { Menu } from "lucide-react";
 import { useMessages, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { itemHref, type NavBadges, type NavItem } from "@/features/navigation/nav-config";
+import {
+  badgeSuffixKey,
+  itemHref,
+  type NavBadges,
+  type NavItem,
+} from "@/features/navigation/nav-config";
 import { CountBadge } from "@/features/notifications/components/count-badge";
 
 interface BottomNavProps {
@@ -58,7 +63,7 @@ export function BottomNav({ basePath, items, activeItem, onOpenMenu, badges }: B
                 </span>
                 <span className="max-w-full truncate px-0.5">{shortLabel(item)}</span>
                 {count ? (
-                  <span className="sr-only">{t("notifications.newCount", { count })}</span>
+                  <span className="sr-only">{t(`nav.${badgeSuffixKey(item.key)}`, { count })}</span>
                 ) : null}
               </Link>
             </li>

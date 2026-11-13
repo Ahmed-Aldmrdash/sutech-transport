@@ -42,13 +42,16 @@ export function ComplaintForm({
   // Before the subscription is active, only payment complaints are accepted.
   const isActive = subscription.status === SubscriptionStatus.Active;
   const categories = isActive ? COMPLAINT_CATEGORIES : [ComplaintCategory.Payment];
-  const { values, setErrors, update, fieldError } = useRequestForm<ComplaintValues>({
-    category: isActive ? "" : ComplaintCategory.Payment,
-    lineId: subscription.line.line_id,
-    happenedOn: today,
-    description: "",
-    attachments: [],
-  });
+  const { values, setErrors, update, fieldError, clearDraft } = useRequestForm<ComplaintValues>(
+    "complaint",
+    {
+      category: isActive ? "" : ComplaintCategory.Payment,
+      lineId: subscription.line.line_id,
+      happenedOn: today,
+      description: "",
+      attachments: [],
+    },
+  );
   const { submit, isSending, serverError } = useSubmit(REQUEST_SERVER_ERRORS);
 
   async function onSubmit(event: FormEvent) {
@@ -77,6 +80,7 @@ export function ComplaintForm({
       ),
     );
     if (created) {
+      clearDraft();
       toast.show({ title: tForm("sent"), description: tForm("sentBody"), tone: Tone.Success });
       router.replace(`${COMPLAINTS_PATH}/${created.request_id}`);
     }
@@ -92,7 +96,7 @@ export function ComplaintForm({
               {tForm("complaint.safetyBody")}
             </Alert>
           ) : null}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField
               label={tForm("complaint.category")}
               placeholder={tForm("complaint.chooseCategory")}

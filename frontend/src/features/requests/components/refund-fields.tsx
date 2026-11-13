@@ -61,7 +61,7 @@ export function RefundEstimate({
   const locale = useLocale() as Locale;
   const isExceptional = reason !== "" && EXCEPTIONAL_REFUND_REASONS.includes(reason);
   return (
-    <dl className="grid gap-3 rounded-md bg-brand-soft p-4 sm:grid-cols-3">
+    <dl className="grid grid-cols-1 gap-3 rounded-md bg-brand-soft p-4 sm:grid-cols-3">
       <div>
         <dt className="text-caption text-brand">{t("refund.paid")}</dt>
         <dd className="text-body font-bold text-ink-strong">{formatMoney(paid, locale)}</dd>

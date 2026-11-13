@@ -68,7 +68,7 @@ function ClinicView({ cases }: { cases: AdminSos[] }) {
   return (
     <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <div className="flex min-w-0 flex-col gap-5">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <StatTile
             label={t("statActive")}
             value={formatNumber(active.length, locale)}

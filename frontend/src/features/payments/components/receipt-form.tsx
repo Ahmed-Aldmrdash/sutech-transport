@@ -12,6 +12,7 @@ import { useToast } from "@/components/ui/toast";
 import type { Subscription } from "@/features/subscriptions/schema";
 import type { Locale } from "@/i18n/routing";
 import { focusFirstError } from "@/lib/forms/focus-first-error";
+import { useFormDraft } from "@/lib/forms/form-draft";
 import {
   PIASTERS_PER_POUND,
   formatCalendarDate,
@@ -39,14 +40,18 @@ export function ReceiptForm({ subscription, instructions, onSent }: ReceiptFormP
   const t = useTranslations("student.payment.receipt");
   const locale = useLocale() as Locale;
   const toast = useToast();
-  const [values, setValues] = useState<ReceiptFormValues>({
-    method: RECEIPT_METHODS[0],
-    reference: "",
-    amount: String(subscription.price_piasters / PIASTERS_PER_POUND),
-    paidOn: "",
-    payer: "",
-    file: null,
-  });
+  // A draft: switching language halfway keeps what was typed (and the chosen photo).
+  const [values, setValues, clearDraft] = useFormDraft<ReceiptFormValues>(
+    `receipt-${subscription.subscription_id}`,
+    {
+      method: RECEIPT_METHODS[0],
+      reference: "",
+      amount: String(subscription.price_piasters / PIASTERS_PER_POUND),
+      paidOn: "",
+      payer: "",
+      file: null,
+    },
+  );
   const [errors, setErrors] = useState<ReceiptErrors>({});
   const today = todayInCairo();
   const update = <K extends keyof ReceiptFormValues>(key: K, value: ReceiptFormValues[K]) => {
@@ -70,6 +75,7 @@ export function ReceiptForm({ subscription, instructions, onSent }: ReceiptFormP
     today,
     onInvalid: setErrors,
     onSent: () => {
+      clearDraft();
       toast.show({ title: t("sent"), description: t("sentBody"), tone: Tone.Success });
       onSent();
     },
@@ -103,7 +109,7 @@ export function ReceiptForm({ subscription, instructions, onSent }: ReceiptFormP
               ))}
             </div>
           </fieldset>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TextField
               label={t("reference")}
               hint={t("referenceHint")}

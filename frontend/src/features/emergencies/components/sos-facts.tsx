@@ -23,16 +23,17 @@ export function Fact({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("flex min-w-0 items-start gap-2", className)}>
-      {icon ? (
-        <span aria-hidden="true" className="mt-0.5 shrink-0 text-teal [&_svg]:size-5">
-          {icon}
-        </span>
-      ) : null}
-      <div className="min-w-0">
-        <dt className="text-caption text-ink-muted">{label}</dt>
-        <dd className="text-body-sm font-bold text-ink-strong">{children}</dd>
-      </div>
+    // dt and dd sit right in this div (a valid <dl> group); the icon hangs in its start padding.
+    <div className={cn("relative min-w-0", icon && "ps-7", className)}>
+      <dt className="text-caption text-ink-muted">
+        {icon ? (
+          <span aria-hidden="true" className="absolute start-0 top-0.5 text-teal [&_svg]:size-5">
+            {icon}
+          </span>
+        ) : null}
+        {label}
+      </dt>
+      <dd className="text-body-sm font-bold text-ink-strong">{children}</dd>
     </div>
   );
 }
@@ -42,11 +43,12 @@ export function CallLink({ name, phone }: { name: string; phone: string }) {
   return (
     <a
       href={`tel:${phone}`}
-      aria-label={t("call", { name })}
       className="inline-flex min-h-tap items-center gap-2 text-brand underline-offset-2 focus-ring hover:underline"
     >
       <Phone aria-hidden="true" className="size-4 shrink-0" />
       <span>
+        {/* Heard as "Call Kamal Ezzat · 0100…": the visible text stays the link's name. */}
+        <span className="sr-only">{t("callPrefix")} </span>
         {name} · <bdi dir="ltr">{formatPhone(phone)}</bdi>
       </span>
     </a>

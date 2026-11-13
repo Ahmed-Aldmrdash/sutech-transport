@@ -1,6 +1,7 @@
+import { MOCK_DESK_STUDENTS } from "@/features/subscriptions/mock-desk-students";
 import { absencesOf } from "@/features/absences/mock-state";
 import type { AbsenceReason } from "@/features/absences/schema";
-import { MOCK_ACCOUNTS } from "@/features/auth/mock-accounts";
+import { MOCK_ACCOUNTS, type MockAccount } from "@/features/auth/mock-accounts";
 import { requireMockAccount } from "@/features/auth/mock-token";
 import {
   MOCK_CAMPUS_ARRIVAL,
@@ -8,7 +9,7 @@ import {
   findMockLine,
 } from "@/features/lines/mock-builders";
 import type { MockLineSource } from "@/features/lines/mock-lines";
-import { bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { DEMO_TRIP_MS } from "@/features/tracking/demo-trip";
 import { TripDirection } from "@/features/trips/schema";
@@ -23,6 +24,7 @@ import {
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError } from "@/lib/api/mock/mock-server";
 import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
+import { todayInCairo } from "@/lib/format";
 import {
   lineBusId,
   lineDriverId,
@@ -172,7 +174,17 @@ export function todayFleetOf(
   line: MockLineSource,
   now: number,
 ): { bus: MockFleetBus; driver: MockFleetDriver } {
-  const date = cairoNow(new Date(now)).date;
+  return fleetOnDate(line, cairoNow(new Date(now)).date);
+}
+
+/**
+ * The bus and driver on the line on one day. A replacement belongs to its own day's trip, so
+ * tomorrow's trip shows the line's usual bus again.
+ */
+function fleetOnDate(
+  line: MockLineSource,
+  date: string,
+): { bus: MockFleetBus; driver: MockFleetDriver } {
   const replaced = [TripDirection.Outbound, TripDirection.Return]
     .map((direction) => trips.get(tripIdOf(line.lineId, date, direction)))
     .filter((trip): trip is MockCrewTrip => Boolean(trip?.replacements?.length))
@@ -183,7 +195,12 @@ export function todayFleetOf(
 
 /** The line as students and guardians should see it today (see todayFleetOf). */
 export function todayLineSource(line: MockLineSource, now: number): MockLineSource {
-  const { bus, driver } = todayFleetOf(line, now);
+  return lineSourceOn(line, cairoNow(new Date(now)).date);
+}
+
+/** The line as it runs on `date`: that day's bus and driver. */
+export function lineSourceOn(line: MockLineSource, date: string): MockLineSource {
+  const { bus, driver } = fleetOnDate(line, date);
   return withFleet(line, bus, driver);
 }
 
@@ -313,13 +330,15 @@ function hashOf(text: string): number {
 
 /**
  * Everyone subscribed on the line. Ahmed: every bus is full, so the demo accounts with an
- * active booking on it are joined by made-up students up to the bus's seats.
+ * active booking on it are joined by made-up students up to the bus's seats (less the few
+ * seats some lines still offer).
  */
-export function mockRidersOf(line: MockLineSource): MockRider[] {
+export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockRider[] {
   const riders: MockRider[] = [];
   for (const { user } of MOCK_ACCOUNTS) {
     if (user.role !== Role.Student) continue;
-    const booking = bookingOf(user.id);
+    // The line they ride that day: an approved temporary change puts them on this roster.
+    const booking = bookingOnDate(user.id, date);
     if (booking?.lineId !== line.lineId || booking.status !== SubscriptionStatus.Active) continue;
     riders.push({
       studentId: user.id,
@@ -330,7 +349,21 @@ export function mockRidersOf(line: MockLineSource): MockRider[] {
       isAccount: true,
     });
   }
-  const seats = MOCK_SEATS_BY_BUS[line.busType];
+  // The made-up students the offices work with ride too, scanned like the seat fillers.
+  for (const student of MOCK_DESK_STUDENTS) {
+    const booking = bookingOnDate(student.id, date);
+    if (booking?.lineId !== line.lineId || booking.status !== SubscriptionStatus.Active) continue;
+    riders.push({
+      studentId: student.id,
+      nameAr: student.nameAr,
+      nameEn: student.nameEn,
+      identifier: student.identifier,
+      stopOrder: booking.stopOrder,
+      isAccount: false,
+    });
+  }
+  // The seats the line still offers this term stay empty.
+  const seats = MOCK_SEATS_BY_BUS[line.busType] - line.seatsAvailable;
   const stopCount = Math.max(1, line.stops.length);
   for (let seat = 0; riders.length < seats; seat += 1) {
     const seed = hashOf(`${line.lineId}-${seat}`);
@@ -457,6 +490,45 @@ export function crewLiveClock(lineId: string, now: number) {
   return { date, ...crewTripClock(trip, line), endedAt: trip.endedAt };
 }
 
+/** A line a demo crew account runs: only the crew's own presses start and end its trips. */
+function isDemoCrewLine(lineId: string): boolean {
+  return Object.values(MOCK_CREW_LINES).includes(lineId);
+}
+
+interface MockOfficeTrip {
+  trip: MockCrewTrip;
+  /** Made up from the timetable (no crew pressed anything): demo accounts ride like the rest. */
+  simulated: boolean;
+}
+
+/**
+ * Mock only: a line's outbound trip as the offices see it. The demo crew's line follows the
+ * crew's presses today; every other line (and the crew's line on earlier days) runs on its timetable (leaves its first stop, reaches
+ * campus), so the office pages have a real-looking day to show. The real server only has
+ * what the crews did.
+ */
+export function officeOutboundTrip(
+  line: MockLineSource,
+  date: string,
+  now: number,
+): MockOfficeTrip {
+  const stored = crewTripOf(line.lineId, date, TripDirection.Outbound);
+  // Today the demo crew's line waits for the crew; an earlier day it ran on its timetable.
+  const crewDrivesIt = isDemoCrewLine(line.lineId) && date === cairoNow(new Date(now)).date;
+  if (stored.startedAt !== null || crewDrivesIt) {
+    return { trip: stored, simulated: false };
+  }
+  const { leavesAt, arrivesAt } = scheduleOf(line, date);
+  return {
+    trip: {
+      ...stored,
+      startedAt: now >= leavesAt ? leavesAt : null,
+      endedAt: now >= arrivesAt ? arrivesAt : null,
+    },
+    simulated: true,
+  };
+}
+
 /** Test helper: forget every crew trip. */
 export function resetCrewMock(): void {
   trips.clear();
@@ -484,6 +556,43 @@ export function requireMockCrew(token: string | null) {
     throw new MockHttpError(HTTP_NOT_FOUND, CrewErrorCode.NoAssignment, "Not on a bus today.");
   }
   return { account, line };
+}
+
+/**
+ * The office's latest change of driver on today's trips, if it took the bus away from this
+ * driver account: they are relieved and can't run the trip any more (the supervisor still
+ * can). A change of bus that keeps the same driver relieves nobody.
+ */
+export function relievedBy(
+  account: MockAccount,
+  line: MockLineSource,
+  now: number,
+): MockReplacement | null {
+  if (account.user.role !== Role.Driver) return null;
+  const date = cairoNow(new Date(now)).date;
+  const last = [TripDirection.Outbound, TripDirection.Return]
+    .flatMap((direction) => trips.get(tripIdOf(line.lineId, date, direction))?.replacements ?? [])
+    .sort((a, b) => a.at - b.at)
+    .at(-1);
+  return last && last.driverId !== lineDriverId(line.lineId) ? last : null;
+}
+
+/** Like requireOwnTrip, for running it (start, scan, end, delay): a relieved driver can't. */
+export function requireRunnableTrip(
+  account: MockAccount,
+  line: MockLineSource,
+  tripId: string,
+  now: number,
+): MockCrewTrip {
+  const trip = requireOwnTrip(line, tripId, now);
+  if (relievedBy(account, line, now)) {
+    throw new MockHttpError(
+      HTTP_FORBIDDEN,
+      CrewErrorCode.DriverRelieved,
+      "The office handed this trip to another driver.",
+    );
+  }
+  return trip;
 }
 
 /** Today's trip of the crew's own bus, or NOT_YOUR_TRIP like the server. */

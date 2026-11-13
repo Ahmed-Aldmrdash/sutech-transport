@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectNoSidewaysScroll, signIn, watchForErrors } from "./helpers";
+import { expectNoSidewaysScroll, signIn, switchTo, watchForErrors } from "./helpers";
 
 /** A one-pixel PNG standing in for the photo of a bank slip. */
 const RECEIPT = {
@@ -50,17 +50,29 @@ test.describe("student", () => {
 
     await page.goto("/en/student/card");
     await expect(
-      page.getByText("Your card opens after you subscribe", { exact: true }).first(),
+      page.getByText("Your receipt is being reviewed", { exact: true }).first(),
     ).toBeVisible();
 
-    // The mock finance office approves a receipt 20 seconds after it arrives: reload until then.
-    test.slow();
-    await expect(async () => {
-      await page.reload();
-      await expect(page.getByRole("img", { name: /Boarding code for/ })).toBeVisible({
-        timeout: 2_000,
-      });
-    }).toPass({ timeout: 40_000, intervals: [5_000] });
+    // Finance (FIN-1001) approves it on the payments desk; then the card opens.
+    await switchTo(page, "FIN-1001");
+    await page.waitForURL(/\/en\/admin\/payments$/);
+    await page.getByRole("searchbox", { name: "Search" }).fill("240100101");
+    await page.getByRole("link", { name: /Ziad/ }).click();
+    // Finance sees the very file the student uploaded, and can open it full size.
+    await expect(page.getByRole("img", { name: "Receipt file" })).toHaveAttribute("src", /^blob:/);
+    await page.getByRole("button", { name: /Enlarge/ }).click();
+    const viewer = page.getByRole("dialog", { name: "slip.png" });
+    await expect(viewer.getByRole("img", { name: "Receipt file" })).toBeVisible();
+    await expect(viewer.getByRole("link", { name: "Download" })).toBeVisible();
+    await viewer.getByRole("button", { name: "Close" }).click();
+    await page.getByRole("button", { name: "Approve" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Approve" }).click();
+    await expect(page.getByText("Approved: the seat is active.")).toBeVisible();
+
+    await switchTo(page, "240100101");
+    await page.waitForURL(/\/en\/student$/);
+    await page.goto("/en/student/card");
+    await expect(page.getByRole("img", { name: /Boarding code for/ })).toBeVisible();
     await expectNoSidewaysScroll(page);
     expect(errors).toEqual([]);
   });

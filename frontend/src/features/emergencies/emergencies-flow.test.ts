@@ -147,7 +147,9 @@ describe("the office takes an SOS (mock server)", () => {
     expect(sent.bus.plate).toBe(spare.plate);
     expect(sent.driver.name).toBe(spare.driver.name);
     const alert = await getAdminSos(sos.id);
-    expect(alert.bus.plate).toBe(spare.plate);
+    // The record keeps the bus the alert was raised on; the new one is in its replacements.
+    expect(alert.bus.plate).toBe("ج ص 9943");
+    expect(alert.replacements.at(-1)?.bus.plate).toBe(spare.plate);
     expect(alert.actions.at(-1)?.action).toBe(SosAction.ReplacementSent);
     expect(alert.actions.at(-1)?.note).toContain(spare.plate);
     expect((await getReplacementOptions(tripId)).buses.map((bus) => bus.bus_id)).not.toContain(
@@ -174,5 +176,20 @@ describe("the office takes an SOS (mock server)", () => {
     expect((await errorOf(listAdminSos())).status).toBe(403);
     await signIn("FIN-1001");
     expect((await errorOf(listAdminSos())).status).toBe(403);
+  });
+
+  it("lets the super admin see every alert but act on none", async () => {
+    const { sos, tripId } = await raise(SosType.Medical);
+    await signIn("ADM-1001");
+    expect((await listAdminSos()).items.some((item) => item.id === sos.id)).toBe(true);
+    expect((await getAdminSos(sos.id)).id).toBe(sos.id);
+    const tried = await errorOf(
+      addSosAction(sos.id, { action: SosAction.Acknowledge, note: null }),
+    );
+    expect(tried.status).toBe(403);
+    expect((await errorOf(getReplacementOptions(tripId))).status).toBe(403);
+    await signIn(CLINIC);
+    const taken = await addSosAction(sos.id, { action: SosAction.Acknowledge, note: null });
+    expect(taken.status).toBe(SosStatus.Acknowledged);
   });
 });

@@ -1,8 +1,10 @@
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
 import { mockTerm, requireMockStudent } from "@/features/subscriptions/mock";
-import { MOCK_TERM, bookingOf } from "@/features/subscriptions/mock-state";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
+import { MOCK_TERM } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
+import { todayInCairo } from "@/lib/format";
 import { getMyCardEndpoint } from "./api";
 import { CardErrorCode } from "./schema";
 
@@ -20,7 +22,8 @@ function mockQrToken(cardId: string, expiresAt: number): string {
 
 registerMock(getMyCardEndpoint, (_input, { token, language }) => {
   const { user } = requireMockStudent(token);
-  const booking = bookingOf(user.id);
+  // Today's line: an approved temporary change shows on the card for its dates.
+  const booking = bookingOnDate(user.id, todayInCairo());
   const line = booking && findMockLine(booking.lineId);
   if (!booking || !line || booking.status !== SubscriptionStatus.Active) {
     throw new MockHttpError(

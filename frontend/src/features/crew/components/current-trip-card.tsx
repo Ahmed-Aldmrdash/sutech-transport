@@ -35,6 +35,8 @@ export function CurrentTripCard({
 }) {
   const t = useTranslations("crew.trip");
   const locale = useLocale() as Locale;
+  // A relieved driver still sees the trip, but the new driver or the supervisor runs it.
+  const canRun = today.relieved === null;
 
   return (
     <Card elevation="raised">
@@ -53,7 +55,7 @@ export function CurrentTripCard({
                 : t("returnTimeUnknown")}
             </p>
             <Counts trip={trip} />
-            <StartButton today={today} trip={trip} onChanged={onChanged} />
+            {canRun ? <StartButton today={today} trip={trip} onChanged={onChanged} /> : null}
           </>
         ) : null}
 
@@ -67,8 +69,12 @@ export function CurrentTripCard({
               {t("onTheRoad", { time: formatTime(trip.started_at, locale) })}
             </p>
             <Counts trip={trip} />
-            <QuickActions />
-            <EndButton trip={trip} onChanged={onChanged} />
+            {canRun ? (
+              <>
+                <QuickActions />
+                <EndButton trip={trip} onChanged={onChanged} />
+              </>
+            ) : null}
           </>
         ) : null}
 

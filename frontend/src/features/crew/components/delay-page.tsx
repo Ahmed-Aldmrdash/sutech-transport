@@ -31,7 +31,11 @@ import { canReportDelay, currentTrip } from "../trip-rules";
 import { CrewGate } from "./crew-gate";
 import { Sent } from "./delay-sent";
 
-const DELAY_ERRORS = [CrewErrorCode.TripAlreadyEnded, CrewErrorCode.DelayOutOfWindow] as const;
+const DELAY_ERRORS = [
+  CrewErrorCode.TripAlreadyEnded,
+  CrewErrorCode.DelayOutOfWindow,
+  CrewErrorCode.DriverRelieved,
+] as const;
 const DEFAULT_MINUTES = 15;
 
 /** "We're running late": students and guardians on the line get a delay notice. */
@@ -72,7 +76,7 @@ function DelayView({ today, refresh }: { today: CrewToday; refresh: () => void }
     );
   }
   return (
-    <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <DelayForm trip={trip} onSent={refresh} />
       <Sent trip={trip} />
     </div>

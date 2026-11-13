@@ -11,6 +11,7 @@ import {
   localized,
   toLineSummary,
 } from "@/features/lines/mock-builders";
+import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { requireMockStudent } from "@/features/subscriptions/mock";
 import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -64,26 +65,32 @@ const MOCK_CHECKOUT_REASON = {
 } as const;
 
 /**
- * Outbound trips from the day the subscription started to today (today once the bus reached
- * campus). Return trips join once the office publishes return times.
+ * Outbound trips from the moment the subscription started to today (today once the bus reached
+ * campus). A trip that left before the subscription was approved is not in it: a student who
+ * subscribed in the afternoon never "rode" that morning. Each day uses the line the student
+ * rode that day (an approved line change moves it). Return trips join once the office
+ * publishes return times.
  */
 export function historyOf(userId: string, language: string, now: number): TripRecord[] {
   const booking = bookingOf(userId, now);
-  const line = booking && findMockLine(booking.lineId);
-  if (!booking || !line || booking.status !== SubscriptionStatus.Active || !booking.activatedAt) {
+  if (!booking || booking.status !== SubscriptionStatus.Active || !booking.activatedAt) {
     return [];
   }
+  const { activatedAt } = booking;
   const cairo = cairoNow(new Date(now));
-  const [pickup = "07:00", stopAr = "", stopEn = ""] = line.stops[booking.stopOrder - 1] ?? [];
   const notGoing = notGoingDatesOf(userId);
-  const summary = toLineSummary(line, language);
   const at = (date: string, clock: string, shift: number) =>
     new Date(cairoInstant(date, clock, cairoOffsetOn(date)) + shift * MS_PER_MINUTE).toISOString();
 
   const records: TripRecord[] = [];
-  let date = cairoNow(new Date(booking.activatedAt)).date;
+  let date = cairoNow(new Date(activatedAt)).date;
   let index = 0;
-  while (date <= cairo.date) {
+  for (; date <= cairo.date; date = addDays(date, 1)) {
+    const day = bookingOnDate(userId, date, now);
+    const line = day && findMockLine(day.lineId);
+    if (!day || !line) continue;
+    const [pickup = "07:00", stopAr = "", stopEn = ""] = line.stops[day.stopOrder - 1] ?? [];
+    const summary = toLineSummary(line, language);
     const crew = crewOutcomeFor(userId, line.lineId, date, now);
     if (crew) {
       // A trip the crew is still running has no record until it ends.
@@ -91,37 +98,35 @@ export function historyOf(userId: string, language: string, now: number): TripRe
         records.push(crewRecord(crew, { date, summary, language, stopAr, stopEn }));
         index += 1;
       }
-      date = addDays(date, 1);
       continue;
     }
+    const departed = cairoInstant(date, pickup, cairoOffsetOn(date));
     const finished = date < cairo.date || cairo.minute >= toMinutes(MOCK_CAMPUS_ARRIVAL.to);
-    if (SERVICE_DAYS.has(weekdayOf(date)) && finished) {
-      const seed = hashOf(`${userId}${date}`);
-      let outcome: TripOutcome = TripOutcome.Rode;
-      if (notGoing.has(date)) outcome = TripOutcome.NotGoing;
-      else if (index === CHECKOUT_DAY_INDEX) outcome = TripOutcome.CheckedOut;
-      else if (seed % ABSENT_ONE_IN === 0) outcome = TripOutcome.Absent;
-      const { boardShift, arriveShift } = tripShiftsOf(line.lineId, booking.stopOrder, date);
-      const rides = outcome === TripOutcome.Rode || outcome === TripOutcome.CheckedOut;
-      records.push({
-        trip_id: `trp_${line.lineId}_${date}_out`,
-        service_date: date,
-        direction: TripDirection.Outbound,
-        line: summary,
-        stop_name: localized(language, stopAr, stopEn),
-        outcome,
-        boarded_at: rides ? at(date, pickup, boardShift) : null,
-        arrived_at:
-          outcome === TripOutcome.Rode ? at(date, MOCK_CAMPUS_ARRIVAL.from, arriveShift) : null,
-        checked_out_at: outcome === TripOutcome.CheckedOut ? at(date, pickup, 25) : null,
-        checkout_reason:
-          outcome === TripOutcome.CheckedOut
-            ? localized(language, MOCK_CHECKOUT_REASON.ar, MOCK_CHECKOUT_REASON.en)
-            : null,
-      });
-      index += 1;
-    }
-    date = addDays(date, 1);
+    if (!SERVICE_DAYS.has(weekdayOf(date)) || !finished || departed < activatedAt) continue;
+    const seed = hashOf(`${userId}${date}`);
+    let outcome: TripOutcome = TripOutcome.Rode;
+    if (notGoing.has(date)) outcome = TripOutcome.NotGoing;
+    else if (index === CHECKOUT_DAY_INDEX) outcome = TripOutcome.CheckedOut;
+    else if (seed % ABSENT_ONE_IN === 0) outcome = TripOutcome.Absent;
+    const { boardShift, arriveShift } = tripShiftsOf(line.lineId, day.stopOrder, date);
+    const rides = outcome === TripOutcome.Rode || outcome === TripOutcome.CheckedOut;
+    records.push({
+      trip_id: `trp_${line.lineId}_${date}_out`,
+      service_date: date,
+      direction: TripDirection.Outbound,
+      line: summary,
+      stop_name: localized(language, stopAr, stopEn),
+      outcome,
+      boarded_at: rides ? at(date, pickup, boardShift) : null,
+      arrived_at:
+        outcome === TripOutcome.Rode ? at(date, MOCK_CAMPUS_ARRIVAL.from, arriveShift) : null,
+      checked_out_at: outcome === TripOutcome.CheckedOut ? at(date, pickup, 25) : null,
+      checkout_reason:
+        outcome === TripOutcome.CheckedOut
+          ? localized(language, MOCK_CHECKOUT_REASON.ar, MOCK_CHECKOUT_REASON.en)
+          : null,
+    });
+    index += 1;
   }
   return records.reverse();
 }

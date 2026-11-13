@@ -2,30 +2,22 @@ import { MOCK_ACCOUNTS } from "@/features/auth/mock-accounts";
 import { mockRidersOf, requireMockCrew } from "@/features/crew/mock-state";
 import { localized } from "@/features/lines/mock-builders";
 import { newMockId } from "@/features/subscriptions/mock-state";
+import { saveMockFile } from "@/lib/api/mock/file-store";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
 import { Role } from "@/lib/auth/roles";
 import { createViolationEndpoint, listMyViolationsEndpoint } from "./api";
-import { ViolationErrorCode, ViolationStatus, type ConductRule, type Violation } from "./schema";
+import { saveViolations, violationsOf, type MockViolation } from "./mock-state";
+import { ViolationErrorCode, ViolationStatus, type Violation } from "./schema";
 
 const HTTP_NOT_FOUND = 404;
-/** Mock only: Student Affairs opens a new violation this long after it arrives. */
-const MOCK_REVIEW_MS = 60_000;
 
-interface MockViolation {
-  violationId: string;
-  rule: ConductRule;
-  student: { studentId: string; nameAr: string; nameEn: string; identifier: string } | null;
-  tripId: string | null;
-  description: string;
-  photoName: string;
-  createdAt: number;
+/** Sent until Student Affairs opens it, then under review, then closed with its decision. */
+export function violationStatusOf(item: MockViolation): ViolationStatus {
+  if (!item.office) return ViolationStatus.Submitted;
+  return item.office.closedAt === null ? ViolationStatus.UnderReview : ViolationStatus.Closed;
 }
 
-/** Each crew member's violations, newest last. The photos themselves aren't kept in the mock. */
-const violations = new StoredMap<MockViolation[]>("sut.mock.violations", MockStorage.Local);
-
-function toViolation(item: MockViolation, language: string, now: number): Violation {
+export function toViolation(item: MockViolation, language: string): Violation {
   return {
     violation_id: item.violationId,
     rule: item.rule,
@@ -39,10 +31,7 @@ function toViolation(item: MockViolation, language: string, now: number): Violat
     trip_id: item.tripId,
     description: item.description,
     photo_name: item.photoName,
-    status:
-      now - item.createdAt >= MOCK_REVIEW_MS
-        ? ViolationStatus.UnderReview
-        : ViolationStatus.Submitted,
+    status: violationStatusOf(item),
     created_at: new Date(item.createdAt).toISOString(),
   };
 }
@@ -79,29 +68,26 @@ registerMock(createViolationEndpoint, ({ body }, { token, language }) => {
       );
     }
   }
+  const violationId = newMockId("vio");
+  saveMockFile(violationId, body.photo.content_type, body.photo.data_base64);
   const item: MockViolation = {
-    violationId: newMockId("vio"),
+    violationId,
     rule: body.rule,
     student,
     tripId: body.trip_id,
+    lineId: line.lineId,
     description: body.description,
     photoName: body.photo.file_name,
     createdAt: now,
   };
-  violations.set(account.user.id, [...(violations.get(account.user.id) ?? []), item]);
-  return toViolation(item, language, now);
+  saveViolations(account.user.id, [...violationsOf(account.user.id), item]);
+  return toViolation(item, language);
 });
 
 registerMock(listMyViolationsEndpoint, (_input, { token, language }) => {
   const { account } = requireMockCrew(token);
-  const now = Date.now();
-  const items = [...(violations.get(account.user.id) ?? [])]
+  const items = [...violationsOf(account.user.id)]
     .reverse()
-    .map((item) => toViolation(item, language, now));
+    .map((item) => toViolation(item, language));
   return { items };
 });
-
-/** Test helper. */
-export function resetViolationsMock(): void {
-  violations.clear();
-}

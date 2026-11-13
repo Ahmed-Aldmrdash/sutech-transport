@@ -1,13 +1,16 @@
 "use client";
 
-import { IdCard, Info, RotateCw } from "lucide-react";
+import { Hourglass, IdCard, Info, RotateCw, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getMySubscription } from "@/features/subscriptions/api";
+import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ClientErrorCode, isApiError } from "@/lib/api/errors";
+import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { readSavedCard } from "../saved-card";
 import { DigitalCard } from "./digital-card";
 import { SavedCardView } from "./saved-card-view";
@@ -25,21 +28,7 @@ export function CardPage() {
         <Skeleton className="mx-auto h-[36rem] w-full max-w-md" />
       ) : null}
       {state === CardLoadState.Error ? <CardError error={error} onRetry={reload} /> : null}
-      {state === CardLoadState.Locked ? (
-        <EmptyState
-          icon={<IdCard />}
-          title={t("student.card.lockedTitle")}
-          description={t("student.card.lockedBody")}
-          action={
-            <div className="flex flex-wrap justify-center gap-2">
-              <ButtonLink href="/student/lines">{t("student.card.goToLines")}</ButtonLink>
-              <ButtonLink href="/student/payment" variant="secondary">
-                {t("student.card.goToPayment")}
-              </ButtonLink>
-            </div>
-          }
-        />
-      ) : null}
+      {state === CardLoadState.Locked ? <LockedCard /> : null}
       {state === CardLoadState.Ready && card ? (
         <>
           <DigitalCard card={card} isRefreshing={isRefreshing} onRefresh={() => void reload()} />
@@ -50,6 +39,42 @@ export function CardPage() {
         </>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * No pass yet: says what's missing for this student. A receipt under review is not "choose a
+ * line" (they already did): it says the pass opens once Finance approves.
+ */
+function LockedCard() {
+  const t = useTranslations("student.card");
+  const mine = useAsync((signal) => getMySubscription({ signal }), []);
+  if (mine.status === AsyncStatus.Loading) {
+    return <Skeleton className="mx-auto h-48 w-full max-w-md" />;
+  }
+  const status = mine.status === AsyncStatus.Success ? mine.data.subscription?.status : undefined;
+  if (status === SubscriptionStatus.PaymentReview || status === SubscriptionStatus.Reserved) {
+    const inReview = status === SubscriptionStatus.PaymentReview;
+    return (
+      <EmptyState
+        icon={inReview ? <Hourglass /> : <Wallet />}
+        title={inReview ? t("reviewTitle") : t("payTitle")}
+        description={inReview ? t("reviewBody") : t("payBody")}
+        action={
+          <ButtonLink href="/student/payment" variant={inReview ? "secondary" : "primary"}>
+            {t("goToPayment")}
+          </ButtonLink>
+        }
+      />
+    );
+  }
+  return (
+    <EmptyState
+      icon={<IdCard />}
+      title={t("lockedTitle")}
+      description={t("lockedBody")}
+      action={<ButtonLink href="/student/lines">{t("goToLines")}</ButtonLink>}
+    />
   );
 }
 

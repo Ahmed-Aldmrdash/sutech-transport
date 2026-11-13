@@ -10,6 +10,7 @@ import { NotificationBell } from "@/features/notifications/components/notificati
 import { NotificationsWatcher } from "@/features/notifications/components/notifications-watcher";
 import { useUnreadCount } from "@/features/notifications/unread-store";
 import { SosAlarm } from "@/features/emergencies/components/sos-alarm";
+import { useAwaitingApprovals } from "@/features/requests/awaiting-approvals";
 import { Role } from "@/lib/auth/roles";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { SignInReason, canOpen, homePathFor, loginHref } from "../access";
@@ -40,6 +41,9 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
   const state = useSession();
   const signOut = useSignOut();
   const unreadCount = useUnreadCount();
+  const awaitingApprovals = useAwaitingApprovals(
+    state.status === SessionStatus.SignedIn && state.session.user.role === Role.Parent,
+  );
 
   const user = state.status === SessionStatus.SignedIn ? state.session.user : null;
   const isAllowed = user !== null && canOpen(user.role, pathname);
@@ -77,7 +81,9 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
           <NotificationBell href={notificationsPath} className="hidden desktop:inline-flex" />
         ) : null
       }
-      badges={notificationsPath ? { notifications: unreadCount } : undefined}
+      badges={
+        notificationsPath ? { notifications: unreadCount, approvals: awaitingApprovals } : undefined
+      }
     >
       <SessionWatcher userId={session.user.id} expiresAt={session.expires_at} />
       {notificationsPath ? <NotificationsWatcher /> : null}

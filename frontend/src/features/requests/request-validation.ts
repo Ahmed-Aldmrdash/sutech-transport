@@ -17,6 +17,7 @@ import {
 export type RequestFieldError =
   | "required"
   | "phoneInvalid"
+  | "guardianSameAsStudent"
   | "textTooShort"
   | "textTooLong"
   | "nameTooShort"
@@ -139,7 +140,12 @@ export function validateLineChange(
     reason: checkText(values.reason),
     studentPhone: checkPhone(values.studentPhone),
     guardianName: checkName(values.guardianName),
-    guardianPhone: checkPhone(values.guardianPhone),
+    guardianPhone:
+      checkPhone(values.guardianPhone) ??
+      (values.studentPhone.trim() &&
+      normalizePhone(values.guardianPhone) === normalizePhone(values.studentPhone)
+        ? "guardianSameAsStudent"
+        : undefined),
   });
 }
 

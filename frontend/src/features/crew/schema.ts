@@ -83,6 +83,8 @@ export const CrewErrorCode = {
   NoAssignment: "NO_ASSIGNMENT",
   /** The trip belongs to another bus. */
   NotYourTrip: "NOT_YOUR_TRIP",
+  /** The office replaced this driver on today's trip: the new driver or the supervisor runs it. */
+  DriverRelieved: "DRIVER_RELIEVED",
   TripAlreadyStarted: "TRIP_ALREADY_STARTED",
   TripAlreadyEnded: "TRIP_ALREADY_ENDED",
   TripNotStarted: "TRIP_NOT_STARTED",
@@ -198,6 +200,17 @@ export const crewTodaySchema = z.object({
   campus_arrival: arrivalWindowSchema,
   /** Today's outbound trip, then the return. Empty on a day without service. */
   trips: z.array(crewTripSchema),
+  /**
+   * Set when the office handed today's bus to another driver: this driver is relieved and
+   * can no longer start, scan or end the trip. Always null for supervisors.
+   */
+  relieved: z
+    .object({
+      driver_name: z.string(),
+      driver_phone: z.string(),
+      at: z.iso.datetime(),
+    })
+    .nullable(),
 });
 export type CrewToday = z.infer<typeof crewTodaySchema>;
 

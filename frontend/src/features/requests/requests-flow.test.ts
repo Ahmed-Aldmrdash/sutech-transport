@@ -8,6 +8,8 @@ import {
 } from "@/features/notifications/api";
 import { resetNotificationsMock } from "@/features/notifications/mock";
 import { NotificationKind, NotificationTarget } from "@/features/notifications/schema";
+import { actOnDeskRequest, getDeskRequest } from "@/features/request-desk/api";
+import { DeskErrorCode, type DeskAction } from "@/features/request-desk/schema";
 import { getMySubscription } from "@/features/subscriptions/api";
 import { resetStudentMock } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -26,7 +28,8 @@ import {
   refuseAsGuardian,
   withdrawRequest,
 } from "./api";
-import { MOCK_REQUEST_TIMING, resetRequestsMock } from "./mock-state";
+import { bookingOnDate } from "./mock-riding-line";
+import { resetRequestsMock } from "./mock-state";
 import {
   RequestErrorCode,
   RequestKind,
@@ -41,10 +44,11 @@ const MARIAM = "240100102"; // Seif, active on line 7 since September
 const AHMED = "240100101"; // no booking
 const YOUSSEF = "260100111"; // active on line 12; his guardian has an account
 const GUARDIAN = "01000002000"; // Ziad's and Yassin's father
+const SEIF_GUARDIAN = "01000002001"; // Seif's father
 const NOV_2 = Date.parse("2026-11-02T08:00:00Z");
 const OCT_1 = Date.parse("2026-10-01T08:00:00Z");
-/** Seif's guardian has no account in the mock, so it "approves" by itself after a while. */
-const OFFICE_GETS_IT = NOV_2 + MOCK_REQUEST_TIMING.guardianAutoApproveAfterMs;
+/** Seif's father approves at once, so the office gets the request then. */
+const OFFICE_GETS_IT = NOV_2;
 
 const DOCUMENT = {
   file_name: "report.pdf",
@@ -64,6 +68,41 @@ async function errorOf(promise: Promise<unknown>): Promise<ApiError> {
 async function signIn(identifier: string) {
   const challenge = await requestOtp(identifier);
   await login(identifier, challenge.demo_code ?? "");
+}
+
+/** Seif's father approves the request in the app, then Seif is back on his phone. */
+async function seifsFatherApproves(requestId: string) {
+  tokenStore.set(null);
+  resetAuthMock();
+  await signIn(SEIF_GUARDIAN);
+  await approveAsGuardian(requestId, { note: null });
+  tokenStore.set(null);
+  resetAuthMock();
+  await signIn(MARIAM);
+}
+
+/**
+ * An office member (Transportation, or finance for refunds) acts on the request, then the
+ * student signs back in. Nothing moves by itself: the office decides.
+ */
+async function officeActs(
+  student: string,
+  requestId: string,
+  action: DeskAction,
+  options: { note?: string | null; refund?: number | null; office?: string } = {},
+) {
+  tokenStore.set(null);
+  resetAuthMock();
+  await signIn(options.office ?? "TRN-1001");
+  const result = await actOnDeskRequest(requestId, {
+    action,
+    note: options.note ?? null,
+    refund_piasters: options.refund ?? null,
+  });
+  tokenStore.set(null);
+  resetAuthMock();
+  await signIn(student);
+  return result;
 }
 
 function at(time: number) {
@@ -140,15 +179,18 @@ describe("student requests (mock server)", () => {
     expect((await errorOf(createLineChange(lineChange()))).code).toBe(
       RequestErrorCode.RequestAlreadyOpen,
     );
+    await seifsFatherApproves(sent.request_id);
 
-    at(OFFICE_GETS_IT + 1);
+    at(OFFICE_GETS_IT + 60_000);
+    // Waits for the office however long it takes.
     expect((await getRequest(sent.request_id)).status).toBe(RequestStatus.Submitted);
 
-    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
+    await officeActs(MARIAM, sent.request_id, "open", { note: "Checking seats on line 12." });
     const reviewing = await getRequest(sent.request_id);
     expect(reviewing.status).toBe(RequestStatus.InReview);
+    expect(reviewing.timeline.at(-1)?.note).toBe("Checking seats on line 12.");
 
-    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    await officeActs(MARIAM, sent.request_id, "approve");
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Approved);
     expect(decided.timeline.map((event) => [event.status, event.by])).toEqual([
@@ -168,7 +210,7 @@ describe("student requests (mock server)", () => {
       lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
     );
     // No guardian answer: it never reaches the office on its own.
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs * 2);
+    at(NOV_2 + 3_600_000);
     expect((await getRequest(first.request_id)).status).toBe(RequestStatus.AwaitingGuardian);
 
     tokenStore.set(null);
@@ -182,6 +224,11 @@ describe("student requests (mock server)", () => {
       by: RequestActor.Guardian,
       note: "Too far from home.",
     });
+    // For 10 minutes the guardian may still change their mind; after that the answer stands.
+    const { approvals: answered } = await listGuardianApprovals();
+    expect(answered[0]?.can_change_until).not.toBeNull();
+    at(Date.now() + 11 * 60 * 1000);
+    expect((await listGuardianApprovals()).approvals[0]?.can_change_until).toBeNull();
     expect((await errorOf(approveAsGuardian(first.request_id, { note: null }))).code).toBe(
       RequestErrorCode.NotAwaitingGuardian,
     );
@@ -208,12 +255,87 @@ describe("student requests (mock server)", () => {
     );
   });
 
-  it("a change to a full line is not approved", async () => {
+  it("a guardian who refused by mistake can approve within 10 minutes", async () => {
+    await signIn(YOUSSEF);
+    const sent = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    await refuseAsGuardian(sent.request_id, { note: null });
+    at(NOV_2 + 5 * 60 * 1000);
+    const changed = await approveAsGuardian(sent.request_id, { note: null });
+    expect(changed.status).toBe(RequestStatus.Submitted);
+    // Approving again is not a change: nothing to do.
+    expect((await errorOf(approveAsGuardian(sent.request_id, { note: null }))).code).toBe(
+      RequestErrorCode.NotAwaitingGuardian,
+    );
+  });
+
+  it("an approved temporary change moves the student only for its dates", async () => {
+    await signIn(YOUSSEF);
+    const sent = await createLineChange(
+      lineChange({
+        to_line_id: "ln_06",
+        to_stop_id: "ln_06_s2",
+        duration: "temporary",
+        starts_on: "2026-11-03",
+        ends_on: "2026-11-05",
+      }),
+    );
+    tokenStore.set(null);
+    await signIn(GUARDIAN);
+    await approveAsGuardian(sent.request_id, { note: null });
+    await officeActs(GUARDIAN, sent.request_id, "approve");
+    expect(bookingOnDate("usr_student_11", "2026-11-02")?.lineId).toBe("ln_12");
+    expect(bookingOnDate("usr_student_11", "2026-11-03")?.lineId).toBe("ln_06");
+    expect(bookingOnDate("usr_student_11", "2026-11-05")?.lineId).toBe("ln_06");
+    expect(bookingOnDate("usr_student_11", "2026-11-06")?.lineId).toBe("ln_12");
+    // The base subscription stays on line 12.
+    tokenStore.set(null);
+    await signIn(YOUSSEF);
+    expect((await getMySubscription()).subscription?.line.line_id).toBe("ln_12");
+  });
+
+  it("request numbers are unique across students", async () => {
+    await signIn(YOUSSEF);
+    const first = await createLineChange(
+      lineChange({ to_line_id: "ln_05", to_stop_id: "ln_05_s1" }),
+    );
+    tokenStore.set(null);
+    await signIn(MARIAM);
+    const second = await createLineChange(lineChange());
+    expect(second.reference).not.toBe(first.reference);
+  });
+
+  it("a change to a full line can't be approved, only refused with a reason", async () => {
     await signIn(MARIAM);
     const sent = await createLineChange(
       lineChange({ to_line_id: "ln_02", to_stop_id: "ln_02_s1" }),
     );
-    at(OFFICE_GETS_IT + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    await seifsFatherApproves(sent.request_id);
+    tokenStore.set(null);
+    await signIn("TRN-1001");
+    expect(
+      (
+        await errorOf(
+          actOnDeskRequest(sent.request_id, {
+            action: "approve",
+            note: null,
+            refund_piasters: null,
+          }),
+        )
+      ).code,
+    ).toBe(DeskErrorCode.SeatUnavailable);
+    expect(
+      (
+        await errorOf(
+          actOnDeskRequest(sent.request_id, { action: "reject", note: " ", refund_piasters: null }),
+        )
+      ).code,
+    ).toBe(DeskErrorCode.NoteRequired);
+    // Refunds and payment complaints are finance's, not the Transportation office's.
+    await officeActs(MARIAM, sent.request_id, "reject", { note: "Line 2 is full." });
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Rejected);
     expect((await getMySubscription()).subscription?.line.line_id).toBe("ln_07");
@@ -262,10 +384,32 @@ describe("student requests (mock server)", () => {
     expect(sent.details.estimated_refund_piasters).toBeNull();
     expect(sent.details.attachments[0]?.file_name).toBe("report.pdf");
 
-    // The university decides exceptional cases: it stays under review.
-    at(NOV_2 + 10 * MOCK_REQUEST_TIMING.decidedAfterMs);
+    // The university decides exceptional cases; finance records the amount it set.
+    tokenStore.set(null);
+    await signIn("TRN-1001");
+    expect((await errorOf(getDeskRequest(sent.request_id))).status).toBe(404);
+    tokenStore.set(null);
+    await signIn("FIN-1001");
+    expect(
+      (
+        await errorOf(
+          actOnDeskRequest(sent.request_id, {
+            action: "approve",
+            note: null,
+            refund_piasters: null,
+          }),
+        )
+      ).code,
+    ).toBe(DeskErrorCode.RefundAmountInvalid);
+    await officeActs(MARIAM, sent.request_id, "open", { office: "FIN-1001" });
     expect((await getRequest(sent.request_id)).status).toBe(RequestStatus.InReview);
     expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.Active);
+    await officeActs(MARIAM, sent.request_id, "approve", { office: "FIN-1001", refund: 750_000 });
+    const decided = await getRequest(sent.request_id);
+    if (decided.kind !== RequestKind.Refund) throw new Error("expected a refund");
+    expect(decided.details.approved_refund_piasters).toBe(750_000);
+    expect(decided.timeline.at(-1)?.by).toBe(RequestActor.Finance);
+    expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.Cancelled);
   });
 
   it("in the 25% window an ordinary refund is approved and ends the subscription", async () => {
@@ -277,8 +421,11 @@ describe("student requests (mock server)", () => {
     if (sent.kind !== RequestKind.Refund) throw new Error("expected a refund");
     expect(sent.details.estimated_refund_piasters).toBe(1_125_000);
 
-    at(OCT_1 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
-    expect((await getRequest(sent.request_id)).status).toBe(RequestStatus.Approved);
+    await officeActs(MARIAM, sent.request_id, "approve", { office: "FIN-1001" });
+    const approved = await getRequest(sent.request_id);
+    expect(approved.status).toBe(RequestStatus.Approved);
+    if (approved.kind !== RequestKind.Refund) throw new Error("expected a refund");
+    expect(approved.details.approved_refund_piasters).toBe(1_125_000);
     expect((await getMySubscription()).subscription?.status).toBe(SubscriptionStatus.Cancelled);
   });
 
@@ -312,10 +459,21 @@ describe("student requests (mock server)", () => {
     const second = await createComplaint(complaint);
     expect((await withdrawRequest(second.request_id)).status).toBe(RequestStatus.Withdrawn);
 
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    await officeActs(MARIAM, first.request_id, "resolve", { note: "The driver was warned." });
     const answered = await getRequest(first.request_id);
     expect(answered.status).toBe(RequestStatus.Resolved);
-    expect(answered.timeline.at(-1)?.note).toBeTruthy();
+    expect(answered.timeline.at(-1)?.note).toBe("The driver was warned.");
+    expect(
+      (
+        await errorOf(
+          actOnDeskRequest(second.request_id, {
+            action: "open",
+            note: null,
+            refund_piasters: null,
+          }),
+        )
+      ).status,
+    ).toBe(403);
     expect((await errorOf(withdrawRequest(first.request_id))).code).toBe(
       RequestErrorCode.NotWithdrawable,
     );
@@ -354,10 +512,15 @@ describe("model permit (mock server)", () => {
       RequestErrorCode.RequestAlreadyOpen,
     );
 
-    at(NOV_2 + MOCK_REQUEST_TIMING.inReviewAfterMs + 1);
+    tokenStore.set(null);
+    await signIn("TRN-1001");
+    const desk = await getDeskRequest(sent.request_id);
+    expect(desk.allowed_actions).toEqual(["open", "approve", "reject"]);
+    expect(desk.suggested_replies.open).toContain("Dr. Nihal");
+    await officeActs(MARIAM, sent.request_id, "open", { note: desk.suggested_replies.open });
     expect((await getRequest(sent.request_id)).timeline.at(-1)?.note).toContain("Dr. Nihal");
 
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    await officeActs(MARIAM, sent.request_id, "approve", { note: "Safety signed." });
     const decided = await getRequest(sent.request_id);
     expect(decided.status).toBe(RequestStatus.Approved);
     expect(decided.timeline.at(-1)?.by).toBe(RequestActor.Safety);
@@ -421,7 +584,7 @@ describe("notifications (mock server)", () => {
       description: "The bus was 30 minutes late this morning.",
       attachments: [],
     });
-    at(NOV_2 + MOCK_REQUEST_TIMING.decidedAfterMs + 1);
+    await officeActs(MARIAM, complaint.request_id, "resolve", { note: "We spoke to the company." });
     const after = await listNotifications({ unread_only: true });
     const answer = after.items.find((item) => item.link?.target === NotificationTarget.Complaint);
     expect(answer?.link?.id).toBe(complaint.request_id);

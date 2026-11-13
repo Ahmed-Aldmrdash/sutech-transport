@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { CountBadge } from "@/features/notifications/components/count-badge";
 import {
+  badgeSuffixKey,
   itemHref,
   type NavBadges,
   type NavItem,
@@ -22,7 +23,6 @@ interface NavLinksProps {
 /** The grouped menu, shared by the laptop sidebar and the phone drawer. */
 export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLinksProps) {
   const t = useTranslations("nav");
-  const tCount = useTranslations("notifications");
   const showGroupTitles = navigation.groups.length > 1;
 
   return (
@@ -37,21 +37,38 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
               const isActive = item === activeItem;
               const Icon = item.icon;
               if (item.soon) {
+                const content = (
+                  <>
+                    <Icon aria-hidden="true" className="size-5 shrink-0" />
+                    <span className="min-w-0 leading-tight">{t(`items.${item.key}`)}</span>
+                    <span className="ms-auto shrink-0 rounded-pill bg-surface-alt px-2 py-0.5 text-caption font-bold text-ink-muted">
+                      {t("soon")}
+                    </span>
+                  </>
+                );
+                const soonStyles =
+                  "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold text-ink-muted";
+                // A planned page opens a short "being built" page; an office home has none.
                 return (
                   <li key={item.key}>
-                    <span
-                      aria-disabled="true"
-                      className="flex h-11 items-center gap-3 rounded-md px-3 text-body-sm font-bold text-ink-muted"
-                    >
-                      <Icon aria-hidden="true" className="size-5 shrink-0" />
-                      <span className="truncate">{t(`items.${item.key}`)}</span>
-                      <span className="ms-auto shrink-0 rounded-pill bg-surface-alt px-2 py-0.5 text-caption font-bold text-ink-muted">
-                        {t("soon")}
+                    {item.segment ? (
+                      <Link
+                        href={itemHref(navigation.basePath, item)}
+                        onClick={onNavigate}
+                        className={cn(soonStyles, "focus-ring hover:bg-surface-alt")}
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <span aria-disabled="true" className={soonStyles}>
+                        {content}
                       </span>
-                    </span>
+                    )}
                   </li>
                 );
               }
+              const count = badges?.[item.key] ?? 0;
+              const label = t(`items.${item.key}`);
               return (
                 <li key={item.key}>
                   <Link
@@ -59,22 +76,21 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
                     onClick={onNavigate}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
-                      "flex h-11 items-center gap-3 rounded-md px-3 text-body-sm font-bold focus-ring transition-colors",
+                      "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold focus-ring transition-colors",
                       isActive
                         ? "bg-brand-soft text-brand"
                         : "text-ink hover:bg-surface-alt hover:text-ink-strong",
                     )}
                   >
                     <Icon aria-hidden="true" className="size-5 shrink-0" />
-                    <span className="truncate">{t(`items.${item.key}`)}</span>
-                    {badges?.[item.key] ? (
-                      <>
-                        <CountBadge count={badges[item.key] ?? 0} className="ms-auto" />
-                        <span className="sr-only">
-                          {tCount("newCount", { count: badges[item.key] ?? 0 })}
-                        </span>
-                      </>
-                    ) : null}
+                    {/* Long labels ("Buses & drivers") wrap to a second line instead of being cut. */}
+                    <span className="min-w-0 leading-tight">
+                      {label}
+                      {count ? (
+                        <span className="sr-only">{t(badgeSuffixKey(item.key), { count })}</span>
+                      ) : null}
+                    </span>
+                    {count ? <CountBadge count={count} className="ms-auto" /> : null}
                   </Link>
                 </li>
               );

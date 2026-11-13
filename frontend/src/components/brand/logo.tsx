@@ -45,17 +45,20 @@ interface LogoProps {
   tagline?: string;
   variant?: "color" | "white";
   className?: string;
+  /** Extra classes for the tagline, e.g. hiding it on very narrow phones. */
+  taglineClassName?: string;
 }
 
 /** Mark + product name. The text is live HTML so it follows the theme and the language. */
-export function Logo({ name, tagline, variant = "color", className }: LogoProps) {
+export function Logo({ name, tagline, variant = "color", className, taglineClassName }: LogoProps) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
+    <span className={cn("inline-flex min-w-0 items-center gap-2.5", className)}>
       <LogoMark variant={variant} />
-      <span className="flex flex-col leading-none">
+      <span className="flex min-w-0 flex-col leading-none">
+        {/* One line, always: a long name is cut with "…" rather than spilling over the page. */}
         <span
           className={cn(
-            "text-h3 font-extrabold tracking-[-0.3px] [&:lang(ar)]:tracking-normal",
+            "truncate text-h3 font-extrabold tracking-[-0.3px] [&:lang(ar)]:tracking-normal",
             variant === "white" ? "text-white" : "text-ink-strong",
           )}
         >
@@ -64,7 +67,8 @@ export function Logo({ name, tagline, variant = "color", className }: LogoProps)
         {tagline ? (
           <span
             className={cn(
-              "mt-1 text-caption",
+              "mt-1 truncate text-caption",
+              taglineClassName,
               variant === "white" ? "text-white/80" : "text-ink-muted",
             )}
           >

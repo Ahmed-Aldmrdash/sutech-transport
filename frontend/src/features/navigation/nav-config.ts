@@ -1,5 +1,5 @@
 import {
-  Armchair,
+  Clock,
   BadgeAlert,
   Bell,
   Building2,
@@ -39,6 +39,7 @@ import { Role } from "@/lib/auth/roles";
 export type NavItemKey =
   | "home"
   | "lines"
+  | "lineDirectory"
   | "payment"
   | "card"
   | "tracking"
@@ -64,7 +65,7 @@ export type NavItemKey =
   | "attendance"
   | "busesDrivers"
   | "students"
-  | "departures"
+  | "returnTimes"
   | "payments"
   | "refunds"
   | "reports"
@@ -87,14 +88,23 @@ export interface NavItem {
   /** Shown in the phone's bottom bar (at most four per role, the rest go in the menu). */
   primary?: boolean;
   /**
-   * Planned but not built yet: listed in the menu as "coming soon", never a link, and no one
-   * may open it. Removed from an item the day its page ships.
+   * Planned but not built yet: listed in the menu as "coming soon". Its link opens a "being
+   * built" page for the offices that own it (see findSoonItem). Removed the day it ships.
    */
   soon?: boolean;
 }
 
 /** A number to show on a menu item (unread notifications). 0 or missing shows nothing. */
 export type NavBadges = Partial<Record<NavItemKey, number>>;
+
+/**
+ * The hidden words after a badged link's visible name (under `nav`): "2 new" or
+ * "1 waiting for you". The link has no aria-label, so its name starts with what is shown
+ * (voice control) and the decorative number is heard once.
+ */
+export function badgeSuffixKey(key: NavItemKey): "badgeWaiting" | "badgeNew" {
+  return key === "approvals" ? "badgeWaiting" : "badgeNew";
+}
 
 export interface NavGroup {
   key: NavGroupKey;
@@ -105,6 +115,8 @@ export interface RoleNavigation {
   /** Where this role's pages live, e.g. "/student". */
   basePath: `/${string}`;
   groups: readonly NavGroup[];
+  /** The page the role lands on after sign-in, when it isn't the first one in the menu. */
+  landing?: NavItemKey;
 }
 
 export const MAX_PRIMARY_ITEMS = 4;
@@ -184,13 +196,40 @@ interface OfficeNavGroup {
 
 const { Transport, Finance, Clinic, StudentAffairs, SecretaryGeneral, BusCompany } = Role;
 
-/** Office pages that are built. Every other office page shows as "coming soon" (phase 6). */
-const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set(["emergencies", "clinic"]);
+/** Office pages that are built. Every other office page shows as "coming soon". */
+const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
+  "users",
+  "auditLog",
+  "overview",
+  "liveTracking",
+  "attendance",
+  "lineDirectory",
+  "returnTimes",
+  "busesDrivers",
+  "students",
+  "emergencies",
+  "clinic",
+  "announcements",
+  "payments",
+  "refunds",
+  "requests",
+  "complaints",
+  "violations",
+  "reports",
+  "secretaryGeneral",
+  "events",
+  "busCompany",
+]);
+
+/** Offices whose own page isn't the first in their menu: they land on it after sign-in. */
+const OFFICE_LANDING: Partial<Record<Role, NavItemKey>> = {
+  [SecretaryGeneral]: "secretaryGeneral",
+};
 
 /** For an office with no built page yet: its home, which lists what is coming. */
 const OFFICE_WELCOME: NavItem = { key: "home", icon: House, segment: "", primary: true };
 
-/** The 20 office pages from the agreed plan, each with the offices that own it. */
+/** The 21 office pages from the agreed plan, each with the offices that own it. */
 const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
   {
     key: "operations",
@@ -212,17 +251,17 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
       },
       { key: "attendance", icon: UserCheck, segment: "attendance", roles: [Transport] },
       { key: "announcements", icon: Megaphone, segment: "announcements", roles: [Transport] },
-      { key: "lines", icon: Route, segment: "lines", roles: [Transport] },
+      { key: "lineDirectory", icon: Route, segment: "lines", roles: [Transport] },
       { key: "busesDrivers", icon: Bus, segment: "buses", roles: [Transport] },
       { key: "students", icon: UsersRound, segment: "students", roles: [Transport] },
-      { key: "departures", icon: Armchair, segment: "departures", roles: [Transport] },
+      { key: "returnTimes", icon: Clock, segment: "return-times", roles: [Transport] },
     ],
   },
   {
     key: "finance",
     items: [
       { key: "payments", icon: CreditCard, segment: "payments", roles: [Finance], primary: true },
-      { key: "refunds", icon: Receipt, segment: "refunds", roles: [Finance] },
+      { key: "refunds", icon: Receipt, segment: "refunds", roles: [Finance], primary: true },
     ],
   },
   {
@@ -235,7 +274,13 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
         roles: [Transport, StudentAffairs],
         primary: true,
       },
-      { key: "complaints", icon: MessageSquareWarning, segment: "complaints", roles: [Transport] },
+      { key: "requests", icon: ClipboardList, segment: "requests", roles: [Transport] },
+      {
+        key: "complaints",
+        icon: MessageSquareWarning,
+        segment: "complaints",
+        roles: [Transport, Finance],
+      },
       {
         key: "reports",
         icon: FileBarChart,
@@ -285,7 +330,7 @@ function officeNavigationFor(role: Role): RoleNavigation {
     key: group.key,
     items: group.items.filter(canSee).map(toNavItem),
   })).filter((group) => group.items.length > 0);
-  const navigation = { basePath: "/admin", groups } as const;
+  const navigation: RoleNavigation = { basePath: "/admin", groups, landing: OFFICE_LANDING[role] };
   if (readyItems(navigation).length > 0) return navigation;
   return { basePath: "/admin", groups: [{ key: "main", items: [OFFICE_WELCOME] }, ...groups] };
 }
@@ -293,6 +338,16 @@ function officeNavigationFor(role: Role): RoleNavigation {
 /** The pages a role can open today (everything but "coming soon"). */
 export function readyItems(navigation: RoleNavigation): NavItem[] {
   return navigation.groups.flatMap((group) => group.items).filter((item) => !item.soon);
+}
+
+/**
+ * The planned page at this path, if the role owns one there: it opens as "being built".
+ * Office homes ("") are left out: those paths belong to the office's welcome page.
+ */
+export function findSoonItem(navigation: RoleNavigation, pathname: string): NavItem | undefined {
+  return soonItems(navigation).find(
+    (item) => item.segment !== "" && itemHref(navigation.basePath, item) === pathname,
+  );
 }
 
 /** The planned pages a role will get, shown as "coming soon". */
@@ -346,9 +401,15 @@ export function findActiveItem(
   return best;
 }
 
-/** Where a role lands after sign-in: its "" page, or its first built page when it has none. */
+/**
+ * Where a role lands after sign-in: its landing page if it has one, else its "" page, else
+ * its first built page.
+ */
 export function roleHomeHref(navigation: RoleNavigation): string {
   const items = readyItems(navigation);
-  const home = items.find((item) => item.segment === "") ?? items[0];
+  const home =
+    items.find((item) => item.key === navigation.landing) ??
+    items.find((item) => item.segment === "") ??
+    items[0];
   return home ? itemHref(navigation.basePath, home) : navigation.basePath;
 }

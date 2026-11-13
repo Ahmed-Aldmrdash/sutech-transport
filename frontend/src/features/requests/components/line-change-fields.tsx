@@ -47,7 +47,7 @@ export function DestinationFields({
       : [];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <SelectField
         label={tForm("lineChange.toLine")}
         hint={tForm("lineChange.toLineHint")}
@@ -110,7 +110,7 @@ export function WhenFields({
         </div>
       </fieldset>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField
           type="date"
           label={tForm("lineChange.startsOn")}

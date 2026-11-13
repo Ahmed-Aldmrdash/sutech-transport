@@ -1,16 +1,13 @@
 import { setRequestLocale } from "next-intl/server";
-import { OfficeWelcomePage } from "@/features/auth/components/office-welcome-page";
+import { AdminHome } from "@/features/ops-desk/components/admin-home";
 import type { Locale } from "@/i18n/routing";
 import { pageTitle } from "@/i18n/page-title";
 
-export const generateMetadata = pageTitle("nav.items.home");
+export const generateMetadata = pageTitle("nav.items.overview");
 
-/**
- * Home for an office with no built page yet. Offices with one (transport, clinic, the super
- * admin) are sent to it, since this path isn't in their menu.
- */
+/** The Transportation office's overview; any other office is sent to its own home. */
 export default async function Page({ params }: PageProps<"/[locale]/admin">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
-  return <OfficeWelcomePage />;
+  return <AdminHome />;
 }

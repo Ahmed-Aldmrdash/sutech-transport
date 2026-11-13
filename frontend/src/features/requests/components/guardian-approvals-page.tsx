@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { listGuardianApprovals } from "../api";
+import { refreshAwaitingApprovals } from "../awaiting-approvals";
 import {
   RequestKind,
   RequestStatus,
@@ -24,6 +25,10 @@ import { ApprovalCard } from "./approval-card";
 export function GuardianApprovalsPage() {
   const t = useTranslations("parent.approvals");
   const state = useAsync((signal) => listGuardianApprovals({ signal }), []);
+  const onAnswered = () => {
+    state.refresh();
+    refreshAwaitingApprovals();
+  };
 
   let content: ReactNode;
   if (state.status === AsyncStatus.Loading) {
@@ -55,7 +60,7 @@ export function GuardianApprovalsPage() {
             />
           ) : (
             waiting.map((item) => (
-              <ApprovalCard key={item.request.request_id} item={item} onAnswered={state.refresh} />
+              <ApprovalCard key={item.request.request_id} item={item} onAnswered={onAnswered} />
             ))
           )}
         </section>
@@ -65,7 +70,7 @@ export function GuardianApprovalsPage() {
               {t("answeredTitle")}
             </h2>
             {answered.map((item) => (
-              <ApprovalCard key={item.request.request_id} item={item} onAnswered={state.refresh} />
+              <ApprovalCard key={item.request.request_id} item={item} onAnswered={onAnswered} />
             ))}
           </section>
         ) : null}

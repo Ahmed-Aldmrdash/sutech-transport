@@ -208,3 +208,67 @@ export async function callEndpoint<E extends Endpoint>(
   }
   return result.data as EndpointResponse<E>;
 }
+
+export interface DownloadedFile {
+  blob: Blob;
+  /** From Content-Disposition, or the fallback the caller gave. */
+  fileName: string;
+}
+
+const FILE_TIMEOUT_MS = 60_000;
+
+function fileNameOf(disposition: string | null): string | null {
+  if (!disposition) return null;
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1];
+  if (encoded) return decodeURIComponent(encoded);
+  return /filename="?([^";]+)"?/i.exec(disposition)?.[1] ?? null;
+}
+
+/**
+ * Live mode only: an endpoint that answers with a file (an Excel or PDF export). Sends the
+ * session cookie like any call, and turns an error answer into ApiError the same way.
+ */
+export async function fetchEndpointFile<E extends Endpoint>(
+  endpoint: E,
+  input: EndpointInput<E>,
+  fallbackName: string,
+  options: RequestOptions = {},
+): Promise<DownloadedFile> {
+  const raw = input as { params?: unknown; query?: unknown };
+  const params = parsePart(endpoint.params, raw.params, "params");
+  const query = parsePart(endpoint.query, raw.query, "query");
+  const url =
+    appConfig.apiBaseUrl.replace(/\/$/, "") +
+    API_PREFIX +
+    buildPath(endpoint.path, params as Record<string, unknown> | undefined) +
+    buildQueryString(query as Record<string, unknown> | undefined);
+  const headers: Record<string, string> = {};
+  const language = currentLanguage();
+  if (language) headers["Accept-Language"] = language;
+  const timeout = AbortSignal.timeout(FILE_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: endpoint.method,
+      headers,
+      credentials: "include",
+      signal: options.signal ? AbortSignal.any([options.signal, timeout]) : timeout,
+    });
+  } catch (error) {
+    if (options.signal?.aborted) throw error;
+    throw new ApiError(
+      HTTP_STATUS_NONE,
+      timeout.aborted ? ClientErrorCode.Timeout : ClientErrorCode.Network,
+      "Could not download the file.",
+      { cause: error },
+    );
+  }
+  if (!response.ok) {
+    if (response.status === HTTP_STATUS_UNAUTHORIZED) unauthorizedHandler?.();
+    throw toApiError(response.status, parseJson(await response.text()));
+  }
+  return {
+    blob: await response.blob(),
+    fileName: fileNameOf(response.headers.get("Content-Disposition")) ?? fallbackName,
+  };
+}

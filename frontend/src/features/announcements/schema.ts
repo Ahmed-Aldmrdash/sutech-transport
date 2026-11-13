@@ -41,3 +41,39 @@ export const announcementPageSchema = z.object({
   total: z.number().int().nonnegative(),
 });
 export type AnnouncementPage = z.infer<typeof announcementPageSchema>;
+
+export const ANNOUNCEMENT_TITLE_MIN_LENGTH = 5;
+export const ANNOUNCEMENT_TITLE_MAX_LENGTH = 120;
+export const ANNOUNCEMENT_BODY_MIN_LENGTH = 10;
+export const ANNOUNCEMENT_BODY_MAX_LENGTH = 1000;
+
+/** What the office posts by hand. Delays come from the crews' delay reports. */
+export const OFFICE_ANNOUNCEMENT_KINDS = [
+  AnnouncementKind.Official,
+  AnnouncementKind.ServiceChange,
+] as const;
+
+const titleSchema = z
+  .string()
+  .trim()
+  .min(ANNOUNCEMENT_TITLE_MIN_LENGTH)
+  .max(ANNOUNCEMENT_TITLE_MAX_LENGTH);
+const bodySchema = z
+  .string()
+  .trim()
+  .min(ANNOUNCEMENT_BODY_MIN_LENGTH)
+  .max(ANNOUNCEMENT_BODY_MAX_LENGTH);
+
+/**
+ * An announcement from the Transportation office, written in both languages so every reader
+ * gets their own. `line_id` null: for every student and guardian.
+ */
+export const createAnnouncementBodySchema = z.object({
+  kind: z.enum(OFFICE_ANNOUNCEMENT_KINDS),
+  line_id: z.string().min(1).nullable(),
+  title_ar: titleSchema,
+  title_en: titleSchema,
+  body_ar: bodySchema,
+  body_en: bodySchema,
+});
+export type CreateAnnouncementBody = z.infer<typeof createAnnouncementBodySchema>;

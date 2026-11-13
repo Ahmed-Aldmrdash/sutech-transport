@@ -10,17 +10,18 @@ import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
 import { TripDirection } from "@/features/trips/schema";
 import type { Locale } from "@/i18n/routing";
-import { formatNumber } from "@/lib/format";
+import { formatClockTime, formatNumber } from "@/lib/format";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { endTrip, startTrip } from "../api";
 import { CrewErrorCode, type CrewToday, type CrewTrip } from "../schema";
-import { isBlockedByOtherTrip, waitingRiders } from "../trip-rules";
+import { isBlockedByOtherTrip, startTimeGap, waitingRiders } from "../trip-rules";
 
 const TRIP_ERRORS = [
   CrewErrorCode.TripAlreadyStarted,
   CrewErrorCode.TripAlreadyEnded,
   CrewErrorCode.TripNotStarted,
   CrewErrorCode.OtherTripInProgress,
+  CrewErrorCode.DriverRelieved,
 ] as const;
 
 export function StartButton({
@@ -35,10 +36,13 @@ export function StartButton({
   compact?: boolean;
 }) {
   const t = useTranslations("crew.trip");
+  const locale = useLocale() as Locale;
   const toast = useToast();
   const [confirming, setConfirming] = useState(false);
+  const [gap, setGap] = useState<number | null>(null);
   const { submit, isSending, serverError } = useSubmit(TRIP_ERRORS);
   const blocked = isBlockedByOtherTrip(today, trip);
+  const hours = gap === null ? 0 : Math.max(1, Math.round(Math.abs(gap) / 60));
 
   async function start() {
     const started = await submit((idempotencyKey) => startTrip(trip.trip_id, { idempotencyKey }));
@@ -58,7 +62,10 @@ export function StartButton({
         className="self-start"
         disabled={blocked}
         iconStart={compact ? <Play className="size-4" /> : undefined}
-        onClick={() => setConfirming(true)}
+        onClick={() => {
+          setGap(startTimeGap(trip, new Date()));
+          setConfirming(true);
+        }}
       >
         {trip.direction === TripDirection.Outbound ? t("startOutbound") : t("startReturn")}
       </Button>
@@ -75,8 +82,18 @@ export function StartButton({
             : t("startReturnConfirm")
         }
         description={t("startConfirmBody")}
-        confirmLabel={t("startConfirm")}
-      />
+        confirmLabel={gap === null ? t("startConfirm") : t("startAnyway")}
+      >
+        {gap !== null && trip.departure_time ? (
+          <Alert
+            tone={Tone.Warning}
+            title={t(gap > 0 ? "offTimeLate" : "offTimeEarly", {
+              time: formatClockTime(trip.departure_time, locale),
+              hours,
+            })}
+          />
+        ) : null}
+      </ConfirmDialog>
     </div>
   );
 }
