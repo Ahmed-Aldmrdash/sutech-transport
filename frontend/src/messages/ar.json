@@ -121,8 +121,8 @@
       "approvals": "موافقات"
     },
     "soon": "قريبًا",
-    "withBadge": "{label} {count} جديد",
-    "withWaiting": "{label} {count} مستني ردك"
+    "badgeNew": "{count} جديد",
+    "badgeWaiting": "{count} مستني ردك"
   },
   "errors": {
     "retry": "جرّب تاني",

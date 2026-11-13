@@ -44,7 +44,7 @@ export function DataTable<TRow>({
     <div
       className={cn("overflow-hidden rounded-card border border-line bg-surface-raised", className)}
     >
-      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={caption}>
+      <div className="relative overflow-x-auto" tabIndex={0} role="region" aria-label={caption}>
         <table className="w-full border-collapse text-body-sm" aria-busy={isLoading || undefined}>
           <caption className="sr-only">{caption}</caption>
           <thead className="bg-surface-alt">

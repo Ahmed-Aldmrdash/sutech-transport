@@ -98,11 +98,12 @@ export interface NavItem {
 export type NavBadges = Partial<Record<NavItemKey, number>>;
 
 /**
- * The message (under `nav`) for a badged link's one accessible name: "Notifications 2 new" or
- * "Approvals 1 waiting for you" (starting with the visible text, for voice control). The visible number is decorative, so it is heard once.
+ * The hidden words after a badged link's visible name (under `nav`): "2 new" or
+ * "1 waiting for you". The link has no aria-label, so its name starts with what is shown
+ * (voice control) and the decorative number is heard once.
  */
-export function badgeLabelKey(key: NavItemKey): "withWaiting" | "withBadge" {
-  return key === "approvals" ? "withWaiting" : "withBadge";
+export function badgeSuffixKey(key: NavItemKey): "badgeWaiting" | "badgeNew" {
+  return key === "approvals" ? "badgeWaiting" : "badgeNew";
 }
 
 export interface NavGroup {

@@ -121,8 +121,8 @@
       "approvals": "Approve"
     },
     "soon": "Soon",
-    "withBadge": "{label} {count} new",
-    "withWaiting": "{label} {count} waiting for you"
+    "badgeNew": "{count} new",
+    "badgeWaiting": "{count} waiting for you"
   },
   "errors": {
     "retry": "Try again",

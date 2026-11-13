@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { CountBadge } from "@/features/notifications/components/count-badge";
 import {
-  badgeLabelKey,
+  badgeSuffixKey,
   itemHref,
   type NavBadges,
   type NavItem,
@@ -75,7 +75,6 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
                     href={itemHref(navigation.basePath, item)}
                     onClick={onNavigate}
                     aria-current={isActive ? "page" : undefined}
-                    aria-label={count ? t(badgeLabelKey(item.key), { label, count }) : undefined}
                     className={cn(
                       "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold focus-ring transition-colors",
                       isActive
@@ -85,7 +84,12 @@ export function NavLinks({ navigation, activeItem, onNavigate, badges }: NavLink
                   >
                     <Icon aria-hidden="true" className="size-5 shrink-0" />
                     {/* Long labels ("Buses & drivers") wrap to a second line instead of being cut. */}
-                    <span className="min-w-0 leading-tight">{label}</span>
+                    <span className="min-w-0 leading-tight">
+                      {label}
+                      {count ? (
+                        <span className="sr-only">{t(badgeSuffixKey(item.key), { count })}</span>
+                      ) : null}
+                    </span>
                     {count ? <CountBadge count={count} className="ms-auto" /> : null}
                   </Link>
                 </li>
