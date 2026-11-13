@@ -36,7 +36,7 @@ function SosView({ today, refresh }: { today: CrewToday; refresh: () => void }) 
   const canRaise = trip !== null && trip.status !== CrewTripStatus.Ended && !isOpen;
 
   return (
-    <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <div className="flex flex-col gap-5">
         {canRaise ? (
           <SosPicker

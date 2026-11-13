@@ -3,13 +3,15 @@ import { BusType } from "./schema";
 /**
  * The university's real lines (Transportation Department "Routes" file, received 2026-11-02):
  * stop names, their order, morning pickup times and notes, exactly as sent. The campus stop is
- * left out: Ahmed confirmed every bus reaches campus between 8:45 and 9:00.
+ * left out: on every line it is "جامعة السويدي" at 8:30 (MOCK_CAMPUS_ARRIVAL). One fix: line 19's
+ * "مسجد بلال" says 8:30 between stops at 7:32 and 7:35, so it is taken as 7:33.
  *
  * Bus types and plates come from the Abu El Hol drivers list. Driver names and mobiles are made
  * up (2026-11-08): no real person's data goes into a public build; the real ones will come from
  * the server. The list's two extra routes (Maadi Mall 50 HUB,
  * ENPPI – Ghamra) aren't in the Routes file, so they wait for the office to confirm them.
- * Not known yet, so kept as placeholders: return times, stop locations (map pins) and exact seat
+ * Return: every bus leaves campus at 4:30 PM (Ahmed, 2026-11-13; the office can change it).
+ * Not known yet, so kept as placeholders: stop locations (map pins) and exact seat
  * counts (estimated from the bus type).
  */
 
@@ -536,7 +538,7 @@ export const MOCK_LINES: readonly MockLineSource[] = [
       ["07:10", "نادي إيزي سبورت", "Easy Sport club"],
       ["07:25", "بنك QNB", "QNB bank"],
       ["07:32", "كشري التحرير", "Koshary El Tahrir"],
-      ["08:30", "مسجد بلال", "Bilal Mosque"],
+      ["07:33", "مسجد بلال", "Bilal Mosque"],
       ["07:35", "نادي المقطم", "El Mokattam club"],
       ["07:40", "أسماك الأندلس", "Asmak El Andalus"],
       ["07:42", "مستورة", "Mastoura"],

@@ -1,4 +1,5 @@
 import { absencesEndpoints } from "@/features/absences/api";
+import { adminSystemEndpoints } from "@/features/admin-system/api";
 import { announcementsEndpoints } from "@/features/announcements/api";
 import { attendanceEndpoints } from "@/features/attendance/api";
 import { authEndpoints } from "@/features/auth/api";
@@ -10,9 +11,13 @@ import { notificationsEndpoints } from "@/features/notifications/api";
 import { paymentsEndpoints } from "@/features/payments/api";
 import { requestsEndpoints } from "@/features/requests/api";
 import { emergenciesEndpoints } from "@/features/emergencies/api";
+import { eventBusesEndpoints } from "@/features/event-buses/api";
 import { financeDeskEndpoints } from "@/features/finance-desk/api";
+import { opsDeskEndpoints } from "@/features/ops-desk/api";
+import { timetableEndpoints } from "@/features/timetable/api";
 import { reportsEndpoints } from "@/features/reports/api";
 import { requestDeskEndpoints } from "@/features/request-desk/api";
+import { sgOfficeEndpoints } from "@/features/sg-office/api";
 import { violationDeskEndpoints } from "@/features/violation-desk/api";
 import { sosEndpoints } from "@/features/sos/api";
 import { subscriptionsEndpoints } from "@/features/subscriptions/api";
@@ -49,4 +54,9 @@ export const allEndpoints: readonly Endpoint[] = [
   ...requestDeskEndpoints,
   ...violationDeskEndpoints,
   ...reportsEndpoints,
+  ...eventBusesEndpoints,
+  ...sgOfficeEndpoints,
+  ...opsDeskEndpoints,
+  ...timetableEndpoints,
+  ...adminSystemEndpoints,
 ];

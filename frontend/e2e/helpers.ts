@@ -1,18 +1,28 @@
 import { expect, type Page } from "@playwright/test";
 
+/** Map tiles come from the internet; one that fails to load is not an app error. */
+const TILE_HOST = "tile.openstreetmap.org";
+
 /** Fails the test on any uncaught error or console error on the page. */
 export function watchForErrors(page: Page): string[] {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
+    if (message.type() === "error" && !message.location().url.includes(TILE_HOST)) {
+      errors.push(message.text());
+    }
   });
   return errors;
 }
 
 export async function expectNoSidewaysScroll(page: Page) {
+  // On a phone a too-wide page widens the layout viewport (innerWidth grows with it), so
+  // compare with the device's own width, not innerWidth.
+  const width = page.viewportSize()?.width ?? 0;
   const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - window.innerWidth,
+    (deviceWidth) =>
+      document.documentElement.scrollWidth - Math.min(deviceWidth, window.innerWidth),
+    width,
   );
   expect(overflow, "the page must never scroll sideways").toBeLessThanOrEqual(0);
 }
@@ -47,6 +57,8 @@ export async function signIn(page: Page, identifier: string, path = "/en/login")
 
 /** The mock keeps its data in this browser, so the next role signs in on the same page. */
 export async function switchTo(page: Page, identifier: string) {
+  // A /me check still in flight would save the session again after it is removed.
+  await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.evaluate(() => localStorage.removeItem("sut.session"));
   await page.context().clearCookies();
   await signIn(page, identifier);

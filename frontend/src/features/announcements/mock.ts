@@ -1,3 +1,5 @@
+import { recordAudit } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
 import { requireMockAccount } from "@/features/auth/mock-token";
 import { mockChildrenOf } from "@/features/children/mock-links";
 import { allCrewDelays, allReplacements } from "@/features/crew/mock-state";
@@ -50,23 +52,24 @@ const MOCK_ANNOUNCEMENTS = [
     id: "ann_return_times",
     kind: AnnouncementKind.ServiceChange,
     publishedAt: "2026-11-02T08:00:00Z",
-    titleAr: "مواعيد العودة هتتعلن قريب",
-    titleEn: "Return times coming soon",
-    bodyAr: "إدارة النقل بتجهز مواعيد خروج الباصات من الجامعة لكل خط، وهتظهر هنا أول ما تتعلن.",
+    titleAr: "العودة من الجامعة 4:30",
+    titleEn: "Buses leave campus at 4:30 PM",
+    bodyAr:
+      "كل الباصات بتطلع من الجامعة الساعة 4:30 العصر. لو ميعاد خطك اتغير هتلاقيه في صفحة الخط.",
     bodyEn:
-      "The Transportation office is preparing each line's afternoon departure times. They will " +
-      "appear here as soon as they are published.",
+      "Every bus leaves campus at 4:30 PM. If your line's time changes, you'll see it on the " +
+      "line's page.",
   },
   {
     id: "ann_arrival_window",
     kind: AnnouncementKind.Official,
     publishedAt: "2026-11-01T09:00:00Z",
-    titleAr: "الوصول للجامعة من 8:45 لـ 9:00",
-    titleEn: "Buses reach campus 8:45 to 9:00",
-    bodyAr: "كل الخطوط بتوصل الجامعة الصبح ما بين 8:45 و9:00. الباص بيستنى في المحطة دقيقتين بس.",
+    titleAr: "الوصول للجامعة 8:30",
+    titleEn: "Buses reach campus at 8:30",
+    bodyAr: "كل الخطوط بتوصل الجامعة الصبح الساعة 8:30. الباص بيستنى في المحطة دقيقتين بس.",
     bodyEn:
-      "Every line reaches campus between 8:45 and 9:00 in the morning. The bus waits at each stop " +
-      "for two minutes only.",
+      "Every line reaches campus at 8:30 in the morning. The bus waits at each stop for two " +
+      "minutes only.",
   },
   {
     id: "ann_payment_methods",
@@ -297,7 +300,7 @@ registerMock(listAnnouncementsEndpoint, ({ query }, { token, language }) => {
 });
 
 registerMock(createAnnouncementEndpoint, ({ body }, { token, language }) => {
-  requireMockOffice(token, [Role.Transport]);
+  const officer = requireMockOffice(token, [Role.Transport]);
   if (body.line_id !== null && !findMockLine(body.line_id)) {
     throw new MockHttpError(404, LineErrorCode.LineNotFound, "No such line.");
   }
@@ -312,6 +315,7 @@ registerMock(createAnnouncementEndpoint, ({ body }, { token, language }) => {
     publishedAt: Date.now(),
   };
   officeAnnouncements.set(item.id, item);
+  recordAudit(officer, AuditAction.AnnouncementPosted, { ar: item.titleAr, en: item.titleEn });
   const created = postedByOffice(language).find((entry) => entry.announcement_id === item.id);
   if (!created) throw new Error("unreachable");
   return created;

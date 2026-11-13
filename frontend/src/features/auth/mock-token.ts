@@ -39,7 +39,10 @@ export function mockUnauthorized(): never {
 export function requireMockAccount(token: string | null): MockAccount {
   const payload = decodeMockToken(token);
   if (!payload || payload.exp <= Date.now()) mockUnauthorized();
-  return findMockAccountById(payload.sub) ?? mockUnauthorized();
+  const account = findMockAccountById(payload.sub);
+  // A stopped account is signed out at its next request, as the real server would.
+  if (!account || account.disabled) mockUnauthorized();
+  return account;
 }
 
 const HTTP_FORBIDDEN = 403;
@@ -52,6 +55,19 @@ export function requireMockOffice(token: string | null, roles: readonly Role[]):
   const account = requireMockAccount(token);
   if (account.user.role !== Role.SuperAdmin && !roles.includes(account.user.role)) {
     throw new MockHttpError(HTTP_FORBIDDEN, ServerErrorCode.Forbidden, "Not your office.");
+  }
+  return account;
+}
+
+/**
+ * The signed-in member of an office that acts on this work. The super admin sees these
+ * pages but does not act on them (the bus company's portal, the SOS and clinic desk), so
+ * they get 403 here like anyone outside the office.
+ */
+export function requireMockActor(token: string | null, roles: readonly Role[]): MockAccount {
+  const account = requireMockAccount(token);
+  if (!roles.includes(account.user.role)) {
+    throw new MockHttpError(HTTP_FORBIDDEN, ServerErrorCode.Forbidden, "View only.");
   }
   return account;
 }

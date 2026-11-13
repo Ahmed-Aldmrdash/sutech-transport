@@ -26,7 +26,7 @@ export function SubscriptionFacts({ subscription }: { subscription: Subscription
     { label: t("price"), value: formatMoney(subscription.price_piasters, locale) },
   ];
   return (
-    <dl className="grid gap-x-6 sm:grid-cols-2">
+    <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
       {rows.map((row) => (
         <div key={row.label} className="flex flex-col gap-0.5 border-t border-line py-2.5">
           <dt className="text-caption text-ink-muted">{row.label}</dt>

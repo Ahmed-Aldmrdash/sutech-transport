@@ -1,3 +1,5 @@
+import { both, recordAudit, studentTarget } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
 import { mockNameOf, requireMockOffice } from "@/features/auth/mock-token";
 import { findMockAccountById } from "@/features/auth/mock-accounts";
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
@@ -179,6 +181,15 @@ registerMock(actOnViolationEndpoint, ({ params, body }, { token, language }) => 
   saveViolations(
     crewId,
     violationsOf(crewId).map((entry) => (entry.violationId === item.violationId ? updated : entry)),
+  );
+  recordAudit(
+    officer,
+    body.action === ViolationDeskAction.Close
+      ? AuditAction.ViolationClosed
+      : AuditAction.ViolationOpened,
+    item.student ? studentTarget(item.student) : both(item.violationId),
+    body.action === ViolationDeskAction.Close ? office.note : null,
+    now,
   );
   return toDeskViolation({ crewId, item: updated }, officer.user.role, language);
 });

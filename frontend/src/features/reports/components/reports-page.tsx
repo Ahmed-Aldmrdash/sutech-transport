@@ -95,7 +95,7 @@ function ReportView({ catalog }: { catalog: ReportCatalog }) {
       />
       {entry ? <p className="-mt-3 text-body-sm text-ink-muted">{entry.description}</p> : null}
       <Card>
-        <CardBody className="grid gap-4 sm:grid-cols-3 sm:items-end">
+        <CardBody className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
           <SelectField
             label={t("line")}
             value={lineId}

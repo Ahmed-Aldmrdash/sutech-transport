@@ -60,7 +60,7 @@ test.describe("finance", () => {
 test.describe("requests and violations", () => {
   test("transport approves a model permit and the student sees it", async ({ page }) => {
     const errors = watchForErrors(page);
-    await landOn(page, "TRN-1001", /\/en\/admin\/emergencies$/);
+    await landOn(page, "TRN-1001", /\/en\/admin$/);
     await page.goto("/en/admin/requests");
     await page.getByRole("link", { name: /Salma Wael Ezzat/ }).click();
     await page.getByRole("button", { name: "Open", exact: true }).click();
@@ -90,7 +90,7 @@ test.describe("requests and violations", () => {
   });
 
   test("transport follows violations without deciding", async ({ page }) => {
-    await landOn(page, "TRN-1001", /\/en\/admin\/emergencies$/);
+    await landOn(page, "TRN-1001", /\/en\/admin$/);
     await page.goto("/en/admin/violations");
     await page.getByRole("link", { name: /Habiba Ashraf Kamal/ }).click();
     await expect(
@@ -102,7 +102,7 @@ test.describe("requests and violations", () => {
 
 test.describe("announcements and reports", () => {
   test("transport posts for one line and its student sees it", async ({ page }) => {
-    await landOn(page, "TRN-1001", /\/en\/admin\/emergencies$/);
+    await landOn(page, "TRN-1001", /\/en\/admin$/);
     await page.goto("/en/admin/announcements");
     await page.getByRole("radio", { name: /Service change/ }).check();
     await page.getByLabel("Who sees it").selectOption("ln_07");
@@ -124,7 +124,7 @@ test.describe("announcements and reports", () => {
 
   test("downloads a report as Excel and PDF", async ({ page }) => {
     const errors = watchForErrors(page);
-    await landOn(page, "TRN-1001", /\/en\/admin\/emergencies$/);
+    await landOn(page, "TRN-1001", /\/en\/admin$/);
     await page.goto("/en/admin/reports");
     await expect(page.getByRole("heading", { name: "Subscribers roster" })).toBeVisible();
     await page.getByLabel("Line", { exact: true }).selectOption("ln_07");

@@ -7,12 +7,16 @@ import {
   type Stop,
 } from "./schema";
 import { MOCK_LINES, type MockLineSource } from "./mock-lines";
+import { mockReturnTime } from "./mock-timetable";
 
 /** One term on any line costs 15,000 EGP (registration letter, Fall 2026). */
 export const MOCK_TERM_PRICE_PIASTERS = 1_500_000;
 
-/** Ahmed, 2026-11-02: every bus reaches campus between 8:45 and 9:00. */
-export const MOCK_CAMPUS_ARRIVAL = { from: "08:45", to: "09:00" } as const;
+/**
+ * The university's Routes file: every line reaches campus ("جامعة السويدي") at 8:30. Ahmed,
+ * 2026-11-13: follow the file (an earlier note had 8:45 to 9:00).
+ */
+export const MOCK_CAMPUS_ARRIVAL = { from: "08:30", to: "08:30" } as const;
 
 /** Seats by bus type. Estimates until the bus company sends the exact count per bus. */
 export const MOCK_SEATS_BY_BUS: Record<BusType, number> = {
@@ -66,7 +70,7 @@ export function toLine(source: MockLineSource, language: string, seatsHeld: numb
     stop_count: source.stops.length,
     first_pickup_time: source.stops[0]?.[0] ?? null,
     campus_arrival: MOCK_CAMPUS_ARRIVAL,
-    return_departure_time: null,
+    return_departure_time: mockReturnTime(source.lineId),
   };
 }
 

@@ -63,12 +63,15 @@ describe("student journey (mock server)", () => {
     tokenStore.set(null);
   });
 
-  it("lists the university's 25 routes at 15,000 EGP, arriving 8:45 to 9:00", async () => {
+  it("lists the university's 25 routes at 15,000 EGP, arriving at 8:30 and leaving at 16:30", async () => {
     const lines = await listLines();
     expect(lines).toHaveLength(25);
     expect(new Set(lines.map((line) => line.price_piasters))).toEqual(new Set([TERM_PRICE]));
-    expect(lines.every((line) => line.campus_arrival.from === "08:45")).toBe(true);
-    expect(lines.every((line) => line.return_departure_time === null)).toBe(true);
+    expect(
+      lines.every(
+        (line) => line.campus_arrival.from === "08:30" && line.return_departure_time === "16:30",
+      ),
+    ).toBe(true);
     const detail = await getLine(OPEN_LINE);
     expect(detail.stops.every((stop) => stop.location === null)).toBe(true);
   });

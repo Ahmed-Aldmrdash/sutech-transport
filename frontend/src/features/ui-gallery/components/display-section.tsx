@@ -30,7 +30,7 @@ export function DisplaySection() {
   return (
     <>
       <GallerySection id="cards" title={t("sections.cards")}>
-        <div className="grid gap-4 desktop:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 desktop:grid-cols-3">
           <Card elevation="raised" className="desktop:col-span-1">
             <CardHeader
               title={t("cards.nextBus")}
@@ -85,7 +85,7 @@ export function DisplaySection() {
             <Badge tone="brand">{t("status.draft")}</Badge>
             <Badge>{t("status.draft")}</Badge>
           </div>
-          <div className="grid gap-3 desktop:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 desktop:grid-cols-2">
             <Alert tone="info" title={t("status.infoTitle")}>
               {t("status.infoBody")}
             </Alert>

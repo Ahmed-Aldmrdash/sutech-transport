@@ -79,13 +79,13 @@ function SosView({ sos, onChanged }: { sos: AdminSos; onChanged: () => void }) {
         actions={<SosStatusBadge status={sos.status} />}
       />
       <StatusBanner sos={sos} onChanged={onChanged} />
-      <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-5">
           <LocationCard sos={sos} />
           <Card>
             <CardHeader title={t("busTitle")} headingLevel={2} />
             <CardBody>
-              <dl className="grid gap-4 sm:grid-cols-2">
+              <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Fact label={t("bus")} icon={<BusFront />}>
                   {t("busLine", {
                     plate: sos.bus.plate,

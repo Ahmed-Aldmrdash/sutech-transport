@@ -4,7 +4,7 @@ import { Armchair, Clock, Undo2, Wallet } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { StatTile } from "@/components/ui/stat-tile";
 import type { Locale } from "@/i18n/routing";
-import { formatClockTime, formatMoney, formatNumber } from "@/lib/format";
+import { formatArrival, formatClockTime, formatMoney, formatNumber } from "@/lib/format";
 import type { Line } from "../schema";
 
 /** Price, free seats, campus arrival and return time, as four tiles. */
@@ -29,10 +29,11 @@ export function LineFacts({ line }: { line: Line }) {
       <StatTile
         label={t("line.arrival")}
         value={formatClockTime(line.campus_arrival.from, locale)}
-        caption={t("arrivalWindow", {
-          from: formatClockTime(line.campus_arrival.from, locale),
-          to: formatClockTime(line.campus_arrival.to, locale),
-        })}
+        caption={
+          line.campus_arrival.from === line.campus_arrival.to
+            ? undefined
+            : formatArrival(line.campus_arrival, locale)
+        }
         icon={<Clock />}
       />
       <StatTile

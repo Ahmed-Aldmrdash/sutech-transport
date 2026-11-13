@@ -39,7 +39,7 @@ export function NotGoingPage() {
         />
       ) : null}
       {state.status === AsyncStatus.Success && state.data !== null ? (
-        <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <ReportForm data={state.data} onDone={state.refresh} />
           <Upcoming items={state.data.upcoming} onChanged={state.refresh} />
         </div>

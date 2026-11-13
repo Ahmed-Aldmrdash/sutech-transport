@@ -14,13 +14,14 @@ export function NotificationBell({ href, className }: { href: string; className?
   return (
     <Link
       href={href}
-      aria-label={unread > 0 ? t("bellUnread", { count: unread }) : t("bell")}
       className={cn(
         "relative inline-flex size-10 items-center justify-center rounded-md text-ink-strong focus-ring transition-colors hover:bg-brand-soft",
         className,
       )}
     >
       <Bell aria-hidden="true" className="size-5" />
+      {/* Hidden text, not aria-label: the visible "9+" stays out of the spoken name. */}
+      <span className="sr-only">{unread > 0 ? t("bellUnread", { count: unread }) : t("bell")}</span>
       {unread > 0 ? <CountBadge count={unread} className="absolute -end-0.5 -top-0.5" /> : null}
     </Link>
   );
