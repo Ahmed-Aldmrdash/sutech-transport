@@ -11,8 +11,13 @@ export function watchForErrors(page: Page): string[] {
 }
 
 export async function expectNoSidewaysScroll(page: Page) {
+  // On a phone a too-wide page widens the layout viewport (innerWidth grows with it), so
+  // compare with the device's own width, not innerWidth.
+  const width = page.viewportSize()?.width ?? 0;
   const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - window.innerWidth,
+    (deviceWidth) =>
+      document.documentElement.scrollWidth - Math.min(deviceWidth, window.innerWidth),
+    width,
   );
   expect(overflow, "the page must never scroll sideways").toBeLessThanOrEqual(0);
 }

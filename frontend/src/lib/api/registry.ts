@@ -1,4 +1,5 @@
 import { absencesEndpoints } from "@/features/absences/api";
+import { adminSystemEndpoints } from "@/features/admin-system/api";
 import { announcementsEndpoints } from "@/features/announcements/api";
 import { attendanceEndpoints } from "@/features/attendance/api";
 import { authEndpoints } from "@/features/auth/api";
@@ -55,4 +56,5 @@ export const allEndpoints: readonly Endpoint[] = [
   ...eventBusesEndpoints,
   ...sgOfficeEndpoints,
   ...opsDeskEndpoints,
+  ...adminSystemEndpoints,
 ];

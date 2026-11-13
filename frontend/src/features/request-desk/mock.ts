@@ -1,3 +1,5 @@
+import { both, recordAudit, studentTarget } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
 import { mockNameOf, requireMockOffice } from "@/features/auth/mock-token";
 import type { MockAccount } from "@/features/auth/mock-accounts";
 import { findMockLine, localized, toLine, toLineSummary } from "@/features/lines/mock-builders";
@@ -342,6 +344,13 @@ function decide(
   }
 }
 
+const AUDIT_FOR_DESK_ACTION: Record<DeskAction, AuditAction> = {
+  [DeskAction.Open]: AuditAction.RequestOpened,
+  [DeskAction.Approve]: AuditAction.RequestApproved,
+  [DeskAction.Reject]: AuditAction.RequestRejected,
+  [DeskAction.Resolve]: AuditAction.RequestResolved,
+};
+
 registerMock(actOnDeskRequestEndpoint, ({ params, body }, { token, language }) => {
   const officer = requireMockOffice(token, DESKS);
   const now = Date.now();
@@ -368,6 +377,14 @@ registerMock(actOnDeskRequestEndpoint, ({ params, body }, { token, language }) =
     requestsOf(owned.studentId).map((item) =>
       item.requestId === request.requestId ? { ...item, office: step } : item,
     ),
+  );
+  const student = findMockStudentRecord(owned.studentId);
+  recordAudit(
+    officer,
+    AUDIT_FOR_DESK_ACTION[body.action],
+    student ? studentTarget(student, request.reference) : both(request.reference),
+    note || null,
+    now,
   );
   return toDeskRequest(findOwned(officer.user.role, request.requestId, now), language, now);
 });

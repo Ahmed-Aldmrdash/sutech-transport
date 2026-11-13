@@ -54,7 +54,7 @@ export function DataTable<TRow>({
                   key={column.key}
                   scope="col"
                   className={cn(
-                    "h-11 border-b border-line px-4 text-label whitespace-nowrap text-ink-muted",
+                    "relative h-11 border-b border-line px-4 text-label whitespace-nowrap text-ink-muted",
                     column.align === "end" ? "text-end" : "text-start",
                     column.className,
                   )}

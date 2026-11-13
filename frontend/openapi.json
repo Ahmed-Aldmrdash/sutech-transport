@@ -29641,6 +29641,630 @@
           }
         ]
       }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "operationId": "admin.users.list",
+        "summary": "Super admin: every office account (Transportation, Finance, Clinic, Student Affairs, Secretary General, Abu El Hol, super admins) with its sign-in ID and whether it may sign in. Filter by `role`, search `q` (ID or name). Students, guardians and crews come from the university's records and the company's list, not from here.",
+        "tags": [
+          "system"
+        ],
+        "x-roles": [
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "transport_admin",
+                "finance",
+                "clinic",
+                "student_affairs",
+                "secretary_general",
+                "bus_company",
+                "super_admin"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "user_id": {
+                            "type": "string"
+                          },
+                          "identifier": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "transport_admin",
+                              "finance",
+                              "clinic",
+                              "student_affairs",
+                              "secretary_general",
+                              "bus_company",
+                              "super_admin"
+                            ]
+                          },
+                          "masked_phone": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          },
+                          "is_you": {
+                            "type": "boolean"
+                          },
+                          "added_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "user_id",
+                          "identifier",
+                          "name",
+                          "role",
+                          "masked_phone",
+                          "active",
+                          "is_you",
+                          "added_at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "counts"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "admin.users.create",
+        "summary": "Super admin: add an office account. The server gives the next sign-in ID for the office (FIN-1002…) and the person signs in with a code sent to `phone`. Logged in the audit log. Errors: PHONE_TAKEN (409).",
+        "tags": [
+          "system"
+        ],
+        "x-roles": [
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "identifier": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "transport_admin",
+                        "finance",
+                        "clinic",
+                        "student_affairs",
+                        "secretary_general",
+                        "bus_company",
+                        "super_admin"
+                      ]
+                    },
+                    "masked_phone": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "is_you": {
+                      "type": "boolean"
+                    },
+                    "added_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "user_id",
+                    "identifier",
+                    "name",
+                    "role",
+                    "masked_phone",
+                    "active",
+                    "is_you",
+                    "added_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 60
+                  },
+                  "name_ar": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 60
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "phone": {
+                    "type": "string",
+                    "pattern": "^01[0125]\\d{8}$"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "transport_admin",
+                      "finance",
+                      "clinic",
+                      "student_affairs",
+                      "secretary_general",
+                      "bus_company",
+                      "super_admin"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "name_ar",
+                  "phone",
+                  "role"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/users/{user_id}": {
+      "patch": {
+        "operationId": "admin.users.update",
+        "summary": "Super admin: stop an account (`active: false`, its sessions end at once), let it sign in again, or move it to another office (`role`). Logged in the audit log. Errors: CANNOT_CHANGE_SELF (409), LAST_SUPER_ADMIN (409), USER_NOT_FOUND (404).",
+        "tags": [
+          "system"
+        ],
+        "x-roles": [
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "identifier": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "transport_admin",
+                        "finance",
+                        "clinic",
+                        "student_affairs",
+                        "secretary_general",
+                        "bus_company",
+                        "super_admin"
+                      ]
+                    },
+                    "masked_phone": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "is_you": {
+                      "type": "boolean"
+                    },
+                    "added_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "user_id",
+                    "identifier",
+                    "name",
+                    "role",
+                    "masked_phone",
+                    "active",
+                    "is_you",
+                    "added_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "transport_admin",
+                      "finance",
+                      "clinic",
+                      "student_affairs",
+                      "secretary_general",
+                      "bus_company",
+                      "super_admin"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/audit": {
+      "get": {
+        "operationId": "admin.audit.list",
+        "summary": "Super admin: the activity log, newest first. One line per office decision (receipts, requests, complaints, violations, announcements, SOS, replacements, event buses, accounts): who, when, what about, and the note given. Filter by `area`, search `q`. Read only: nobody can edit or delete a line.",
+        "tags": [
+          "system"
+        ],
+        "x-roles": [
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "area",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "payments",
+                "requests",
+                "violations",
+                "announcements",
+                "emergencies",
+                "events",
+                "users"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "audit_id": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "actor": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "identifier": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string",
+                                "enum": [
+                                  "super_admin",
+                                  "transport_admin",
+                                  "finance",
+                                  "clinic",
+                                  "student_affairs",
+                                  "secretary_general",
+                                  "bus_company",
+                                  "driver",
+                                  "supervisor",
+                                  "student",
+                                  "parent"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "identifier",
+                              "role"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "payment_approved",
+                              "payment_rejected",
+                              "office_payment",
+                              "request_opened",
+                              "request_approved",
+                              "request_rejected",
+                              "request_resolved",
+                              "violation_opened",
+                              "violation_closed",
+                              "announcement_posted",
+                              "sos_action",
+                              "replacement_sent",
+                              "event_requested",
+                              "event_cancelled",
+                              "event_confirmed",
+                              "event_declined",
+                              "user_added",
+                              "user_stopped",
+                              "user_activated",
+                              "user_role_changed"
+                            ]
+                          },
+                          "area": {
+                            "type": "string",
+                            "enum": [
+                              "payments",
+                              "requests",
+                              "violations",
+                              "announcements",
+                              "emergencies",
+                              "events",
+                              "users"
+                            ]
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "audit_id",
+                          "at",
+                          "actor",
+                          "action",
+                          "area",
+                          "target",
+                          "detail"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "page": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "page_size": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "page_size"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
     }
   }
 }

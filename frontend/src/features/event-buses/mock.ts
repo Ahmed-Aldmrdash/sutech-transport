@@ -1,3 +1,5 @@
+import { recordAudit } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
 import { mockNameOf, requireMockOffice } from "@/features/auth/mock-token";
 import { allReplacements } from "@/features/crew/mock-state";
 import {
@@ -233,6 +235,14 @@ registerMock(getEventEndpoint, ({ params }, { token, language }) => {
   return toBusEvent(requireEvent(params.event_id, now), Side.Office, language, now);
 });
 
+/** "Robotics fair visit · 2026-12-03", for the activity log. */
+function eventTarget(item: MockBusEvent) {
+  return {
+    ar: `${item.title.ar} · ${item.eventDate}`,
+    en: `${item.title.en} · ${item.eventDate}`,
+  };
+}
+
 registerMock(createEventEndpoint, ({ body }, { token, language }) => {
   const officer = requireMockOffice(token, OFFICE);
   const now = Date.now();
@@ -278,6 +288,7 @@ registerMock(createEventEndpoint, ({ body }, { token, language }) => {
     cancellation: null,
   };
   saveMockEvent(created);
+  recordAudit(officer, AuditAction.EventRequested, eventTarget(created));
   return toBusEvent(created, Side.Office, language, now);
 });
 
@@ -298,6 +309,7 @@ registerMock(cancelEventEndpoint, ({ params, body }, { token, language }) => {
     cancellation: { reason: typed(reason), by: mockNameOf(officer), at: now },
   };
   saveMockEvent(updated);
+  recordAudit(officer, AuditAction.EventCancelled, eventTarget(updated), reason, now);
   return toBusEvent(updated, Side.Office, language, now);
 });
 
@@ -359,6 +371,13 @@ registerMock(replyToRequestEndpoint, ({ params, body }, { token, language }) => 
     reply: { busIds, note: note ? typed(note) : null, by: mockNameOf(company), at: now },
   };
   saveMockEvent(updated);
+  recordAudit(
+    company,
+    body.decision === EventAction.Confirm ? AuditAction.EventConfirmed : AuditAction.EventDeclined,
+    eventTarget(updated),
+    note || null,
+    now,
+  );
   return toBusEvent(updated, Side.Company, language, now);
 });
 

@@ -1,6 +1,7 @@
 /** Each feature's mock, loaded on demand (see MOCK_FEATURE_OF). */
 export const MockFeature = {
   Absences: "absences",
+  AdminSystem: "admin-system",
   Announcements: "announcements",
   Attendance: "attendance",
   Auth: "auth",

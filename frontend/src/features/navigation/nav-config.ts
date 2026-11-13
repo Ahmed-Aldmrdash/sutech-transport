@@ -197,6 +197,8 @@ const { Transport, Finance, Clinic, StudentAffairs, SecretaryGeneral, BusCompany
 
 /** Office pages that are built. Every other office page shows as "coming soon". */
 const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
+  "users",
+  "auditLog",
   "overview",
   "liveTracking",
   "attendance",

@@ -39,7 +39,10 @@ export function mockUnauthorized(): never {
 export function requireMockAccount(token: string | null): MockAccount {
   const payload = decodeMockToken(token);
   if (!payload || payload.exp <= Date.now()) mockUnauthorized();
-  return findMockAccountById(payload.sub) ?? mockUnauthorized();
+  const account = findMockAccountById(payload.sub);
+  // A stopped account is signed out at its next request, as the real server would.
+  if (!account || account.disabled) mockUnauthorized();
+  return account;
 }
 
 const HTTP_FORBIDDEN = 403;

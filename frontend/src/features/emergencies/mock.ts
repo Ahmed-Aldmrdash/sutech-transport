@@ -1,3 +1,5 @@
+import { recordAudit } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
 import { requireMockOffice } from "@/features/auth/mock-token";
 import {
   crewFleetOf,
@@ -167,8 +169,23 @@ registerMock(getAdminSosEndpoint, ({ params }, { token, language }) => {
   return toAdminSos(requireVisibleSos(params.sos_id, user.role), language);
 });
 
+const SOS_ACTION_WORD: Record<SosAction, { ar: string; en: string }> = {
+  [SosAction.Acknowledge]: { ar: "استلام البلاغ", en: "took the alert" },
+  [SosAction.AmbulanceCalled]: { ar: "طلب إسعاف", en: "called an ambulance" },
+  [SosAction.ReplacementSent]: { ar: "إرسال بديل", en: "sent a replacement" },
+  [SosAction.Note]: { ar: "ملاحظة", en: "note" },
+  [SosAction.Close]: { ar: "إغلاق البلاغ", en: "closed the alert" },
+};
+
+/** "Line 7 · SOS · took the alert", for the activity log. */
+function sosTarget(lineId: string, word: { ar: string; en: string }) {
+  const code = findMockLine(lineId)?.code ?? lineId;
+  return { ar: `خط ${code} · استغاثة · ${word.ar}`, en: `Line ${code} · SOS · ${word.en}` };
+}
+
 registerMock(addSosActionEndpoint, ({ params, body }, { token, language }) => {
-  const { user } = requireSosDesk(token);
+  const account = requireSosDesk(token);
+  const { user } = account;
   const sos = requireVisibleSos(params.sos_id, user.role);
   const status = sosStatusOf(sos);
   if (status === SosStatus.Closed) conflict(EmergencyErrorCode.SosClosed, "Already closed.");
@@ -184,6 +201,12 @@ registerMock(addSosActionEndpoint, ({ params, body }, { token, language }) => {
     throw new MockHttpError(HTTP.Unprocessable, EmergencyErrorCode.NoteRequired, "Note?");
   }
   const updated = addSosAction(sos, { action: body.action, by: user.id, at: Date.now(), note });
+  recordAudit(
+    account,
+    AuditAction.SosAction,
+    sosTarget(sos.lineId, SOS_ACTION_WORD[body.action]),
+    note,
+  );
   return toAdminSos(updated, language);
 });
 
@@ -290,6 +313,16 @@ registerMock(sendReplacementEndpoint, ({ params, body }, { token, language }) =>
     at: now,
   };
   saveCrewTrip({ ...trip, replacements: [...(trip.replacements ?? []), replacement] });
+  recordAudit(
+    account,
+    AuditAction.ReplacementSent,
+    {
+      ar: `خط ${line.code} · ${body.bus_id ? "أتوبيس بديل" : "سواق بديل"}`,
+      en: `Line ${line.code} · ${body.bus_id ? "replacement bus" : "replacement driver"}`,
+    },
+    replacement.note,
+    now,
+  );
   if (sos) {
     addSosAction(sos, {
       action: SosAction.ReplacementSent,

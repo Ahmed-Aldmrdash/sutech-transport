@@ -1,3 +1,5 @@
+import { recordAudit } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
 import { requireMockAccount } from "@/features/auth/mock-token";
 import { mockChildrenOf } from "@/features/children/mock-links";
 import { allCrewDelays, allReplacements } from "@/features/crew/mock-state";
@@ -297,7 +299,7 @@ registerMock(listAnnouncementsEndpoint, ({ query }, { token, language }) => {
 });
 
 registerMock(createAnnouncementEndpoint, ({ body }, { token, language }) => {
-  requireMockOffice(token, [Role.Transport]);
+  const officer = requireMockOffice(token, [Role.Transport]);
   if (body.line_id !== null && !findMockLine(body.line_id)) {
     throw new MockHttpError(404, LineErrorCode.LineNotFound, "No such line.");
   }
@@ -312,6 +314,7 @@ registerMock(createAnnouncementEndpoint, ({ body }, { token, language }) => {
     publishedAt: Date.now(),
   };
   officeAnnouncements.set(item.id, item);
+  recordAudit(officer, AuditAction.AnnouncementPosted, { ar: item.titleAr, en: item.titleEn });
   const created = postedByOffice(language).find((entry) => entry.announcement_id === item.id);
   if (!created) throw new Error("unreachable");
   return created;

@@ -1,3 +1,5 @@
+import { recordAudit, studentTarget } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
 import { mockNameOf, requireMockOffice } from "@/features/auth/mock-token";
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
 import { PaymentStatus, type Payment } from "@/features/payments/schema";
@@ -211,6 +213,13 @@ registerMock(reviewPaymentEndpoint, ({ params, body }, { token, language }) => {
         : { ...booking, status: SubscriptionStatus.Reserved, holdExpiresAt: now + MOCK_HOLD_MS },
     );
   }
+  recordAudit(
+    officer,
+    approved ? AuditAction.PaymentApproved : AuditAction.PaymentRejected,
+    studentTarget(student, payment.referenceNumber),
+    approved ? null : reason,
+    now,
+  );
   return toOfficePayment({ student, payment: reviewed }, language);
 });
 
@@ -293,6 +302,13 @@ registerMock(recordOfficePaymentEndpoint, ({ body }, { token, language }) => {
     reviewedBy: mockNameOf(officer),
   };
   savePayments(student.id, [...paymentsOf(student.id), payment]);
+  recordAudit(
+    officer,
+    AuditAction.OfficePayment,
+    studentTarget(student, payment.referenceNumber),
+    null,
+    now,
+  );
   saveBooking(student.id, {
     ...booking,
     status: SubscriptionStatus.Active,
