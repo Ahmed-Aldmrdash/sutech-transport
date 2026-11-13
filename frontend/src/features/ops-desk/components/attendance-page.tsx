@@ -42,14 +42,24 @@ export function AttendancePage() {
   const pathname = usePathname();
   const today = todayInCairo();
   const askedDate = params.get("date") ?? "";
-  const [lineId, setLineId] = useState(params.get("line") ?? "ln_01");
+  const [chosenLine, setLineId] = useState(params.get("line") ?? "");
   const [date, setDate] = useState(
     DATE_PATTERN.test(askedDate) && askedDate <= today ? askedDate : today,
   );
   const lines = useAsync((signal) => listOpsLines({ signal }), []);
+  // With no line in the address, show the first line the server lists (never a guessed id).
+  const firstLine =
+    lines.status === AsyncStatus.Success ? (lines.data.items[0]?.line.line_id ?? "") : "";
+  const lineId = chosenLine || firstLine;
+  const linesError = lines.status === AsyncStatus.Error ? lines.error : undefined;
   const state = useAsync(
-    (signal) => getLineAttendance({ line_id: lineId, date }, { signal }),
-    [lineId, date],
+    (signal) =>
+      lineId
+        ? getLineAttendance({ line_id: lineId, date }, { signal })
+        : linesError
+          ? Promise.reject(linesError)
+          : new Promise<never>(() => undefined),
+    [lineId, date, linesError],
   );
 
   function choose(next: { line?: string; date?: string }) {

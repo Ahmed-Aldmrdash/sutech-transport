@@ -47,6 +47,13 @@ test("students are found by university ID", async ({ page }) => {
 
 test("attendance, the live map and the buses open", async ({ page }) => {
   const errors = watchForErrors(page);
+  // From the menu (no line in the address) it opens on the first line, not on an error.
+  await page.goto("/en/admin/attendance");
+  await expect(page.getByLabel("Line")).toHaveValue("ln_01_1");
+  await expect(
+    page.getByText("No buses this day").or(page.locator("main tbody tr, main li").first()),
+  ).toBeVisible();
+  await expect(page.getByText("Something went wrong")).toHaveCount(0);
   await page.goto("/en/admin/attendance?line=ln_07");
   await expect(page.getByRole("heading", { level: 1, name: "Attendance" })).toBeVisible();
   await expect(page.getByLabel("Line")).toHaveValue("ln_07");

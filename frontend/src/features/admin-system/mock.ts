@@ -16,7 +16,7 @@ import {
   listStaffUsersEndpoint,
   updateStaffUserEndpoint,
 } from "./api";
-import { both, recordAudit, recordedAudit, type MockAuditEntry } from "./mock-log";
+import { recordAudit, recordedAudit, type MockAuditEntry } from "./mock-log";
 import {
   AUDIT_AREA_OF,
   AUDIT_PAGE_SIZE,
@@ -210,12 +210,10 @@ function seededAudit(now: number): MockAuditEntry[] {
     ];
   };
   return [
-    ...seed(
-      3,
-      "FIN-1001",
-      AuditAction.PaymentApproved,
-      both("NBE-55120 · 240100107 · Malak Sherif Anwar"),
-    ),
+    ...seed(3, "FIN-1001", AuditAction.PaymentApproved, {
+      ar: "NBE-55120 · 240100107 · ملك شريف أنور",
+      en: "NBE-55120 · 240100107 · Malak Sherif Anwar",
+    }),
     ...seed(5, "STA-1001", AuditAction.ViolationOpened, {
       ar: "240100108 · أدهم مدحت صابر",
       en: "240100108 · Adham Medhat Saber",
@@ -228,18 +226,19 @@ function seededAudit(now: number): MockAuditEntry[] {
       30,
       "FIN-1001",
       AuditAction.PaymentRejected,
-      both("NBE-55098 · 250100105 · Hazem Wael Fouad"),
+      {
+        ar: "NBE-55098 · 250100105 · حازم وائل فؤاد",
+        en: "NBE-55098 · 250100105 · Hazem Wael Fouad",
+      },
       {
         ar: "الإيصال غير واضح، ارفع صورة أوضح.",
         en: "The slip is blurry; upload a clearer photo.",
       },
     ),
-    ...seed(
-      50,
-      "TRN-1001",
-      AuditAction.RequestApproved,
-      both("REQ-2026-0004 · 240100109 · Farida Tarek Helmy"),
-    ),
+    ...seed(50, "TRN-1001", AuditAction.RequestApproved, {
+      ar: "REQ-2026-0004 · 240100109 · فريدة طارق حلمي",
+      en: "REQ-2026-0004 · 240100109 · Farida Tarek Helmy",
+    }),
   ];
 }
 
