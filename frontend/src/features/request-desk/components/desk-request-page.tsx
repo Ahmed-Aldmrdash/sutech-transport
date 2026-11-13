@@ -7,7 +7,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CallLink, Fact } from "@/features/emergencies/components/sos-facts";
-import { RequestDetails } from "@/features/requests/components/request-details";
+import { RequestDetails, RequestViewer } from "@/features/requests/components/request-details";
 import { useRequestTitle } from "@/features/requests/components/request-list";
 import { RequestStatusBadge } from "@/features/requests/components/request-status-badge";
 import { Timeline } from "@/features/requests/components/request-timeline";
@@ -59,8 +59,12 @@ export function DeskRequestPage({
       />
       <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-5">
-          <RequestDetails request={request} title={t("detail.asked")} />
-          <Timeline events={request.timeline} />
+          <RequestDetails
+            request={request}
+            title={t("detail.asked")}
+            viewer={RequestViewer.Office}
+          />
+          <Timeline events={request.timeline} viewer={RequestViewer.Office} />
         </div>
         <div className="flex flex-col gap-5">
           {desk.allowed_actions.length > 0 ? (

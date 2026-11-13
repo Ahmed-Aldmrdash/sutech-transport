@@ -191,6 +191,8 @@ function toDeskRequest(owned: Owned, language: string, now: number): DeskRequest
   const booking = bookingOf(studentId, now);
   const line = booking ? findMockLine(booking.lineId) : undefined;
   const replies = suggestedReplies(request.payload);
+  // The student reads the answer: ready replies come in their language, not the office's.
+  const replyLanguage = request.language ?? "ar";
   return {
     request: toStudentRequest(request, language, now),
     stage: stageOf(statusAt(request, now)),
@@ -209,11 +211,12 @@ function toDeskRequest(owned: Owned, language: string, now: number): DeskRequest
     },
     allowed_actions: allowedActions(request, now),
     suggested_replies: {
-      open: text(replies.open, language),
-      approve: text(replies.approve, language),
-      reject: text(replies.reject, language),
-      resolve: text(replies.resolve, language),
+      open: text(replies.open, replyLanguage),
+      approve: text(replies.approve, replyLanguage),
+      reject: text(replies.reject, replyLanguage),
+      resolve: text(replies.resolve, replyLanguage),
     },
+    reply_language: replyLanguage,
     target_seats_available: targetSeats(request, language),
     handled_by_name: handledBy(request, language),
   };

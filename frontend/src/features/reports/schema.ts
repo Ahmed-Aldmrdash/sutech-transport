@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { lineSummarySchema } from "@/features/lines/schema";
 import { calendarDateSchema } from "@/features/subscriptions/schema";
 import { Role } from "@/lib/auth/roles";
@@ -134,6 +135,6 @@ export const reportSchema = z.object({
   }),
   /** A few headline numbers, already written out ("1,240 students"). */
   summary: z.array(z.object({ label: z.string(), value: z.string() })),
-  generated_at: z.iso.datetime(),
+  generated_at: isoDateTime(),
 });
 export type Report = z.infer<typeof reportSchema>;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { lineSummarySchema } from "@/features/lines/schema";
 import {
   CONDUCT_RULES,
@@ -56,7 +57,7 @@ export const deskViolationSchema = violationSchema.extend({
       outcome: z.enum(VIOLATION_OUTCOMES),
       note: z.string(),
       by_name: z.string(),
-      at: z.iso.datetime(),
+      at: isoDateTime(),
     })
     .nullable(),
   /** What this caller may do now: Student Affairs acts, Transportation only reads. */

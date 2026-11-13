@@ -44,15 +44,34 @@ export function Dialog({
   // press also started on the backdrop.
   const openedAt = useRef(0);
   const pressedBackdrop = useRef(false);
+  /** The control that opened the dialog: keyboard users carry on from it after it closes. */
+  const returnTo = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
     if (open && !dialog.open) {
+      returnTo.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
       dialog.showModal();
       openedAt.current = performance.now();
     }
     if (!open && dialog.open) dialog.close();
+  }, [open]);
+
+  // Many dialogs leave the page when they close (their parent stops rendering them), which
+  // skips the browser's own focus return and drops focus on <body>. Put it back on the opener,
+  // unless something else took focus meanwhile.
+  useEffect(() => {
+    if (!open) return;
+    const dialog = ref.current;
+    return () => {
+      const target = returnTo.current;
+      returnTo.current = null;
+      const active = document.activeElement;
+      const focusLost = !active || active === document.body || dialog?.contains(active);
+      if (target?.isConnected && focusLost) target.focus({ preventScroll: true });
+    };
   }, [open]);
 
   return (

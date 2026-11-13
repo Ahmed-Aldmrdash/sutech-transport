@@ -32,6 +32,7 @@ import {
   markAllNotificationsReadEndpoint,
   markNotificationReadEndpoint,
 } from "./api";
+import { guardianViolationNotifications, studentViolationNotifications } from "./mock-violations";
 import { NotificationKind, NotificationTarget, type AppNotification } from "./schema";
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -412,6 +413,7 @@ function notificationsFor(userId: string, role: Role, language: string): AppNoti
           ...paymentNotifications(userId, language),
           ...requestNotifications(userId, language),
           ...busNearNotifications(userId, language, now),
+          ...studentViolationNotifications(userId, language),
         ]
       : []),
     ...(role === Role.Parent
@@ -419,6 +421,7 @@ function notificationsFor(userId: string, role: Role, language: string): AppNoti
           ...childNotifications(userId, language, now),
           ...daysOffNotifications(userId, language, now),
           ...approvalNotifications(userId, language, now),
+          ...guardianViolationNotifications(userId, language),
         ]
       : []),
   ];

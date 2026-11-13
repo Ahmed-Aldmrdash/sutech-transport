@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import {
   arrivalWindowSchema,
   busSchema,
@@ -45,7 +46,7 @@ export const nextTripSchema = z.object({
   /** The last stop the bus passed, from GPS. */
   near_stop: z.string().nullable(),
   /** When the GPS position behind this status was taken. null before the trip starts. */
-  location_updated_at: z.iso.datetime().nullable(),
+  location_updated_at: isoDateTime().nullable(),
 });
 export type NextTrip = z.infer<typeof nextTripSchema>;
 

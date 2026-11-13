@@ -1,0 +1,17 @@
+# Every text file is stored and checked out with LF, on every OS. Generated files (openapi.json,
+# tokens.css) are compared byte for byte in tests, and Prettier expects LF, so a Windows
+# checkout with core.autocrlf=true must not turn them into CRLF.
+* text=auto eol=lf
+
+# Binary files: never touch their bytes.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.bundle binary

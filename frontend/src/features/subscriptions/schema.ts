@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { clockTimeSchema, lineSummarySchema } from "@/features/lines/schema";
 
 /** A calendar day, "YYYY-MM-DD" (Cairo). Used for term dates and receipt dates. */
@@ -49,7 +50,7 @@ const latestPaymentSchema = z.object({
   payment_id: z.string(),
   status: z.enum(["pending_review", "approved", "rejected"]),
   rejection_reason: z.string().nullable(),
-  submitted_at: z.iso.datetime(),
+  submitted_at: isoDateTime(),
 });
 
 export const subscriptionSchema = z.object({
@@ -66,10 +67,10 @@ export const subscriptionSchema = z.object({
   stop: subscriptionStopSchema,
   /** Fixed when the seat was booked. */
   price_piasters: z.number().int().nonnegative(),
-  reserved_at: z.iso.datetime(),
+  reserved_at: isoDateTime(),
   /** While reserved: when the seat is released if no receipt arrives. Otherwise null. */
-  hold_expires_at: z.iso.datetime().nullable(),
-  activated_at: z.iso.datetime().nullable(),
+  hold_expires_at: isoDateTime().nullable(),
+  activated_at: isoDateTime().nullable(),
   latest_payment: latestPaymentSchema.nullable(),
 });
 export type Subscription = z.infer<typeof subscriptionSchema>;

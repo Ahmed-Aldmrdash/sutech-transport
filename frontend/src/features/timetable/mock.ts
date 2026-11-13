@@ -17,7 +17,7 @@ import {
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { Role } from "@/lib/auth/roles";
 import { changeReturnTimeEndpoint, getTimetableEndpoint } from "./api";
-import { TimetableErrorCode, type Timetable } from "./schema";
+import { TimetableErrorCode, isReturnTimeAllowed, type Timetable } from "./schema";
 
 const TRANSPORT = [Role.Transport];
 
@@ -29,6 +29,7 @@ function clock12(clock: string): { ar: string; en: string } {
   return { ar: `${time} ${morning ? "ص" : "م"}`, en: `${time} ${morning ? "AM" : "PM"}` };
 }
 const HTTP_NOT_FOUND = 404;
+const HTTP_UNPROCESSABLE = 422;
 
 function timetable(language: string): Timetable {
   return {
@@ -55,6 +56,13 @@ registerMock(getTimetableEndpoint, (_input, { token, language }) => {
 
 registerMock(changeReturnTimeEndpoint, ({ body }, { token, language }) => {
   const account = requireMockOffice(token, TRANSPORT);
+  if (!isReturnTimeAllowed(body.return_departure_time)) {
+    throw new MockHttpError(
+      HTTP_UNPROCESSABLE,
+      TimetableErrorCode.ReturnTimeOutOfRange,
+      "The buses leave campus from 12:00 to 20:00.",
+    );
+  }
   const lines =
     body.line_ids.length === 0
       ? MOCK_LINES

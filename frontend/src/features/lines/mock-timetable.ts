@@ -21,6 +21,11 @@ export function mockReturnChange(lineId: string): MockReturnTime | null {
   return changed.get(lineId) ?? null;
 }
 
+/** Every line the office changed, with its change (for the line notices). */
+export function allMockReturnChanges(): { lineId: string; change: MockReturnTime }[] {
+  return [...changed.entries()].map(([lineId, change]) => ({ lineId, change }));
+}
+
 export function saveMockReturnTime(lineId: string, change: MockReturnTime): void {
   changed.set(lineId, change);
 }

@@ -74,7 +74,6 @@ export function CodeInput({
           <input
             ref={ref}
             {...control}
-            name="code"
             value={value}
             onChange={(event) => onChange(event.target.value)}
             inputMode="numeric"

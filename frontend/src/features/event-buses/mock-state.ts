@@ -1,4 +1,4 @@
-import { addDays } from "@/lib/api/mock/cairo-clock";
+import { addDays, cairoInstant, cairoOffsetOn } from "@/lib/api/mock/cairo-clock";
 import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
 import { todayInCairo } from "@/lib/format";
 import { BusType } from "@/features/lines/schema";
@@ -39,12 +39,19 @@ export interface MockBusEvent {
 
 const events = new StoredMap<MockBusEvent>("sut.mock.busEvents", MockStorage.Local);
 
-const TRANSPORT_OFFICER: Name = { ar: "نادية سمير", en: "Nadia Samir" };
+/** TRN-1001: the Transportation office asks Abu El Hol for event buses. */
+const TRANSPORT_OFFICER: Name = { ar: "كريم فتحي", en: "Karim Fathy" };
 const COMPANY_DESK: Name = { ar: "مكتب أبو الهول", en: "Abu El Hol desk" };
-const DAY_MS = 86_400_000;
 
-/** Seeded requests, dated around today. */
-function seedEvents(today: string, now: number): MockBusEvent[] {
+/**
+ * Seeded requests, dated around today. Their times are fixed office hours N days back, so a
+ * reload shows the same "asked at" time (they used to move with the clock).
+ */
+function seedEvents(today: string): MockBusEvent[] {
+  const daysAgoAt = (days: number, clock: string) => {
+    const day = addDays(today, -days);
+    return cairoInstant(day, clock, cairoOffsetOn(day));
+  };
   const base = {
     note: null,
     requestedBy: TRANSPORT_OFFICER,
@@ -68,7 +75,7 @@ function seedEvents(today: string, now: number): MockBusEvent[] {
       busType: BusType.LargeBus,
       busesRequested: 3,
       status: EventStatus.WaitingCompany,
-      createdAt: now - DAY_MS,
+      createdAt: daysAgoAt(1, "10:20"),
     },
     {
       ...base,
@@ -85,12 +92,12 @@ function seedEvents(today: string, now: number): MockBusEvent[] {
       busType: BusType.LargeBus,
       busesRequested: 2,
       status: EventStatus.Confirmed,
-      createdAt: now - 4 * DAY_MS,
+      createdAt: daysAgoAt(4, "11:05"),
       reply: {
         busIds: ["bus_spare_2", "bus_ln_03"],
         note: { ar: "السواقين هيكونوا هناك 7:30.", en: "The drivers will be there at 7:30." },
         by: COMPANY_DESK,
-        at: now - 3 * DAY_MS,
+        at: daysAgoAt(3, "09:40"),
       },
     },
     {
@@ -111,12 +118,12 @@ function seedEvents(today: string, now: number): MockBusEvent[] {
       busType: BusType.Coaster,
       busesRequested: 2,
       status: EventStatus.Confirmed,
-      createdAt: now - 14 * DAY_MS,
+      createdAt: daysAgoAt(14, "12:30"),
       reply: {
         busIds: ["bus_spare_1", "bus_ln_05"],
         note: null,
         by: COMPANY_DESK,
-        at: now - 12 * DAY_MS,
+        at: daysAgoAt(12, "10:15"),
       },
     },
     {
@@ -133,7 +140,7 @@ function seedEvents(today: string, now: number): MockBusEvent[] {
       busType: BusType.Coaster,
       busesRequested: 2,
       status: EventStatus.Declined,
-      createdAt: now - 2 * DAY_MS,
+      createdAt: daysAgoAt(2, "13:10"),
       reply: {
         busIds: [],
         note: {
@@ -141,7 +148,7 @@ function seedEvents(today: string, now: number): MockBusEvent[] {
           en: "All our spare buses are in maintenance that day.",
         },
         by: COMPANY_DESK,
-        at: now - DAY_MS,
+        at: daysAgoAt(1, "09:25"),
       },
     },
   ];
@@ -149,9 +156,7 @@ function seedEvents(today: string, now: number): MockBusEvent[] {
 
 /** Every request: the seeds (unless changed since) and the ones the office made. */
 export function allMockEvents(now = Date.now()): MockBusEvent[] {
-  const seeds = seedEvents(todayInCairo(new Date(now)), now).filter(
-    (seed) => !events.has(seed.eventId),
-  );
+  const seeds = seedEvents(todayInCairo(new Date(now))).filter((seed) => !events.has(seed.eventId));
   return [...seeds, ...events.values()];
 }
 

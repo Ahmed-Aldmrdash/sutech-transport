@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { ALL_ROLES, type Role } from "@/lib/auth/roles";
 
 /** Error codes for the two-step login, exactly as the contract names them. */
@@ -65,12 +66,12 @@ export const userSchema = z.object({
 export type User = z.infer<typeof userSchema>;
 
 /**
- * The server also sets the session cookie (HttpOnly, Secure, SameSite=Strict) on this answer.
+ * The server also sets the session cookie (HttpOnly, Secure, SameSite=Lax) on this answer.
  * The body never carries the token, so page scripts can't read or leak it.
  */
 export const loginResponseSchema = z.object({
   /** When the session cookie stops working (ISO 8601, UTC). The app signs out at that moment. */
-  expires_at: z.iso.datetime(),
+  expires_at: isoDateTime(),
   user: userSchema,
 });
 export type LoginResponse = z.infer<typeof loginResponseSchema>;

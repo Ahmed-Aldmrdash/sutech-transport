@@ -4,7 +4,7 @@ import { Armchair, Clock, Undo2, Wallet } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { StatTile } from "@/components/ui/stat-tile";
 import type { Locale } from "@/i18n/routing";
-import { formatArrival, formatClockTime, formatMoney, formatNumber } from "@/lib/format";
+import { formatArrival, formatClockTime, formatMoneyParts, formatNumber } from "@/lib/format";
 import type { Line } from "../schema";
 
 /** Price, free seats, campus arrival and return time, as four tiles. */
@@ -15,7 +15,7 @@ export function LineFacts({ line }: { line: Line }) {
     <div className="grid grid-cols-2 gap-3 desktop:grid-cols-4">
       <StatTile
         label={t("line.price")}
-        value={formatMoney(line.price_piasters, locale)}
+        value={<Price piasters={line.price_piasters} locale={locale} />}
         icon={<Wallet />}
       />
       <StatTile
@@ -48,5 +48,22 @@ export function LineFacts({ line }: { line: Line }) {
         icon={<Undo2 />}
       />
     </div>
+  );
+}
+
+/**
+ * "EGP 15,000" is wider than a half-width tile on a phone, and the space inside a formatted
+ * price never breaks. The currency is a smaller word of its own that can wrap to the next line,
+ * so the amount is always shown whole.
+ */
+function Price({ piasters, locale }: { piasters: number; locale: Locale }) {
+  const { amount, currency, currencyFirst } = formatMoneyParts(piasters, locale);
+  const unit = <span className="text-body-sm font-bold text-ink-muted">{currency}</span>;
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
+      {currencyFirst ? unit : null}
+      <bdi className="whitespace-nowrap">{amount}</bdi>
+      {currencyFirst ? null : unit}
+    </span>
   );
 }

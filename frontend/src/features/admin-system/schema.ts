@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { Role } from "@/lib/auth/roles";
 
 /**
@@ -63,7 +64,7 @@ export const staffUserSchema = z.object({
   /** The signed-in super admin: they can't stop themselves or change their office. */
   is_you: z.boolean(),
   /** Added by a super admin (not from the first setup). */
-  added_at: z.iso.datetime().nullable(),
+  added_at: isoDateTime().nullable(),
 });
 export type StaffUser = z.infer<typeof staffUserSchema>;
 
@@ -173,7 +174,7 @@ export type AuditQuery = z.input<typeof auditQuerySchema>;
 
 export const auditEntrySchema = z.object({
   audit_id: z.string(),
-  at: z.iso.datetime(),
+  at: isoDateTime(),
   actor: z.object({ name: z.string(), identifier: z.string(), role: z.enum(Role) }),
   action: z.enum(AUDIT_ACTIONS),
   area: z.enum(AUDIT_AREAS),

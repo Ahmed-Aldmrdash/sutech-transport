@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { busTypeSchema, clockTimeSchema, lineSummarySchema } from "@/features/lines/schema";
 import { receiptFileSchema } from "@/features/payments/schema";
 import { calendarDateSchema } from "@/features/subscriptions/schema";
@@ -288,7 +289,7 @@ export const RequestActor = {
 /** One step in the request's history. The office's reply to the student is in `note`. */
 export const requestEventSchema = z.object({
   status: requestStatusSchema,
-  at: z.iso.datetime(),
+  at: isoDateTime(),
   by: z.enum([
     RequestActor.Student,
     RequestActor.Guardian,
@@ -306,8 +307,8 @@ const requestBase = z.object({
   /** Short number to quote at the office, e.g. "REQ-2026-0042". */
   reference: z.string(),
   status: requestStatusSchema,
-  submitted_at: z.iso.datetime(),
-  updated_at: z.iso.datetime(),
+  submitted_at: isoDateTime(),
+  updated_at: isoDateTime(),
   /** Oldest first; the first event is the student sending it (submitted or awaiting_guardian). */
   timeline: z.array(requestEventSchema).min(1),
 });

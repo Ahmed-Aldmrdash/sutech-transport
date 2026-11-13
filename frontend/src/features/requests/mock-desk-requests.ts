@@ -20,8 +20,8 @@ export const DESK_SEED_REQUESTS: Record<string, MockRequest[]> = {
         lineId: null,
         happenedOn: "2026-11-09",
         description:
-          "My first transfer was rejected but the money left my father's account. I uploaded " +
-          "the right number again; please check it soon, the hold ends tomorrow.",
+          "أول تحويل اترفض بس الفلوس اتخصمت من حساب بابا. رفعت الرقم الصح تاني؛ ياريت " +
+          "تراجعوه بسرعة، الحجز بيخلص بكرة.",
         attachments: [],
       },
     },
@@ -39,8 +39,8 @@ export const DESK_SEED_REQUESTS: Record<string, MockRequest[]> = {
         subscriptionId: "sub_desk_55",
         reason: "medical",
         explanation:
-          "I had knee surgery and the doctor says no stairs or long rides for two months. " +
-          "My family will drive me until then.",
+          "عملت عملية في الركبة والدكتور قال ممنوع سلالم أو مشاوير طويلة لمدة شهرين. أهلي " +
+          "هيوصلوني لحد ما أخف.",
         paidPiasters: 1_500_000,
         deductionPercent: 100,
         estimatedRefundPiasters: null,
@@ -79,7 +79,7 @@ export const DESK_SEED_REQUESTS: Record<string, MockRequest[]> = {
         duration: "permanent",
         startsOn: "2026-11-22",
         endsOn: null,
-        reason: "My family moved to El Rehab this month, so line 4 no longer passes near home.",
+        reason: "أهلي نقلوا الرحاب الشهر ده، وخط 4 مبقاش بيعدي جنب البيت.",
         studentPhone: "01000006156",
         guardianName: "Tarek Fouad",
         guardianPhone: "01000007156",
@@ -141,8 +141,7 @@ export const DESK_SEED_REQUESTS: Record<string, MockRequest[]> = {
         category: "driver_behaviour",
         lineId: "ln_12",
         happenedOn: "2026-11-11",
-        description:
-          "The driver was on his phone most of the way back and drove fast on the ring road.",
+        description: "السواق كان ماسك الموبايل أغلب طريق الرجوع وكان سايق بسرعة على الدائري.",
         attachments: [],
       },
     },

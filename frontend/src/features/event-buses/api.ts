@@ -23,7 +23,10 @@ import {
 
 const TAG = "event-buses";
 const OFFICE = [Role.SuperAdmin, Role.Transport];
+/** Reading the company's portal: Abu El Hol and the super admin (view only). */
 const COMPANY = [Role.SuperAdmin, Role.BusCompany];
+/** Answering a request: Abu El Hol only (the super admin gets 403). */
+const COMPANY_ACTOR = [Role.BusCompany];
 
 export const listEventsEndpoint = defineEndpoint({
   id: "events.list",
@@ -112,9 +115,9 @@ export const replyToRequestEndpoint = defineEndpoint({
   summary:
     "Confirm with 1 to `buses_requested` buses (each comes with its driver; fewer means a " +
     "partial answer), or decline with a reason. Errors: EVENT_NOT_WAITING, BUS_NOT_AVAILABLE " +
-    "(409), BUSES_INVALID, REASON_REQUIRED (422).",
+    "(409), BUSES_INVALID, REASON_REQUIRED (422), FORBIDDEN (403, super_admin: view only).",
   tag: TAG,
-  access: COMPANY,
+  access: COMPANY_ACTOR,
   idempotent: true,
   params: eventParamsSchema,
   body: companyReplyBodySchema,

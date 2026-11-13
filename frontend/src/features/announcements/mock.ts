@@ -6,12 +6,14 @@ import { allCrewDelays, allReplacements } from "@/features/crew/mock-state";
 import { DelayReason } from "@/features/crew/schema";
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
 import { mockFleetBus, mockFleetDriver } from "@/features/lines/mock-fleet";
+import { MOCK_LINES } from "@/features/lines/mock-lines";
+import { allMockReturnChanges } from "@/features/lines/mock-timetable";
 import { actionsOf, allSos } from "@/features/sos/mock-state";
 import { SosAction } from "@/features/sos/schema";
 import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
-import { formatPhone, todayInCairo } from "@/lib/format";
+import { formatClockTime, formatPhone, todayInCairo } from "@/lib/format";
 import { Role } from "@/lib/auth/roles";
 import { createAnnouncementEndpoint, listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
@@ -206,6 +208,66 @@ function emergencyAnnouncements(language: string): Announcement[] {
   return notices;
 }
 
+/**
+ * What the server posts when the office changes when buses leave campus (PUT
+ * /admin/timetable/return-time): a service change for each line, so its students and their
+ * guardians get a notification. A change for every line at once is one notice for everyone.
+ */
+function returnTimeAnnouncements(language: string): Announcement[] {
+  const byMoment = new Map<number, { lineId: string; time: string }[]>();
+  for (const { lineId, change } of allMockReturnChanges()) {
+    byMoment.set(change.at, [...(byMoment.get(change.at) ?? []), { lineId, time: change.time }]);
+  }
+  return [...byMoment.entries()].flatMap(([at, lines]): Announcement[] => {
+    const published_at = new Date(at).toISOString();
+    const clock = (time: string) =>
+      localized(language, formatClockTime(time, "ar"), formatClockTime(time, "en"));
+    const first = lines[0];
+    if (first && lines.length === MOCK_LINES.length) {
+      return [
+        {
+          announcement_id: `ann_return_all_${at}`,
+          kind: AnnouncementKind.ServiceChange,
+          title: localized(
+            language,
+            `ميعاد العودة اتغير: الباصات هتطلع من الجامعة الساعة ${clock(first.time)}`,
+            `New return time: buses leave campus at ${clock(first.time)}`,
+          ),
+          body: localized(
+            language,
+            "الميعاد الجديد لكل الخطوط. خليك في الباص قبل الميعاد بخمس دقايق.",
+            "The new time is for every line. Be on the bus five minutes before it.",
+          ),
+          line: null,
+          published_at,
+        },
+      ];
+    }
+    return lines.flatMap(({ lineId, time }): Announcement[] => {
+      const line = findMockLine(lineId);
+      if (!line) return [];
+      return [
+        {
+          announcement_id: `ann_return_${lineId}_${at}`,
+          kind: AnnouncementKind.ServiceChange,
+          title: localized(
+            language,
+            `خط ${line.code} هيطلع من الجامعة الساعة ${clock(time)}`,
+            `Line ${line.code} now leaves campus at ${clock(time)}`,
+          ),
+          body: localized(
+            language,
+            "ده الميعاد الجديد للعودة. خليك في الباص قبل الميعاد بخمس دقايق.",
+            "This is the new return time. Be on the bus five minutes before it.",
+          ),
+          line: toLineSummary(line, language),
+          published_at,
+        },
+      ];
+    });
+  });
+}
+
 interface MockOfficeAnnouncement {
   id: string;
   kind: typeof AnnouncementKind.Official | typeof AnnouncementKind.ServiceChange;
@@ -256,6 +318,7 @@ function mockAnnouncements(language: string): Announcement[] {
     ...postedByOffice(language),
     ...crewDelayAnnouncements(language),
     ...emergencyAnnouncements(language),
+    ...returnTimeAnnouncements(language),
     ...fixed,
   ].sort((a, b) => b.published_at.localeCompare(a.published_at));
 }

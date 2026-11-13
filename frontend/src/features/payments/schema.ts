@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { calendarDateSchema } from "@/features/subscriptions/schema";
 
 /**
@@ -72,10 +73,10 @@ export const paymentSchema = z.object({
   paid_on: calendarDateSchema,
   payer_name: z.string(),
   file_name: z.string().nullable(),
-  submitted_at: z.iso.datetime(),
+  submitted_at: isoDateTime(),
   status: z.enum([PaymentStatus.PendingReview, PaymentStatus.Approved, PaymentStatus.Rejected]),
   rejection_reason: z.string().nullable(),
-  reviewed_at: z.iso.datetime().nullable(),
+  reviewed_at: isoDateTime().nullable(),
 });
 export type Payment = z.infer<typeof paymentSchema>;
 

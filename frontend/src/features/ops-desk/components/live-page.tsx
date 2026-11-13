@@ -44,6 +44,11 @@ export function LivePage() {
     return () => window.clearInterval(timer);
   }, [refresh]);
 
+  // Fetch the map library while the buses load, not after: the map is the page's main content.
+  useEffect(() => {
+    void import("leaflet");
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("lead")} />

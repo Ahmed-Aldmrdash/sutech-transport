@@ -8,16 +8,24 @@ import { formatCalendarDate, formatClockTime, formatDateTime, formatMoney } from
 import { RequestKind, type StudentRequest } from "../schema";
 import { Row, Attachments } from "./request-detail-parts";
 
+/** Who reads the page: the student ("Your mobile") or an office ("Student's mobile"). */
+export const RequestViewer = { Student: "student", Office: "office" } as const;
+export type RequestViewer = (typeof RequestViewer)[keyof typeof RequestViewer];
+
 /** What the student asked for, field by field. */
 export function RequestDetails({
   request,
   title,
+  viewer = RequestViewer.Student,
 }: {
   request: StudentRequest;
   /** The card's heading; "What you sent" on the student's own page. */
   title?: string;
+  viewer?: RequestViewer;
 }) {
   const t = useTranslations("student");
+  const tOffice = useTranslations("desk.requests.detail.fields");
+  const isOffice = viewer === RequestViewer.Office;
   const locale = useLocale() as Locale;
   const lineLabel = (line: { code: string; name: string }) =>
     `${t("lineCode", { code: line.code })} · ${line.name}`;
@@ -32,7 +40,7 @@ export function RequestDetails({
           <Row label={t("requests.lineChange.fromLine")}>{lineLabel(details.from_line)}</Row>
           <Row label={t("requests.lineChange.toLine")}>{lineLabel(details.to_line)}</Row>
           <Row label={t("requests.lineChange.toStop")}>{details.to_stop.name}</Row>
-          <Row label={t("requests.lineChange.duration")}>
+          <Row label={isOffice ? tOffice("duration") : t("requests.lineChange.duration")}>
             {details.ends_on
               ? t("requests.lineChange.temporaryRange", {
                   from: day(details.starts_on),
@@ -40,8 +48,10 @@ export function RequestDetails({
                 })
               : t("requests.lineChange.permanentFrom", { from: day(details.starts_on) })}
           </Row>
-          <Row label={t("requests.lineChange.reason")}>{details.reason}</Row>
-          <Row label={t("requests.lineChange.studentPhone")}>
+          <Row label={isOffice ? tOffice("reason") : t("requests.lineChange.reason")}>
+            {details.reason}
+          </Row>
+          <Row label={isOffice ? tOffice("studentPhone") : t("requests.lineChange.studentPhone")}>
             <span dir="ltr">{details.student_phone}</span>
           </Row>
           <Row label={t("requests.guardian.name")}>{details.guardian_name}</Row>
@@ -59,8 +69,12 @@ export function RequestDetails({
           <Row label={t("requests.refund.reason")}>
             {t(`requests.refund.reasons.${details.reason}.label`)}
           </Row>
-          <Row label={t("requests.refund.explanation")}>{details.explanation}</Row>
-          <Row label={t("requests.refund.paid")}>{formatMoney(details.paid_piasters, locale)}</Row>
+          <Row label={isOffice ? tOffice("explanation") : t("requests.refund.explanation")}>
+            {details.explanation}
+          </Row>
+          <Row label={isOffice ? tOffice("paid") : t("requests.refund.paid")}>
+            {formatMoney(details.paid_piasters, locale)}
+          </Row>
           <Row label={t("requests.refund.deduction")}>
             {t("requests.refund.percent", { percent: details.deduction_percent })}
           </Row>
@@ -97,8 +111,12 @@ export function RequestDetails({
           <Row label={t("requests.complaint.line")}>
             {details.line ? lineLabel(details.line) : t("requests.complaint.noLine")}
           </Row>
-          <Row label={t("requests.complaint.happenedOn")}>{day(details.happened_on)}</Row>
-          <Row label={t("requests.complaint.description")}>{details.description}</Row>
+          <Row label={isOffice ? tOffice("happenedOn") : t("requests.complaint.happenedOn")}>
+            {day(details.happened_on)}
+          </Row>
+          <Row label={isOffice ? tOffice("description") : t("requests.complaint.description")}>
+            {details.description}
+          </Row>
           {details.attachments.length > 0 ? (
             <Row label={t("requests.complaint.attachments")}>
               <Attachments items={details.attachments} />

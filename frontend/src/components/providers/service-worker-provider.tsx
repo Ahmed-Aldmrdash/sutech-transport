@@ -1,12 +1,15 @@
 "use client";
 
-import { SerwistProvider } from "@serwist/turbopack/react";
+import { SerwistProvider, useSerwist } from "@serwist/turbopack/react";
 import { useEffect, type ReactNode } from "react";
 import { UpdateBanner } from "./update-banner";
 
 const SERVICE_WORKER_URL = "/serwist/sw.js";
 
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+/** Once per page load, even if the provider mounts again (a language switch). */
+let registerStarted = false;
 
 /**
  * Registers the PWA service worker in production builds only.
@@ -23,11 +26,29 @@ export function ServiceWorkerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <SerwistProvider swUrl={SERVICE_WORKER_URL} disable={!IS_PRODUCTION}>
+    <SerwistProvider swUrl={SERVICE_WORKER_URL} disable={!IS_PRODUCTION} register={false}>
+      <RegisterWorker />
       {children}
       <UpdateBanner />
     </SerwistProvider>
   );
+}
+
+/**
+ * Registers the worker ourselves so a browser that refuses it (private mode, a company policy,
+ * blocked site data) only loses offline mode: the provider's own call had no error handling and
+ * threw an uncaught error on every page. The app works the same without the worker.
+ */
+function RegisterWorker() {
+  const { serwist } = useSerwist();
+  useEffect(() => {
+    if (!serwist || registerStarted) return;
+    registerStarted = true;
+    serwist.register().catch(() => {
+      // No service worker here: pages still load from the network.
+    });
+  }, [serwist]);
+  return null;
 }
 
 async function removeServiceWorkers() {

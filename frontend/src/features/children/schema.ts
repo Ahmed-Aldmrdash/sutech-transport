@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { tripRecordSchema } from "@/features/attendance/schema";
 import {
   arrivalWindowSchema,
@@ -74,7 +75,7 @@ const DAY_EVENT_KINDS = Object.values(DayEventKind) as [DayEventKind, ...DayEven
 
 export const dayEventSchema = z.object({
   kind: z.enum(DAY_EVENT_KINDS),
-  at: z.iso.datetime(),
+  at: isoDateTime(),
   /** Stop name, check-out reason or the student's note, in the request's language. */
   detail: z.string().nullable(),
 });
@@ -104,7 +105,7 @@ export const childDaySchema = z.object({
       service_date: calendarDateSchema,
       reason: z.enum(ABSENCE_REASONS),
       note: z.string().nullable(),
-      reported_at: z.iso.datetime(),
+      reported_at: isoDateTime(),
     }),
   ),
 });

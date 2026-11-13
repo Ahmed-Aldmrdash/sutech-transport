@@ -3,6 +3,8 @@ import { createAnnouncement, listAnnouncements } from "@/features/announcements/
 import { resetOfficeAnnouncementsMock } from "@/features/announcements/mock";
 import { login, requestOtp } from "@/features/auth/api";
 import { resetAuthMock } from "@/features/auth/mock";
+import { listNotifications } from "@/features/notifications/api";
+import { NotificationKind } from "@/features/notifications/schema";
 import { PaymentStatus } from "@/features/payments/schema";
 import { getReport, listReports } from "@/features/reports/api";
 import { ReportErrorCode } from "@/features/reports/schema";
@@ -156,6 +158,37 @@ describe("violation desk (mock server)", () => {
       actOnViolation(item.violation_id, { action: "open", outcome: null, note: null }),
     );
     expect(late.code).toBe(ViolationDeskErrorCode.ViolationClosed);
+  });
+
+  it("tells the student and their guardian about a warning, not about a dismissed report", async () => {
+    await signIn("240100102");
+    const student = await listNotifications({ page_size: 50 });
+    const warning = student.items.find((item) => item.kind === NotificationKind.ViolationDecision);
+    expect(warning?.title).toMatch(/إنذار/);
+    expect(warning?.body).toMatch(/مزيكا أو أفلام بصوت عالي/);
+    expect(warning?.link).toBeNull();
+
+    await signIn("01000002001");
+    const guardian = await listNotifications({ page_size: 50 });
+    const childWarning = guardian.items.find(
+      (item) => item.kind === NotificationKind.ViolationDecision,
+    );
+    expect(childWarning?.link).toEqual({ target: "child_day", id: "usr_student_2" });
+
+    // The seeded smoking report on another student, dismissed: nobody is told.
+    await signIn("STA-1001");
+    const [open] = (await listDeskViolations({ status: ViolationStatus.Submitted })).items;
+    if (!open) throw new Error("no new report");
+    await actOnViolation(open.violation_id, {
+      action: "close",
+      outcome: "dismissed",
+      note: "Could not confirm who it was.",
+    });
+    await signIn("240100102");
+    const after = await listNotifications({ page_size: 50 });
+    expect(
+      after.items.filter((item) => item.kind === NotificationKind.ViolationDecision),
+    ).toHaveLength(1);
   });
 });
 

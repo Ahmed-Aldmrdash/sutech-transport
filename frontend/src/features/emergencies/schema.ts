@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { busTypeSchema, geoPointSchema, lineSummarySchema } from "@/features/lines/schema";
 import { SOS_STATUSES, SosAction, sosSchema } from "@/features/sos/schema";
 import { TripDirection } from "@/features/trips/schema";
@@ -73,7 +74,7 @@ export const tripReplacementSchema = z.object({
   note: z.string().nullable(),
   sos_id: z.string().nullable(),
   by_name: z.string().nullable(),
-  at: z.iso.datetime(),
+  at: isoDateTime(),
 });
 export type TripReplacement = z.infer<typeof tripReplacementSchema>;
 

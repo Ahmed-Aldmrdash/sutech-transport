@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { clockTimeSchema, lineSummarySchema } from "@/features/lines/schema";
 import { calendarDateSchema } from "@/features/subscriptions/schema";
 
@@ -10,7 +11,7 @@ export const CardErrorCode = { NotSubscribed: "NOT_SUBSCRIBED" } as const;
  */
 const cardQrSchema = z.object({
   token: z.string().min(1),
-  expires_at: z.iso.datetime(),
+  expires_at: isoDateTime(),
 });
 
 export const studentCardSchema = z.object({

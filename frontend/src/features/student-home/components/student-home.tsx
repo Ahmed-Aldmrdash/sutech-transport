@@ -28,6 +28,7 @@ export function StudentHome() {
       : "";
 
   const subscription = state.status === AsyncStatus.Success ? state.data.subscription : null;
+  const isLoading = state.status === AsyncStatus.Loading;
   const isActive = subscription?.status === SubscriptionStatus.Active;
 
   return (
@@ -38,7 +39,7 @@ export function StudentHome() {
       />
       <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-5">
-          {state.status === AsyncStatus.Loading ? <Skeleton className="h-72 w-full" /> : null}
+          {isLoading ? <Skeleton className="h-72 w-full" /> : null}
           {state.status === AsyncStatus.Error ? (
             <ErrorState error={state.error} onRetry={state.reload} />
           ) : null}
@@ -48,7 +49,12 @@ export function StudentHome() {
           {isActive ? <NextTripCard /> : null}
           {state.status === AsyncStatus.Success && !isActive ? <SubscribeSteps /> : null}
         </div>
-        <AlertsCard />
+        {/* On a phone the alerts sit under the cards above, which grow once they load: show
+            them after that, so they don't jump down the screen (layout shift). They still load
+            meanwhile. On a laptop they have their own column. */}
+        <div className={isLoading ? "hidden desktop:block" : undefined}>
+          <AlertsCard />
+        </div>
       </div>
     </div>
   );

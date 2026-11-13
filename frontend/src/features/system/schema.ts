@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 
 export const ServiceStatus = {
   Ok: "ok",
@@ -9,6 +10,6 @@ export const ServiceStatus = {
 export const healthSchema = z.object({
   status: z.enum([ServiceStatus.Ok, ServiceStatus.Degraded]),
   version: z.string(),
-  server_time: z.iso.datetime(),
+  server_time: isoDateTime(),
 });
 export type Health = z.infer<typeof healthSchema>;

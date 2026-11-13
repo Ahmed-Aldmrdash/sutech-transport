@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { listAudit } from "@/features/admin-system/api";
 import { resetAudit } from "@/features/admin-system/mock-log";
 import { login, requestOtp } from "@/features/auth/api";
+import { listAnnouncements } from "@/features/announcements/api";
 import { resetAuthMock } from "@/features/auth/mock";
 import { getLine } from "@/features/lines/api";
 import { resetReturnTimes } from "@/features/lines/mock-timetable";
@@ -54,10 +55,20 @@ describe("return times (mock server)", () => {
 
     await signIn("240100102");
     expect((await getLine("ln_07")).return_departure_time).toBe("15:00");
+    const notices = await listAnnouncements({ kind: "service_change" });
+    expect(notices.items.map((item) => item.title)).toContain(
+      "خط 7 هيطلع من الجامعة الساعة 3:00 م",
+    );
 
     await signIn("TRN-1001");
     const all = await changeReturnTime({ line_ids: [], return_departure_time: "17:00" });
     expect(all.items.every((row) => row.return_departure_time === "17:00")).toBe(true);
+    await signIn("240100101");
+    const forEveryone = await listAnnouncements({ kind: "service_change" });
+    expect(forEveryone.items[0]?.title).toBe(
+      "ميعاد العودة اتغير: الباصات هتطلع من الجامعة الساعة 5:00 م",
+    );
+    expect(forEveryone.items[0]?.line).toBeNull();
 
     await signIn("ADM-1001");
     const log = await listAudit({ area: "timetable" });
@@ -73,6 +84,15 @@ describe("return times (mock server)", () => {
       changeReturnTime({ line_ids: ["ln_99"], return_departure_time: "16:00" }),
     );
     expect(missing.code).toBe(TimetableErrorCode.LineNotFound);
+    for (const time of ["06:00", "11:59", "20:01", "23:30"]) {
+      const early = await errorOf(
+        changeReturnTime({ line_ids: ["ln_07"], return_departure_time: time }),
+      );
+      expect(early.code).toBe(TimetableErrorCode.ReturnTimeOutOfRange);
+    }
+    expect((await getTimetable()).items.every((row) => row.return_departure_time === "16:30")).toBe(
+      true,
+    );
     await signIn("FIN-1001");
     expect((await errorOf(getTimetable())).code).toBe(ServerErrorCode.Forbidden);
     await signIn("240100102");

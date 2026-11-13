@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { calendarDateSchema } from "@/features/subscriptions/schema";
 
 /** Why the student won't ride. Only shown to the office and the driver as a hint. */
@@ -36,16 +37,16 @@ export const absenceSchema = z.object({
   service_date: calendarDateSchema,
   reason: z.enum(ABSENCE_REASONS),
   note: z.string().nullable(),
-  created_at: z.iso.datetime(),
+  created_at: isoDateTime(),
   /** The bus leaves the line's first stop then; after it the report can't be taken back. */
-  cutoff_at: z.iso.datetime(),
+  cutoff_at: isoDateTime(),
 });
 export type Absence = z.infer<typeof absenceSchema>;
 
 /** A service day the student can still report, with its cutoff. */
 export const reportableDaySchema = z.object({
   service_date: calendarDateSchema,
-  cutoff_at: z.iso.datetime(),
+  cutoff_at: isoDateTime(),
 });
 export type ReportableDay = z.infer<typeof reportableDaySchema>;
 

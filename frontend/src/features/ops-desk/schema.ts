@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { riderCountsSchema, riderSchema } from "@/features/crew/schema";
 import { fleetSchema } from "@/features/event-buses/schema";
 import {
@@ -75,7 +76,7 @@ export const liveBusSchema = z.object({
     .extend({
       heading: z.number().min(0).max(360).nullable(),
       speed_kmh: z.number().nonnegative(),
-      recorded_at: z.iso.datetime(),
+      recorded_at: isoDateTime(),
     })
     .nullable(),
   /** The last stop the bus passed. */
@@ -92,7 +93,7 @@ export const liveBusSchema = z.object({
 export type LiveBus = z.infer<typeof liveBusSchema>;
 
 export const liveBusesSchema = z.object({
-  generated_at: z.iso.datetime(),
+  generated_at: isoDateTime(),
   campus_location: geoPointSchema,
   items: z.array(liveBusSchema),
 });
@@ -230,7 +231,7 @@ export const opsStudentDetailSchema = opsStudentSchema.extend({
       reference: z.string(),
       kind: z.enum(REQUEST_KIND_VALUES),
       status: requestStatusSchema,
-      received_at: z.iso.datetime(),
+      received_at: isoDateTime(),
       /** The Transportation office handles it, so the link opens its desk. */
       handled_here: z.boolean(),
     }),

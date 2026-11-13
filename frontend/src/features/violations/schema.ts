@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 
 /**
  * The university's "Code of Conduct on University Buses" (Transportation Department, received
@@ -127,7 +128,7 @@ export const violationSchema = z.object({
   description: z.string(),
   photo_name: z.string(),
   status: z.enum(VIOLATION_STATUSES),
-  created_at: z.iso.datetime(),
+  created_at: isoDateTime(),
 });
 export type Violation = z.infer<typeof violationSchema>;
 

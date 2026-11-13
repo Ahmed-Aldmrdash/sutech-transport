@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { EVENT_KINDS, EVENT_STATUSES } from "@/features/event-buses/schema";
 import { busTypeSchema, clockTimeSchema, lineSummarySchema } from "@/features/lines/schema";
 import { SOS_STATUSES, SOS_TYPES } from "@/features/sos/schema";
@@ -86,7 +87,7 @@ export const sgOverviewSchema = z.object({
   is_service_day: z.boolean(),
   /** On a day with no buses: the latest earlier day that had them (up to a month back). */
   previous_service_day: z.iso.date().nullable(),
-  generated_at: z.iso.datetime(),
+  generated_at: isoDateTime(),
   totals: z.object({
     lines: count,
     lines_running: count,
@@ -105,7 +106,7 @@ export const sgOverviewSchema = z.object({
       type: z.enum(SOS_TYPES),
       status: z.enum(SOS_STATUSES),
       line: lineSummarySchema,
-      raised_at: z.iso.datetime(),
+      raised_at: isoDateTime(),
     }),
   ),
   /** Event buses that day (waiting for Abu El Hol or confirmed). */
@@ -137,11 +138,11 @@ export const watchedStudentSchema = z.object({
     pickup_time: clockTimeSchema.nullable(),
   }),
   status: z.enum(WATCHED_STATUSES),
-  boarded_at: z.iso.datetime().nullable(),
-  checked_out_at: z.iso.datetime().nullable(),
+  boarded_at: isoDateTime().nullable(),
+  checked_out_at: isoDateTime().nullable(),
   /** Why they left the bus, in the request's language. */
   checkout_reason: z.string().nullable(),
-  added_at: z.iso.datetime(),
+  added_at: isoDateTime(),
 });
 export type WatchedStudent = z.infer<typeof watchedStudentSchema>;
 

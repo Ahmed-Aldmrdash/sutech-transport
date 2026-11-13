@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { lineSummarySchema } from "@/features/lines/schema";
 import {
   PAYER_NAME_MAX_LENGTH,
@@ -137,7 +138,7 @@ export const awaitingPaymentSchema = z.object({
   stop_name: z.string(),
   price_piasters: z.number().int().positive(),
   /** When the seat is released if not paid. */
-  hold_expires_at: z.iso.datetime().nullable(),
+  hold_expires_at: isoDateTime().nullable(),
 });
 export type AwaitingPayment = z.infer<typeof awaitingPaymentSchema>;
 

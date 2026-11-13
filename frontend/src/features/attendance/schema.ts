@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { lineSummarySchema } from "@/features/lines/schema";
 import { calendarDateSchema } from "@/features/subscriptions/schema";
 import { TripDirection } from "@/features/trips/schema";
@@ -30,9 +31,9 @@ export const tripRecordSchema = z.object({
   stop_name: z.string(),
   outcome: z.enum(TRIP_OUTCOMES),
   /** Scan times; null when it didn't happen. */
-  boarded_at: z.iso.datetime().nullable(),
-  arrived_at: z.iso.datetime().nullable(),
-  checked_out_at: z.iso.datetime().nullable(),
+  boarded_at: isoDateTime().nullable(),
+  arrived_at: isoDateTime().nullable(),
+  checked_out_at: isoDateTime().nullable(),
   /** In the request's language, e.g. "Felt unwell". */
   checkout_reason: z.string().nullable(),
 });

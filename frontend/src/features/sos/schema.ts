@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { Role } from "@/lib/auth/roles";
 
 /**
@@ -51,7 +52,7 @@ export const SOS_NOTE_MAX_LENGTH = 300;
 const sosLocationSchema = z.object({
   lat: z.number(),
   lng: z.number(),
-  fix_at: z.iso.datetime(),
+  fix_at: isoDateTime(),
   source: z.literal("bus_gps"),
 });
 
@@ -61,7 +62,7 @@ export const sosActionEntrySchema = z.object({
   by: z.string(),
   /** Their name in the request's language, so the crew sees who took it. */
   by_name: z.string().nullable(),
-  at: z.iso.datetime(),
+  at: isoDateTime(),
   note: z.string().nullable(),
 });
 export type SosActionEntry = z.infer<typeof sosActionEntrySchema>;
@@ -82,7 +83,7 @@ export const sosSchema = z.object({
   /** null if the bus's GPS device hasn't reported on this trip. */
   location: sosLocationSchema.nullable(),
   riders_on_board: z.number().int().nonnegative(),
-  created_at: z.iso.datetime(),
+  created_at: isoDateTime(),
   /** Oldest first. */
   actions: z.array(sosActionEntrySchema),
 });

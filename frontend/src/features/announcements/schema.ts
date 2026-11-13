@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { lineSummarySchema } from "@/features/lines/schema";
 
 export const AnnouncementKind = {
@@ -18,7 +19,7 @@ export const announcementSchema = z.object({
   body: z.string(),
   /** null when it is for everyone. */
   line: lineSummarySchema.nullable(),
-  published_at: z.iso.datetime(),
+  published_at: isoDateTime(),
 });
 export type Announcement = z.infer<typeof announcementSchema>;
 

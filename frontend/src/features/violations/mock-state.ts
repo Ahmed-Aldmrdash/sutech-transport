@@ -54,8 +54,7 @@ const SEED_VIOLATIONS: Record<string, MockViolation[]> = {
       },
       tripId: null,
       lineId: "ln_07",
-      description:
-        "Played videos out loud on the way back after being asked twice to use headphones.",
+      description: "كان مشغّل فيديوهات بصوت عالي في طريق الرجوع، واتقاله مرتين يستخدم سماعات.",
       photoName: "seat-9.jpg",
       createdAt: Date.parse("2026-10-21T13:20:00Z"),
       office: {
@@ -64,7 +63,7 @@ const SEED_VIOLATIONS: Record<string, MockViolation[]> = {
         closedAt: Date.parse("2026-10-22T09:30:00Z"),
         closedBy: AFFAIRS_OFFICER,
         outcome: "warning",
-        note: "First time. The student was warned in person and signed the conduct rules.",
+        note: "أول مرة. اتنبه عليه شخصيًا ووقّع على قواعد السلوك.",
       },
     },
     {
@@ -78,7 +77,7 @@ const SEED_VIOLATIONS: Record<string, MockViolation[]> = {
       },
       tripId: null,
       lineId: "ln_07",
-      description: "Was vaping in the back seats on the way in; asked to stop twice.",
+      description: "كانت بتشرب فيب في الكراسي اللي ورا في طريق الرايح، واتقالها مرتين توقف.",
       photoName: "back-seats.jpg",
       createdAt: Date.parse("2026-11-10T06:40:00Z"),
       office: null,
@@ -91,7 +90,7 @@ const SEED_VIOLATIONS: Record<string, MockViolation[]> = {
       student: null,
       tripId: null,
       lineId: "ln_07",
-      description: "Found the cover of seat 14 cut with a blade after the return trip.",
+      description: "لقيت كسوة كرسي 14 متقطعة بموس بعد رحلة الرجوع.",
       photoName: "seat-14.jpg",
       createdAt: Date.parse("2026-11-09T14:05:00Z"),
       office: {

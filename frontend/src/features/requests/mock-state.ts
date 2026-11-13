@@ -15,11 +15,6 @@ import type {
  * pages (request desk); nothing is decided by a timer. Only the mock uses this.
  */
 
-const MS_PER_SECOND = 1000;
-
-/** Mock only: a guardian with no account in the demo "approves" after this long. */
-export const MOCK_GUARDIAN_AUTO_APPROVE_MS = 20 * MS_PER_SECOND;
-
 /** The office's answer: approved or rejected (line change, refund, permit), or resolved. */
 export type MockDecision =
   typeof RequestStatus.Approved | typeof RequestStatus.Rejected | typeof RequestStatus.Resolved;
@@ -103,7 +98,10 @@ export type MockRequestPayload =
  * and count as already sent to the office.
  */
 export interface MockGuardianStep {
-  /** False when no guardian account follows the student in the mock (see the auto-approval). */
+  /**
+   * False when no guardian account follows the student: then nothing waits for an answer and
+   * the office calls the guardian (see guardianStepOf).
+   */
   hasAccount: boolean;
   decidedAt: number | null;
   approved: boolean;
@@ -125,10 +123,19 @@ export interface MockOfficeStep {
   refundPiasters: number | null;
 }
 
+/** The language a student wrote a request in: the office answers in it. */
+export type MockLanguage = "ar" | "en";
+
+export function mockLanguageOf(acceptLanguage: string): MockLanguage {
+  return acceptLanguage === "en" ? "en" : "ar";
+}
+
 export interface MockRequest {
   requestId: string;
   reference: string;
   submittedAt: number;
+  /** The student's language when sending it. Missing on older saved requests: Arabic. */
+  language?: MockLanguage;
   withdrawnAt: number | null;
   /** Null until an office member opens it. */
   office?: MockOfficeStep | null;
@@ -172,7 +179,7 @@ const SEED_REQUESTS: Record<string, MockRequest[]> = {
         category: "delay",
         lineId: "ln_07",
         happenedOn: "2026-10-13",
-        description: "The bus reached campus at 9:40 and I missed my first lecture.",
+        description: "الباص وصل الجامعة الساعة 9:40 وفاتتني أول محاضرة.",
         attachments: [],
       },
     },

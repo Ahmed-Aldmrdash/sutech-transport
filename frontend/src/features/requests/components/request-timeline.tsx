@@ -8,6 +8,7 @@ import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
 import { RequestActor, RequestStatus, type RequestEvent, type StudentRequest } from "../schema";
+import { RequestViewer } from "./request-details";
 import { REQUEST_STATUS_TONE } from "./request-status-badge";
 
 /** The office's last word, on top where the student looks first. */
@@ -48,9 +49,28 @@ export function LatestAnswer({ request }: { request: StudentRequest }) {
   );
 }
 
-export function Timeline({ events }: { events: readonly RequestEvent[] }) {
+export function Timeline({
+  events,
+  viewer = RequestViewer.Student,
+}: {
+  events: readonly RequestEvent[];
+  /** On an office's page the student is "the student", not "you". */
+  viewer?: RequestViewer;
+}) {
   const t = useTranslations("student.requests");
+  const tOffice = useTranslations("desk.requests.detail.history");
+  const isOffice = viewer === RequestViewer.Office;
   const locale = useLocale() as Locale;
+  const guardianWord = (event: RequestEvent) => {
+    const refused = event.status === RequestStatus.Rejected;
+    if (isOffice) return tOffice(refused ? "guardianRefused" : "guardianApproved");
+    return t(refused ? "detail.guardianRefused" : "detail.guardianApproved");
+  };
+  const actor = (by: RequestEvent["by"]) => {
+    if (isOffice && by === RequestActor.Student) return tOffice("byStudent");
+    if (isOffice && by === RequestActor.Guardian) return tOffice("byGuardian");
+    return t(`detail.by.${by}`);
+  };
   return (
     <Card>
       <CardHeader title={t("detail.historyTitle")} />
@@ -79,16 +99,12 @@ export function Timeline({ events }: { events: readonly RequestEvent[] }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-body-sm font-bold text-ink-strong">
                     {event.by === RequestActor.Guardian
-                      ? t(
-                          event.status === RequestStatus.Rejected
-                            ? "detail.guardianRefused"
-                            : "detail.guardianApproved",
-                        )
+                      ? guardianWord(event)
                       : t(`status.${event.status}`)}
                   </p>
                   <p className="text-caption text-ink-muted">
                     {t("detail.eventMeta", {
-                      by: t(`detail.by.${event.by}`),
+                      by: actor(event.by),
                       date: formatDateTime(event.at, locale),
                     })}
                   </p>

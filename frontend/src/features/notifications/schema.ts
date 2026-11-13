@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 
 /** What a notification is about. Each kind has its own icon and where it leads. */
 export const NotificationKind = {
@@ -23,6 +24,11 @@ export const NotificationKind = {
   ApprovalNeeded: "approval_needed",
   /** To guardians: the child left the bus mid-trip; the body has the reason. */
   ChildCheckedOut: "child_checked_out",
+  /**
+   * To the student and their guardians: Student Affairs closed a bus conduct report about the
+   * student with a warning or an investigation (not when it was dismissed).
+   */
+  ViolationDecision: "violation_decision",
 } as const;
 export type NotificationKind = (typeof NotificationKind)[keyof typeof NotificationKind];
 const NOTIFICATION_KINDS = Object.values(NotificationKind) as [
@@ -64,9 +70,9 @@ export const notificationSchema = z.object({
   /** In the request's language. */
   title: z.string(),
   body: z.string(),
-  created_at: z.iso.datetime(),
+  created_at: isoDateTime(),
   /** null while unread. */
-  read_at: z.iso.datetime().nullable(),
+  read_at: isoDateTime().nullable(),
   link: notificationLinkSchema.nullable(),
 });
 export type AppNotification = z.infer<typeof notificationSchema>;

@@ -7,6 +7,8 @@ export const ApiMode = {
 export type ApiMode = (typeof ApiMode)[keyof typeof ApiMode];
 
 const DEFAULT_MOCK_LATENCY_MS = 150;
+/** A FastAPI running on the developer's machine. Never used by a live build (it must say). */
+const DEV_API_BASE_URL = "http://localhost:8000";
 
 /**
  * OpenStreetMap's own tile servers: fine for development and the mock demo, but their usage
@@ -21,7 +23,8 @@ const IS_PRODUCTION_BUILD = process.env.NODE_ENV === "production";
 const configSchema = z
   .object({
     apiMode: z.enum([ApiMode.Mock, ApiMode.Live]),
-    apiBaseUrl: z.url().default("http://localhost:8000"),
+    /** Required in a live build; development and the mock fall back to a local FastAPI. */
+    apiBaseUrl: z.url().optional(),
     mockLatencyMs: z.coerce.number().int().min(0).max(10_000).default(DEFAULT_MOCK_LATENCY_MS),
     /** The developer pages (/ui, /preview). Off unless asked for, and never in live mode. */
     devPages: z.boolean(),
@@ -29,6 +32,13 @@ const configSchema = z
     mapAttribution: z.string().optional(),
   })
   .superRefine((config, ctx) => {
+    if (config.apiMode === ApiMode.Live && IS_PRODUCTION_BUILD && !config.apiBaseUrl) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["apiBaseUrl"],
+        message: "Set NEXT_PUBLIC_API_BASE_URL to the FastAPI server for a live build.",
+      });
+    }
     if (config.apiMode === ApiMode.Live && IS_PRODUCTION_BUILD && !config.mapTileUrl) {
       ctx.addIssue({
         code: "custom",
@@ -39,6 +49,7 @@ const configSchema = z
   })
   .transform((config) => ({
     ...config,
+    apiBaseUrl: config.apiBaseUrl ?? DEV_API_BASE_URL,
     devPages: config.devPages && config.apiMode === ApiMode.Mock,
     mapTileUrl: config.mapTileUrl ?? DEV_MAP_TILE_URL,
     mapAttribution: config.mapAttribution ?? DEV_MAP_ATTRIBUTION,

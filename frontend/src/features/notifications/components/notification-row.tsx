@@ -10,6 +10,7 @@ import {
   LogOut,
   Megaphone,
   School,
+  ShieldAlert,
   Timer,
   UserX,
   type LucideIcon,
@@ -39,6 +40,7 @@ const KIND_ICON: Record<NotificationKind, LucideIcon> = {
   [NotificationKind.ChildNotGoing]: CalendarX2,
   [NotificationKind.ChildCheckedOut]: LogOut,
   [NotificationKind.ApprovalNeeded]: ListChecks,
+  [NotificationKind.ViolationDecision]: ShieldAlert,
 };
 
 const KIND_STYLE: Record<NotificationKind, string> = {
@@ -54,6 +56,7 @@ const KIND_STYLE: Record<NotificationKind, string> = {
   [NotificationKind.ChildNotGoing]: "bg-surface-alt text-ink",
   [NotificationKind.ChildCheckedOut]: "bg-warning-soft text-warning-text",
   [NotificationKind.ApprovalNeeded]: "bg-warning-soft text-warning-text",
+  [NotificationKind.ViolationDecision]: "bg-warning-soft text-warning-text",
 };
 
 export function NotificationRow({ item, onRead }: { item: AppNotification; onRead: () => void }) {

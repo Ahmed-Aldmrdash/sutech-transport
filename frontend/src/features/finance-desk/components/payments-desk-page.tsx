@@ -50,8 +50,10 @@ export function PaymentsDeskPage() {
     setPage(1);
   }, []);
   const counts = state.data?.counts;
+  // "(…)" holds the count's place until it arrives: the chips keep their width, so on a phone
+  // they don't wrap to a new row and push the search box down (layout shift).
   const label = (key: PaymentStatus) =>
-    counts ? `${t(`filters.${key}`)} (${formatNumber(counts[key], locale)})` : t(`filters.${key}`);
+    `${t(`filters.${key}`)} (${counts ? formatNumber(counts[key], locale) : "…"})`;
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import {
   arrivalWindowSchema,
   busSchema,
@@ -17,7 +18,7 @@ const busPositionSchema = geoPointSchema.extend({
   /** Compass direction of travel, 0 = north, clockwise. null when standing still. */
   heading: z.number().min(0).max(360).nullable(),
   speed_kmh: z.number().nonnegative(),
-  recorded_at: z.iso.datetime(),
+  recorded_at: isoDateTime(),
 });
 
 /** Why there's no bus to follow right now. */
@@ -63,6 +64,6 @@ export const trackingSchema = z.object({
   trip: liveTripSchema.nullable(),
   reason: z.enum([NoTrackingReason.NoSubscription, NoTrackingReason.NoTripNow]).nullable(),
   /** When the next trip starts (the bus leaves its first stop), for "no_trip_now". */
-  next_departure_at: z.iso.datetime().nullable(),
+  next_departure_at: isoDateTime().nullable(),
 });
 export type Tracking = z.infer<typeof trackingSchema>;

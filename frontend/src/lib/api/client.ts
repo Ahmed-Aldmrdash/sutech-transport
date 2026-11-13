@@ -21,6 +21,12 @@ import type { MockResponse } from "./mock/mock-server";
 import { tokenStore } from "./token-store";
 
 const REQUEST_TIMEOUT_MS = 15_000;
+/**
+ * Uploads (a 5 MB receipt is ~6.7 MB of base64; a complaint can carry 3 files) get much longer
+ * on a slow mobile connection. A body bigger than this counts as an upload.
+ */
+const UPLOAD_TIMEOUT_MS = 120_000;
+const UPLOAD_BODY_CHARS = 256 * 1024;
 
 export interface RequestOptions {
   signal?: AbortSignal;
@@ -119,14 +125,16 @@ async function sendToServer({
   if (parsed.body !== undefined) headers["Content-Type"] = "application/json";
   if (idempotencyKey) headers[IDEMPOTENCY_HEADER] = idempotencyKey;
 
-  const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+  const body = parsed.body === undefined ? undefined : JSON.stringify(parsed.body);
+  const isUpload = (body?.length ?? 0) > UPLOAD_BODY_CHARS;
+  const timeout = AbortSignal.timeout(isUpload ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
 
   try {
     const response = await fetch(url, {
       method: endpoint.method,
       headers,
-      body: parsed.body === undefined ? undefined : JSON.stringify(parsed.body),
+      body,
       // The session is an HttpOnly cookie the server sets at sign-in; scripts never hold it.
       credentials: "include",
       signal: combined,

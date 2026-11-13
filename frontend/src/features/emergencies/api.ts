@@ -21,9 +21,15 @@ import {
 } from "./schema";
 
 const TAG = "emergencies";
-/** The clinic sees medical alerts and accidents only; the server filters the rest out. */
+/**
+ * Reading the desk: the two offices and the super admin. The clinic sees medical alerts and
+ * accidents only; the server filters the rest out.
+ */
 const SOS_DESK = [Role.SuperAdmin, Role.Transport, Role.Clinic];
-const TRANSPORT = [Role.SuperAdmin, Role.Transport];
+/** Acting on an alert: the two offices only. The super admin watches (403 here). */
+const SOS_ACTORS = [Role.Transport, Role.Clinic];
+/** Replacement buses and drivers: the Transportation office only (the super admin gets 403). */
+const TRANSPORT = [Role.Transport];
 
 export const listAdminSosEndpoint = defineEndpoint({
   id: "emergencies.list",
@@ -61,9 +67,9 @@ export const addSosActionEndpoint = defineEndpoint({
     "takes an open alert (the crew sees who took it); then `ambulance_called`, `note` (needs " +
     "`note`) and `close` (needs the summary in `note`). Closing tells the trip's students and " +
     "guardians it was handled. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED " +
-    "(409), NOTE_REQUIRED (422).",
+    "(409), NOTE_REQUIRED (422), FORBIDDEN (403, super_admin: view only).",
   tag: TAG,
-  access: SOS_DESK,
+  access: SOS_ACTORS,
   idempotent: true,
   params: adminSosParamsSchema,
   body: sosActionBodySchema,
@@ -76,7 +82,7 @@ export const getReplacementOptionsEndpoint = defineEndpoint({
   path: "/admin/trips/{trip_id}/replacement-options",
   summary:
     "The trip's bus and driver now, how many riders it carries, and the buses (each with its " +
-    "driver) and drivers free to send today.",
+    "driver) and drivers free to send today. Transportation office only (super_admin: 403).",
   tag: TAG,
   access: TRANSPORT,
   params: tripParamsSchema,
@@ -92,7 +98,8 @@ export const sendReplacementEndpoint = defineEndpoint({
     "trip that hasn't ended. Riders and attendance stay with the trip (business rule 10); the " +
     "crew, the line's students and their guardians see the new bus and driver at once, and " +
     "`sos_id` gets a `replacement_sent` line. Errors: TRIP_ALREADY_ENDED, BUS_NOT_AVAILABLE, " +
-    "DRIVER_NOT_AVAILABLE, SOS_CLOSED (409), NOTHING_TO_CHANGE (422).",
+    "DRIVER_NOT_AVAILABLE, SOS_CLOSED (409), NOTHING_TO_CHANGE (422), FORBIDDEN (403, also " +
+    "for super_admin: view only).",
   tag: TAG,
   access: TRANSPORT,
   idempotent: true,

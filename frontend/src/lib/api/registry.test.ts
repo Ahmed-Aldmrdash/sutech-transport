@@ -17,6 +17,43 @@ describe("endpoint registry", () => {
   });
 });
 
+describe("contract rules from the agreement", () => {
+  const document = buildOpenApiDocument();
+  const operation = (method: string, path: string) =>
+    document.paths[`/api/v1${path}`]?.[method] as
+      { "x-roles": readonly string[] | "public"; security?: unknown } | undefined;
+
+  it("signs in with an HttpOnly session cookie, never a bearer token", () => {
+    const schemes = (document.components as { securitySchemes: Record<string, unknown> })
+      .securitySchemes;
+    expect(schemes).toEqual({
+      sessionCookie: expect.objectContaining({ type: "apiKey", in: "cookie" }),
+    });
+    const securities = Object.values(document.paths).flatMap((methods) =>
+      Object.values(methods).map((item) => JSON.stringify(item.security ?? null)),
+    );
+    expect(new Set(securities)).toEqual(new Set(["null", '[{"sessionCookie":[]}]']));
+    expect(operation("get", "/me")?.security).toEqual([{ sessionCookie: [] }]);
+    expect(operation("post", "/auth/otp")?.security).toBeUndefined();
+  });
+
+  it("keeps the super admin view-only on SOS, replacement buses and Abu El Hol's portal", () => {
+    const actions = [
+      ["post", "/admin/sos/{sos_id}/actions"],
+      ["get", "/admin/trips/{trip_id}/replacement-options"],
+      ["post", "/admin/trips/{trip_id}/replacement"],
+      ["post", "/bus-company/requests/{event_id}/reply"],
+    ] as const;
+    for (const [method, path] of actions) {
+      expect(operation(method, path)?.["x-roles"]).not.toContain("super_admin");
+    }
+    // ...but still reads those desks.
+    for (const path of ["/admin/sos", "/admin/sos/{sos_id}", "/bus-company/requests"]) {
+      expect(operation("get", path)?.["x-roles"]).toContain("super_admin");
+    }
+  });
+});
+
 describe("openapi.json", () => {
   it("is up to date with the endpoint definitions (run `npm run openapi`)", async () => {
     const { readFileSync } = await import("node:fs");

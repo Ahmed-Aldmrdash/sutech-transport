@@ -46,6 +46,11 @@ export function TrackingPanel({ load, loadKey, audience, linesHref }: TrackingPa
     return () => clearInterval(timer);
   }, [refresh]);
 
+  // Fetch the map library while the trip loads, not after it.
+  useEffect(() => {
+    void import("leaflet");
+  }, []);
+
   if (state.status === AsyncStatus.Loading) {
     return (
       <div className="flex flex-col gap-5">

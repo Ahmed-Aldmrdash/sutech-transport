@@ -34,7 +34,8 @@ export const loginEndpoint = defineEndpoint({
   method: HttpMethod.Post,
   path: "/auth/login",
   summary:
-    "Step 2: the same identifier plus the code. Returns a bearer token that carries the role. " +
+    "Step 2: the same identifier plus the code. Sets the HttpOnly, Secure, SameSite=Lax session " +
+    "cookie (the session carries the role); the body has no token, only `expires_at` and the user. " +
     "Errors: INVALID_OTP (400), OTP_EXPIRED (400), OTP_LOCKED (429).",
   tag: TAG,
   access: "public",
@@ -46,7 +47,7 @@ export const logoutEndpoint = defineEndpoint({
   id: "auth.logout",
   method: HttpMethod.Post,
   path: "/auth/logout",
-  summary: "Revokes the caller's token.",
+  summary: "Ends the caller's session on the server and clears the session cookie.",
   tag: TAG,
   access: ALL_ROLES,
   response: z.object({ ok: z.literal(true) }),
@@ -56,7 +57,8 @@ export const getMeEndpoint = defineEndpoint({
   id: "auth.getMe",
   method: HttpMethod.Get,
   path: "/me",
-  summary: "The signed-in account and its role. 401 when the token has expired or was revoked.",
+  summary:
+    "The signed-in account and its role. 401 when the session cookie has expired or was revoked.",
   tag: TAG,
   access: ALL_ROLES,
   response: userSchema,

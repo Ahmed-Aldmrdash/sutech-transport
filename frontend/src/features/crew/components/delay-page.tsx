@@ -26,6 +26,7 @@ import {
   DelayReason,
   type CrewToday,
   type CrewTrip,
+  type DelayMinutes,
 } from "../schema";
 import { canReportDelay, currentTrip } from "../trip-rules";
 import { CrewGate } from "./crew-gate";
@@ -36,7 +37,7 @@ const DELAY_ERRORS = [
   CrewErrorCode.DelayOutOfWindow,
   CrewErrorCode.DriverRelieved,
 ] as const;
-const DEFAULT_MINUTES = 15;
+const DEFAULT_MINUTES: DelayMinutes = 15;
 
 /** "We're running late": students and guardians on the line get a delay notice. */
 export function DelayPage() {
@@ -89,7 +90,7 @@ function DelayForm({ trip, onSent }: { trip: CrewTrip; onSent: () => void }) {
   const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
   const toast = useToast();
-  const [minutes, setMinutes] = useState<number>(DEFAULT_MINUTES);
+  const [minutes, setMinutes] = useState<DelayMinutes>(DEFAULT_MINUTES);
   const [reason, setReason] = useState<DelayReason>(DelayReason.Traffic);
   const [note, setNote] = useState("");
   const { submit, isSending, serverError } = useSubmit(DELAY_ERRORS);

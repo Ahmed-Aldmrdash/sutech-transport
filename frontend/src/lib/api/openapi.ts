@@ -5,6 +5,14 @@ import { allEndpoints } from "./registry";
 
 type JsonSchema = Record<string, unknown>;
 
+/**
+ * The agreement's session: an HttpOnly, Secure, SameSite=Lax cookie that POST /auth/login sets
+ * and the browser sends with every request (`credentials: "include"`). No bearer token: page
+ * scripts never see the credential. The cookie's name is the backend's choice; this is ours.
+ */
+const SESSION_SCHEME = "sessionCookie";
+const SESSION_COOKIE_NAME = "sut_session";
+
 interface Operation {
   operationId: string;
   summary: string;
@@ -72,7 +80,7 @@ function toOperation(endpoint: Endpoint): Operation {
       default: errorResponse,
     },
   };
-  if (endpoint.access !== "public") operation.security = [{ bearerAuth: [] }];
+  if (endpoint.access !== "public") operation.security = [{ [SESSION_SCHEME]: [] }];
   if (endpoint.body) {
     operation.requestBody = {
       required: true,
@@ -98,11 +106,23 @@ export function buildOpenApiDocument(
       version: "0.1.0",
       description:
         "Generated from the front end's Zod schemas (npm run openapi). Fields are snake_case, " +
-        "times are ISO 8601 UTC, money is integer piasters, errors are { code, message }.",
+        "times are ISO 8601 UTC (`Z`; the app also accepts `+00:00`), money is integer piasters, " +
+        "errors are { code, message }. Sign-in sets an HttpOnly session cookie (no bearer token). " +
+        "`x-roles` lists the only roles allowed; any other role gets 403 FORBIDDEN.",
     },
     servers: [{ url: "http://localhost:8000" }],
     components: {
-      securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } },
+      securitySchemes: {
+        [SESSION_SCHEME]: {
+          type: "apiKey",
+          in: "cookie",
+          name: SESSION_COOKIE_NAME,
+          description:
+            "HttpOnly, Secure, SameSite=Lax session cookie set by POST /auth/login and cleared by " +
+            "POST /auth/logout. An expired or revoked session answers 401 UNAUTHORIZED; a role " +
+            "outside `x-roles` answers 403 FORBIDDEN.",
+        },
+      },
       responses: {
         Error: {
           description: "Any error",

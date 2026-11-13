@@ -10,7 +10,7 @@ import { ConfirmDialog } from "@/components/ui/dialog";
 import { TextAreaField, TextField } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { Tone } from "@/components/ui/tone";
-import { RequestKind } from "@/features/requests/schema";
+import { RequestActor, RequestKind } from "@/features/requests/schema";
 import type { Locale } from "@/i18n/routing";
 import { focusFirstError } from "@/lib/forms/focus-first-error";
 import { PIASTERS_PER_POUND, formatMoney, formatNumber } from "@/lib/format";
@@ -40,12 +40,28 @@ export function DeskActionsCard({ desk, onDone }: { desk: DeskRequest; onDone: (
   const [action, setAction] = useState<DeskAction | null>(null);
   const { request } = desk;
   const seats = desk.target_seats_available;
+  // A line change normally reaches the office after the guardian approved in the app. With no
+  // guardian account it comes straight here, and the office confirms by phone.
+  const guardianToCall =
+    request.kind === RequestKind.LineChange &&
+    !request.timeline.some((event) => event.by === RequestActor.Guardian)
+      ? request.details
+      : null;
 
   return (
     <Card elevation="raised" className="border-brand">
       <CardHeader title={t("title")} headingLevel={2} />
       <CardBody className="flex flex-col gap-4">
         <p className="text-body-sm text-ink">{t(`lead.${request.kind}`)}</p>
+        {guardianToCall ? (
+          <Alert tone={Tone.Info} title={t("callGuardian.title")}>
+            {t.rich("callGuardian.body", {
+              name: guardianToCall.guardian_name,
+              number: guardianToCall.guardian_phone,
+              phone: (chunks) => <bdi dir="ltr">{chunks}</bdi>,
+            })}
+          </Alert>
+        ) : null}
         {request.kind === RequestKind.LineChange && seats !== null ? (
           <Alert
             tone={seats > 0 ? Tone.Success : Tone.Warning}
@@ -180,7 +196,9 @@ function ActionDialog({
         ) : null}
         <TextAreaField
           label={t("noteLabel")}
-          hint={needsNote ? t("noteHintRequired") : t("noteHint")}
+          hint={`${needsNote ? t("noteHintRequired") : t("noteHint")} ${t(`replyIn.${desk.reply_language}`)}`}
+          lang={desk.reply_language}
+          dir={desk.reply_language === "ar" ? "rtl" : "ltr"}
           required={needsNote}
           optionalText={needsNote ? undefined : t("optional")}
           maxLength={DESK_NOTE_MAX_LENGTH}

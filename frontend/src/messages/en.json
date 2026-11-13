@@ -307,6 +307,7 @@
     "identifierLead": "Enter your ID and we'll text a one-time code to your registered phone. No password needed.",
     "identifierLabel": "University ID, staff ID or phone",
     "identifierHint": "Students: your 9-digit university ID. Parents: the phone number registered with the university.",
+    "identifierPlaceholder": "e.g. 241234567",
     "identifierRequired": "Enter your ID or phone number.",
     "identifierTooShort": "This looks too short. Check it and try again.",
     "phoneLength": "Phone numbers are 11 digits starting with 01. Check it and try again.",
@@ -1895,7 +1896,22 @@
           "expired": "Hold ran out",
           "cancelled": "Cancelled"
         },
-        "handledBy": "Handled by"
+        "handledBy": "Handled by",
+        "fields": {
+          "duration": "Duration",
+          "reason": "Student's reason",
+          "studentPhone": "Student's mobile",
+          "explanation": "Student's explanation",
+          "paid": "Paid",
+          "happenedOn": "Happened on",
+          "description": "What happened"
+        },
+        "history": {
+          "byStudent": "The student",
+          "byGuardian": "The guardian",
+          "guardianApproved": "The guardian approved; sent to the Transportation office",
+          "guardianRefused": "The guardian didn't approve"
+        }
       },
       "act": {
         "title": "Your answer",
@@ -1945,7 +1961,15 @@
         "amountLabel": "Amount to refund (EGP)",
         "amountHint": "As the university decided. The student paid {paid}.",
         "amountInvalid": "Enter an amount from 0 up to {max}.",
-        "amountFixed": "Refund by the policy: {amount}"
+        "amountFixed": "Refund by the policy: {amount}",
+        "replyIn": {
+          "ar": "The student uses the app in Arabic: answer in Arabic.",
+          "en": "The student uses the app in English: answer in English."
+        },
+        "callGuardian": {
+          "title": "The guardian hasn't approved in the app",
+          "body": "They have no account. Call {name} on <phone>{number}</phone> to confirm before you approve."
+        }
       },
       "errors": {
         "REQUEST_CLOSED": "This request is already answered or withdrawn.",
@@ -2593,8 +2617,11 @@
           "LINE_NOT_FOUND": "This line no longer exists. Refresh the page.",
           "network": "No connection. Try again.",
           "invalid": "Some details aren't right. Check them and try again.",
-          "generic": "Something went wrong. Try again."
-        }
+          "generic": "Something went wrong. Try again.",
+          "RETURN_TIME_OUT_OF_RANGE": "The buses can leave campus only from 12:00 PM to 8:00 PM."
+        },
+        "timeHint": "From {from} to {to}. Most days the buses leave at {usual}.",
+        "timeRange": "Pick a time from {from} to {to}."
       }
     },
     "system": {

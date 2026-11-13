@@ -19,7 +19,14 @@ import { formatArrival, formatClockTime, formatDateTime, formatNumber } from "@/
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { changeReturnTime, getTimetable } from "../api";
-import { TimetableErrorCode, type Timetable, type TimetableRow } from "../schema";
+import {
+  RETURN_TIME_EARLIEST,
+  RETURN_TIME_LATEST,
+  TimetableErrorCode,
+  isReturnTimeAllowed,
+  type Timetable,
+  type TimetableRow,
+} from "../schema";
 
 const ERRORS = Object.values(TimetableErrorCode);
 const CLOCK = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -215,9 +222,18 @@ function ChangeDialog({
   const [error, setError] = useState<string | undefined>();
   const { submit, isSending, serverError } = useSubmit(ERRORS);
 
+  const range = {
+    from: formatClockTime(RETURN_TIME_EARLIEST, locale),
+    to: formatClockTime(RETURN_TIME_LATEST, locale),
+  };
+
   async function onConfirm() {
     if (!CLOCK.test(time)) {
       setError(t("timeError"));
+      return;
+    }
+    if (!isReturnTimeAllowed(time)) {
+      setError(t("timeRange", range));
       return;
     }
     const saved = await submit((idempotencyKey) =>
@@ -248,8 +264,14 @@ function ChangeDialog({
         <TextField
           type="time"
           label={t("leavesAt")}
+          hint={t("timeHint", {
+            ...range,
+            usual: formatClockTime(timetable.default_return_time, locale),
+          })}
           required
           dir="ltr"
+          min={RETURN_TIME_EARLIEST}
+          max={RETURN_TIME_LATEST}
           value={time}
           error={error}
           onChange={(event) => {

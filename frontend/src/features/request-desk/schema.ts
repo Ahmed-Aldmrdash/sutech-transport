@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { lineSummarySchema } from "@/features/lines/schema";
 import { RequestKind, requestStatusSchema, studentRequestSchema } from "@/features/requests/schema";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -95,8 +96,8 @@ export const deskRequestSummarySchema = z.object({
   title: z.string(),
   student: z.object({ name: z.string(), identifier: z.string() }),
   /** When it reached the office (after the guardian, for a line change). */
-  received_at: z.iso.datetime(),
-  updated_at: z.iso.datetime(),
+  received_at: isoDateTime(),
+  updated_at: isoDateTime(),
   /** Who opened or answered it last; null while new. */
   handled_by_name: z.string().nullable(),
 });
@@ -125,6 +126,8 @@ export const deskRequestListSchema = z.object({
 });
 export type DeskRequestList = z.infer<typeof deskRequestListSchema>;
 
+const REPLY_LANGUAGES = ["ar", "en"] as const;
+
 /** Ready answers the office can send as they are or edit, in the request's language. */
 const suggestedRepliesSchema = z.object({
   open: z.string().nullable(),
@@ -141,6 +144,12 @@ export const deskRequestSchema = z.object({
   /** What this caller may do now; empty when the request is closed. */
   allowed_actions: z.array(z.enum(DESK_ACTIONS)),
   suggested_replies: suggestedRepliesSchema,
+  /**
+   * The language the student sent the request in (their app language). The suggested replies
+   * are in it, whatever the office's own language, and the office answers in it: the student
+   * reads the note exactly as written.
+   */
+  reply_language: z.enum(REPLY_LANGUAGES),
   /** A line change: free seats on the new line now. Null for other kinds. */
   target_seats_available: z.number().int().nonnegative().nullable(),
   handled_by_name: z.string().nullable(),

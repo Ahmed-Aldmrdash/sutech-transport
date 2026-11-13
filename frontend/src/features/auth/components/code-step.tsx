@@ -5,6 +5,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { useIsHydrated } from "@/lib/hooks/use-is-hydrated";
 import { login, requestOtp } from "../api";
 import { loginErrorKey, type LoginErrorKey } from "../auth-errors";
 import { sanitizeCode } from "../identifier";
@@ -42,6 +43,8 @@ export function CodeStep({
   const [bannerError, setBannerError] = useState<LoginErrorKey | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  /** A reload stays on this step (server-rendered); see IdentifierStep. */
+  const isHydrated = useIsHydrated();
 
   const length = challenge.code_length;
   const expiresIn = useCountdown(sentAt + challenge.expires_in_seconds * MS_PER_SECOND);
@@ -139,7 +142,7 @@ export function CodeStep({
           fullWidth
           withArrow
           isLoading={isVerifying}
-          disabled={isExpired}
+          disabled={isExpired || !isHydrated}
         >
           {isVerifying ? t("verifying") : t("verify")}
         </Button>

@@ -6,9 +6,12 @@ the bus company, super admin). One Next.js app, Arabic (RTL, default) and Englis
 
 It runs today on an in-browser mock server. When the FastAPI server is ready, set
 `NEXT_PUBLIC_API_MODE=live`, `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_MAP_TILE_URL`; screens
-do not change. A production build refuses to start without `NEXT_PUBLIC_API_MODE` (it never
-falls back to the mock), and a live production build refuses to start without a map tile
-provider (OpenStreetMap's own servers are for development only). See `.env.example`.
+do not change. If uploaded files (receipts, documents, photos) are served from another domain
+than the API (a storage bucket's signed links), list it in `NEXT_PUBLIC_FILE_ORIGINS` so the
+Content-Security-Policy lets those images load. A production build refuses to start without
+`NEXT_PUBLIC_API_MODE` (it never falls back to the mock), and a live production build refuses
+to start without the API address or a map tile provider (OpenStreetMap's own servers are for
+development only). See `.env.example`.
 
 All names, IDs and phone numbers in the mock are made up (fake mobiles start `0100000`);
 `src/lib/demo-data-privacy.test.ts` fails if a real-looking one is added.

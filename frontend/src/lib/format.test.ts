@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, formatMoney, formatTime } from "./format";
+import { formatDateTime, formatMoney, formatMoneyParts, formatTime } from "./format";
 
 describe("formatMoney", () => {
   it("turns piasters into pounds", () => {
@@ -13,6 +13,21 @@ describe("formatMoney", () => {
 
   it("shows piasters when the amount has them", () => {
     expect(formatMoney(12_550, "en")).toMatch(/125\.5/);
+  });
+});
+
+describe("formatMoneyParts", () => {
+  it("splits a price into the amount and the currency, in the locale's order", () => {
+    expect(formatMoneyParts(1_500_000, "en")).toEqual({
+      amount: "15,000",
+      currency: "EGP",
+      currencyFirst: true,
+    });
+    expect(formatMoneyParts(1_500_000, "ar")).toEqual({
+      amount: "15,000",
+      currency: "ج.م.",
+      currencyFirst: false,
+    });
   });
 });
 

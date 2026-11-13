@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import {
   BusType,
   busTypeSchema,
@@ -129,18 +130,16 @@ export const busEventSchema = z.object({
   /** The day is over (or cancelled/declined): read-only for everyone. */
   is_past: z.boolean(),
   requested_by_name: z.string(),
-  created_at: z.iso.datetime(),
+  created_at: isoDateTime(),
   company_reply: z
     .object({
       buses: z.array(eventBusSchema),
       note: z.string().nullable(),
       by_name: z.string(),
-      at: z.iso.datetime(),
+      at: isoDateTime(),
     })
     .nullable(),
-  cancellation: z
-    .object({ reason: z.string(), by_name: z.string(), at: z.iso.datetime() })
-    .nullable(),
+  cancellation: z.object({ reason: z.string(), by_name: z.string(), at: isoDateTime() }).nullable(),
   /** What the caller may do now. */
   allowed_actions: z.array(z.enum(EVENT_ACTIONS)),
 });

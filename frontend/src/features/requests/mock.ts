@@ -36,6 +36,7 @@ import {
   withdrawRequestEndpoint,
 } from "./api";
 import {
+  mockLanguageOf,
   nextReference,
   requestsOf,
   saveRequests,
@@ -44,7 +45,7 @@ import {
   type MockRequestPayload,
   type MockText,
 } from "./mock-state";
-import { guardianAnswerOf, officeStartOf, statusAt } from "./mock-status";
+import { guardianAnswerOf, guardianStepOf, officeStartOf, statusAt } from "./mock-status";
 import { deductionOn, isRefundWindowOpen, refundAmount } from "./refund-policy";
 import {
   ComplaintCategory,
@@ -95,7 +96,7 @@ function timelineOf(request: MockRequest, now: number, language: string): Reques
   const note = (text: MockText | null) => (text ? localized(language, text.ar, text.en) : null);
   const events: RequestEvent[] = [
     {
-      status: request.guardian ? RequestStatus.AwaitingGuardian : RequestStatus.Submitted,
+      status: guardianStepOf(request) ? RequestStatus.AwaitingGuardian : RequestStatus.Submitted,
       at: iso(request.submittedAt),
       by: RequestActor.Student,
       note: null,
@@ -423,6 +424,7 @@ registerMock(createLineChangeEndpoint, ({ body }, { token, language }) => {
 
   const stored = addRequest(user.id, {
     submittedAt: now,
+    language: mockLanguageOf(language),
     withdrawnAt: null,
     appliedAt: null,
     guardian: {
@@ -476,6 +478,7 @@ registerMock(createRefundEndpoint, ({ body }, { token, language }) => {
   const estimate = isExceptional ? null : refundAmount(paid, deduction);
   const stored = addRequest(user.id, {
     submittedAt: now,
+    language: mockLanguageOf(language),
     withdrawnAt: null,
     appliedAt: null,
     payload: {
@@ -517,6 +520,7 @@ registerMock(createComplaintEndpoint, ({ body }, { token, language }) => {
   }
   const stored = addRequest(user.id, {
     submittedAt: now,
+    language: mockLanguageOf(language),
     withdrawnAt: null,
     appliedAt: null,
     payload: {
@@ -544,6 +548,7 @@ registerMock(createModelPermitEndpoint, ({ body }, { token, language }) => {
   }
   const stored = addRequest(user.id, {
     submittedAt: now,
+    language: mockLanguageOf(language),
     withdrawnAt: null,
     appliedAt: null,
     payload: {
@@ -610,7 +615,7 @@ registerMock(getRefundPolicyEndpoint, (_input, { token, language }) => {
 /** A child's line changes, the ones a guardian answers. */
 function lineChangesOf(studentId: string, now: number): MockRequest[] {
   return currentRequestsOf(studentId, now).filter(
-    (request) => request.payload.kind === RequestKind.LineChange && request.guardian,
+    (request) => request.payload.kind === RequestKind.LineChange && guardianStepOf(request),
   );
 }
 

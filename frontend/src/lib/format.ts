@@ -19,6 +19,35 @@ export function formatMoney(piasters: number, locale: Locale): string {
   }).format(piasters / PIASTERS_PER_POUND);
 }
 
+/** The amount part of a formatted price: digits, separators and sign, no currency or marks. */
+const AMOUNT_PARTS = new Set<string>(["integer", "group", "decimal", "fraction", "minusSign"]);
+
+/**
+ * The same price as formatMoney, split so a narrow card can put the currency on its own line:
+ * `{ amount: "15,000", currency: "EGP", currencyFirst: true }` (in Arabic: "ج.م.", after).
+ */
+export function formatMoneyParts(
+  piasters: number,
+  locale: Locale,
+): { amount: string; currency: string; currencyFirst: boolean } {
+  const parts = new Intl.NumberFormat(INTL_LOCALE[locale], {
+    style: "currency",
+    currency: "EGP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).formatToParts(piasters / PIASTERS_PER_POUND);
+  const currencyAt = parts.findIndex((part) => part.type === "currency");
+  const amountAt = parts.findIndex((part) => AMOUNT_PARTS.has(part.type));
+  return {
+    amount: parts
+      .filter((part) => AMOUNT_PARTS.has(part.type))
+      .map((part) => part.value)
+      .join(""),
+    currency: parts[currencyAt]?.value ?? "",
+    currencyFirst: currencyAt < amountAt,
+  };
+}
+
 export function formatNumber(value: number, locale: Locale): string {
   return new Intl.NumberFormat(INTL_LOCALE[locale]).format(value);
 }

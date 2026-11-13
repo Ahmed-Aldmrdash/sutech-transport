@@ -45,6 +45,22 @@ export function LinesPage() {
 
   const booking = mine.status === AsyncStatus.Success ? mine.data.subscription : null;
   const hasOpenBooking = booking !== null && !BOOKABLE_STATUSES.includes(booking.status);
+  // The lead, the "already booked" note and the list arrive from two requests: show them
+  // together, so nothing on the page jumps down while the rest loads (layout shift).
+  const isLoading = lines.status === AsyncStatus.Loading || mine.status === AsyncStatus.Loading;
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6" aria-busy="true">
+        <PageHeader title={t("nav.items.lines")} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 desktop:grid-cols-3">
+          {Array.from({ length: SKELETON_CARDS }, (_, index) => (
+            <Skeleton key={index} className="h-40" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,13 +97,6 @@ export function LinesPage() {
         />
       </div>
 
-      {lines.status === AsyncStatus.Loading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 desktop:grid-cols-3">
-          {Array.from({ length: SKELETON_CARDS }, (_, index) => (
-            <Skeleton key={index} className="h-40" />
-          ))}
-        </div>
-      ) : null}
       {lines.status === AsyncStatus.Error ? (
         <ErrorState error={lines.error} onRetry={lines.reload} />
       ) : null}

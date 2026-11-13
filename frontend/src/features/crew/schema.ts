@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isoDateTime } from "@/lib/api/iso-datetime";
 import { ABSENCE_REASONS } from "@/features/absences/schema";
 import {
   arrivalWindowSchema,
@@ -73,6 +74,7 @@ export const DELAY_REASONS = Object.values(DelayReason) as [DelayReason, ...Dela
 
 /** The delays the crew can pick, in minutes. */
 export const DELAY_MINUTES = [5, 10, 15, 20, 30, 45, 60] as const;
+export type DelayMinutes = (typeof DELAY_MINUTES)[number];
 export const CREW_NOTE_MAX_LENGTH = 200;
 
 /** A trip that hasn't started takes a delay from this long before its pickup time to this long after. */
@@ -120,8 +122,8 @@ export const riderSchema = z.object({
   stop_name: z.string(),
   pickup_time: clockTimeSchema.nullable(),
   state: z.enum(RIDER_STATES),
-  boarded_at: z.iso.datetime().nullable(),
-  checked_out_at: z.iso.datetime().nullable(),
+  boarded_at: isoDateTime().nullable(),
+  checked_out_at: isoDateTime().nullable(),
   checkout_reason: z.enum(CHECKOUT_REASONS).nullable(),
   checkout_note: z.string().nullable(),
   /** How the boarding was recorded. null until boarded. */
@@ -146,7 +148,7 @@ export const tripDelaySchema = z.object({
   minutes: z.number().int().positive(),
   reason: z.enum(DELAY_REASONS),
   note: z.string().nullable(),
-  reported_at: z.iso.datetime(),
+  reported_at: isoDateTime(),
 });
 export type TripDelay = z.infer<typeof tripDelaySchema>;
 
@@ -156,8 +158,8 @@ export const crewTripSchema = z.object({
   status: z.enum(CREW_TRIP_STATUSES),
   /** Outbound: pickup time at the first stop. Return: null until the office publishes it. */
   departure_time: clockTimeSchema.nullable(),
-  started_at: z.iso.datetime().nullable(),
-  ended_at: z.iso.datetime().nullable(),
+  started_at: isoDateTime().nullable(),
+  ended_at: isoDateTime().nullable(),
   /** Everyone subscribed on the line, in stop order. */
   riders: z.array(riderSchema),
   counts: riderCountsSchema,
@@ -172,7 +174,7 @@ export const crewTripSchema = z.object({
       plate: z.string(),
       driver_name: z.string(),
       driver_phone: z.string(),
-      at: z.iso.datetime(),
+      at: isoDateTime(),
     })
     .nullable(),
 });
@@ -208,7 +210,7 @@ export const crewTodaySchema = z.object({
     .object({
       driver_name: z.string(),
       driver_phone: z.string(),
-      at: z.iso.datetime(),
+      at: isoDateTime(),
     })
     .nullable(),
 });
@@ -235,7 +237,8 @@ export const scanResultSchema = z.object({ rider: riderSchema, counts: riderCoun
 export type ScanResult = z.infer<typeof scanResultSchema>;
 
 export const delayBodySchema = z.object({
-  minutes: z.number().int().positive().max(180),
+  /** One of DELAY_MINUTES, as the agreement lists them. */
+  minutes: z.literal([...DELAY_MINUTES]),
   reason: z.enum(DELAY_REASONS),
   note: z.string().trim().max(CREW_NOTE_MAX_LENGTH).nullable(),
 });

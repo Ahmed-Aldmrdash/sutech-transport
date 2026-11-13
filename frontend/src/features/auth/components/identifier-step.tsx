@@ -6,6 +6,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
+import { useIsHydrated } from "@/lib/hooks/use-is-hydrated";
 import { requestOtp } from "../api";
 import { loginErrorKey, type LoginErrorKey } from "../auth-errors";
 import { identifierShapeError, normalizeIdentifier } from "../identifier";
@@ -34,6 +35,9 @@ export function IdentifierStep({
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState<LoginErrorKey | null>(initialError);
   const [isSending, setIsSending] = useState(false);
+  // Before React runs, the button would send the form the browser's way: a page reload with
+  // the ID (or a guardian's phone) in the URL. A disabled button also stops Enter.
+  const isHydrated = useIsHydrated();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,7 +82,6 @@ export function IdentifierStep({
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
         <TextField
           ref={inputRef}
-          name="identifier"
           label={t("identifierLabel")}
           hint={t("identifierHint")}
           error={fieldError ?? undefined}
@@ -92,12 +95,19 @@ export function IdentifierStep({
           spellCheck={false}
           enterKeyHint="send"
           maxLength={IDENTIFIER_MAX_LENGTH}
-          placeholder="240100101"
+          placeholder={t("identifierPlaceholder")}
           dir="ltr"
           className="text-body"
           autoFocus
         />
-        <Button type="submit" size="lg" fullWidth withArrow isLoading={isSending}>
+        <Button
+          type="submit"
+          size="lg"
+          fullWidth
+          withArrow
+          isLoading={isSending}
+          disabled={!isHydrated}
+        >
           {isSending ? t("sendingCode") : t("sendCode")}
         </Button>
       </form>

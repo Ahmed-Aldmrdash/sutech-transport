@@ -30,8 +30,9 @@ export const changeReturnTimeEndpoint = defineEndpoint({
   summary:
     "Transportation: set when the buses leave campus, for the lines in `line_ids` or for " +
     "every line when it is empty. Students, guardians and the crews see the new time at once " +
-    "(line page, next trip, the crew's return trip). Logged in the audit log. Errors: " +
-    "LINE_NOT_FOUND (404).",
+    "(line page, next trip, the crew's return trip). Logged in the audit log. The time must " +
+    "be from 12:00 to 20:00 (Egypt time). Errors: LINE_NOT_FOUND (404), " +
+    "RETURN_TIME_OUT_OF_RANGE (422).",
   tag: TAG,
   access: TRANSPORT,
   idempotent: true,
