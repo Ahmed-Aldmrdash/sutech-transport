@@ -5,7 +5,7 @@ import { useMessages, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import {
-  badgeLabelKey,
+  badgeSuffixKey,
   itemHref,
   type NavBadges,
   type NavItem,
@@ -46,14 +46,6 @@ export function BottomNav({ basePath, items, activeItem, onOpenMenu, badges }: B
               <Link
                 href={itemHref(basePath, item)}
                 aria-current={isActive ? "page" : undefined}
-                aria-label={
-                  count
-                    ? t(`nav.${badgeLabelKey(item.key)}`, {
-                        label: t(`nav.items.${item.key}`),
-                        count,
-                      })
-                    : undefined
-                }
                 className={cn(
                   itemStyles,
                   isActive ? "text-brand" : "text-ink-muted hover:text-ink-strong",
@@ -70,6 +62,9 @@ export function BottomNav({ basePath, items, activeItem, onOpenMenu, badges }: B
                   {count ? <CountBadge count={count} className="absolute end-1 -top-1" /> : null}
                 </span>
                 <span className="max-w-full truncate px-0.5">{shortLabel(item)}</span>
+                {count ? (
+                  <span className="sr-only">{t(`nav.${badgeSuffixKey(item.key)}`, { count })}</span>
+                ) : null}
               </Link>
             </li>
           );

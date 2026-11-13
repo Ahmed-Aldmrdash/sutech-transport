@@ -57,11 +57,13 @@ describe("role access", () => {
     expect(homePathFor(Role.Parent)).toBe("/parent");
     expect(homePathFor(Role.Driver)).toBe("/driver");
     expect(homePathFor(Role.Supervisor)).toBe("/driver");
-    expect(homePathFor(Role.Transport)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.SuperAdmin)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.Finance)).toBe("/admin");
+    expect(homePathFor(Role.Transport)).toBe("/admin");
+    expect(homePathFor(Role.SuperAdmin)).toBe("/admin");
+    expect(homePathFor(Role.Finance)).toBe("/admin/payments");
+    expect(homePathFor(Role.StudentAffairs)).toBe("/admin/violations");
+    expect(homePathFor(Role.SecretaryGeneral)).toBe("/admin/secretary-general");
     expect(homePathFor(Role.Clinic)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.BusCompany)).toBe("/admin");
+    expect(homePathFor(Role.BusCompany)).toBe("/admin/bus-company");
   });
 
   it("keeps roles out of each other's pages", () => {
@@ -75,12 +77,30 @@ describe("role access", () => {
   });
 
   it("keeps offices apart inside /admin", () => {
-    // Finance has no built page yet: its home, and its own planned pages as "being built".
-    expect(canOpen(Role.Finance, "/admin")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin")).toBe(false);
     expect(canOpen(Role.Finance, "/admin/payments")).toBe(true);
-    expect(canOpen(Role.Finance, "/admin/payments/pay_1")).toBe(false);
+    expect(canOpen(Role.Finance, "/admin/payments/pay_1")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/complaints/req_1")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/requests")).toBe(false);
     expect(canOpen(Role.Finance, "/admin/emergencies")).toBe(false);
-    expect(canOpen(Role.Transport, "/admin")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/refunds")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/violations/vio_1")).toBe(true);
+    expect(canOpen(Role.StudentAffairs, "/admin/reports")).toBe(false);
+    // Abu El Hol sees its portal only: no student, office or report page.
+    expect(canOpen(Role.BusCompany, "/admin")).toBe(false);
+    expect(canOpen(Role.BusCompany, "/admin/bus-company")).toBe(true);
+    expect(canOpen(Role.BusCompany, "/admin/bus-company/fleet")).toBe(true);
+    expect(canOpen(Role.BusCompany, "/admin/events")).toBe(false);
+    expect(canOpen(Role.BusCompany, "/admin/reports")).toBe(false);
+    expect(canOpen(Role.Transport, "/admin/events/new")).toBe(true);
+    expect(canOpen(Role.Transport, "/admin/bus-company")).toBe(false);
+    expect(canOpen(Role.SecretaryGeneral, "/admin/secretary-general")).toBe(true);
+    expect(canOpen(Role.SecretaryGeneral, "/admin/events")).toBe(false);
+    // The overview is the Transportation office's home; other offices have none there.
+    expect(canOpen(Role.Transport, "/admin")).toBe(true);
+    expect(canOpen(Role.Transport, "/admin/students/usr_student_2")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/students")).toBe(false);
+    expect(canOpen(Role.SecretaryGeneral, "/admin/tracking")).toBe(false);
     expect(canOpen(Role.Transport, "/admin/emergencies/sos_1")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/clinic")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/payments")).toBe(false);
@@ -93,7 +113,8 @@ describe("role access", () => {
   it("returns to the page asked for only if the role may open it", () => {
     expect(landingPathFor(Role.Student, "/student/card")).toBe("/student/card");
     expect(landingPathFor(Role.Student, "/admin/users")).toBe("/student");
-    expect(landingPathFor(Role.Finance, null)).toBe("/admin");
+    expect(landingPathFor(Role.Finance, null)).toBe("/admin/payments");
+    expect(landingPathFor(Role.Finance, "/admin/refunds/req_9")).toBe("/admin/refunds/req_9");
   });
 
   it("never follows a link off the site", () => {

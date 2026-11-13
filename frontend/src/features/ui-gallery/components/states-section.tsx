@@ -11,7 +11,7 @@ export function StatesSection() {
   const t = useTranslations("gallery");
   return (
     <GallerySection id="states" title={t("sections.states")}>
-      <div className="grid gap-4 desktop:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 desktop:grid-cols-3">
         <EmptyState
           icon={<BellOff />}
           title={t("states.emptyTitle")}

@@ -47,6 +47,7 @@ import {
   type Rider,
   type RiderCounts,
 } from "./schema";
+import { mockReturnTime } from "@/features/lines/mock-timetable";
 
 const HTTP = { NotFound: 404, Conflict: 409, Unprocessable: 422 };
 /** A pass is accepted a few seconds past its 30-second life, for slow networks. */
@@ -57,7 +58,7 @@ function conflict(code: string, message: string): never {
   throw new MockHttpError(HTTP.Conflict, code, message);
 }
 
-function toRider(
+export function toRider(
   trip: MockCrewTrip,
   line: MockLineSource,
   rider: MockRider,
@@ -84,7 +85,7 @@ function toRider(
   };
 }
 
-function countsOf(riders: readonly Rider[]): RiderCounts {
+export function countsOf(riders: readonly Rider[]): RiderCounts {
   const count = (state: RiderState) => riders.filter((rider) => rider.state === state).length;
   return {
     total: riders.length,
@@ -110,8 +111,11 @@ function replacementOf(trip: MockCrewTrip, line: MockLineSource, language: strin
 }
 
 /** Outbound trips leave at the first stop's pickup time; return times aren't published yet. */
+/** Outbound: the first stop's pickup. Return: when the bus leaves campus. */
 function departureTimeOf(trip: MockCrewTrip, line: MockLineSource): string | null {
-  return trip.direction === TripDirection.Outbound ? (line.stops[0]?.[0] ?? null) : null;
+  return trip.direction === TripDirection.Outbound
+    ? (line.stops[0]?.[0] ?? null)
+    : mockReturnTime(line.lineId);
 }
 
 function toCrewTrip(

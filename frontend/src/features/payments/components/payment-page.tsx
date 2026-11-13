@@ -86,7 +86,7 @@ export function PaymentPage() {
             {t("student.payment.onlyTheseMethods")}
           </p>
           {/* Where to pay comes first; the receipt form is for after paying. */}
-          <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <div className="flex flex-col gap-5">
               <BankDetailsCard instructions={instructions} />
               <OfficePaymentCard instructions={instructions} />

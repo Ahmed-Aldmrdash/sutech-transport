@@ -1,4 +1,6 @@
-import { requireMockAccount } from "@/features/auth/mock-token";
+import { recordAudit } from "@/features/admin-system/mock-log";
+import { AuditAction } from "@/features/admin-system/schema";
+import { requireMockActor, requireMockOffice } from "@/features/auth/mock-token";
 import {
   crewFleetOf,
   crewTripStatus,
@@ -62,16 +64,13 @@ const HTTP = { Forbidden: 403, NotFound: 404, Conflict: 409, Unprocessable: 422 
 /** The clinic follows medical alerts and accidents, never a breakdown. */
 const CLINIC_TYPES: readonly SosType[] = [SosType.Medical, SosType.Accident];
 
-function requireOffice(token: string | null, roles: readonly Role[]) {
-  const account = requireMockAccount(token);
-  if (account.user.role !== Role.SuperAdmin && !roles.includes(account.user.role)) {
-    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Not your office.");
-  }
-  return account;
-}
+const requireOffice = requireMockOffice;
 
-const requireSosDesk = (token: string | null) =>
-  requireOffice(token, [Role.Transport, Role.Clinic]);
+const SOS_DESK: readonly Role[] = [Role.Transport, Role.Clinic];
+/** Reading the desk: the two offices and the super admin. */
+const requireSosDesk = (token: string | null) => requireOffice(token, SOS_DESK);
+/** Acting on an alert: the two offices only; the super admin watches. */
+const requireSosActor = (token: string | null) => requireMockActor(token, SOS_DESK);
 
 function visibleTo(role: Role, sos: MockSos): boolean {
   return role !== Role.Clinic || CLINIC_TYPES.includes(sos.type);
@@ -173,8 +172,23 @@ registerMock(getAdminSosEndpoint, ({ params }, { token, language }) => {
   return toAdminSos(requireVisibleSos(params.sos_id, user.role), language);
 });
 
+const SOS_ACTION_WORD: Record<SosAction, { ar: string; en: string }> = {
+  [SosAction.Acknowledge]: { ar: "استلام البلاغ", en: "took the alert" },
+  [SosAction.AmbulanceCalled]: { ar: "طلب إسعاف", en: "called an ambulance" },
+  [SosAction.ReplacementSent]: { ar: "إرسال بديل", en: "sent a replacement" },
+  [SosAction.Note]: { ar: "ملاحظة", en: "note" },
+  [SosAction.Close]: { ar: "إغلاق البلاغ", en: "closed the alert" },
+};
+
+/** "Line 7 · SOS · took the alert", for the activity log. */
+function sosTarget(lineId: string, word: { ar: string; en: string }) {
+  const code = findMockLine(lineId)?.code ?? lineId;
+  return { ar: `خط ${code} · استغاثة · ${word.ar}`, en: `Line ${code} · SOS · ${word.en}` };
+}
+
 registerMock(addSosActionEndpoint, ({ params, body }, { token, language }) => {
-  const { user } = requireSosDesk(token);
+  const account = requireSosActor(token);
+  const { user } = account;
   const sos = requireVisibleSos(params.sos_id, user.role);
   const status = sosStatusOf(sos);
   if (status === SosStatus.Closed) conflict(EmergencyErrorCode.SosClosed, "Already closed.");
@@ -190,6 +204,12 @@ registerMock(addSosActionEndpoint, ({ params, body }, { token, language }) => {
     throw new MockHttpError(HTTP.Unprocessable, EmergencyErrorCode.NoteRequired, "Note?");
   }
   const updated = addSosAction(sos, { action: body.action, by: user.id, at: Date.now(), note });
+  recordAudit(
+    account,
+    AuditAction.SosAction,
+    sosTarget(sos.lineId, SOS_ACTION_WORD[body.action]),
+    note,
+  );
   return toAdminSos(updated, language);
 });
 
@@ -217,7 +237,7 @@ function requireTodayTrip(tripId: string, now: number) {
 }
 
 registerMock(getReplacementOptionsEndpoint, ({ params }, { token, language }) => {
-  requireOffice(token, [Role.Transport]);
+  requireMockActor(token, [Role.Transport]);
   const now = Date.now();
   const { trip, line } = requireTodayTrip(params.trip_id, now);
   const fleet = crewFleetOf(trip, line);
@@ -252,7 +272,7 @@ registerMock(getReplacementOptionsEndpoint, ({ params }, { token, language }) =>
 });
 
 registerMock(sendReplacementEndpoint, ({ params, body }, { token, language }) => {
-  const account = requireOffice(token, [Role.Transport]);
+  const account = requireMockActor(token, [Role.Transport]);
   const now = Date.now();
   const { trip, line } = requireTodayTrip(params.trip_id, now);
   if (crewTripStatus(trip) === CrewTripStatus.Ended) {
@@ -296,6 +316,16 @@ registerMock(sendReplacementEndpoint, ({ params, body }, { token, language }) =>
     at: now,
   };
   saveCrewTrip({ ...trip, replacements: [...(trip.replacements ?? []), replacement] });
+  recordAudit(
+    account,
+    AuditAction.ReplacementSent,
+    {
+      ar: `خط ${line.code} · ${body.bus_id ? "أتوبيس بديل" : "سواق بديل"}`,
+      en: `Line ${line.code} · ${body.bus_id ? "replacement bus" : "replacement driver"}`,
+    },
+    replacement.note,
+    now,
+  );
   if (sos) {
     addSosAction(sos, {
       action: SosAction.ReplacementSent,

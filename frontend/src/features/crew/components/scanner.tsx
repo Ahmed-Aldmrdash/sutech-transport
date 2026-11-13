@@ -101,7 +101,7 @@ export function Scanner({ trip, onScanned }: { trip: CrewTrip; onScanned: () => 
   const checkoutOpen = action === ScanAction.Checkout && pending !== null;
 
   return (
-    <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <Card elevation="raised">
         <CardBody className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">

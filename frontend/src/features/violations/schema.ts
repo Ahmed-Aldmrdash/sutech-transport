@@ -66,6 +66,21 @@ const VIOLATION_STATUSES = Object.values(ViolationStatus) as [
   ...ViolationStatus[],
 ];
 
+/** What Student Affairs decided once it looked into it. */
+export const ViolationOutcome = {
+  /** A warning to the student, recorded on their file. */
+  Warning: "warning",
+  /** Sent for investigation under the university's discipline rules. */
+  Investigation: "investigation",
+  /** Not a violation, or the student couldn't be identified. */
+  Dismissed: "dismissed",
+} as const;
+export type ViolationOutcome = (typeof ViolationOutcome)[keyof typeof ViolationOutcome];
+export const VIOLATION_OUTCOMES = Object.values(ViolationOutcome) as [
+  ViolationOutcome,
+  ...ViolationOutcome[],
+];
+
 export const ViolationErrorCode = {
   StudentNotFound: "STUDENT_NOT_FOUND",
   /** Photos only: JPEG, PNG or WebP. */

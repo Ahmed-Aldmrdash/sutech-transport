@@ -47,7 +47,8 @@ export function LocaleSwitcher({
       onClick={switchLocale}
       disabled={isSwitching}
       lang={target}
-      aria-label={t("switchLanguage")}
+      // Starts with the visible name, so "click العربية" works with voice control.
+      aria-label={`${t("otherLanguageName")}: ${t("switchLanguage")}`}
       className={cn(
         "tap-area inline-flex h-10 items-center gap-2 rounded-md px-3 text-body-sm font-bold focus-ring transition-colors disabled:opacity-60",
         onBrand ? "text-white hover:bg-white/15" : "text-ink-strong hover:bg-brand-soft",

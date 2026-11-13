@@ -47,7 +47,7 @@ export function ControlsSection() {
         <Card>
           <CardBody>
             <form
-              className="grid gap-5 desktop:grid-cols-2"
+              className="grid grid-cols-1 gap-5 desktop:grid-cols-2"
               onSubmit={(event) => event.preventDefault()}
             >
               <TextField

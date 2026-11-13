@@ -77,3 +77,11 @@ export function requireMockGuardian(token: string | null): MockAccount {
   }
   return guardian;
 }
+
+/** The guardian account that follows this student, if any (for the office's student page). */
+export function mockGuardianAccountOf(studentId: string): MockAccount | undefined {
+  const entry = Object.entries(GUARDIAN_CHILDREN).find(([, children]) =>
+    children.includes(studentId),
+  );
+  return entry ? findMockAccountById(entry[0]) : undefined;
+}

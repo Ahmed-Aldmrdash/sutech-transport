@@ -43,7 +43,7 @@ export function LoginScreen({ next, reason, savedCodeStep }: LoginScreenProps) {
   }
 
   return (
-    <div className="grid min-h-dvh bg-surface desktop:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+    <div className="grid min-h-dvh grid-cols-1 bg-surface desktop:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
       <LoginBrandPanel />
 
       <div className="flex min-w-0 flex-col">

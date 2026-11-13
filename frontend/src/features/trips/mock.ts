@@ -6,6 +6,7 @@ import {
   toLineSummary,
 } from "@/features/lines/mock-builders";
 import { lineSourceOn } from "@/features/crew/mock-state";
+import { mockReturnTime } from "@/features/lines/mock-timetable";
 import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { requireMockStudent } from "@/features/subscriptions/mock";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -72,7 +73,7 @@ registerMock(getMyNextTripEndpoint, (_input, { token, language }) => {
       line: toLineSummary(line, language),
       stop: { name: localized(language, nameAr, nameEn), pickup_time: pickup },
       campus_arrival: MOCK_CAMPUS_ARRIVAL,
-      return_departure_time: null,
+      return_departure_time: mockReturnTime(line.lineId),
       bus: toBus(lineSourceOn(line, serviceDate), language, true),
       status,
       eta_minutes: eta,

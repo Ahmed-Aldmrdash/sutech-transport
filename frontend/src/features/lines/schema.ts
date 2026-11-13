@@ -25,7 +25,10 @@ export const busTypeSchema = z.enum([
  */
 export const clockTimeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
-/** When buses reach campus in the morning (Cairo time). Today every line: 08:45 to 09:00. */
+/**
+ * When buses reach campus in the morning (Cairo time). A window, or one time when `from` equals
+ * `to`. Today every line: 08:30 (the university's Routes file).
+ */
 export const arrivalWindowSchema = z.object({
   from: clockTimeSchema,
   to: clockTimeSchema,

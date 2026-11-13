@@ -22,8 +22,9 @@ const REASON_FOR_TYPE: Record<SosType, ReplacementReason> = {
 interface ReplacementDialogProps {
   open: boolean;
   tripId: string;
-  sosId: string;
-  sosType: SosType;
+  /** The alert it answers; null when the office changes a trip's bus or driver on its own. */
+  sosId: string | null;
+  sosType: SosType | null;
   onClose: () => void;
   onSent: (replacement: TripReplacement) => void;
 }
@@ -49,7 +50,7 @@ function ReplacementBody({ tripId, sosId, sosType, onClose, onSent }: Replacemen
     <ReplacementForm
       options={options.data}
       sosId={sosId}
-      defaultReason={REASON_FOR_TYPE[sosType]}
+      defaultReason={sosType ? REASON_FOR_TYPE[sosType] : ReplacementReason.Other}
       onClose={onClose}
       onSent={onSent}
     />

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoSidewaysScroll, isPhone, signIn } from "./helpers";
+import { expectNoSidewaysScroll, isPhone, signIn, switchTo } from "./helpers";
 
 const DRIVER = "DRV-1001"; // Kamal Ezzat, line 7
 const TRANSPORT = "TRN-1001"; // Karim Fathy, Transportation office
@@ -16,13 +16,6 @@ function watchForAppErrors(page: Page): string[] {
     }
   });
   return errors;
-}
-
-/** The mock keeps its data in this browser, so the next role signs in on the same page. */
-async function switchTo(page: Page, identifier: string) {
-  await page.evaluate(() => localStorage.removeItem("sut.session"));
-  await page.context().clearCookies();
-  await signIn(page, identifier);
 }
 
 async function driverRaisesSos(page: Page, type: RegExp = /Bus problem/) {
@@ -56,8 +49,10 @@ test.describe("emergencies", () => {
     await driverRaisesSos(page);
 
     await switchTo(page, TRANSPORT);
-    await page.waitForURL(/\/en\/admin\/emergencies$/);
-    // The office lands on the emergencies desk, where the new alert heads the list.
+    await page.waitForURL(/\/en\/admin$/);
+    // The overview shows the open alert first; its desk lists it at the top.
+    await expect(page.getByRole("link", { name: /Open emergencies/ })).toContainText("1");
+    await page.goto("/en/admin/emergencies");
     await page
       .getByRole("link", { name: /Bus problem Not taken Line 7/ })
       .first()
@@ -110,5 +105,23 @@ test.describe("emergencies", () => {
     await page.getByRole("dialog").getByRole("button", { name: "Ambulance called" }).click();
     await expect(page.getByText("Called an ambulance")).toBeVisible();
     expect(errors).toEqual([]);
+  });
+
+  test("the super admin sees a medical SOS from the clinic page but can't act on it", async ({
+    page,
+  }) => {
+    await driverRaisesSos(page, /^Medical/);
+    await switchTo(page, "ADM-1001");
+    await page.waitForURL(/\/en\/admin$/);
+    await page.goto("/en/admin/clinic");
+    const now = page.getByRole("region", { name: "Needs you now" });
+    await expect(now.getByText(/Medical · Line 7/)).toBeVisible();
+    await now.getByRole("link", { name: "Open" }).click();
+    await expect(
+      page.getByText(/View only\. The Transportation office and the clinic/),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Take it" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Ambulance called" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Close the alert" })).toHaveCount(0);
   });
 });

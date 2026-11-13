@@ -24,7 +24,7 @@ export function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("lead")} />
-      <div className="grid items-start gap-5 desktop:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-2">
         {user ? <AccountCard user={user} /> : null}
         <div className="flex flex-col gap-5">
           <SettingCard icon={<Languages />} title={t("language")} description={t("languageHint")}>

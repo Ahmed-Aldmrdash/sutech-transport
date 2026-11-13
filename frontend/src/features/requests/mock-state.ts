@@ -1,4 +1,5 @@
 import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
+import { DESK_SEED_REQUESTS } from "./mock-desk-requests";
 import type {
   ComplaintCategory,
   LineChangeDuration,
@@ -9,27 +10,19 @@ import type {
 } from "./schema";
 
 /**
- * The mock Transportation office's memory of each student's requests, in localStorage so a
- * demo continues where it stopped. Statuses move with time (see MOCK_REQUEST_TIMING), the way
- * an office would pick a request up and answer it. Only the mock uses this.
+ * The mock offices' memory of each student's requests, in localStorage so a demo continues
+ * where it stopped. The Transportation office and finance open and answer them on their own
+ * pages (request desk); nothing is decided by a timer. Only the mock uses this.
  */
 
 const MS_PER_SECOND = 1000;
 
-/** Mock only: when the office opens a request, and when it answers. */
-export const MOCK_REQUEST_TIMING = {
-  /** A guardian with no account in the mock "approves" after this long, so the demo goes on. */
-  guardianAutoApproveAfterMs: 20 * MS_PER_SECOND,
-  inReviewAfterMs: 15 * MS_PER_SECOND,
-  decidedAfterMs: 45 * MS_PER_SECOND,
-} as const;
+/** Mock only: a guardian with no account in the demo "approves" after this long. */
+export const MOCK_GUARDIAN_AUTO_APPROVE_MS = 20 * MS_PER_SECOND;
 
-/** What the office will do once it decides. "stays_in_review" = no answer yet (refunds). */
-export type MockOutcome =
-  | typeof RequestStatus.Approved
-  | typeof RequestStatus.Rejected
-  | typeof RequestStatus.Resolved
-  | "stays_in_review";
+/** The office's answer: approved or rejected (line change, refund, permit), or resolved. */
+export type MockDecision =
+  typeof RequestStatus.Approved | typeof RequestStatus.Rejected | typeof RequestStatus.Resolved;
 
 export interface MockText {
   ar: string;
@@ -117,15 +110,28 @@ export interface MockGuardianStep {
   note: string | null;
 }
 
+/** What the office did: who opened the request, and who answered it, with their notes. */
+export interface MockOfficeStep {
+  openedAt: number;
+  openedBy: MockText;
+  /** Shown to the student, e.g. "Bring the original receipt to A039". */
+  openNote: MockText | null;
+  decidedAt: number | null;
+  decidedBy: MockText | null;
+  decision: MockDecision | null;
+  /** The answer the student reads. */
+  note: MockText | null;
+  /** An approved refund: the amount to pay back. */
+  refundPiasters: number | null;
+}
+
 export interface MockRequest {
   requestId: string;
   reference: string;
   submittedAt: number;
   withdrawnAt: number | null;
-  outcome: MockOutcome;
-  /** The office's notes: when it opens the request, and its answer. */
-  reviewNote: MockText | null;
-  decisionNote: MockText | null;
+  /** Null until an office member opens it. */
+  office?: MockOfficeStep | null;
   /** Set once the decision's effect (e.g. moving the booking) has been applied. */
   appliedAt: number | null;
   /** Set for a line change: it waits for the guardian before the office sees it. */
@@ -143,15 +149,22 @@ const SEED_REQUESTS: Record<string, MockRequest[]> = {
       reference: "REQ-2026-0017",
       submittedAt: Date.parse("2026-10-14T06:10:00Z"),
       withdrawnAt: null,
-      outcome: "resolved",
-      reviewNote: null,
-      decisionNote: {
-        ar:
-          "اتكلمنا مع شركة أبو الهول، والتأخير كان بسبب عطل في الباص. اتغير الباص ومن يومها " +
-          "الخط بيوصل في ميعاده. متأسفين على التأخير.",
-        en:
-          "We spoke to Abu El Hol: the delay was a breakdown. The bus was replaced and the line " +
-          "has been on time since. Sorry for the delay.",
+      office: {
+        openedAt: Date.parse("2026-10-14T07:30:00Z"),
+        openedBy: { ar: "كريم فتحي", en: "Karim Fathy" },
+        openNote: null,
+        decidedAt: Date.parse("2026-10-15T09:10:00Z"),
+        decidedBy: { ar: "كريم فتحي", en: "Karim Fathy" },
+        decision: "resolved",
+        refundPiasters: null,
+        note: {
+          ar:
+            "اتكلمنا مع شركة أبو الهول، والتأخير كان بسبب عطل في الباص. اتغير الباص ومن يومها " +
+            "الخط بيوصل في ميعاده. متأسفين على التأخير.",
+          en:
+            "We spoke to Abu El Hol: the delay was a breakdown. The bus was replaced and the line " +
+            "has been on time since. Sorry for the delay.",
+        },
       },
       appliedAt: null,
       payload: {
@@ -166,8 +179,15 @@ const SEED_REQUESTS: Record<string, MockRequest[]> = {
   ],
 };
 
+Object.assign(SEED_REQUESTS, DESK_SEED_REQUESTS);
+
 export function requestsOf(userId: string): MockRequest[] {
   return requests.get(userId) ?? SEED_REQUESTS[userId] ?? [];
+}
+
+/** Every student with a request, stored or seeded (the office queues read them all). */
+export function studentsWithRequests(): string[] {
+  return [...new Set([...requests.keys(), ...Object.keys(SEED_REQUESTS)])];
 }
 
 export function saveRequests(userId: string, list: MockRequest[]): void {

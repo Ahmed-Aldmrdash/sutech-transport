@@ -1,5 +1,6 @@
 import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
 import { MOCK_TERM_PRICE_PIASTERS } from "@/features/lines/mock-builders";
+import { DESK_SEED_BOOKINGS, DESK_SEED_PAYMENTS } from "./mock-desk-seeds";
 import { SubscriptionStatus } from "./schema";
 
 /**
@@ -8,17 +9,10 @@ import { SubscriptionStatus } from "./schema";
  * where it stopped. Only the mock uses this; the real rules live on the server.
  */
 
-const MS_PER_SECOND = 1000;
 const MS_PER_HOUR = 3_600_000;
 
 /** A booking holds the seat for 24 hours (agreement, business rule 2). */
 export const MOCK_HOLD_MS = 24 * MS_PER_HOUR;
-
-/** Mock only: finance "reviews" a receipt this long after it is uploaded. */
-export const MOCK_REVIEW_MS = 20 * MS_PER_SECOND;
-
-/** Mock only: a reference number ending like this is rejected, to try the rejection path. */
-export const MOCK_REJECTED_REFERENCE_SUFFIX = "0000";
 
 export const MOCK_TERM = {
   term_id: "2026-fall",
@@ -52,22 +46,20 @@ export interface MockBooking {
 export interface MockPayment {
   paymentId: string;
   subscriptionId: string;
-  method: "bank_deposit" | "bank_transfer";
+  method: "bank_deposit" | "bank_transfer" | "card_at_office";
   referenceNumber: string;
   amountPiasters: number;
   paidOn: string;
   payerName: string;
-  fileName: string;
+  /** null for a Visa payment finance recorded at the office. */
+  fileName: string | null;
   submittedAt: number;
   status: MockPaymentStatus;
   rejectionReason: { ar: string; en: string } | null;
   reviewedAt: number | null;
+  /** The finance officer who reviewed or recorded it. Missing on receipts saved before. */
+  reviewedBy?: { ar: string; en: string } | null;
 }
-
-const REJECTION_REASON = {
-  ar: "رقم العملية مش ظاهر في كشف الحساب. اتأكد منه وارفع الإيصال تاني.",
-  en: "The reference number doesn't appear on the bank statement. Check it and upload again.",
-};
 
 const bookings = new StoredMap<MockBooking>("sut.mock.bookings", MockStorage.Local);
 const payments = new StoredMap<MockPayment[]>("sut.mock.payments", MockStorage.Local);
@@ -137,8 +129,16 @@ const SEED_PAYMENTS: Record<string, MockPayment[]> = {
   ],
 };
 
+Object.assign(SEED_BOOKINGS, DESK_SEED_BOOKINGS);
+Object.assign(SEED_PAYMENTS, DESK_SEED_PAYMENTS);
+
 export function paymentsOf(userId: string): MockPayment[] {
   return payments.get(userId) ?? SEED_PAYMENTS[userId] ?? [];
+}
+
+/** Every student with a receipt, stored or seeded (finance's queue reads them all). */
+export function studentsWithPayments(): string[] {
+  return [...new Set([...payments.keys(), ...Object.keys(SEED_PAYMENTS)])];
 }
 
 export function savePayments(userId: string, list: MockPayment[]): void {
@@ -149,49 +149,14 @@ export function saveBooking(userId: string, booking: MockBooking): void {
   bookings.set(userId, booking);
 }
 
-/** Finance's review in the mock: approved, or rejected for the test suffix. */
-function reviewPending(userId: string, booking: MockBooking, now: number): MockBooking {
-  const list = paymentsOf(userId);
-  const pending = list.find(
-    (payment) =>
-      payment.subscriptionId === booking.subscriptionId &&
-      payment.status === MockPaymentStatus.PendingReview,
-  );
-  if (!pending || pending.submittedAt + MOCK_REVIEW_MS > now) return booking;
-
-  const reviewedAt = pending.submittedAt + MOCK_REVIEW_MS;
-  const rejected = pending.referenceNumber.endsWith(MOCK_REJECTED_REFERENCE_SUFFIX);
-  savePayments(
-    userId,
-    list.map((payment) =>
-      payment === pending
-        ? {
-            ...payment,
-            status: rejected ? MockPaymentStatus.Rejected : MockPaymentStatus.Approved,
-            rejectionReason: rejected ? REJECTION_REASON : null,
-            reviewedAt,
-          }
-        : payment,
-    ),
-  );
-  return rejected
-    ? { ...booking, status: SubscriptionStatus.Reserved, holdExpiresAt: now + MOCK_HOLD_MS }
-    : {
-        ...booking,
-        status: SubscriptionStatus.Active,
-        holdExpiresAt: null,
-        activatedAt: reviewedAt,
-      };
-}
-
-/** The student's booking with time-based changes applied (hold expiry, receipt review). */
+/**
+ * The student's booking with time-based changes applied (the hold expiring). Receipts are
+ * reviewed by finance on the office's payments page (FIN-1001), not by a timer.
+ */
 export function bookingOf(userId: string, now = Date.now()): MockBooking | undefined {
   const stored = bookings.get(userId) ?? SEED_BOOKINGS[userId];
   if (!stored) return undefined;
   let booking = stored;
-  if (booking.status === SubscriptionStatus.PaymentReview) {
-    booking = reviewPending(userId, booking, now);
-  }
   if (
     booking.status === SubscriptionStatus.Reserved &&
     booking.holdExpiresAt !== null &&

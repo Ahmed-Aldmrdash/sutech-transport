@@ -40,7 +40,7 @@ export const RequestStatus = {
   Withdrawn: "withdrawn",
 } as const;
 export type RequestStatus = (typeof RequestStatus)[keyof typeof RequestStatus];
-const requestStatusSchema = z.enum([
+export const requestStatusSchema = z.enum([
   RequestStatus.AwaitingGuardian,
   RequestStatus.Submitted,
   RequestStatus.InReview,
@@ -198,6 +198,8 @@ export const attachmentSchema = z.object({
   file_name: z.string(),
   content_type: z.string(),
   size_bytes: z.number().int().nonnegative(),
+  /** A short-lived link to open the file (the student who sent it and the office). */
+  url: z.url().nullable(),
 });
 export type Attachment = z.infer<typeof attachmentSchema>;
 
@@ -230,6 +232,8 @@ const refundDetailsSchema = z.object({
    * university decides.
    */
   estimated_refund_piasters: z.number().int().nonnegative().nullable(),
+  /** The amount finance approved; null until a refund is approved. */
+  approved_refund_piasters: z.number().int().nonnegative().nullable(),
   guardian_name: z.string(),
   guardian_phone: z.string(),
   attachments: z.array(attachmentSchema),

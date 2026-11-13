@@ -103,7 +103,7 @@ export function Dialog({
               onClick={onClose}
             />
           </div>
-          {children ? <div className="overflow-y-auto px-5 py-3">{children}</div> : null}
+          {children ? <div className="min-h-0 overflow-y-auto px-5 py-3">{children}</div> : null}
           {footer ? (
             <div className="flex flex-col-reverse gap-2 p-5 pt-3 desktop:flex-row desktop:justify-end">
               {footer}

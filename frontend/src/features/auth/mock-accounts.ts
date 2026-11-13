@@ -1,3 +1,4 @@
+import { MockStorage, StoredMap } from "@/lib/api/mock/stored-map";
 import { Role } from "@/lib/auth/roles";
 import type { User } from "./schema";
 
@@ -321,11 +322,55 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
   ),
 ];
 
+/**
+ * The super admin's changes to staff accounts, kept in this browser like the rest of the
+ * mock: accounts they added, and accounts they stopped or moved to another office.
+ */
+interface MockStaffChange {
+  /** An account the super admin added. */
+  added?: MockAccount & { createdAt: number };
+  disabled?: boolean;
+  role?: Role;
+}
+
+const staffChanges = new StoredMap<MockStaffChange>("sut.mock.staff", MockStorage.Local);
+
+function withChange(account: MockAccount, change: MockStaffChange | undefined): MockAccount {
+  if (!change) return account;
+  return {
+    ...account,
+    user: { ...account.user, role: change.role ?? account.user.role },
+    disabled: change.disabled ?? account.disabled,
+  };
+}
+
+/** Every account: the seeded ones (with the super admin's changes) and the ones added. */
+export function allMockAccounts(): MockAccount[] {
+  const seeded = MOCK_ACCOUNTS.map((item) => withChange(item, staffChanges.get(item.user.id)));
+  const added = [...staffChanges.values()].flatMap((change) =>
+    change.added ? [withChange(change.added, change)] : [],
+  );
+  return [...seeded, ...added];
+}
+
+export function staffChangeOf(userId: string): MockStaffChange | undefined {
+  return staffChanges.get(userId);
+}
+
+export function saveStaffChange(userId: string, change: MockStaffChange): void {
+  staffChanges.set(userId, change);
+}
+
+/** Test helper: forget the super admin's changes. */
+export function resetStaffChanges(): void {
+  staffChanges.clear();
+}
+
 export function findMockAccount(identifier: string): MockAccount | undefined {
   const wanted = identifier.toUpperCase();
-  return MOCK_ACCOUNTS.find((item) => item.user.identifier.toUpperCase() === wanted);
+  return allMockAccounts().find((item) => item.user.identifier.toUpperCase() === wanted);
 }
 
 export function findMockAccountById(id: string): MockAccount | undefined {
-  return MOCK_ACCOUNTS.find((item) => item.user.id === id);
+  return allMockAccounts().find((item) => item.user.id === id);
 }

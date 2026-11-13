@@ -1,3 +1,4 @@
+import { MOCK_DESK_STUDENTS } from "@/features/subscriptions/mock-desk-students";
 import { absencesOf } from "@/features/absences/mock-state";
 import type { AbsenceReason } from "@/features/absences/schema";
 import { MOCK_ACCOUNTS, type MockAccount } from "@/features/auth/mock-accounts";
@@ -329,7 +330,8 @@ function hashOf(text: string): number {
 
 /**
  * Everyone subscribed on the line. Ahmed: every bus is full, so the demo accounts with an
- * active booking on it are joined by made-up students up to the bus's seats.
+ * active booking on it are joined by made-up students up to the bus's seats (less the few
+ * seats some lines still offer).
  */
 export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockRider[] {
   const riders: MockRider[] = [];
@@ -347,7 +349,21 @@ export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockR
       isAccount: true,
     });
   }
-  const seats = MOCK_SEATS_BY_BUS[line.busType];
+  // The made-up students the offices work with ride too, scanned like the seat fillers.
+  for (const student of MOCK_DESK_STUDENTS) {
+    const booking = bookingOnDate(student.id, date);
+    if (booking?.lineId !== line.lineId || booking.status !== SubscriptionStatus.Active) continue;
+    riders.push({
+      studentId: student.id,
+      nameAr: student.nameAr,
+      nameEn: student.nameEn,
+      identifier: student.identifier,
+      stopOrder: booking.stopOrder,
+      isAccount: false,
+    });
+  }
+  // The seats the line still offers this term stay empty.
+  const seats = MOCK_SEATS_BY_BUS[line.busType] - line.seatsAvailable;
   const stopCount = Math.max(1, line.stops.length);
   for (let seat = 0; riders.length < seats; seat += 1) {
     const seed = hashOf(`${line.lineId}-${seat}`);
@@ -472,6 +488,45 @@ export function crewLiveClock(lineId: string, now: number) {
   const line = findMockLine(lineId);
   if (!trip || !line) return null;
   return { date, ...crewTripClock(trip, line), endedAt: trip.endedAt };
+}
+
+/** A line a demo crew account runs: only the crew's own presses start and end its trips. */
+function isDemoCrewLine(lineId: string): boolean {
+  return Object.values(MOCK_CREW_LINES).includes(lineId);
+}
+
+interface MockOfficeTrip {
+  trip: MockCrewTrip;
+  /** Made up from the timetable (no crew pressed anything): demo accounts ride like the rest. */
+  simulated: boolean;
+}
+
+/**
+ * Mock only: a line's outbound trip as the offices see it. The demo crew's line follows the
+ * crew's presses today; every other line (and the crew's line on earlier days) runs on its timetable (leaves its first stop, reaches
+ * campus), so the office pages have a real-looking day to show. The real server only has
+ * what the crews did.
+ */
+export function officeOutboundTrip(
+  line: MockLineSource,
+  date: string,
+  now: number,
+): MockOfficeTrip {
+  const stored = crewTripOf(line.lineId, date, TripDirection.Outbound);
+  // Today the demo crew's line waits for the crew; an earlier day it ran on its timetable.
+  const crewDrivesIt = isDemoCrewLine(line.lineId) && date === cairoNow(new Date(now)).date;
+  if (stored.startedAt !== null || crewDrivesIt) {
+    return { trip: stored, simulated: false };
+  }
+  const { leavesAt, arrivesAt } = scheduleOf(line, date);
+  return {
+    trip: {
+      ...stored,
+      startedAt: now >= leavesAt ? leavesAt : null,
+      endedAt: now >= arrivesAt ? arrivesAt : null,
+    },
+    simulated: true,
+  };
 }
 
 /** Test helper: forget every crew trip. */

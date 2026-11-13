@@ -71,7 +71,7 @@ export function RequestDetailPage({
         actions={<RequestStatusBadge status={request.status} />}
       />
       <LatestAnswer request={request} />
-      <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <RequestDetails request={request} />
         <div className="flex flex-col gap-5">
           <Timeline events={request.timeline} />

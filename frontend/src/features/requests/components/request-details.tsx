@@ -9,7 +9,14 @@ import { RequestKind, type StudentRequest } from "../schema";
 import { Row, Attachments } from "./request-detail-parts";
 
 /** What the student asked for, field by field. */
-export function RequestDetails({ request }: { request: StudentRequest }) {
+export function RequestDetails({
+  request,
+  title,
+}: {
+  request: StudentRequest;
+  /** The card's heading; "What you sent" on the student's own page. */
+  title?: string;
+}) {
   const t = useTranslations("student");
   const locale = useLocale() as Locale;
   const lineLabel = (line: { code: string; name: string }) =>
@@ -62,6 +69,11 @@ export function RequestDetails({ request }: { request: StudentRequest }) {
               ? t("requests.refund.decidedByUniversity")
               : formatMoney(details.estimated_refund_piasters, locale)}
           </Row>
+          {details.approved_refund_piasters === null ? null : (
+            <Row label={t("requests.refund.approvedAmount")}>
+              {formatMoney(details.approved_refund_piasters, locale)}
+            </Row>
+          )}
           <Row label={t("requests.guardian.name")}>{details.guardian_name}</Row>
           <Row label={t("requests.guardian.phone")}>
             <span dir="ltr">{details.guardian_phone}</span>
@@ -148,7 +160,7 @@ export function RequestDetails({ request }: { request: StudentRequest }) {
 
   return (
     <Card>
-      <CardHeader title={t("requests.detail.detailsTitle")} />
+      <CardHeader title={title ?? t("requests.detail.detailsTitle")} />
       <CardBody>
         <dl className="flex flex-col divide-y divide-line">
           <Row label={t("requests.detail.submittedAt")}>

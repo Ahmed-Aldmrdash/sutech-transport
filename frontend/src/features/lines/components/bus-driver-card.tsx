@@ -28,7 +28,7 @@ export function BusDriverDetails({ bus }: { bus: Bus }) {
   const driver = bus.driver;
   return (
     <div className="flex flex-col gap-3">
-      <dl className="grid gap-x-6 sm:grid-cols-2">
+      <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
         {/* dt and dd sit right in the row's div (a dl allows one wrapping div, no deeper). */}
         <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-t border-line py-2.5">
           <dt className="col-span-2 grid grid-cols-subgrid items-center text-caption text-ink-muted">

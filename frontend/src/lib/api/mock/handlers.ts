@@ -9,6 +9,7 @@ import { MOCK_FEATURE_OF } from "./mock-routing";
  */
 const LOADERS: Record<MockFeatureName, () => Promise<unknown>> = {
   [MockFeature.Absences]: () => import("@/features/absences/mock"),
+  [MockFeature.AdminSystem]: () => import("@/features/admin-system/mock"),
   [MockFeature.Announcements]: () => import("@/features/announcements/mock"),
   [MockFeature.Attendance]: () => import("@/features/attendance/mock"),
   [MockFeature.Auth]: () => import("@/features/auth/mock"),
@@ -16,16 +17,24 @@ const LOADERS: Record<MockFeatureName, () => Promise<unknown>> = {
   [MockFeature.Children]: () => import("@/features/children/mock"),
   [MockFeature.Crew]: () => import("@/features/crew/mock"),
   [MockFeature.Emergencies]: () => import("@/features/emergencies/mock"),
+  [MockFeature.EventBuses]: () => import("@/features/event-buses/mock"),
+  [MockFeature.FinanceDesk]: () => import("@/features/finance-desk/mock"),
   [MockFeature.Lines]: () => import("@/features/lines/mock"),
   [MockFeature.Notifications]: () => import("@/features/notifications/mock"),
   [MockFeature.Payments]: () => import("@/features/payments/mock"),
+  [MockFeature.Reports]: () => import("@/features/reports/mock"),
+  [MockFeature.SgOffice]: () => import("@/features/sg-office/mock"),
+  [MockFeature.OpsDesk]: () => import("@/features/ops-desk/mock"),
+  [MockFeature.Timetable]: () => import("@/features/timetable/mock"),
   [MockFeature.Requests]: () => import("@/features/requests/mock"),
+  [MockFeature.RequestDesk]: () => import("@/features/request-desk/mock"),
   [MockFeature.Sos]: () => import("@/features/sos/mock"),
   [MockFeature.Subscriptions]: () => import("@/features/subscriptions/mock"),
   [MockFeature.System]: () => import("@/features/system/mock"),
   [MockFeature.Tracking]: () => import("@/features/tracking/mock"),
   [MockFeature.Trips]: () => import("@/features/trips/mock"),
   [MockFeature.Violations]: () => import("@/features/violations/mock"),
+  [MockFeature.ViolationDesk]: () => import("@/features/violation-desk/mock"),
 };
 
 export function loadMockFeature(feature: MockFeatureName): Promise<unknown> {
