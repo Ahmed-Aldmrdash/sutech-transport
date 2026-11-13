@@ -3,6 +3,7 @@
 import { FileClock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
+import { Card, CardBody } from "@/components/ui/card";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/table";
@@ -55,7 +56,38 @@ export function AuditLogPage() {
       <DeskListState state={state}>
         {(log: AuditLog) => (
           <div className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-3 desktop:hidden" aria-label={t("caption")}>
+              {log.items.length === 0 ? (
+                <li className="text-body text-ink-muted">{t("empty")}</li>
+              ) : null}
+              {log.items.map((entry) => (
+                <li key={entry.audit_id}>
+                  <Card>
+                    <CardBody className="flex flex-col gap-1">
+                      <p className="text-body font-bold text-ink-strong">
+                        {t(`actions.${entry.action}`)}
+                      </p>
+                      <p className="text-body-sm text-ink">
+                        <bdi>{entry.target}</bdi>
+                      </p>
+                      {entry.detail ? (
+                        <p className="text-body-sm text-ink-muted">
+                          {t("note")}: {entry.detail}
+                        </p>
+                      ) : null}
+                      <p className="text-caption text-ink-muted">
+                        {entry.actor.name} · {tRoot(`roles.${entry.actor.role}`)} ·{" "}
+                        <time dateTime={entry.at} className="tabular-nums">
+                          {formatDateTime(entry.at, locale)}
+                        </time>
+                      </p>
+                    </CardBody>
+                  </Card>
+                </li>
+              ))}
+            </ul>
             <DataTable
+              className="hidden desktop:block"
               caption={t("caption")}
               rows={log.items}
               getRowKey={(entry) => entry.audit_id}

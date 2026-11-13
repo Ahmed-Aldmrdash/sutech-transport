@@ -51,7 +51,7 @@ export function CompanyRequestPage({ eventId }: { eventId: string }) {
         actions={<EventStatusBadge event={event} />}
       />
       <Answer event={event} />
-      <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <EventFacts event={event} />
         {canReply ? (
           <CompanyReplyCard event={event} available={available} onDone={state.refresh} />

@@ -122,10 +122,10 @@ test.describe("student requests, notifications and settings", () => {
     const entry = isPhone(page)
       ? page
           .getByRole("navigation", { name: "Quick navigation" })
-          .getByRole("link", { name: /Notifications, \d+ new/ })
+          .getByRole("link", { name: /Notifications \d+ new/ })
       : page
           .getByRole("navigation", { name: "Main navigation" })
-          .getByRole("link", { name: /Notifications, \d+ new/ });
+          .getByRole("link", { name: /Notifications \d+ new/ });
     await expect(entry).toBeAttached();
     await entry.click();
     await expect(page.getByRole("heading", { name: "Notifications", level: 1 })).toBeVisible();

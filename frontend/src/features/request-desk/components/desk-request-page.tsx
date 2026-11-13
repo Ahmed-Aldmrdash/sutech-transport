@@ -57,7 +57,7 @@ export function DeskRequestPage({
         title={titleOf(request)}
         actions={<RequestStatusBadge status={request.status} />}
       />
-      <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-5">
           <RequestDetails request={request} title={t("detail.asked")} />
           <Timeline events={request.timeline} />

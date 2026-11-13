@@ -131,7 +131,7 @@ export function DayOverview<T extends SgOverview>({
                 }
               />
             )}
-            <div className="grid items-start gap-5 desktop:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-2">
               <SgEmergencies items={day.emergencies} />
               <SgEvents items={day.events} />
             </div>

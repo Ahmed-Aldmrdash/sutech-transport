@@ -14,7 +14,7 @@ import { STATUS_TONE, directionTitle } from "./current-trip-card";
 export function QuickActions() {
   const t = useTranslations("crew.trip");
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       <ButtonLink
         href="/driver/scan"
         size="lg"

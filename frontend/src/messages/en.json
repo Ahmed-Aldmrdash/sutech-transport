@@ -121,8 +121,8 @@
       "approvals": "Approve"
     },
     "soon": "Soon",
-    "withBadge": "{label}, {count} new",
-    "withWaiting": "{label}, {count} waiting for you"
+    "withBadge": "{label} {count} new",
+    "withWaiting": "{label} {count} waiting for you"
   },
   "errors": {
     "retry": "Try again",
@@ -1023,6 +1023,13 @@
       "checkedOutAt": "Left the bus {time}",
       "reason": "Reason: {reason}",
       "returnNote": "Return trips will show here once the Transportation office publishes return times."
+    },
+    "assistant": {
+      "title": "Assistant",
+      "lead": "Ask about your line, times and the bus rules, in English or Arabic.",
+      "soonTitle": "The assistant is coming soon",
+      "soonBody": "It is being built and will open here. Until then, your line, times and announcements are in the app, and the Transportation office (A039) answers anything else.",
+      "lines": "See the lines"
     }
   },
   "notifications": {
@@ -1668,7 +1675,8 @@
       "title": "No alerts",
       "body": "No driver or supervisor has pressed SOS yet. A new alert shows here at once with the bus's location."
     },
-    "allAlerts": "See all alerts"
+    "allAlerts": "See all alerts",
+    "callPrefix": "Call"
   },
   "clinic": {
     "title": "Clinic",

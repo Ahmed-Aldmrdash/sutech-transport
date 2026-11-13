@@ -82,7 +82,7 @@ export function LinesPage() {
       </div>
 
       {lines.status === AsyncStatus.Loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 desktop:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 desktop:grid-cols-3">
           {Array.from({ length: SKELETON_CARDS }, (_, index) => (
             <Skeleton key={index} className="h-40" />
           ))}
@@ -97,7 +97,7 @@ export function LinesPage() {
             {t("student.lines.count", { count: visible.length })}
           </p>
           {visible.length > 0 ? (
-            <ul className="grid gap-4 sm:grid-cols-2 desktop:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 desktop:grid-cols-3">
               {visible.map((line) => (
                 <LineCard key={line.line_id} line={line} />
               ))}

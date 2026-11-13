@@ -54,7 +54,7 @@ export function UserActions({ user, onChanged }: { user: StaffUser; onChanged: (
   ) : null;
 
   return (
-    <div className="flex flex-wrap justify-end gap-2">
+    <div className="flex flex-wrap gap-2 desktop:justify-end">
       <Button size="sm" variant="secondary" onClick={() => setOpen(Open.Move)}>
         {t("move")}
       </Button>

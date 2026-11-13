@@ -20,7 +20,7 @@ export function ViolationsPage() {
       <PageHeader title={t("title")} description={t("lead")} />
       <CrewGate>
         {(today) => (
-          <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
             <ViolationForm today={today} onSent={mine.refresh} />
             <Card>
               <CardHeader title={t("mineTitle")} headingLevel={2} />

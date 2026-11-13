@@ -98,8 +98,8 @@ export interface NavItem {
 export type NavBadges = Partial<Record<NavItemKey, number>>;
 
 /**
- * The message (under `nav`) for a badged link's one accessible name: "Notifications, 2 new" or
- * "Approvals, 1 waiting for you". The visible number is decorative, so it is heard once.
+ * The message (under `nav`) for a badged link's one accessible name: "Notifications 2 new" or
+ * "Approvals 1 waiting for you" (starting with the visible text, for voice control). The visible number is decorative, so it is heard once.
  */
 export function badgeLabelKey(key: NavItemKey): "withWaiting" | "withBadge" {
   return key === "approvals" ? "withWaiting" : "withBadge";

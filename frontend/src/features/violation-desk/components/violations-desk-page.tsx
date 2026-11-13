@@ -75,7 +75,7 @@ export function ViolationsDeskPage() {
           { value: ALL, label: t("desk.violations.filters.all") },
         ]}
       />
-      <div className="grid gap-4 desktop:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] desktop:items-end">
+      <div className="grid grid-cols-1 gap-4 desktop:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] desktop:items-end">
         <DeskSearch hint={t("desk.violations.searchHint")} onSearch={onSearch} />
         <SelectField
           label={t("desk.violations.rule")}

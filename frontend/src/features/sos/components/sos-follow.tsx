@@ -81,7 +81,7 @@ export function SosFollow({ sosId }: { sosId: string }) {
           </span>
         </div>
 
-        <dl className="grid gap-3 text-body-sm sm:grid-cols-2">
+        <dl className="grid grid-cols-1 gap-3 text-body-sm sm:grid-cols-2">
           <div className="flex items-start gap-2">
             <Icon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-teal" />
             <div>

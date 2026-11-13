@@ -106,7 +106,7 @@ export function NewEventPage() {
             onSubmit={(event) => void send(event)}
             className="flex flex-col gap-5"
           >
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <SelectField
                 label={t("kind")}
                 required
@@ -173,7 +173,7 @@ export function NewEventPage() {
                 onChange={(event) => update("destination", event.target.value)}
               />
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <TextField
                 label={t("students")}
                 required

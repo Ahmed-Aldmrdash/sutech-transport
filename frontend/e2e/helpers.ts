@@ -1,11 +1,16 @@
 import { expect, type Page } from "@playwright/test";
 
+/** Map tiles come from the internet; one that fails to load is not an app error. */
+const TILE_HOST = "tile.openstreetmap.org";
+
 /** Fails the test on any uncaught error or console error on the page. */
 export function watchForErrors(page: Page): string[] {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
+    if (message.type() === "error" && !message.location().url.includes(TILE_HOST)) {
+      errors.push(message.text());
+    }
   });
   return errors;
 }

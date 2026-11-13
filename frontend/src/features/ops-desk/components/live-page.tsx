@@ -137,7 +137,7 @@ function LiveView({
           {allIdle ? t("noServiceBody") : t("noneOnRoadBody")}
         </Alert>
       ) : null}
-      <div className="grid items-start gap-4 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid grid-cols-1 items-start gap-4 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-4">
           <FleetMap
             buses={pins}

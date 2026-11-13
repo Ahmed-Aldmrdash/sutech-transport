@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardBody } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { SelectField } from "@/components/ui/select-field";
 import { DataTable } from "@/components/ui/table";
@@ -65,63 +66,89 @@ export function UsersPage() {
       </div>
       <DeskListState state={state}>
         {(list: StaffUsers) => (
-          <DataTable
-            caption={t("caption")}
-            rows={list.items}
-            getRowKey={(user) => user.user_id}
-            empty={
-              <p className="flex items-center gap-2 text-body text-ink-muted">
-                <UsersRound aria-hidden="true" className="size-5" />
-                {t("empty")}
-              </p>
-            }
-            columns={[
-              {
-                key: "name",
-                header: t("name"),
-                cell: (user) => (
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-ink-strong">{user.name}</span>
-                    {user.is_you ? <Badge tone={Tone.Brand}>{t("you")}</Badge> : null}
-                  </span>
-                ),
-              },
-              {
-                key: "identifier",
-                header: t("identifier"),
-                cell: (user) => <bdi className="tabular-nums">{user.identifier}</bdi>,
-              },
-              {
-                key: "office",
-                header: t("office"),
-                cell: (user) => tRoot(`roles.${user.role}`),
-              },
-              {
-                key: "phone",
-                header: t("phone"),
-                cell: (user) => (
-                  <bdi dir="ltr" className="tabular-nums">
-                    {user.masked_phone}
-                  </bdi>
-                ),
-              },
-              {
-                key: "status",
-                header: t("status"),
-                cell: (user) =>
-                  user.active ? (
-                    <Badge tone={Tone.Success}>{t("active")}</Badge>
-                  ) : (
-                    <Badge tone={Tone.Danger}>{t("stopped")}</Badge>
+          <>
+            <ul className="flex flex-col gap-3 desktop:hidden" aria-label={t("caption")}>
+              {list.items.length === 0 ? (
+                <li className="text-body text-ink-muted">{t("empty")}</li>
+              ) : null}
+              {list.items.map((user) => (
+                <li key={user.user_id}>
+                  <Card>
+                    <CardBody className="flex flex-col gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-body font-bold text-ink-strong">{user.name}</span>
+                        {user.is_you ? <Badge tone={Tone.Brand}>{t("you")}</Badge> : null}
+                        <StatusBadge active={user.active} />
+                      </div>
+                      <p className="text-body-sm text-ink">
+                        {tRoot(`roles.${user.role}`)}
+                        {" · "}
+                        <bdi className="tabular-nums">{user.identifier}</bdi>
+                        {" · "}
+                        <bdi dir="ltr" className="tabular-nums">
+                          {user.masked_phone}
+                        </bdi>
+                      </p>
+                      <UserActions user={user} onChanged={refresh} />
+                    </CardBody>
+                  </Card>
+                </li>
+              ))}
+            </ul>
+            <DataTable
+              className="hidden desktop:block"
+              caption={t("caption")}
+              rows={list.items}
+              getRowKey={(user) => user.user_id}
+              empty={
+                <p className="flex items-center gap-2 text-body text-ink-muted">
+                  <UsersRound aria-hidden="true" className="size-5" />
+                  {t("empty")}
+                </p>
+              }
+              columns={[
+                {
+                  key: "name",
+                  header: t("name"),
+                  cell: (user) => (
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-ink-strong">{user.name}</span>
+                      {user.is_you ? <Badge tone={Tone.Brand}>{t("you")}</Badge> : null}
+                    </span>
                   ),
-              },
-              {
-                key: "actions",
-                header: <span className="sr-only">{t("actions")}</span>,
-                cell: (user) => <UserActions user={user} onChanged={refresh} />,
-              },
-            ]}
-          />
+                },
+                {
+                  key: "identifier",
+                  header: t("identifier"),
+                  cell: (user) => <bdi className="tabular-nums">{user.identifier}</bdi>,
+                },
+                {
+                  key: "office",
+                  header: t("office"),
+                  cell: (user) => tRoot(`roles.${user.role}`),
+                },
+                {
+                  key: "phone",
+                  header: t("phone"),
+                  cell: (user) => (
+                    <bdi dir="ltr" className="tabular-nums">
+                      {user.masked_phone}
+                    </bdi>
+                  ),
+                },
+                {
+                  key: "status",
+                  header: t("status"),
+                  cell: (user) => <StatusBadge active={user.active} />,
+                },
+                {
+                  key: "actions",
+                  header: <span className="sr-only">{t("actions")}</span>,
+                  cell: (user) => <UserActions user={user} onChanged={refresh} />,
+                },
+              ]}
+            />
+          </>
         )}
       </DeskListState>
       <p className="text-caption text-ink-muted">{t("selfNote")}</p>
@@ -135,5 +162,14 @@ export function UsersPage() {
         />
       ) : null}
     </div>
+  );
+}
+
+function StatusBadge({ active }: { active: boolean }) {
+  const t = useTranslations("desk.system.users");
+  return active ? (
+    <Badge tone={Tone.Success}>{t("active")}</Badge>
+  ) : (
+    <Badge tone={Tone.Danger}>{t("stopped")}</Badge>
   );
 }

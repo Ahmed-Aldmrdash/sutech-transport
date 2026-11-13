@@ -109,5 +109,7 @@ test("a line change goes from the student to his father, then to the office", as
   await switchTo(page, "ADM-1001");
   await page.waitForURL(/\/en\/admin$/);
   await page.goto("/en/admin/audit-log");
-  await expect(page.getByRole("cell", { name: "Approved a request" }).first()).toBeVisible();
+  await expect(
+    page.getByText("Approved a request").filter({ visible: true }).first(),
+  ).toBeVisible();
 });

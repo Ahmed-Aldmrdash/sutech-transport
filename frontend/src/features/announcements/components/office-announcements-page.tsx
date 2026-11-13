@@ -49,7 +49,7 @@ export function OfficeAnnouncementsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("lead")} />
-      <div className="grid items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Composer
           onPosted={() => {
             setPage(1);
@@ -181,7 +181,7 @@ function Composer({ onPosted }: { onPosted: () => void }) {
             ]}
             onChange={(event) => setLineId(event.target.value)}
           />
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TextField
               label={t("titleAr")}
               lang="ar"

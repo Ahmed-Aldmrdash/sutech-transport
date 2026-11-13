@@ -22,7 +22,7 @@ test("the super admin adds an account, stops it, and sees both in the activity l
   await dialog.getByRole("button", { name: "Add account" }).click();
   await expect(page.getByText("Account added: FIN-1002.")).toBeVisible();
 
-  const row = page.getByRole("row", { name: /Rania Adel/ });
+  const row = page.locator("li, tr").filter({ hasText: "Rania Adel" }).filter({ visible: true });
   await row.getByRole("button", { name: "Stop" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Stop" }).click();
   await expect(page.getByText("Rania Adel is stopped.")).toBeVisible();
@@ -30,10 +30,10 @@ test("the super admin adds an account, stops it, and sees both in the activity l
 
   await page.goto("/en/admin/audit-log");
   await expect(page.getByRole("heading", { level: 1, name: "Activity log" })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "Stopped an account" })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "Added an account" })).toBeVisible();
+  await expect(page.getByText("Stopped an account").filter({ visible: true })).toBeVisible();
+  await expect(page.getByText("Added an account").filter({ visible: true })).toBeVisible();
   await page.getByRole("button", { name: "Payments" }).click();
-  await expect(page.getByRole("cell", { name: "Added an account" })).toHaveCount(0);
+  await expect(page.getByText("Added an account").filter({ visible: true })).toHaveCount(0);
   await expectNoSidewaysScroll(page);
   expect(errors).toEqual([]);
 
@@ -57,7 +57,10 @@ test("only the super admin opens the system pages", async ({ page }) => {
   await page.waitForURL(/\/en\/admin$/);
   await page.goto("/en/admin/users");
   // Your own row has no actions.
-  const mine = page.getByRole("row", { name: /Mariam Hassan/ });
+  const mine = page
+    .locator("li, tr")
+    .filter({ hasText: "Mariam Hassan" })
+    .filter({ visible: true });
   await expect(mine.getByText("You")).toBeVisible();
   await expect(mine.getByRole("button")).toHaveCount(0);
 });
