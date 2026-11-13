@@ -1,0 +1,215 @@
+/* ==========================================================================
+   SUtech Transport — Design Tokens  v1.1  (2026-10-30)
+   Source: SUTech Brand Manual 2025 (official colours + tint scales)
+           + sut.edu.eg components (radius, shadow, type rhythm).
+   See DESIGN-SYSTEM.md for usage rules.
+
+   Theme:     light by default; dark via prefers-color-scheme or
+              <html data-theme="dark">. Force light with data-theme="light".
+   Language:  <html lang="ar" dir="rtl"> switches to the Arabic font
+              and drops uppercase/letter-spacing automatically.
+   ========================================================================== */
+
+/* Fonts: free stand-ins for the official Gilroy (EN) and AbdoMaster (AR).
+   If the university supplies the licensed files, add @font-face rules and put
+   "Gilroy" / "AbdoMaster" first in --font-latin / --font-arabic. Nothing else changes. */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap");
+
+:root {
+  /* ---- Brand scales (official, manual p36: 100 / 80 / 60 / 40 / 20 %) ---- */
+  --purple-dark: #2F103D;  /* sut.edu.eg footer gradient end; pressed state */
+  --purple:      #58286E;  /* Pantone P 94-15 U */
+  --purple-80:   #724686;
+  --purple-60:   #8C659E;
+  --purple-40:   #A583B6;
+  --purple-20:   #BFA1CE;
+  --purple-soft: #F3EEF6;  /* derived 7 % tint, for tinted surfaces */
+
+  --teal-dark:   #1D6170;  /* derived, AA text on teal-soft */
+  --teal:        #257988;  /* Pantone 126-14 U */
+  --teal-80:     #428E9B;
+  --teal-60:     #5EA3AE;
+  --teal-40:     #7AB8C0;
+  --teal-20:     #97CDD3;
+  --teal-soft:   #E9F3F5;
+
+  --coral-ink:   #B4472E;  /* derived, the only coral allowed for small text (5.4:1) */
+  --coral:       #CF644B;  /* Pantone P 41-6 U, fills, icons, large text only */
+  --coral-80:    #DA7D67;
+  --coral-60:    #E69583;
+  --coral-40:    #F1AE9F;
+  --coral-20:    #FCC6BB;
+  --coral-soft:  #FDF0EC;
+
+  --gray:        #545557;  /* logo wordmark gray */
+  --gray-80:     #6D6E6F;
+  --gray-60:     #868688;
+  --gray-40:     #9E9FA0;
+  --gray-20:     #B7B7B8;
+
+  /* ---- Semantic: light ---- */
+  --bg:          #F7F7F7;  /* shared by sut.edu.eg and elsewedyelectric.com */
+  --surface:     #FFFFFF;
+  --surface-2:   #F9F9F9;
+  --ink:         #1F1A24;  /* headings */
+  --text:        #3B3D42;  /* body, sut.edu.eg body colour */
+  --muted:       #6D6E6F;  /* secondary text (gray-80, 5.1:1) */
+  --line:        #E7E7E7;  /* sut.edu.eg divider */
+  --line-strong: #D5D3D8;
+
+  --brand:       var(--purple);
+  --brand-2:     var(--purple-dark);   /* hover/pressed */
+  --brand-soft:  var(--purple-soft);
+  --on-brand:    #FFFFFF;
+
+  --info:        var(--teal);          /* on-route, live tracking, links */
+  --info-ink:    var(--teal-dark);
+  --info-soft:   var(--teal-soft);
+  --on-info:     #FFFFFF;
+
+  --accent:      var(--coral);         /* highlights, icon tiles, map pins */
+  --accent-ink:  var(--coral-ink);
+  --accent-soft: var(--coral-soft);
+  --on-accent:   #1F1A24;              /* white on coral fails AA */
+  --qr-ink:      #1F1A24;              /* QR modules, always dark on the white QR frame */
+
+  /* fill (white text on it passes AA) / soft background / ink = text on the soft background */
+  --ok:   #1E8752; --ok-soft:   #DDF1E5; --ok-ink:   #176B41;   /* arrived, paid, on time */
+  --warn: #A8670D; --warn-soft: #FBECD3; --warn-ink: #855108;   /* delayed, low balance   */
+  --bad:  #C62828; --bad-soft:  #F9E0E0; --bad-ink:  #A61F1F;   /* cancelled, error, SOS. Red text uses --bad-ink (5.6:1+), never --bad on --bad-soft */
+
+  --focus:       var(--teal);
+  --scrim:       rgba(22, 16, 26, .55);
+  --glass:       rgba(255, 255, 255, .72);         /* over maps / photos */
+  --glass-line:  rgba(255, 255, 255, .45);
+
+  /* Map (kept from the demo's map style, retuned toward the brand) */
+  --map-water:   #BFDDE2;
+  --map-land:    #EEF1EC;
+  --map-road:    #FFFFFF;
+  --map-block:   #E2E5DE;
+  --map-route:   var(--purple);
+  --map-route-2: var(--teal);
+
+  /* ---- Typography ---- */
+  --font-latin:  "Montserrat", "Segoe UI", system-ui, sans-serif;
+  --font-arabic: "Tajawal", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font:        var(--font-latin), var(--font-arabic);
+
+  /*            size / line-height                     weight  tracking */
+  --t-display:  800 32px/38px var(--font);  --ls-display: -0.8px;
+  --t-h1:       800 26px/32px var(--font);  --ls-h1:      -0.6px;
+  --t-h2:       800 20px/28px var(--font);  --ls-h2:      -0.4px;
+  --t-h3:       700 17px/24px var(--font);  --ls-h3:      -0.2px;
+  --t-body:     400 16px/26px var(--font);
+  --t-body-sm:  400 14px/22px var(--font);
+  --t-caption:  500 12px/18px var(--font);
+  --t-eyebrow:  600 11px/16px var(--font);  --ls-eyebrow:  0.8px;   /* UPPERCASE in EN */
+  --t-button:   700 14px/20px var(--font);  --ls-button:   0.6px;   /* UPPERCASE in EN */
+  --t-number:   800 28px/32px var(--font);  /* ETA, minutes, seat counts */
+
+  /* ---- Shape ---- */
+  --r-xs:   4px;    /* icon tiles, small chips (sut.edu.eg)  */
+  --r-sm:   6px;    /* glass tags                            */
+  --r-md:   8px;    /* buttons, inputs (both sites)          */
+  --r-lg:   12px;   /* cards                                 */
+  --r-xl:   20px;   /* sheets, hero cards (elsewedy cards)   */
+  --r-pill: 999px;
+
+  /* ---- Elevation (both sites are almost flat) ---- */
+  --shadow-sm: 0 1px 2px rgba(31, 26, 36, .06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, .10);   /* sut.edu.eg standard */
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, .18);  /* sheets, dialogs      */
+  --blur-glass: blur(12px) saturate(1.6);
+
+  /* ---- Space (4-pt) ---- */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-15: 60px;
+  --gutter: 16px;          /* phone side padding */
+  --tap: 48px;             /* minimum touch target */
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur-fast: 150ms;  --dur: 250ms;  --dur-slow: 400ms;
+
+  /* ---- Gradients (from sut.edu.eg) ---- */
+  --grad-brand:  linear-gradient(120deg, var(--purple) 0%, var(--purple-dark) 100%);
+  --grad-warm:   linear-gradient(225deg, var(--purple) 0%, var(--coral) 100%);
+  --grad-scrim:  linear-gradient(180deg, rgba(0,0,0,.67) 0%, rgba(0,0,0,0) 100%);
+
+  /* ---- Data viz: categorical order (series 1 → 5), all from the official scales ---- */
+  --chart-1: var(--purple);  --chart-2: var(--teal);  --chart-3: var(--coral);
+  --chart-4: var(--purple-60); --chart-5: var(--gray);
+  --chart-grid: var(--line);  --chart-axis: var(--muted);
+
+  /* ---- Loading ---- */
+  --skeleton:    #ECEAEE;
+  --skeleton-hi: #F7F6F8;
+
+  /* ---- Layout ---- */
+  --appbar-h:   56px;
+  --bottomnav-h: 64px;
+  --sidebar-w:  248px;     /* admin dashboard */
+  --content-max: 1280px;
+
+  /* ---- Layers ---- */
+  --z-nav: 10; --z-sheet: 40; --z-dialog: 50; --z-toast: 60;
+
+  color-scheme: light;
+}
+
+/* ---- Semantic: dark (purple-black base, brand colours lifted to 40 % tints) ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16101A; --surface: #211A26; --surface-2: #2A2230;
+    --ink: #F3F1F5; --text: #DCD8E0; --muted: #A7A3AD;
+    --line: #362E3C; --line-strong: #4A4151;
+    --brand: var(--purple-20); --brand-2: #D6C4E0; --brand-soft: #33243D; --on-brand: #16101A;
+    --info: var(--teal-40); --info-ink: var(--teal-20); --info-soft: #173339; --on-info: #16101A;
+    --accent: var(--coral-60); --accent-ink: var(--coral-40); --accent-soft: #3A221C; --on-accent: #16101A; --qr-ink: #1F1A24;
+    --ok: #4CC08A; --ok-soft: #173826; --ok-ink: #4CC08A; --warn: #E3A848; --warn-soft: #3A2C12; --warn-ink: #E3A848; --bad: #EF7A6E; --bad-soft: #3D1F1C; --bad-ink: #EF7A6E;
+    --focus: var(--teal-40); --scrim: rgba(0,0,0,.65);
+    --glass: rgba(33, 26, 38, .72); --glass-line: rgba(255,255,255,.10);
+    --map-water: #1E3940; --map-land: #1C1820; --map-road: #2E2734; --map-block: #241E29;
+    --map-route: var(--purple-40); --map-route-2: var(--teal-40);
+    --shadow-md: 0 4px 20px rgba(0,0,0,.40); --shadow-lg: 0 12px 48px rgba(0,0,0,.55);
+    --skeleton: #2A2230; --skeleton-hi: #352C3C;
+    --chart-1: var(--purple-40); --chart-2: var(--teal-40); --chart-3: var(--coral-60); --chart-4: var(--purple-20); --chart-5: var(--gray-20);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16101A; --surface: #211A26; --surface-2: #2A2230;
+  --ink: #F3F1F5; --text: #DCD8E0; --muted: #A7A3AD;
+  --line: #362E3C; --line-strong: #4A4151;
+  --brand: var(--purple-20); --brand-2: #D6C4E0; --brand-soft: #33243D; --on-brand: #16101A;
+  --info: var(--teal-40); --info-ink: var(--teal-20); --info-soft: #173339; --on-info: #16101A;
+  --accent: var(--coral-60); --accent-ink: var(--coral-40); --accent-soft: #3A221C; --on-accent: #16101A; --qr-ink: #1F1A24;
+  --ok: #4CC08A; --ok-soft: #173826; --ok-ink: #4CC08A; --warn: #E3A848; --warn-soft: #3A2C12; --warn-ink: #E3A848; --bad: #EF7A6E; --bad-soft: #3D1F1C; --bad-ink: #EF7A6E;
+  --focus: var(--teal-40); --scrim: rgba(0,0,0,.65);
+  --glass: rgba(33, 26, 38, .72); --glass-line: rgba(255,255,255,.10);
+  --map-water: #1E3940; --map-land: #1C1820; --map-road: #2E2734; --map-block: #241E29;
+  --map-route: var(--purple-40); --map-route-2: var(--teal-40);
+  --shadow-md: 0 4px 20px rgba(0,0,0,.40); --shadow-lg: 0 12px 48px rgba(0,0,0,.55);
+  --skeleton: #2A2230; --skeleton-hi: #352C3C;
+    --chart-1: var(--purple-40); --chart-2: var(--teal-40); --chart-3: var(--coral-60); --chart-4: var(--purple-20); --chart-5: var(--gray-20);
+  color-scheme: dark;
+}
+
+/* ---- Arabic: Arabic font first, no uppercase or tracking, taller lines ---- */
+:root:lang(ar), [dir="rtl"] {
+  --font: var(--font-arabic), var(--font-latin);
+  --t-body:    400 16px/28px var(--font);
+  --t-body-sm: 400 14px/24px var(--font);
+  --ls-display: 0; --ls-h1: 0; --ls-h2: 0; --ls-h3: 0;
+  --ls-eyebrow: 0; --ls-button: 0;
+}
+
+/* ---- Base ---- */
+html { background: var(--bg); color: var(--text); font: var(--t-body); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); }
+h1, h2, h3 { color: var(--ink); margin: 0; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}

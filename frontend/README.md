@@ -27,27 +27,26 @@ npm run dev                  # http://localhost:3000 → /ar
 Open `/ar` and sign in with one of these mock accounts. Each request makes a new random code
 (the old one stops working), and in mock mode the code step shows it in place of the SMS:
 
-| Role                  | ID                      | Home                 |
-| --------------------- | ----------------------- | -------------------- |
-| Student (no booking)  | `240100101`             | `/student`           |
-| Student (subscribed)  | `240100102`             | `/student`           |
-| Parent                | `01000002000`           | `/parent`            |
-| Parent (line 7 child) | `01000002001`           | `/parent`            |
-| Driver / supervisor   | `DRV-1001` / `SUP-1001` | `/driver`            |
-| Transportation office | `TRN-1001`              | `/admin/emergencies` |
-| Finance               | `FIN-1001`              | `/admin`             |
-| Clinic                | `CLN-1001`              | `/admin/emergencies` |
-| Student affairs       | `STA-1001`              | `/admin`             |
-| Secretary General     | `SGO-1001`              | `/admin`             |
-| Abu El Hol            | `BUS-1001`              | `/admin`             |
-| Super admin           | `ADM-1001`              | `/admin/emergencies` |
+| Role                     | ID                      | Home                       |
+| ------------------------ | ----------------------- | -------------------------- |
+| Student (no booking)     | `240100101`             | `/student`                 |
+| Student (subscribed)     | `240100102`             | `/student`                 |
+| Parent                   | `01000002000`           | `/parent`                  |
+| Parent (line 7 child)    | `01000002001`           | `/parent`                  |
+| Driver / supervisor      | `DRV-1001` / `SUP-1001` | `/driver`                  |
+| Transportation office    | `TRN-1001`              | `/admin`                   |
+| Finance                  | `FIN-1001`              | `/admin/payments`          |
+| Clinic                   | `CLN-1001`              | `/admin/emergencies`       |
+| Student affairs          | `STA-1001`              | `/admin/violations`        |
+| Secretary General        | `SGO-1001`              | `/admin/secretary-general` |
+| Abu El Hol (bus company) | `BUS-1001`              | `/admin/bus-company`       |
+| Super admin              | `ADM-1001`              | `/admin`                   |
+| Disabled account         | `240100000`             | (refused)                  |
 
-Each office lands on its first built page. An office with none yet gets `/admin`: its account
-and the list of its pages marked "Coming soon". Menu items that aren't built show as "Soon",
-never as links, and their URLs are a real 404.
-| Disabled account | `240100000` | (refused) |
+Each role lands on its own working page and its menu shows only the pages it may open. The only
+page still marked "Coming soon" is the student's AI assistant (built by the AI team).
 
-Student pages in mock mode (phase 2):
+Student pages in mock mode:
 
 - Bookings and receipts are kept in the browser (`localStorage`), so they survive a refresh.
 - The mock finance office approves a receipt 20 seconds after it arrives. A reference number
@@ -123,7 +122,8 @@ e2e/                      Playwright tests
    `ServiceStatus.Ok`).
 5. Clear English names, no abbreviations.
 6. Prettier formats, ESLint blocks mistakes (`npm run check` must be green).
-7. One feature per branch and pull request, with clear commit messages.
+7. `main` is the only long-lived branch. Each task gets one short branch and one pull request
+   into `main`; the branch is deleted once it is merged.
 
 Design rules that the code enforces:
 

@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUtech Transport Design System</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  body { padding-bottom: 96px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--gutter); }
+
+  /* ---------- page chrome ---------- */
+  .hero { background: var(--grad-brand); color: #fff; position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: url("assets/pattern.svg"); }
+  .hero .wrap { position: relative; padding-top: 28px; padding-bottom: 40px; }
+  .topbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .topbar img { width: 40px; height: 40px; }
+  .topbar .name { font: var(--t-h3); letter-spacing: var(--ls-h3); color: #fff; margin-inline-end: auto; }
+  .toggles { display: flex; gap: 8px; }
+  .toggle { font: var(--t-caption); color: #fff; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25);
+            border-radius: var(--r-pill); padding: 8px 14px; cursor: pointer; min-height: 36px; }
+  .hero h1 { font: var(--t-display); letter-spacing: var(--ls-display); color: #fff; margin-top: 36px; max-width: 720px; }
+  .hero h1 b { font-weight: 800; } .hero h1 span { font-weight: 400; }
+  .hero p { color: rgba(255,255,255,.75); max-width: 640px; margin: 12px 0 0; }
+
+  section { padding: 40px 0 8px; }
+  .eyebrow { font: var(--t-eyebrow); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--brand);
+             background: var(--brand-soft); border-radius: var(--r-xs); padding: 4px 8px; display: inline-block; }
+  :lang(ar) .eyebrow, :lang(ar) .btn, :lang(ar) .nav span { text-transform: none; }
+  .sec-title { font: var(--t-h1); letter-spacing: var(--ls-h1); color: var(--ink); margin: 10px 0 6px; }
+  .sec-lead { color: var(--muted); margin: 0 0 20px; max-width: 680px; font: var(--t-body-sm); }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+  /* ---------- colour swatches ---------- */
+  .scale { display: grid; grid-template-columns: repeat(5, 1fr); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .scale div { height: 72px; padding: 8px; font: var(--t-caption); display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+  .scale .hex { font: 600 11px/14px ui-monospace, Consolas, monospace; }
+  @media (max-width: 560px) { .scale div { padding: 6px 4px; } .scale .hex { font-size: 9.5px; } }
+  .scale-name { font: var(--t-h3); color: var(--ink); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; }
+  .scale-name small { font: var(--t-caption); color: var(--muted); }
+  .sem { display: flex; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line);
+         border-radius: var(--r-md); padding: 10px; }
+  .sem i { width: 36px; height: 36px; border-radius: var(--r-sm); border: 1px solid var(--line); flex: none; }
+  .sem b { display: block; font: var(--t-body-sm); font-weight: 700; color: var(--ink); }
+  .sem code { font-size: 12px; color: var(--muted); }
+
+  /* ---------- type ---------- */
+  .type-row { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .type-row small { font: var(--t-caption); color: var(--muted); }
+
+  /* ---------- components ---------- */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; box-shadow: var(--shadow-sm); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+  .btn { font: var(--t-button); letter-spacing: var(--ls-button); text-transform: uppercase; min-height: var(--tap);
+         padding: 0 20px; border-radius: var(--r-md); border: 1.5px solid transparent; cursor: pointer;
+         display: inline-flex; align-items: center; gap: 10px; transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+  .btn:active { transform: scale(.98); }
+  .btn-primary { background: var(--brand); color: var(--on-brand); }
+  .btn-primary:hover { background: var(--brand-2); }
+  .btn-secondary { background: var(--info); color: var(--on-info); }
+  .btn-secondary:hover { background: var(--info-ink); }
+  .btn-outline { background: transparent; color: var(--brand); border-color: var(--brand); }
+  .btn-outline:hover { background: var(--brand-soft); }
+  .btn-ghost { background: transparent; color: var(--info-ink); padding: 0 8px; }
+  .btn-danger { background: var(--bad); color: #fff; }
+  .btn[disabled] { background: var(--line); color: var(--muted); border-color: transparent; cursor: not-allowed; }
+  /* sut.edu.eg signature: label + square icon tile */
+  .btn-tile { background: transparent; color: var(--ink); padding: 0; gap: 12px; }
+  .btn-tile .tile { width: 44px; height: 44px; border-radius: var(--r-xs); background: var(--accent); color: var(--on-accent);
+                    display: grid; place-items: center; transition: background var(--dur-fast) var(--ease); }
+  .btn-tile:hover .tile { background: var(--ink); color: var(--surface); }
+  [dir="rtl"] .flip { transform: scaleX(-1); }
+
+  .chip { font: var(--t-caption); font-weight: 700; border-radius: var(--r-pill); padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px; }
+  .chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .chip.ok { background: var(--ok-soft); color: var(--ok-ink); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn-ink); }
+  .chip.bad { background: var(--bad-soft); color: var(--bad-ink); }
+  .chip.info { background: var(--info-soft); color: var(--info-ink); }
+  .chip.live::before { animation: pulse 1.4s infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+
+  .field label { font: var(--t-caption); color: var(--muted); display: block; margin-bottom: 6px; }
+  .input { width: 100%; min-height: var(--tap); border-radius: var(--r-md); border: 1.5px solid var(--line-strong);
+           background: var(--surface); color: var(--ink); font: var(--t-body); padding: 0 14px; }
+  .input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px var(--info-soft); }
+  .seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-md); padding: 4px; }
+  .seg button { font: var(--t-body-sm); font-weight: 600; border: 0; background: transparent; color: var(--muted); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+  .seg button.on { background: var(--surface); color: var(--brand); box-shadow: var(--shadow-sm); }
+
+  /* trip card */
+  .trip-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .trip-route { font: var(--t-h2); letter-spacing: var(--ls-h2); color: var(--ink); }
+  .trip-sub { font: var(--t-body-sm); color: var(--muted); }
+  .eta { text-align: end; }
+  .eta b { font: var(--t-number); color: var(--brand); display: block; }
+  .eta small { font: var(--t-caption); color: var(--muted); }
+  .stops { list-style: none; margin: 18px 0 0; padding: 0; position: relative; }
+  .stops::before { content: ""; position: absolute; inset-inline-start: 7px; top: 8px; bottom: 8px; width: 2px; background: var(--line-strong); }
+  .stops li { position: relative; padding-inline-start: 28px; margin: 0 0 12px; font: var(--t-body-sm); color: var(--text); display: flex; justify-content: space-between; }
+  .stops li::before { content: ""; position: absolute; inset-inline-start: 0; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line-strong); }
+  .stops li.done::before { background: var(--info); border-color: var(--info); }
+  .stops li.now::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .stops li.now { font-weight: 700; color: var(--ink); }
+  .stops time { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* pass card */
+  .pass { background: var(--grad-brand); color: #fff; border-radius: var(--r-xl); padding: 22px; position: relative; overflow: hidden; min-height: 210px; box-shadow: var(--shadow-md); }
+  .pass::before { content: ""; position: absolute; inset: 0; background: url("assets/pattern.svg"); }
+  .pass > * { position: relative; }
+  .pass .eyebrow { background: rgba(255,255,255,.16); color: #F6E2FF; }
+  .pass h3 { font: var(--t-h2); color: #fff; margin: 12px 0 2px; }
+  .pass p { margin: 0; color: rgba(255,255,255,.72); font: var(--t-body-sm); }
+  .pass .foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 22px; }
+  .pass .qr { width: 72px; height: 72px; border-radius: var(--r-md); background:
+      repeating-conic-gradient(#fff 0 25%, #2F103D 0 50%) 0 0 / 12px 12px; border: 6px solid #fff; }
+  .pass .valid { font: var(--t-caption); color: rgba(255,255,255,.72); }
+  .pass .valid b { display: block; font: var(--t-h3); color: #fff; }
+
+  /* stat tile */
+  .stat .label { font: var(--t-caption); color: var(--muted); }
+  .stat .value { font: var(--t-number); color: var(--ink); margin: 6px 0; }
+  .stat .delta { font: var(--t-caption); color: var(--ok-ink); font-weight: 700; }
+  .stat .bar { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 10px; }
+  .stat .bar i { display: block; height: 100%; background: var(--info); border-radius: 3px; }
+
+  /* map + glass */
+  .map { height: 240px; border-radius: var(--r-xl); position: relative; overflow: hidden; background:
+      linear-gradient(115deg, transparent 47%, var(--map-road) 47% 51%, transparent 51%),
+      linear-gradient(20deg, transparent 60%, var(--map-road) 60% 63%, transparent 63%),
+      radial-gradient(circle at 85% 20%, var(--map-water) 0 18%, transparent 18.5%),
+      var(--map-land); border: 1px solid var(--line); }
+  .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .glass { position: absolute; inset-inline: 12px; bottom: 12px; background: var(--glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass);
+           border: 1px solid var(--glass-line); border-radius: var(--r-lg); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); }
+  .glass b { font: var(--t-h3); color: var(--ink); } .glass small { display: block; font: var(--t-caption); color: var(--muted); }
+
+  /* bottom nav */
+  .nav { position: fixed; inset-inline: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line);
+         display: flex; justify-content: space-around; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); z-index: 5; }
+  .nav a { display: grid; justify-items: center; gap: 2px; min-width: 64px; padding: 6px; border-radius: var(--r-md); text-decoration: none; color: var(--muted); }
+  .nav a.on { color: var(--brand); }
+  .nav a.on svg { background: var(--brand-soft); border-radius: var(--r-pill); }
+  .nav svg { width: 52px; height: 28px; padding: 4px 14px; }
+  .nav span { font: var(--t-caption); font-size: 11px; }
+
+  .tokens-table { width: 100%; border-collapse: collapse; font: var(--t-body-sm); }
+  .tokens-table td, .tokens-table th { text-align: start; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  .tokens-table th { font: var(--t-caption); color: var(--muted); }
+  .r-demo { width: 44px; height: 32px; background: var(--brand-soft); border: 1.5px solid var(--brand); }
+  .sh-demo { width: 64px; height: 36px; background: var(--surface); border-radius: var(--r-md); }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+  code, .hex { direction: ltr; unicode-bidi: isolate; }
+  [data-lucide], .lucide { width: 20px; height: 20px; stroke-width: 2; flex: none; }
+
+  /* ---------- app bar ---------- */
+  .phone { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .appbar { height: var(--appbar-h); display: flex; align-items: center; gap: 4px; padding: 0 8px; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .appbar h3 { font: var(--t-h3); color: var(--ink); margin-inline-end: auto; padding-inline-start: 4px; }
+  .appbar.brand { background: var(--grad-brand); border: 0; } .appbar.brand h3, .appbar.brand .icon-btn { color: #fff; }
+  .icon-btn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: var(--r-pill); border: 0; background: transparent; color: var(--ink); cursor: pointer; position: relative; }
+  .icon-btn:hover { background: var(--surface-2); } .appbar.brand .icon-btn:hover { background: rgba(255,255,255,.12); }
+  .badge-dot { position: absolute; top: 9px; inset-inline-end: 10px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
+
+  /* ---------- lists ---------- */
+  .list { background: var(--surface); }
+  .li { display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 10px 16px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .li:last-child { border-bottom: 0; } .li:hover { background: var(--surface-2); }
+  .li .lead { width: 40px; height: 40px; border-radius: var(--r-md); display: grid; place-items: center; flex: none; }
+  .li .lead.b { background: var(--brand-soft); color: var(--brand); } .li .lead.i { background: var(--info-soft); color: var(--info-ink); } .li .lead.a { background: var(--accent-soft); color: var(--accent-ink); }
+  .li .main { flex: 1; min-width: 0; } .li .main b { display: block; font: var(--t-body); font-weight: 600; color: var(--ink); } .li .main small { font: var(--t-body-sm); color: var(--muted); }
+  .li .trail { color: var(--muted); display: flex; align-items: center; gap: 8px; font: var(--t-caption); }
+  .list-head { font: var(--t-eyebrow); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--muted); padding: 16px 16px 6px; }
+
+  /* ---------- selection controls ---------- */
+  .check { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font: var(--t-body); color: var(--text); min-height: var(--tap); }
+  .check input { appearance: none; width: 22px; height: 22px; margin: 0; border: 2px solid var(--line-strong); border-radius: 6px; background: var(--surface); display: grid; place-items: center; cursor: pointer; transition: all var(--dur-fast) var(--ease); }
+  .check input[type=radio] { border-radius: 50%; }
+  .check input:checked { background: var(--brand); border-color: var(--brand); }
+  .check input[type=checkbox]:checked::after { content: ""; width: 6px; height: 11px; border: solid var(--on-brand); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+  .check input[type=radio]:checked { background: var(--surface); border-width: 7px; }
+  .switch { appearance: none; width: 48px; height: 28px; border-radius: 999px; background: var(--line-strong); position: relative; cursor: pointer; margin: 0; transition: background var(--dur) var(--ease); flex: none; }
+  .switch::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm); transition: inset-inline-start var(--dur) var(--ease); }
+  .switch:checked { background: var(--brand); } .switch:checked::after { inset-inline-start: 23px; }
+  :root[data-theme="dark"] .switch:checked::after { background: var(--on-brand); }
+  .input.error { border-color: var(--bad); } .help { font: var(--t-caption); color: var(--muted); margin-top: 6px; display: flex; gap: 6px; align-items: center; } .help.error { color: var(--bad-ink); }
+  .select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-inline-end: 36px; }
+  [dir="rtl"] .select { background-position: 15px 50%, 20px 50%; }
+
+  /* ---------- feedback ---------- */
+  .toast { display: flex; align-items: center; gap: 12px; background: var(--ink); color: var(--surface); border-radius: var(--r-md); padding: 12px 14px; box-shadow: var(--shadow-lg); font: var(--t-body-sm); max-width: 420px; }
+  .toast .lucide, .toast [data-lucide] { color: var(--ok); }
+  .toast button { margin-inline-start: auto; background: none; border: 0; color: var(--purple-20); font: var(--t-button); letter-spacing: var(--ls-button); text-transform: uppercase; cursor: pointer; padding: 6px; }
+  :root[data-theme="dark"] .toast button { color: var(--purple); }
+  .toast-host { position: fixed; inset-inline: 0; bottom: calc(var(--bottomnav-h) + 16px); display: grid; justify-items: center; z-index: var(--z-toast); pointer-events: none; padding: 0 16px; }
+  .toast-host .toast { pointer-events: auto; animation: toast-in var(--dur-slow) var(--ease); }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(16px); } }
+  .banner { display: flex; gap: 12px; align-items: flex-start; border-radius: var(--r-md); padding: 12px 14px; font: var(--t-body-sm); }
+  .banner b { display: block; color: inherit; } .banner.warn { background: var(--warn-soft); color: var(--warn-ink); } .banner.info { background: var(--info-soft); color: var(--info-ink); } .banner.bad { background: var(--bad-soft); color: var(--bad-ink); }
+
+  .skel { background: linear-gradient(90deg, var(--skeleton) 25%, var(--skeleton-hi) 50%, var(--skeleton) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite linear; border-radius: var(--r-sm); }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  .state { text-align: center; padding: 28px 20px; display: grid; justify-items: center; gap: 8px; }
+  .state .art { width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 6px; position: relative; }
+  .state .art.empty { background: var(--brand-soft); color: var(--brand); } .state .art.err { background: var(--bad-soft); color: var(--bad); }
+  .state .art img { width: 56px; opacity: .9; } .state .art .lucide, .state .art [data-lucide] { width: 44px; height: 44px; stroke-width: 1.75; }
+  .state h4 { font: var(--t-h2); color: var(--ink); margin: 0; } .state p { margin: 0 0 8px; color: var(--muted); font: var(--t-body-sm); max-width: 280px; }
+
+  /* ---------- overlays ---------- */
+  dialog { border: 0; padding: 0; background: transparent; color: var(--text); max-width: min(400px, calc(100vw - 32px)); }
+  dialog::backdrop { background: var(--scrim); }
+  .dialog { background: var(--surface); border-radius: var(--r-xl); padding: 24px; box-shadow: var(--shadow-lg); }
+  .dialog .ic { width: 48px; height: 48px; border-radius: 50%; background: var(--bad-soft); color: var(--bad); display: grid; place-items: center; margin-bottom: 14px; }
+  .dialog h4 { font: var(--t-h2); color: var(--ink); margin: 0 0 6px; } .dialog p { margin: 0 0 20px; color: var(--muted); font: var(--t-body-sm); }
+  .dialog .actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+  .sheet-wrap { position: fixed; inset: 0; background: var(--scrim); z-index: var(--z-sheet); display: none; align-items: flex-end; justify-content: center; }
+  .sheet-wrap.open { display: flex; }
+  .sheet { background: var(--surface); width: 100%; max-width: 560px; border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 8px 20px calc(20px + env(safe-area-inset-bottom)); box-shadow: var(--shadow-lg); animation: sheet-up var(--dur-slow) var(--ease); }
+  @keyframes sheet-up { from { transform: translateY(100%); } }
+  .grabber { width: 40px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 4px auto 16px; }
+  .sheet h4 { font: var(--t-h2); color: var(--ink); margin: 0 0 4px; }
+  .seat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0 20px; }
+  .seat-grid span { height: 40px; border-radius: var(--r-sm); display: grid; place-items: center; font: var(--t-caption); font-weight: 700; border: 1.5px solid var(--line-strong); color: var(--text); }
+  .seat-grid .taken { background: var(--surface-2); color: var(--muted); border-color: transparent; text-decoration: line-through; }
+  .seat-grid .mine { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+
+  /* ---------- admin ---------- */
+  .admin { display: grid; grid-template-columns: var(--sidebar-w) 1fr; border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden; background: var(--bg); box-shadow: var(--shadow-sm); min-height: 620px; }
+  .side { background: var(--surface); border-inline-end: 1px solid var(--line); padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .side .logo { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; font: var(--t-h3); color: var(--ink); } .side .logo img { width: 30px; }
+  .side a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--r-md); color: var(--muted); text-decoration: none; font: var(--t-body-sm); font-weight: 600; }
+  .side a:hover { background: var(--surface-2); color: var(--ink); }
+  .side a.on { background: var(--brand-soft); color: var(--brand); }
+  .side a .count { margin-inline-start: auto; font: var(--t-caption); font-weight: 700; background: var(--bad); color: #fff; border-radius: 999px; padding: 0 7px; }
+  .side .group { font: var(--t-eyebrow); letter-spacing: var(--ls-eyebrow); text-transform: uppercase; color: var(--muted); padding: 16px 12px 6px; }
+  .admin-main { padding: 20px 24px; min-width: 0; }
+  .admin-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .admin-top h3 { font: var(--t-h1); letter-spacing: var(--ls-h1); color: var(--ink); margin-inline-end: auto; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .search { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: var(--r-md); padding: 0 12px; min-height: 40px; color: var(--muted); flex: 1 1 220px; max-width: 320px; }
+  .search input { border: 0; outline: 0; background: transparent; font: var(--t-body-sm); color: var(--ink); width: 100%; }
+  .fchip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: var(--r-pill); border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font: var(--t-body-sm); font-weight: 600; cursor: pointer; }
+  .fchip.on { background: var(--brand-soft); border-color: transparent; color: var(--brand); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; }
+  .kpi small { font: var(--t-caption); color: var(--muted); display: flex; align-items: center; gap: 6px; } .kpi b { display: block; font: var(--t-number); color: var(--ink); margin: 6px 0 2px; }
+  .kpi .up { font: var(--t-caption); font-weight: 700; color: var(--ok-ink); } .kpi .down { font: var(--t-caption); font-weight: 700; color: var(--bad-ink); }
+  .charts { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .chart-card h5 { font: var(--t-h3); color: var(--ink); margin: 0; } .chart-card .sub { font: var(--t-caption); color: var(--muted); margin-bottom: 10px; }
+  .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .chart text { font: 500 11px var(--font); fill: var(--chart-axis); }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font: var(--t-caption); color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-inline-end: 6px; vertical-align: -1px; }
+  .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: auto; }
+  table.data { width: 100%; border-collapse: collapse; font: var(--t-body-sm); min-width: 640px; }
+  table.data th { font: var(--t-caption); font-weight: 700; color: var(--muted); text-align: start; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.data td { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--text); white-space: nowrap; }
+  table.data tr:last-child td { border-bottom: 0; } table.data tbody tr:hover { background: var(--surface-2); }
+  table.data td.num { font-variant-numeric: tabular-nums; text-align: end; } table.data th.num { text-align: end; }
+  table.data td b { color: var(--ink); font-weight: 700; }
+  .occ { display: inline-block; width: 64px; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; vertical-align: middle; margin-inline-end: 8px; } .occ i { display: block; height: 100%; background: var(--info); }
+  .pager { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line); font: var(--t-caption); color: var(--muted); }
+  @media (max-width: 900px) { .admin { grid-template-columns: 1fr; } .side { display: none; } .kpis { grid-template-columns: repeat(2, 1fr); } .charts { grid-template-columns: 1fr; } .admin-main { padding: 16px; } }
+
+  /* ---------- icons + pwa ---------- */
+  .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+  .icons div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 6px 10px; display: grid; justify-items: center; gap: 8px; color: var(--ink); }
+  .icons small { font: 500 10.5px/14px ui-monospace, Consolas, monospace; color: var(--muted); direction: ltr; }
+  .pwa { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+  .pwa figure { margin: 0; display: grid; gap: 6px; justify-items: center; } .pwa figcaption { font: 500 11px ui-monospace, Consolas, monospace; color: var(--muted); direction: ltr; }
+  .pwa img { border: 1px solid var(--line); background: #fff; }
+  .only-dark { display: none !important; }
+  :root[data-theme="dark"] .only-dark { display: inline-block !important; } :root[data-theme="dark"] .only-light { display: none !important; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .only-dark { display: inline-block !important; } :root:not([data-theme="light"]) .only-light { display: none !important; } }
+  @media (max-width: 560px) { .type-row { grid-template-columns: 1fr; gap: 4px; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="topbar">
+      <img src="assets/sutech-mark-white.svg" alt="">
+      <span class="name">SUtech Transport</span>
+      <div class="toggles">
+        <button class="toggle" id="lang">عربي</button>
+        <button class="toggle" id="theme" data-en="Dark mode" data-ar="الوضع الداكن">Dark mode</button>
+      </div>
+    </div>
+    <h1 data-en="<span>Design system for </span><b>getting to campus.</b>" data-ar="<span>نظام التصميم </span><b>للوصول إلى الجامعة.</b>"><span>Design system for </span><b>getting to campus.</b></h1>
+    <p data-en="Official SUTech brand colours, tints and shapes, built into a mobile-first PWA kit. Light and dark, English and Arabic." data-ar="ألوان وتدرّجات وأشكال هوية SUTech الرسمية، في مكوّنات جاهزة لتطبيق ويب للموبايل. فاتح وداكن، عربي وإنجليزي.">Official SUTech brand colours, tints and shapes, built into a mobile-first PWA kit. Light and dark, English and Arabic.</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- COLOUR -->
+  <section>
+    <span class="eyebrow" data-en="01 · Colour" data-ar="٠١ · الألوان">01 · Colour</span>
+    <h2 class="sec-title" data-en="Brand palette" data-ar="ألوان الهوية">Brand palette</h2>
+    <p class="sec-lead" data-en="From the SUTech Brand Manual 2025. Each colour comes with the official 100/80/60/40/20% tints. Use the tints for hover states, backgrounds and charts instead of inventing new shades." data-ar="من دليل هوية SUTech 2025. كل لون معاه تدرّجاته الرسمية ١٠٠/٨٠/٦٠/٤٠/٢٠٪. استخدم التدرّجات للـ hover والخلفيات والرسوم، ومتخترعش درجات جديدة.">From the SUTech Brand Manual 2025. Each colour comes with the official 100/80/60/40/20% tints. Use the tints for hover states, backgrounds and charts instead of inventing new shades.</p>
+    <div class="grid g2" id="scales"></div>
+  </section>
+
+  <section>
+    <h2 class="sec-title" data-en="Semantic roles" data-ar="الأدوار">Semantic roles</h2>
+    <p class="sec-lead" data-en="Components only use these names. Dark mode swaps the values, not the names." data-ar="المكوّنات بتستخدم الأسماء دي بس. الوضع الداكن بيغيّر القيم مش الأسماء.">Components only use these names. Dark mode swaps the values, not the names.</p>
+    <div class="grid g3" id="semantic"></div>
+  </section>
+
+  <!-- TYPE -->
+  <section>
+    <span class="eyebrow" data-en="02 · Type" data-ar="٠٢ · الخطوط">02 · Type</span>
+    <h2 class="sec-title" data-en="Montserrat + Tajawal" data-ar="Montserrat + Tajawal">Montserrat + Tajawal</h2>
+    <p class="sec-lead" data-en="Free stand-ins for the official Gilroy (English) and AbdoMaster (Arabic). Swap the two font tokens if the licensed files arrive." data-ar="بدائل مجانية للخطوط الرسمية Gilroy (إنجليزي) وAbdoMaster (عربي). لو وصلت ملفات الخطوط المرخّصة، غيّر متغيّرين الخط بس.">Free stand-ins for the official Gilroy (English) and AbdoMaster (Arabic). Swap the two font tokens if the licensed files arrive.</p>
+    <div class="card">
+      <div class="type-row"><small>Display · 32/38 · 800</small><div style="font:var(--t-display);letter-spacing:var(--ls-display);color:var(--ink)" data-en="Bus 7 arrives in 4 min" data-ar="أتوبيس ٧ هيوصل كمان ٤ دقايق">Bus 7 arrives in 4 min</div></div>
+      <div class="type-row"><small>H1 · 26/32 · 800</small><div style="font:var(--t-h1);letter-spacing:var(--ls-h1);color:var(--ink)" data-en="Your trips today" data-ar="رحلاتك النهارده">Your trips today</div></div>
+      <div class="type-row"><small>H2 · 20/28 · 800</small><div style="font:var(--t-h2);letter-spacing:var(--ls-h2);color:var(--ink)" data-en="Nasr City → Campus" data-ar="مدينة نصر ← الجامعة">Nasr City → Campus</div></div>
+      <div class="type-row"><small>H3 · 17/24 · 700</small><div style="font:var(--t-h3);color:var(--ink)" data-en="Morning route · Line A" data-ar="خط الصبح · خط A">Morning route · Line A</div></div>
+      <div class="type-row"><small>Body · 16/26 · 400</small><div style="font:var(--t-body)" data-en="Your seat is reserved. Show your pass to the driver when boarding." data-ar="الكرسي بتاعك محجوز. ورّي الكارنيه للسواق وانت راكب.">Your seat is reserved. Show your pass to the driver when boarding.</div></div>
+      <div class="type-row"><small>Small · 14/22 · 400</small><div style="font:var(--t-body-sm);color:var(--muted)" data-en="Last updated 2 minutes ago" data-ar="آخر تحديث من دقيقتين">Last updated 2 minutes ago</div></div>
+      <div class="type-row"><small>Eyebrow · 11 · 600</small><div><span class="eyebrow" data-en="Live tracking" data-ar="تتبع مباشر">Live tracking</span></div></div>
+      <div class="type-row" style="border:0"><small>Number · 28 · 800</small><div style="font:var(--t-number);color:var(--brand)">07:45</div></div>
+    </div>
+  </section>
+
+  <!-- COMPONENTS -->
+  <section>
+    <span class="eyebrow" data-en="03 · Components" data-ar="٠٣ · المكوّنات">03 · Components</span>
+    <h2 class="sec-title" data-en="Buttons & controls" data-ar="الأزرار وعناصر التحكم">Buttons & controls</h2>
+    <div class="card">
+      <div class="row">
+        <button class="btn btn-primary" data-en="Book seat" data-ar="احجز كرسي">Book seat</button>
+        <button class="btn btn-secondary" data-en="Track bus" data-ar="تتبّع الأتوبيس">Track bus</button>
+        <button class="btn btn-outline" data-en="View route" data-ar="شوف الخط">View route</button>
+        <button class="btn btn-ghost" data-en="Skip" data-ar="تخطي">Skip</button>
+        <button class="btn btn-danger" data-en="SOS" data-ar="طوارئ">SOS</button>
+        <button class="btn btn-primary" disabled data-en="Full" data-ar="مكتمل">Full</button>
+        <button class="btn btn-tile"><span data-en="Discover routes" data-ar="اكتشف الخطوط">Discover routes</span>
+          <span class="tile"><svg class="flip" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
+      </div>
+      <div class="row" style="margin-top:20px">
+        <span class="chip ok" data-en="On time" data-ar="في المعاد">On time</span>
+        <span class="chip warn" data-en="Delayed 8 min" data-ar="متأخر ٨ دقايق">Delayed 8 min</span>
+        <span class="chip bad" data-en="Cancelled" data-ar="اتلغى">Cancelled</span>
+        <span class="chip info live" data-en="Live" data-ar="مباشر">Live</span>
+      </div>
+      <div class="grid g2" style="margin-top:20px">
+        <div class="field"><label data-en="Pickup stop" data-ar="محطة الركوب">Pickup stop</label><input class="input" value="Abbas El-Akkad"></div>
+        <div class="field"><label data-en="Trip" data-ar="الرحلة">Trip</label>
+          <div class="seg"><button class="on" data-en="Morning" data-ar="الصبح">Morning</button><button data-en="Afternoon" data-ar="الضهر">Afternoon</button><button data-en="Evening" data-ar="بالليل">Evening</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title" data-en="Cards" data-ar="الكروت">Cards</h2>
+    <div class="grid g3">
+      <div class="card">
+        <div class="trip-head">
+          <div><span class="chip info live" data-en="On route" data-ar="في الطريق">On route</span>
+            <div class="trip-route" style="margin-top:10px" data-en="Line A · Bus 07" data-ar="خط A · أتوبيس ٠٧">Line A · Bus 07</div>
+            <div class="trip-sub" data-en="Nasr City → SUTech Campus" data-ar="مدينة نصر ← حرم SUTech">Nasr City → SUTech Campus</div></div>
+          <div class="eta"><b>4</b><small data-en="min" data-ar="دقيقة">min</small></div>
+        </div>
+        <ul class="stops">
+          <li class="done"><span data-en="Abbas El-Akkad" data-ar="عباس العقاد">Abbas El-Akkad</span><time>07:10</time></li>
+          <li class="now"><span data-en="Makram Ebeid" data-ar="مكرم عبيد">Makram Ebeid</span><time>07:22</time></li>
+          <li><span data-en="El-Obour gate" data-ar="بوابة العبور">El-Obour gate</span><time>07:38</time></li>
+          <li style="margin:0"><span data-en="SUTech Campus" data-ar="حرم SUTech">SUTech Campus</span><time>07:55</time></li>
+        </ul>
+      </div>
+
+      <div class="pass">
+        <span class="eyebrow" data-en="Transport pass" data-ar="كارنيه النقل">Transport pass</span>
+        <h3>Ahmed Aldmrdash</h3>
+        <p data-en="School of Engineering Technology · ID 2023-0417" data-ar="كلية تكنولوجيا الهندسة · رقم ٢٠٢٣-٠٤١٧">School of Engineering Technology · ID 2023-0417</p>
+        <div class="foot">
+          <div class="valid"><span data-en="Valid until" data-ar="صالح لحد">Valid until</span><b data-en="Jan 2027" data-ar="يناير ٢٠٢٧">Jan 2027</b></div>
+          <div class="qr" aria-label="QR"></div>
+        </div>
+      </div>
+
+      <div class="card stat">
+        <div class="label" data-en="Seats booked today" data-ar="الكراسي المحجوزة النهارده">Seats booked today</div>
+        <div class="value">1,284</div>
+        <div class="delta" data-en="▲ 6% vs last week" data-ar="▲ ٦٪ عن الأسبوع اللي فات">▲ 6% vs last week</div>
+        <div class="bar"><i style="width:78%"></i></div>
+        <div class="trip-sub" style="margin-top:8px" data-en="78% of fleet capacity" data-ar="٧٨٪ من سعة الأسطول">78% of fleet capacity</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec-title" data-en="Map overlay" data-ar="الخريطة">Map overlay</h2>
+    <p class="sec-lead" data-en="Purple line = your route, teal = other lines, coral pin = the live bus. Info sitting on the map uses frosted glass." data-ar="الخط البنفسجي = خطّك، التيل = باقي الخطوط، الدبوس الكورال = الأتوبيس لايف. أي معلومة فوق الخريطة بتبقى على زجاج مطفي.">Purple line = your route, teal = other lines, coral pin = the live bus. Info sitting on the map uses frosted glass.</p>
+    <div class="map">
+      <svg viewBox="0 0 1000 240" preserveAspectRatio="none">
+        <path d="M40 200 C 200 180, 260 90, 420 110 S 700 60, 960 40" fill="none" stroke="var(--map-route-2)" stroke-width="5" stroke-dasharray="2 10" stroke-linecap="round" opacity=".7"/>
+        <path d="M30 50 C 180 70, 300 140, 480 105 S 760 150, 950 110" fill="none" stroke="var(--map-route)" stroke-width="7" stroke-linecap="round"/>
+        <circle cx="480" cy="105" r="16" fill="var(--accent)" opacity=".25"/><circle cx="480" cy="105" r="8" fill="var(--accent)" stroke="#fff" stroke-width="3"/>
+      </svg>
+      <div class="glass"><div><b data-en="Bus 07 · 4 min away" data-ar="أتوبيس ٠٧ · كمان ٤ دقايق">Bus 07 · 4 min away</b><small data-en="Next stop: Makram Ebeid" data-ar="المحطة الجاية: مكرم عبيد">Next stop: Makram Ebeid</small></div><span class="chip ok" data-en="On time" data-ar="في المعاد">On time</span></div>
+    </div>
+  </section>
+
+  <!-- NAVIGATION + LISTS -->
+  <section id="lists">
+    <h2 class="sec-title" data-en="App bar, lists & settings" data-ar="الهيدر والقوايم والإعدادات">App bar, lists & settings</h2>
+    <p class="sec-lead" data-en="56px app bar: plain on inner screens, brand gradient on Home. List rows are at least 64px tall with a 40px tinted icon tile." data-ar="هيدر ٥٦px: عادي في الشاشات الداخلية، ومتدرّج بنفسجي في الرئيسية. صفوف القوايم أقل حاجة ٦٤px وفيها مربع أيقونة ٤٠px ملوّن.">56px app bar: plain on inner screens, brand gradient on Home. List rows are at least 64px tall with a 40px tinted icon tile.</p>
+    <div class="grid g2">
+      <div class="phone">
+        <div class="appbar brand"><img src="assets/sutech-mark-white.svg" alt="" style="width:30px;margin-inline-start:8px"><h3 data-en="Good morning, Ahmed" data-ar="صباح الخير يا أحمد">Good morning, Ahmed</h3>
+          <button class="icon-btn" aria-label="Notifications"><i data-lucide="bell"></i><span class="badge-dot" style="border-color:var(--purple)"></span></button></div>
+        <div class="appbar"><button class="icon-btn" aria-label="Back"><i data-lucide="arrow-left" class="flip"></i></button><h3 data-en="My trips" data-ar="رحلاتي">My trips</h3>
+          <button class="icon-btn" aria-label="Filter"><i data-lucide="sliders-horizontal"></i></button><button class="icon-btn" aria-label="More"><i data-lucide="more-vertical"></i></button></div>
+        <div class="list">
+          <div class="list-head" data-en="Today" data-ar="النهارده">Today</div>
+          <div class="li"><span class="lead b"><i data-lucide="bus"></i></span><div class="main"><b data-en="Line A · 07:10" data-ar="خط A · ٠٧:١٠">Line A · 07:10</b><small data-en="Abbas El-Akkad → Campus" data-ar="عباس العقاد ← الجامعة">Abbas El-Akkad → Campus</small></div><div class="trail"><span class="chip ok" data-en="Booked" data-ar="محجوز">Booked</span></div></div>
+          <div class="li"><span class="lead i"><i data-lucide="map-pin"></i></span><div class="main"><b data-en="Return · 16:30" data-ar="العودة · ١٦:٣٠">Return · 16:30</b><small data-en="Campus → Abbas El-Akkad" data-ar="الجامعة ← عباس العقاد">Campus → Abbas El-Akkad</small></div><div class="trail"><i data-lucide="chevron-right" class="flip"></i></div></div>
+          <div class="li"><span class="lead a"><i data-lucide="wallet"></i></span><div class="main"><b data-en="Transport balance" data-ar="رصيد النقل">Transport balance</b><small data-en="Renews Jan 2027" data-ar="بيتجدد يناير ٢٠٢٧">Renews Jan 2027</small></div><div class="trail" style="font-weight:700;color:var(--ink)">EGP 1,250</div></div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="appbar"><button class="icon-btn" aria-label="Back"><i data-lucide="arrow-left" class="flip"></i></button><h3 data-en="Settings" data-ar="الإعدادات">Settings</h3></div>
+        <div class="list">
+          <div class="list-head" data-en="Notifications" data-ar="الإشعارات">Notifications</div>
+          <label class="li"><span class="lead i"><i data-lucide="bell-ring"></i></span><div class="main"><b data-en="Bus approaching" data-ar="الأتوبيس قرّب">Bus approaching</b><small data-en="Alert 5 min before pickup" data-ar="تنبيه قبل الركوب بـ٥ دقايق">Alert 5 min before pickup</small></div><input type="checkbox" class="switch" checked></label>
+          <label class="li"><span class="lead a"><i data-lucide="triangle-alert"></i></span><div class="main"><b data-en="Delays & changes" data-ar="التأخير والتغييرات">Delays & changes</b><small data-en="Route or time changes" data-ar="تغيير الخط أو المعاد">Route or time changes</small></div><input type="checkbox" class="switch" checked></label>
+          <label class="li"><span class="lead b"><i data-lucide="moon"></i></span><div class="main"><b data-en="Dark mode" data-ar="الوضع الداكن">Dark mode</b><small data-en="Follow system" data-ar="زي الموبايل">Follow system</small></div><input type="checkbox" class="switch" id="darkSwitch"></label>
+          <div class="list-head" data-en="Pickup preference" data-ar="تفضيل الركوب">Pickup preference</div>
+          <div style="padding:0 16px 12px;display:grid">
+            <label class="check"><input type="radio" name="pp" checked><span data-en="Nearest stop" data-ar="أقرب محطة">Nearest stop</span></label>
+            <label class="check"><input type="radio" name="pp"><span data-en="Fixed stop" data-ar="محطة ثابتة">Fixed stop</span></label>
+            <label class="check"><input type="checkbox" checked><span data-en="Share live location with parent" data-ar="شارك موقعي مع ولي الأمر">Share live location with parent</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMS -->
+  <section>
+    <h2 class="sec-title" data-en="Form states" data-ar="حالات الفورم">Form states</h2>
+    <div class="card grid g3">
+      <div class="field"><label data-en="Student ID" data-ar="رقم الطالب">Student ID</label><input class="input" placeholder="2023-0000"><div class="help" data-en="As printed on your university card" data-ar="زي ما هو مكتوب على كارنيه الجامعة">As printed on your university card</div></div>
+      <div class="field"><label data-en="Phone" data-ar="الموبايل">Phone</label><input class="input error" value="0101234" dir="ltr"><div class="help error"><i data-lucide="circle-alert" style="width:14px;height:14px"></i><span data-en="Enter 11 digits" data-ar="اكتب ١١ رقم">Enter 11 digits</span></div></div>
+      <div class="field"><label data-en="Line" data-ar="الخط">Line</label><select class="input select"><option>Line A · Nasr City</option><option>Line B · Heliopolis</option><option>Line C · 10th of Ramadan</option></select></div>
+    </div>
+  </section>
+
+  <!-- FEEDBACK -->
+  <section id="feedback">
+    <span class="eyebrow" data-en="Feedback" data-ar="الاستجابة">Feedback</span>
+    <h2 class="sec-title" data-en="Toast, banners, dialog, bottom sheet" data-ar="التنبيهات والنوافذ">Toast, banners, dialog, bottom sheet</h2>
+    <p class="sec-lead" data-en="Toast = done, auto-hides after 4s. Banner = ongoing situation. Dialog = destructive confirmation only. Bottom sheet = choose or act without leaving the screen." data-ar="التوست = حاجة خلصت، وبيختفي بعد ٤ ثواني. البانر = وضع مستمر. الديالوج = تأكيد الحذف أو الإلغاء بس. البوتوم شيت = اختيار أو إجراء من غير ما تسيب الشاشة.">Toast = done, auto-hides after 4s. Banner = ongoing situation. Dialog = destructive confirmation only. Bottom sheet = choose or act without leaving the screen.</p>
+    <div class="card" style="display:grid;gap:14px">
+      <div class="row">
+        <button class="btn btn-outline" id="showToast" data-en="Show toast" data-ar="اعرض توست">Show toast</button>
+        <button class="btn btn-danger" id="showDialog" data-en="Cancel booking…" data-ar="إلغاء الحجز…">Cancel booking…</button>
+        <button class="btn btn-primary" id="showSheet" data-en="Choose seat" data-ar="اختار كرسي">Choose seat</button>
+      </div>
+      <div class="toast"><i data-lucide="circle-check"></i><span data-en="Seat 7 booked for 07:10" data-ar="تم حجز كرسي ٧ لرحلة ٠٧:١٠">Seat 7 booked for 07:10</span><button data-en="Undo" data-ar="تراجع">Undo</button></div>
+      <div class="banner warn"><i data-lucide="clock-alert"></i><div><b data-en="Line B delayed ~10 min" data-ar="خط B متأخر حوالي ١٠ دقايق">Line B delayed ~10 min</b><span data-en="Traffic on the Ring Road. ETA updates live." data-ar="زحمة على الدائري. الوقت المتوقع بيتحدّث لايف.">Traffic on the Ring Road. ETA updates live.</span></div></div>
+      <div class="banner info"><i data-lucide="info"></i><div><b data-en="New stop added" data-ar="اتضافت محطة جديدة">New stop added</b><span data-en="Line A now stops at El-Obour gate." data-ar="خط A بقى يقف عند بوابة العبور.">Line A now stops at El-Obour gate.</span></div></div>
+      <div class="banner bad"><i data-lucide="wifi-off"></i><div><b data-en="You're offline" data-ar="مفيش إنترنت">You're offline</b><span data-en="Showing your last saved pass and schedule." data-ar="بنعرض آخر كارنيه ومواعيد متسجّلة.">Showing your last saved pass and schedule.</span></div></div>
+    </div>
+  </section>
+
+  <!-- LOADING / EMPTY / ERROR -->
+  <section>
+    <h2 class="sec-title" data-en="Loading, empty & error" data-ar="التحميل والشاشات الفاضية والأخطاء">Loading, empty & error</h2>
+    <div class="grid g3">
+      <div class="card" aria-busy="true">
+        <div class="trip-head"><div style="flex:1"><div class="skel" style="width:70px;height:22px;border-radius:999px"></div><div class="skel" style="width:70%;height:22px;margin-top:12px"></div><div class="skel" style="width:50%;height:14px;margin-top:8px"></div></div><div class="skel" style="width:44px;height:44px;border-radius:var(--r-md)"></div></div>
+        <div class="skel" style="height:14px;margin-top:22px"></div><div class="skel" style="height:14px;margin-top:12px;width:85%"></div><div class="skel" style="height:14px;margin-top:12px;width:60%"></div>
+      </div>
+      <div class="card state">
+        <div class="art empty"><i data-lucide="calendar-x"></i></div>
+        <h4 data-en="No trips booked" data-ar="مفيش رحلات محجوزة">No trips booked</h4>
+        <p data-en="Book your first ride and it'll show up here." data-ar="احجز أول رحلة وهتظهر هنا.">Book your first ride and it'll show up here.</p>
+        <button class="btn btn-primary" data-en="Book a ride" data-ar="احجز رحلة">Book a ride</button>
+      </div>
+      <div class="card state">
+        <div class="art err"><i data-lucide="cloud-off"></i></div>
+        <h4 data-en="Couldn't load the map" data-ar="الخريطة محمّلتش">Couldn't load the map</h4>
+        <p data-en="Check your connection and try again." data-ar="اتأكد من الإنترنت وجرّب تاني.">Check your connection and try again.</p>
+        <button class="btn btn-outline" data-en="Retry" data-ar="جرّب تاني">Retry</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section>
+    <span class="eyebrow" data-en="05 · Admin dashboard" data-ar="٠٥ · لوحة الأدمن">05 · Admin dashboard</span>
+    <h2 class="sec-title" data-en="Desktop: sidebar, filters, charts, table" data-ar="الكمبيوتر: قائمة جانبية، فلاتر، رسوم، جدول">Desktop: sidebar, filters, charts, table</h2>
+    <p class="sec-lead" data-en="Same tokens as the app. Sidebar 248px; under 900px it collapses and the content stacks. Chart series always follow --chart-1 → --chart-5." data-ar="نفس الـ tokens بتاعة التطبيق. القائمة الجانبية ٢٤٨px، وأقل من ٩٠٠px بتختفي والمحتوى بيترص. ألوان الرسوم دايمًا بالترتيب --chart-1 لـ --chart-5.">Same tokens as the app. Sidebar 248px; under 900px it collapses and the content stacks. Chart series always follow --chart-1 → --chart-5.</p>
+    <div class="admin" id="admin">
+      <aside class="side">
+        <div class="logo"><img src="assets/sutech-mark.svg" class="only-light" alt=""><img src="assets/sutech-mark-white.svg" class="only-dark" alt=""><span data-en="Transport Admin" data-ar="إدارة النقل">Transport Admin</span></div>
+        <a class="on" href="#"><i data-lucide="layout-dashboard"></i><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a>
+        <a href="#"><i data-lucide="route"></i><span data-en="Routes & stops" data-ar="الخطوط والمحطات">Routes & stops</span></a>
+        <a href="#"><i data-lucide="bus"></i><span data-en="Fleet" data-ar="الأسطول">Fleet</span></a>
+        <a href="#"><i data-lucide="users"></i><span data-en="Riders" data-ar="الركاب">Riders</span></a>
+        <a href="#"><i data-lucide="id-card"></i><span data-en="Drivers" data-ar="السواقين">Drivers</span></a>
+        <a href="#"><i data-lucide="siren"></i><span data-en="Incidents" data-ar="البلاغات">Incidents</span><span class="count">3</span></a>
+        <div class="group" data-en="Reports" data-ar="التقارير">Reports</div>
+        <a href="#"><i data-lucide="chart-column"></i><span data-en="Analytics" data-ar="التحليلات">Analytics</span></a>
+        <a href="#"><i data-lucide="settings"></i><span data-en="Settings" data-ar="الإعدادات">Settings</span></a>
+      </aside>
+      <div class="admin-main">
+        <div class="admin-top"><h3 data-en="Overview" data-ar="نظرة عامة">Overview</h3>
+          <button class="btn btn-outline" style="min-height:40px"><i data-lucide="download"></i><span data-en="Export" data-ar="تصدير">Export</span></button>
+          <button class="btn btn-primary" style="min-height:40px"><i data-lucide="plus"></i><span data-en="New trip" data-ar="رحلة جديدة">New trip</span></button></div>
+        <div class="filters">
+          <div class="search"><i data-lucide="search"></i><input data-en-ph="Search bus, driver, stop…" data-ar-ph="دوّر على أتوبيس، سواق، محطة…" placeholder="Search bus, driver, stop…"></div>
+          <button class="fchip on"><i data-lucide="calendar" style="width:16px;height:16px"></i><span data-en="Today" data-ar="النهارده">Today</span></button>
+          <button class="fchip"><span data-en="All lines" data-ar="كل الخطوط">All lines</span><i data-lucide="chevron-down" style="width:16px;height:16px"></i></button>
+          <button class="fchip"><span data-en="Status: Any" data-ar="الحالة: الكل">Status: Any</span><i data-lucide="chevron-down" style="width:16px;height:16px"></i></button>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><small><i data-lucide="users" style="width:14px;height:14px"></i><span data-en="Riders today" data-ar="ركاب النهارده">Riders today</span></small><b>1,284</b><span class="up">▲ 6%</span></div>
+          <div class="kpi"><small><i data-lucide="clock" style="width:14px;height:14px"></i><span data-en="On-time rate" data-ar="نسبة الالتزام">On-time rate</span></small><b>94%</b><span class="up">▲ 2 pts</span></div>
+          <div class="kpi"><small><i data-lucide="bus" style="width:14px;height:14px"></i><span data-en="Buses running" data-ar="أتوبيسات شغالة">Buses running</span></small><b>18/20</b><span class="down" data-en="2 in service" data-ar="٢ في الصيانة">2 in service</span></div>
+          <div class="kpi"><small><i data-lucide="armchair" style="width:14px;height:14px"></i><span data-en="Seat occupancy" data-ar="نسبة الإشغال">Seat occupancy</span></small><b>78%</b><span class="up">▲ 4%</span></div>
+        </div>
+        <div class="charts">
+          <div class="card chart-card"><h5 data-en="Riders per line" data-ar="الركاب لكل خط">Riders per line</h5><div class="sub" data-en="Morning vs. afternoon, this week" data-ar="الصبح مقابل الضهر، الأسبوع ده">Morning vs. afternoon, this week</div>
+            <div class="chart" id="barChart"></div>
+            <div class="legend"><span><i style="background:var(--chart-1)"></i><span data-en="Morning" data-ar="الصبح">Morning</span></span><span><i style="background:var(--chart-2)"></i><span data-en="Afternoon" data-ar="الضهر">Afternoon</span></span></div></div>
+          <div class="card chart-card"><h5 data-en="On-time rate" data-ar="نسبة الالتزام بالمواعيد">On-time rate</h5><div class="sub" data-en="Last 7 days · target 95%" data-ar="آخر ٧ أيام · الهدف ٩٥٪">Last 7 days · target 95%</div>
+            <div class="chart" id="lineChart"></div>
+            <div class="legend"><span><i style="background:var(--chart-1)"></i><span data-en="On time" data-ar="في المعاد">On time</span></span><span><i style="background:var(--chart-3)"></i><span data-en="Target" data-ar="الهدف">Target</span></span></div></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th data-en="Bus" data-ar="الأتوبيس">Bus</th><th data-en="Line" data-ar="الخط">Line</th><th data-en="Driver" data-ar="السواق">Driver</th><th data-en="Occupancy" data-ar="الإشغال">Occupancy</th><th class="num">ETA</th><th data-en="Status" data-ar="الحالة">Status</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><b>BUS-07</b></td><td>A · Nasr City</td><td>Mahmoud Saeed</td><td><span class="occ"><i style="width:86%"></i></span>26/30</td><td class="num">07:51</td><td><span class="chip ok" data-en="On time" data-ar="في المعاد">On time</span></td><td><button class="icon-btn" aria-label="More"><i data-lucide="more-horizontal"></i></button></td></tr>
+              <tr><td><b>BUS-03</b></td><td>B · Heliopolis</td><td>Karim Adel</td><td><span class="occ"><i style="width:70%"></i></span>21/30</td><td class="num">08:04</td><td><span class="chip warn" data-en="Delayed 10m" data-ar="متأخر ١٠ د">Delayed 10m</span></td><td><button class="icon-btn" aria-label="More"><i data-lucide="more-horizontal"></i></button></td></tr>
+              <tr><td><b>BUS-12</b></td><td>C · 10th of Ramadan</td><td>Hany Fathy</td><td><span class="occ"><i style="width:40%"></i></span>12/30</td><td class="num">07:40</td><td><span class="chip info live" data-en="Live" data-ar="مباشر">Live</span></td><td><button class="icon-btn" aria-label="More"><i data-lucide="more-horizontal"></i></button></td></tr>
+              <tr><td><b>BUS-09</b></td><td>A · Nasr City</td><td>—</td><td><span class="occ"><i style="width:0"></i></span>0/30</td><td class="num">—</td><td><span class="chip bad" data-en="Out of service" data-ar="خارج الخدمة">Out of service</span></td><td><button class="icon-btn" aria-label="More"><i data-lucide="more-horizontal"></i></button></td></tr>
+            </tbody>
+          </table>
+          <div class="pager"><span data-en="Showing 4 of 20 buses" data-ar="عرض ٤ من ٢٠ أتوبيس">Showing 4 of 20 buses</span><span class="row" style="gap:4px"><button class="icon-btn" aria-label="Previous"><i data-lucide="chevron-left" class="flip"></i></button><button class="icon-btn" aria-label="Next"><i data-lucide="chevron-right" class="flip"></i></button></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ICONS -->
+  <section>
+    <span class="eyebrow" data-en="06 · Icons" data-ar="٠٦ · الأيقونات">06 · Icons</span>
+    <h2 class="sec-title" data-en="Lucide, 2px stroke, rounded" data-ar="Lucide بخط ٢px مدوّر">Lucide, 2px stroke, rounded</h2>
+    <p class="sec-lead" data-en="One icon set only: Lucide (open-source, matches sut.edu.eg's thin rounded arrows). 20px in lists and buttons, 24px in nav and app bar, colour = currentColor. Flip arrows and chevrons in RTL with .flip." data-ar="مجموعة أيقونات واحدة بس: Lucide (مفتوحة المصدر وشبه أسهم موقع الجامعة الرفيعة المدوّرة). ٢٠px في القوايم والأزرار، و٢٤px في شريط التنقل والهيدر، واللون من currentColor. اقلب الأسهم في العربي بـ .flip.">One icon set only: Lucide (open-source, matches sut.edu.eg's thin rounded arrows). 20px in lists and buttons, 24px in nav and app bar, colour = currentColor. Flip arrows and chevrons in RTL with .flip.</p>
+    <div class="icons" id="iconGrid"></div>
+  </section>
+
+  <!-- PWA -->
+  <section>
+    <span class="eyebrow" data-en="07 · App icon" data-ar="٠٧ · أيقونة التطبيق">07 · App icon</span>
+    <h2 class="sec-title" data-en="PWA icons & splash" data-ar="أيقونات الـ PWA وشاشة البداية">PWA icons & splash</h2>
+    <p class="sec-lead" data-en="Official 3-shape mark on white (the mark is never recoloured). Maskable versions keep the mark inside the 80% safe zone. Files: assets/pwa/." data-ar="علامة الجامعة الرسمية بأشكالها التلاتة على أبيض، ومن غير ما نغيّر ألوانها. نسخ الـ maskable سايبة العلامة جوه منطقة الأمان (٨٠٪). الملفات في assets/pwa/.">Official 3-shape mark on white (the mark is never recoloured). Maskable versions keep the mark inside the 80% safe zone. Files: assets/pwa/.</p>
+    <div class="card pwa">
+      <figure><img src="assets/pwa/icon-512.png" width="128" height="128" style="border-radius:28px" alt=""><figcaption>icon-512.png</figcaption></figure>
+      <figure><img src="assets/pwa/icon-maskable-512.png" width="128" height="128" style="border-radius:50%" alt=""><figcaption>icon-maskable-512.png</figcaption></figure>
+      <figure><img src="assets/pwa/icon-192.png" width="64" height="64" style="border-radius:14px" alt=""><figcaption>icon-192.png</figcaption></figure>
+      <figure><img src="assets/pwa/apple-touch-icon.png" width="60" height="60" style="border-radius:13px" alt=""><figcaption>apple-touch-icon.png</figcaption></figure>
+      <figure><img src="assets/pwa/favicon-32.png" width="32" height="32" alt=""><figcaption>favicon-32 / .svg</figcaption></figure>
+      <figure><img src="assets/pwa/splash-light-1170x2532.png" width="96" style="border-radius:12px" alt=""><figcaption>splash-light</figcaption></figure>
+      <figure><img src="assets/pwa/splash-dark-1170x2532.png" width="96" style="border-radius:12px;border-color:#362E3C" alt=""><figcaption>splash-dark</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- TOKENS -->
+  <section>
+    <span class="eyebrow" data-en="04 · Shape & depth" data-ar="٠٤ · الأشكال والعمق">04 · Shape & depth</span>
+    <h2 class="sec-title" data-en="Radius, shadow, spacing" data-ar="الزوايا والظلال والمسافات">Radius, shadow, spacing</h2>
+    <div class="grid g2">
+      <div class="card"><table class="tokens-table"><tr><th>Token</th><th>Value</th><th data-en="Use" data-ar="الاستخدام">Use</th><th></th></tr>
+        <tr><td><code>--r-xs</code></td><td>4px</td><td data-en="Icon tiles, eyebrows" data-ar="مربعات الأيقونات">Icon tiles, eyebrows</td><td><div class="r-demo" style="border-radius:var(--r-xs)"></div></td></tr>
+        <tr><td><code>--r-md</code></td><td>8px</td><td data-en="Buttons, inputs" data-ar="الأزرار والحقول">Buttons, inputs</td><td><div class="r-demo" style="border-radius:var(--r-md)"></div></td></tr>
+        <tr><td><code>--r-lg</code></td><td>12px</td><td data-en="Cards" data-ar="الكروت">Cards</td><td><div class="r-demo" style="border-radius:var(--r-lg)"></div></td></tr>
+        <tr><td><code>--r-xl</code></td><td>20px</td><td data-en="Sheets, pass, map" data-ar="الكارنيه والخريطة">Sheets, pass, map</td><td><div class="r-demo" style="border-radius:var(--r-xl)"></div></td></tr>
+        <tr><td><code>--r-pill</code></td><td>999px</td><td data-en="Status chips" data-ar="شارات الحالة">Status chips</td><td><div class="r-demo" style="border-radius:var(--r-pill)"></div></td></tr>
+      </table></div>
+      <div class="card"><table class="tokens-table"><tr><th>Token</th><th data-en="Use" data-ar="الاستخدام">Use</th><th></th></tr>
+        <tr><td><code>--shadow-sm</code></td><td data-en="Resting cards" data-ar="الكروت العادية">Resting cards</td><td><div class="sh-demo" style="box-shadow:var(--shadow-sm)"></div></td></tr>
+        <tr><td><code>--shadow-md</code></td><td data-en="Raised: pass, glass (sut.edu.eg)" data-ar="المرفوع: الكارنيه والزجاج">Raised: pass, glass (sut.edu.eg)</td><td><div class="sh-demo" style="box-shadow:var(--shadow-md)"></div></td></tr>
+        <tr><td><code>--shadow-lg</code></td><td data-en="Bottom sheets, dialogs" data-ar="النوافذ المنبثقة">Bottom sheets, dialogs</td><td><div class="sh-demo" style="box-shadow:var(--shadow-lg)"></div></td></tr>
+        <tr><td><code>--s-*</code></td><td colspan="2" data-en="4-pt scale: 4 8 12 16 20 24 32 40 60 · gutter 16 · tap target 48" data-ar="مقياس ٤ نقاط: 4 8 12 16 20 24 32 40 60 · الهامش 16 · أقل لمسة 48">4-pt scale: 4 8 12 16 20 24 32 40 60 · gutter 16 · tap target 48</td></tr>
+      </table></div>
+    </div>
+  </section>
+</main>
+
+<nav class="nav">
+  <a class="on" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-en="Home" data-ar="الرئيسية">Home</span></a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21l1-4M16 21l-1-4"/></svg><span data-en="Trips" data-ar="الرحلات">Trips</span></a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span data-en="Track" data-ar="التتبّع">Track</span></a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 15h4M15 9h2"/></svg><span data-en="Pass" data-ar="الكارنيه">Pass</span></a>
+</nav>
+
+<dialog id="dlg"><div class="dialog">
+  <div class="ic"><i data-lucide="calendar-x"></i></div>
+  <h4 data-en="Cancel this booking?" data-ar="تلغي الحجز ده؟">Cancel this booking?</h4>
+  <p data-en="Seat 7 on Line A at 07:10 will be released to the waiting list. This can't be undone." data-ar="كرسي ٧ في خط A الساعة ٠٧:١٠ هيروح لقايمة الانتظار. مينفعش ترجع فيها.">Seat 7 on Line A at 07:10 will be released to the waiting list. This can't be undone.</p>
+  <div class="actions"><button class="btn btn-ghost" data-close data-en="Keep it" data-ar="خليه">Keep it</button><button class="btn btn-danger" data-close data-en="Cancel booking" data-ar="الغي الحجز">Cancel booking</button></div>
+</div></dialog>
+
+<div class="sheet-wrap" id="sheet"><div class="sheet" role="dialog" aria-modal="true">
+  <div class="grabber"></div>
+  <h4 data-en="Choose your seat" data-ar="اختار كرسيك">Choose your seat</h4>
+  <div class="trip-sub" data-en="Line A · Bus 07 · 07:10" data-ar="خط A · أتوبيس ٠٧ · ٠٧:١٠">Line A · Bus 07 · 07:10</div>
+  <div class="seat-grid"><span>1</span><span class="taken">2</span><span class="taken">3</span><span>4</span><span>5</span><span class="taken">6</span><span class="mine">7</span><span>8</span><span class="taken">9</span><span>10</span><span>11</span><span class="taken">12</span></div>
+  <button class="btn btn-primary" data-close style="width:100%;justify-content:center" data-en="Confirm seat 7" data-ar="أكّد كرسي ٧">Confirm seat 7</button>
+</div></div>
+
+<div class="toast-host" id="toastHost"></div>
+
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script>
+  const scales = [
+    ['Purple', 'P 94-15 U', ['#58286E','#724686','#8C659E','#A583B6','#BFA1CE']],
+    ['Teal', '126-14 U', ['#257988','#428E9B','#5EA3AE','#7AB8C0','#97CDD3']],
+    ['Coral', 'P 41-6 U', ['#CF644B','#DA7D67','#E69583','#F1AE9F','#FCC6BB']],
+    ['Gray', 'logo gray', ['#545557','#6D6E6F','#868688','#9E9FA0','#B7B7B8']],
+  ];
+  const lum = h => { const c = [1,3,5].map(i => parseInt(h.slice(i,i+2),16)/255).map(v => v <= .03928 ? v/12.92 : ((v+.055)/1.055)**2.4); return .2126*c[0]+.7152*c[1]+.0722*c[2]; };
+  document.getElementById('scales').innerHTML = scales.map(([n, p, s]) =>
+    `<div><div class="scale-name">${n}<small>Pantone ${p}</small></div><div class="scale">${
+      s.map((h,i) => `<div style="background:${h};color:${lum(h) > .35 ? '#1F1A24' : '#fff'}"><span>${100-i*20}%</span><span class="hex">${h}</span></div>`).join('')}</div></div>`).join('');
+
+  const roles = [['--brand','Brand / primary'],['--info','Info · on route'],['--accent','Accent · live bus'],['--ink','Headings'],['--text','Body text'],['--muted','Secondary text'],['--bg','Background'],['--surface','Surface'],['--line','Divider'],['--ok','Success'],['--warn','Warning'],['--bad','Error / SOS']];
+  function paintRoles() {
+    const cs = getComputedStyle(document.documentElement);
+    document.getElementById('semantic').innerHTML = roles.map(([v, l]) =>
+      `<div class="sem"><i style="background:var(${v})"></i><div><b>${l}</b><code>${v} · ${cs.getPropertyValue(v).trim().toUpperCase()}</code></div></div>`).join('');
+  }
+
+  const root = document.documentElement;
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : mq.matches;
+  const themeBtn = document.getElementById('theme');
+  function themeLabel() {
+    const ar = root.lang === 'ar';
+    themeBtn.textContent = isDark() ? (ar ? 'الوضع الفاتح' : 'Light mode') : (ar ? 'الوضع الداكن' : 'Dark mode');
+  }
+  themeBtn.onclick = () => { root.dataset.theme = isDark() ? 'light' : 'dark'; themeLabel(); paintRoles(); };
+
+  document.getElementById('lang').onclick = e => {
+    const ar = root.lang !== 'ar';
+    root.lang = ar ? 'ar' : 'en'; root.dir = ar ? 'rtl' : 'ltr';
+    e.target.textContent = ar ? 'English' : 'عربي';
+    document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.dataset[ar ? 'ar' : 'en']; });
+    themeLabel();
+  };
+
+  const q = new URLSearchParams(location.search);
+  if (q.get('theme')) root.dataset.theme = q.get('theme');
+  if (q.get('lang') === 'ar') document.getElementById('lang').click();
+  themeLabel(); paintRoles();
+  mq.addEventListener('change', () => { themeLabel(); paintRoles(); syncSwitch(); });
+
+  // ---- icons ----
+  const iconNames = ['bus','bus-front','route','map-pin','map','navigation','locate-fixed','clock','calendar','ticket','id-card','qr-code','wallet','users','user','armchair','bell','bell-ring','triangle-alert','siren','phone','message-circle','settings','search','sliders-horizontal','arrow-left','arrow-right','chevron-right','check','x','circle-check','circle-alert','info','wifi-off','moon','sun','languages','log-out'];
+  document.getElementById('iconGrid').innerHTML = iconNames.map(n => `<div><i data-lucide="${n}" style="width:24px;height:24px"></i><small>${n}</small></div>`).join('');
+  const drawIcons = () => window.lucide && lucide.createIcons();
+
+  // ---- charts (plain SVG, tokens only) ----
+  function bars() {
+    const lines = ['A','B','C','D','E'], am = [320, 280, 190, 240, 150], pm = [260, 300, 170, 210, 120];
+    const W = 460, H = 200, pad = 28, max = 350, bw = 18, step = (W - pad) / lines.length;
+    let s = `<svg viewBox="0 0 ${W} ${H + 24}">`;
+    for (let g = 0; g <= 350; g += 100) { const y = H - g / max * H; s += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--chart-grid)"/><text x="0" y="${y + 4}">${g}</text>`; }
+    lines.forEach((l, i) => { const x = pad + i * step + step / 2 - bw - 2;
+      s += `<rect x="${x}" y="${H - am[i] / max * H}" width="${bw}" height="${am[i] / max * H}" rx="4" fill="var(--chart-1)"/>`;
+      s += `<rect x="${x + bw + 4}" y="${H - pm[i] / max * H}" width="${bw}" height="${pm[i] / max * H}" rx="4" fill="var(--chart-2)"/>`;
+      s += `<text x="${x + bw + 2}" y="${H + 18}" text-anchor="middle">${l}</text>`; });
+    document.getElementById('barChart').innerHTML = s + '</svg>';
+  }
+  function line() {
+    const v = [91, 93, 89, 95, 94, 96, 94], W = 320, H = 170, pad = 28, lo = 85, hi = 100;
+    const X = i => pad + i * (W - pad) / (v.length - 1), Y = n => H - (n - lo) / (hi - lo) * H;
+    let s = `<svg viewBox="0 0 ${W} ${H + 24}">`;
+    for (let g = 85; g <= 100; g += 5) s += `<line x1="${pad}" x2="${W}" y1="${Y(g)}" y2="${Y(g)}" stroke="var(--chart-grid)"/><text x="0" y="${Y(g) + 4}">${g}%</text>`;
+    s += `<line x1="${pad}" x2="${W}" y1="${Y(95)}" y2="${Y(95)}" stroke="var(--chart-3)" stroke-width="2" stroke-dasharray="5 5"/>`;
+    const pts = v.map((n, i) => `${X(i)},${Y(n)}`).join(' ');
+    s += `<polygon points="${X(0)},${H} ${pts} ${X(v.length - 1)},${H}" fill="var(--chart-1)" opacity=".10"/>`;
+    s += `<polyline points="${pts}" fill="none" stroke="var(--chart-1)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+    v.forEach((n, i) => { s += `<circle cx="${X(i)}" cy="${Y(n)}" r="${i === v.length - 1 ? 5 : 3.5}" fill="var(--surface)" stroke="var(--chart-1)" stroke-width="2.5"/><text x="${X(i)}" y="${H + 18}" text-anchor="middle">${['S','S','M','T','W','T','F'][i]}</text>`; });
+    document.getElementById('lineChart').innerHTML = s + '</svg>';
+  }
+  bars(); line();
+
+  // ---- overlays + toast ----
+  const dlg = document.getElementById('dlg'), sheet = document.getElementById('sheet'), host = document.getElementById('toastHost');
+  document.getElementById('showDialog').onclick = () => dlg.showModal();
+  document.getElementById('showSheet').onclick = () => sheet.classList.add('open');
+  sheet.onclick = e => { if (e.target === sheet || e.target.hasAttribute('data-close')) sheet.classList.remove('open'); };
+  dlg.addEventListener('click', e => { if (e.target === dlg || e.target.hasAttribute('data-close')) dlg.close(); });
+  document.getElementById('showToast').onclick = () => {
+    const ar = root.lang === 'ar';
+    host.innerHTML = `<div class="toast"><i data-lucide="circle-check"></i><span>${ar ? 'تم حجز كرسي ٧ لرحلة ٠٧:١٠' : 'Seat 7 booked for 07:10'}</span><button>${ar ? 'تراجع' : 'Undo'}</button></div>`;
+    drawIcons(); clearTimeout(host.t); host.t = setTimeout(() => host.innerHTML = '', 4000);
+  };
+
+  // ---- dark switch in Settings mirrors the theme ----
+  const ds = document.getElementById('darkSwitch');
+  const syncSwitch = () => { ds.checked = isDark(); };
+  ds.onchange = () => { root.dataset.theme = ds.checked ? 'dark' : 'light'; themeLabel(); paintRoles(); };
+  themeBtn.addEventListener('click', syncSwitch); syncSwitch();
+
+  // ---- placeholders follow language; icons redraw after text swap ----
+  document.getElementById('lang').addEventListener('click', () => {
+    const ar = root.lang === 'ar';
+    document.querySelectorAll('[data-en-ph]').forEach(el => el.placeholder = el.dataset[ar ? 'arPh' : 'enPh']);
+    drawIcons();
+  });
+  if (root.lang === 'ar') document.querySelectorAll('[data-ar-ph]').forEach(el => el.placeholder = el.dataset.arPh);
+  drawIcons();
+</script>
+</body>
+</html>
