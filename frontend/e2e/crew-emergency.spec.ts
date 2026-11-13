@@ -106,4 +106,22 @@ test.describe("emergencies", () => {
     await expect(page.getByText("Called an ambulance")).toBeVisible();
     expect(errors).toEqual([]);
   });
+
+  test("the super admin sees a medical SOS from the clinic page but can't act on it", async ({
+    page,
+  }) => {
+    await driverRaisesSos(page, /^Medical/);
+    await switchTo(page, "ADM-1001");
+    await page.waitForURL(/\/en\/admin$/);
+    await page.goto("/en/admin/clinic");
+    const now = page.getByRole("region", { name: "Needs you now" });
+    await expect(now.getByText(/Medical · Line 7/)).toBeVisible();
+    await now.getByRole("link", { name: "Open" }).click();
+    await expect(
+      page.getByText(/View only\. The Transportation office and the clinic/),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Take it" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Ambulance called" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Close the alert" })).toHaveCount(0);
+  });
 });

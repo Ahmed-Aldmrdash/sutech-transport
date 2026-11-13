@@ -1,6 +1,7 @@
 import { recordAudit } from "@/features/admin-system/mock-log";
 import { AuditAction } from "@/features/admin-system/schema";
-import { mockNameOf, requireMockOffice } from "@/features/auth/mock-token";
+import { mockNameOf, requireMockActor, requireMockOffice } from "@/features/auth/mock-token";
+import type { MockAccount } from "@/features/auth/mock-accounts";
 import { allReplacements } from "@/features/crew/mock-state";
 import {
   MOCK_SEATS_BY_BUS,
@@ -316,18 +317,24 @@ registerMock(cancelEventEndpoint, ({ params, body }, { token, language }) => {
 // ---------------------------------------------------------------------------------------------
 // Abu El Hol
 
+/** The super admin sees the company's portal but answers nothing in it. */
+function forViewer(event: BusEvent, account: MockAccount): BusEvent {
+  return account.user.role === Role.SuperAdmin ? { ...event, allowed_actions: [] } : event;
+}
+
 registerMock(listCompanyRequestsEndpoint, ({ query }, { token, language }) => {
-  requireMockOffice(token, COMPANY);
-  return listFor(query, Side.Company, language, Date.now());
+  const account = requireMockOffice(token, COMPANY);
+  const page = listFor(query, Side.Company, language, Date.now());
+  return { ...page, items: page.items.map((event) => forViewer(event, account)) };
 });
 
 registerMock(getCompanyRequestEndpoint, ({ params }, { token, language }) => {
-  requireMockOffice(token, COMPANY);
+  const account = requireMockOffice(token, COMPANY);
   const now = Date.now();
   const item = requireEvent(params.event_id, now);
   const taken = busesTakenOn(item.eventDate, item.eventId, now);
   return {
-    event: toBusEvent(item, Side.Company, language, now),
+    event: forViewer(toBusEvent(item, Side.Company, language, now), account),
     // Spares at the garage first: a line bus still has its own trips that day.
     available_buses: [...fleet()]
       .sort((a, b) => Number(a.line !== null) - Number(b.line !== null))
@@ -340,7 +347,7 @@ registerMock(getCompanyRequestEndpoint, ({ params }, { token, language }) => {
 });
 
 registerMock(replyToRequestEndpoint, ({ params, body }, { token, language }) => {
-  const company = requireMockOffice(token, COMPANY);
+  const company = requireMockActor(token, COMPANY);
   const now = Date.now();
   const item = requireEvent(params.event_id, now);
   if (item.status !== EventStatus.WaitingCompany || isPast(item, now)) {

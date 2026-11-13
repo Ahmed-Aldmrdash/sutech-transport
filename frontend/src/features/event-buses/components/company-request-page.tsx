@@ -14,12 +14,14 @@ import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { getCompanyRequest } from "../api";
 import { EventStatus, type BusEvent } from "../schema";
 import { CompanyReplyCard } from "./company-reply-card";
+import { useIsViewOnly } from "@/features/emergencies/components/use-office-role";
 import { EventBusesTable, EventFacts, EventStatusBadge } from "./event-parts";
 
 /** One request as Abu El Hol sees it, and its answer: which buses go, or why none can. */
 export function CompanyRequestPage({ eventId }: { eventId: string }) {
   const t = useTranslations("desk.company");
   const tEvents = useTranslations("desk.events");
+  const viewOnly = useIsViewOnly();
   const state = useAsync((signal) => getCompanyRequest(eventId, { signal }), [eventId]);
   const back = <BackLink href="/admin/bus-company">{t("back")}</BackLink>;
 
@@ -51,6 +53,9 @@ export function CompanyRequestPage({ eventId }: { eventId: string }) {
         actions={<EventStatusBadge event={event} />}
       />
       <Answer event={event} />
+      {viewOnly && event.status === EventStatus.WaitingCompany ? (
+        <Alert tone={Tone.Info} title={t("viewOnly")} />
+      ) : null}
       <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <EventFacts event={event} />
         {canReply ? (

@@ -1,6 +1,6 @@
 import { recordAudit } from "@/features/admin-system/mock-log";
 import { AuditAction } from "@/features/admin-system/schema";
-import { requireMockOffice } from "@/features/auth/mock-token";
+import { requireMockActor, requireMockOffice } from "@/features/auth/mock-token";
 import {
   crewFleetOf,
   crewTripStatus,
@@ -66,8 +66,11 @@ const CLINIC_TYPES: readonly SosType[] = [SosType.Medical, SosType.Accident];
 
 const requireOffice = requireMockOffice;
 
-const requireSosDesk = (token: string | null) =>
-  requireOffice(token, [Role.Transport, Role.Clinic]);
+const SOS_DESK: readonly Role[] = [Role.Transport, Role.Clinic];
+/** Reading the desk: the two offices and the super admin. */
+const requireSosDesk = (token: string | null) => requireOffice(token, SOS_DESK);
+/** Acting on an alert: the two offices only; the super admin watches. */
+const requireSosActor = (token: string | null) => requireMockActor(token, SOS_DESK);
 
 function visibleTo(role: Role, sos: MockSos): boolean {
   return role !== Role.Clinic || CLINIC_TYPES.includes(sos.type);
@@ -184,7 +187,7 @@ function sosTarget(lineId: string, word: { ar: string; en: string }) {
 }
 
 registerMock(addSosActionEndpoint, ({ params, body }, { token, language }) => {
-  const account = requireSosDesk(token);
+  const account = requireSosActor(token);
   const { user } = account;
   const sos = requireVisibleSos(params.sos_id, user.role);
   const status = sosStatusOf(sos);
@@ -234,7 +237,7 @@ function requireTodayTrip(tripId: string, now: number) {
 }
 
 registerMock(getReplacementOptionsEndpoint, ({ params }, { token, language }) => {
-  requireOffice(token, [Role.Transport]);
+  requireMockActor(token, [Role.Transport]);
   const now = Date.now();
   const { trip, line } = requireTodayTrip(params.trip_id, now);
   const fleet = crewFleetOf(trip, line);
@@ -269,7 +272,7 @@ registerMock(getReplacementOptionsEndpoint, ({ params }, { token, language }) =>
 });
 
 registerMock(sendReplacementEndpoint, ({ params, body }, { token, language }) => {
-  const account = requireOffice(token, [Role.Transport]);
+  const account = requireMockActor(token, [Role.Transport]);
   const now = Date.now();
   const { trip, line } = requireTodayTrip(params.trip_id, now);
   if (crewTripStatus(trip) === CrewTripStatus.Ended) {

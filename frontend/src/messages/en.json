@@ -1676,7 +1676,8 @@
       "body": "No driver or supervisor has pressed SOS yet. A new alert shows here at once with the bus's location."
     },
     "allAlerts": "See all alerts",
-    "callPrefix": "Call"
+    "callPrefix": "Call",
+    "viewOnly": "View only. The Transportation office and the clinic take alerts and act on them."
   },
   "clinic": {
     "title": "Clinic",
@@ -2287,7 +2288,8 @@
           "replacement": "Replacement",
           "spare": "At the garage"
         }
-      }
+      },
+      "viewOnly": "View only. Abu El Hol's team answers this request; you see what they send."
     },
     "sg": {
       "title": "Secretary General",

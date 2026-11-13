@@ -87,3 +87,15 @@ test("the Secretary General follows a student by university ID", async ({ page }
   await expectNoSidewaysScroll(page);
   expect(errors).toEqual([]);
 });
+
+test("the super admin sees Abu El Hol's requests but can't answer them", async ({ page }) => {
+  await landOn(page, "ADM-1001", /\/en\/admin$/);
+  await page.goto("/en/admin/bus-company/evt_seed_1");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Military education - first group" }),
+  ).toBeVisible();
+  await expect(page.getByText(/^View only\. Abu El Hol's team answers/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Confirm these buses" })).toHaveCount(0);
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await expectNoSidewaysScroll(page);
+});

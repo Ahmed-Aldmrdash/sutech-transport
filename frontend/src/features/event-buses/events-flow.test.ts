@@ -187,4 +187,23 @@ describe("dates", () => {
     expect(past?.event_date).toBe(addDays(todayInCairo(), -6));
     expect(past?.allowed_actions).toEqual([]);
   });
+
+  it("lets the super admin see the company's portal but answer nothing", async () => {
+    await signIn("TRN-1001");
+    const created = await createEvent(newEvent());
+    await signIn("ADM-1001");
+    const list = await listCompanyRequests();
+    expect(list.items.every((item) => item.allowed_actions.length === 0)).toBe(true);
+    const request = await getCompanyRequest(created.event_id);
+    expect(request.event.allowed_actions).toEqual([]);
+    const tried = await errorOf(
+      replyToRequest(created.event_id, { decision: "decline", bus_ids: [], note: "No buses" }),
+    );
+    expect(tried.code).toBe(ServerErrorCode.Forbidden);
+    await signIn("BUS-1001");
+    expect((await getCompanyRequest(created.event_id)).event.allowed_actions).toEqual([
+      EventAction.Confirm,
+      EventAction.Decline,
+    ]);
+  });
 });

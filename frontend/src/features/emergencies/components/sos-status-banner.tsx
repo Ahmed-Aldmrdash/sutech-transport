@@ -11,6 +11,7 @@ import { formatTime } from "@/lib/format";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { addSosAction } from "../api";
 import { EmergencyErrorCode, type AdminSos } from "../schema";
+import { useIsViewOnly } from "./use-office-role";
 
 const ERRORS = Object.values(EmergencyErrorCode);
 
@@ -19,6 +20,7 @@ export function StatusBanner({ sos, onChanged }: { sos: AdminSos; onChanged: () 
   const t = useTranslations("emergencies");
   const locale = useLocale() as Locale;
   const { submit, isSending, serverError } = useSubmit(ERRORS);
+  const viewOnly = useIsViewOnly();
   const entryOf = (action: SosAction) => sos.actions.find((entry) => entry.action === action);
 
   if (sos.status === SosStatus.Open) {
@@ -32,23 +34,25 @@ export function StatusBanner({ sos, onChanged }: { sos: AdminSos; onChanged: () 
           {t("openBanner")}
         </p>
         {serverError ? <p className="text-body-sm">{t(`errors.${serverError}`)}</p> : null}
-        <Button
-          variant="danger"
-          size="lg"
-          isLoading={isSending}
-          iconStart={<Hand className="size-5" />}
-          onClick={() =>
-            void submit((idempotencyKey) =>
-              addSosAction(
-                sos.id,
-                { action: SosAction.Acknowledge, note: null },
-                { idempotencyKey },
-              ),
-            ).then(onChanged)
-          }
-        >
-          {t("take")}
-        </Button>
+        {viewOnly ? null : (
+          <Button
+            variant="danger"
+            size="lg"
+            isLoading={isSending}
+            iconStart={<Hand className="size-5" />}
+            onClick={() =>
+              void submit((idempotencyKey) =>
+                addSosAction(
+                  sos.id,
+                  { action: SosAction.Acknowledge, note: null },
+                  { idempotencyKey },
+                ),
+              ).then(onChanged)
+            }
+          >
+            {t("take")}
+          </Button>
+        )}
       </div>
     );
   }

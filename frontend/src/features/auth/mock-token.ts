@@ -59,6 +59,19 @@ export function requireMockOffice(token: string | null, roles: readonly Role[]):
   return account;
 }
 
+/**
+ * The signed-in member of an office that acts on this work. The super admin sees these
+ * pages but does not act on them (the bus company's portal, the SOS and clinic desk), so
+ * they get 403 here like anyone outside the office.
+ */
+export function requireMockActor(token: string | null, roles: readonly Role[]): MockAccount {
+  const account = requireMockAccount(token);
+  if (!roles.includes(account.user.role)) {
+    throw new MockHttpError(HTTP_FORBIDDEN, ServerErrorCode.Forbidden, "View only.");
+  }
+  return account;
+}
+
 /** "نادية سمير" / "Nadia Samir": a staff member's name in both languages, for logs. */
 export function mockNameOf(account: MockAccount): { ar: string; en: string } {
   return { ar: account.user.name_ar ?? account.user.name, en: account.user.name };
