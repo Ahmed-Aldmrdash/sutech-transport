@@ -58,6 +58,12 @@ export function formatClockTime(clock: string, locale: Locale): string {
   }).format(Date.UTC(2000, 0, 1, hours, minutes));
 }
 
+/** The campus arrival: "8:30 AM", or "8:45 AM – 9:00 AM" when it is a window. */
+export function formatArrival(window: { from: string; to: string }, locale: Locale): string {
+  const from = formatClockTime(window.from, locale);
+  return window.from === window.to ? from : `${from} – ${formatClockTime(window.to, locale)}`;
+}
+
 /** A calendar day sent as "YYYY-MM-DD" (term dates, receipt dates), e.g. "Jan 21, 2027". */
 export function formatCalendarDate(
   day: string,

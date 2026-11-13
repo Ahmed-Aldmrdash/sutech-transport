@@ -25,6 +25,7 @@ const LOADERS: Record<MockFeatureName, () => Promise<unknown>> = {
   [MockFeature.Reports]: () => import("@/features/reports/mock"),
   [MockFeature.SgOffice]: () => import("@/features/sg-office/mock"),
   [MockFeature.OpsDesk]: () => import("@/features/ops-desk/mock"),
+  [MockFeature.Timetable]: () => import("@/features/timetable/mock"),
   [MockFeature.Requests]: () => import("@/features/requests/mock"),
   [MockFeature.RequestDesk]: () => import("@/features/request-desk/mock"),
   [MockFeature.Sos]: () => import("@/features/sos/mock"),

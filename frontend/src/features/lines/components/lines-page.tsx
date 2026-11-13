@@ -15,7 +15,7 @@ import { Tone } from "@/components/ui/tone";
 import { getMySubscription } from "@/features/subscriptions/api";
 import { BOOKABLE_STATUSES } from "@/features/subscriptions/schema";
 import type { Locale } from "@/i18n/routing";
-import { formatClockTime, formatMoney } from "@/lib/format";
+import { formatArrival, formatMoney } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { listLines } from "../api";
 import type { Line } from "../schema";
@@ -134,7 +134,6 @@ function LinesLead({ lines }: { lines: Line[] }) {
   if (!sample) return null;
   return t("lead", {
     price: formatMoney(sample.price_piasters, locale),
-    from: formatClockTime(sample.campus_arrival.from, locale),
-    to: formatClockTime(sample.campus_arrival.to, locale),
+    arrival: formatArrival(sample.campus_arrival, locale),
   });
 }

@@ -22,6 +22,7 @@ export const MockFeature = {
   Sos: "sos",
   Subscriptions: "subscriptions",
   System: "system",
+  Timetable: "timetable",
   Tracking: "tracking",
   Trips: "trips",
   Violations: "violations",

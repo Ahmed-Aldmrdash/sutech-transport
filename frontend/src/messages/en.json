@@ -93,7 +93,7 @@
       "attendance": "Attendance",
       "busesDrivers": "Buses & drivers",
       "students": "Students",
-      "departures": "Departure trips",
+      "returnTimes": "Return times",
       "payments": "Payments",
       "refunds": "Refunds",
       "reports": "Reports",
@@ -382,7 +382,6 @@
       "minutes": "{minutes} min"
     },
     "toBeAnnounced": "To be announced",
-    "arrivalWindow": "{from} – {to}",
     "lineCode": "Line {code}",
     "home": {
       "lead": "Your university bus, in one place.",
@@ -448,7 +447,7 @@
       }
     },
     "lines": {
-      "lead": "Every line costs {price} a term. Buses reach campus between {from} and {to}.",
+      "lead": "Every line costs {price} a term. Buses reach campus at {arrival}.",
       "searchLabel": "Search lines",
       "searchPlaceholder": "Area or line number, e.g. Nasr City or 12",
       "onlyAvailable": "Only lines with free seats",
@@ -2562,6 +2561,40 @@
         "title": "Buses & drivers",
         "lead": "Every Abu El Hol bus and driver working for the university, and what each does today. Send another bus or driver to a line's trip from here.",
         "today": "Today's trip"
+      },
+      "returnTimes": {
+        "title": "Return times",
+        "lead": "When each bus reaches campus in the morning and leaves in the afternoon. Change one line, or every line at once: students and drivers see the new time right away.",
+        "changeAll": "Change for every line",
+        "search": "Find a line",
+        "noMatch": "No line matches your search.",
+        "arrival": "Campus arrival",
+        "arrivalCaption": "From the university's Routes file",
+        "leaves": "Leaves campus",
+        "leavesCaption": "Every line, unless you set another time",
+        "otherTime": "Lines with another time",
+        "otherTimeCaption": "of {total} lines",
+        "line": "Line",
+        "lineValue": "Line {code} · {name}",
+        "firstPickup": "First pickup",
+        "changedBy": "Changed by {name} · {when}",
+        "actions": "Actions",
+        "change": "Change",
+        "changeLine": "Change line {code}",
+        "lineTitle": "Return time · Line {code} · {name}",
+        "lineBody": "The students and the driver of this line see the new time right away.",
+        "allTitle": "Return time for every line",
+        "allBody": "All {total} lines get this time, including lines you changed before.",
+        "leavesAt": "Leaves campus at",
+        "timeError": "Pick a time.",
+        "save": "Save",
+        "saved": "Saved. Return time: {time}.",
+        "errors": {
+          "LINE_NOT_FOUND": "This line no longer exists. Refresh the page.",
+          "network": "No connection. Try again.",
+          "invalid": "Some details aren't right. Check them and try again.",
+          "generic": "Something went wrong. Try again."
+        }
       }
     },
     "system": {
@@ -2636,7 +2669,8 @@
           "announcements": "Announcements",
           "emergencies": "Emergencies",
           "events": "Event buses",
-          "users": "Accounts"
+          "users": "Accounts",
+          "timetable": "Timetable"
         },
         "actions": {
           "payment_approved": "Approved a receipt",
@@ -2658,7 +2692,8 @@
           "user_added": "Added an account",
           "user_stopped": "Stopped an account",
           "user_activated": "Allowed an account again",
-          "user_role_changed": "Changed an account's office"
+          "user_role_changed": "Changed an account's office",
+          "return_time_changed": "Changed the return time"
         }
       }
     }

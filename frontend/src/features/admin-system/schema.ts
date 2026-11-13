@@ -108,6 +108,7 @@ export const AuditArea = {
   Emergencies: "emergencies",
   Events: "events",
   Users: "users",
+  Timetable: "timetable",
 } as const;
 export type AuditArea = (typeof AuditArea)[keyof typeof AuditArea];
 export const AUDIT_AREAS = Object.values(AuditArea) as [AuditArea, ...AuditArea[]];
@@ -133,6 +134,7 @@ export const AuditAction = {
   UserStopped: "user_stopped",
   UserActivated: "user_activated",
   UserRoleChanged: "user_role_changed",
+  ReturnTimeChanged: "return_time_changed",
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
 const AUDIT_ACTIONS = Object.values(AuditAction) as [AuditAction, ...AuditAction[]];
@@ -158,6 +160,7 @@ export const AUDIT_AREA_OF: Record<AuditAction, AuditArea> = {
   [AuditAction.UserStopped]: AuditArea.Users,
   [AuditAction.UserActivated]: AuditArea.Users,
   [AuditAction.UserRoleChanged]: AuditArea.Users,
+  [AuditAction.ReturnTimeChanged]: AuditArea.Timetable,
 };
 
 export const auditQuerySchema = z.object({

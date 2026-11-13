@@ -11,6 +11,8 @@ export const MOCK_FEATURE_OF: Readonly<Record<string, MockFeatureName>> = {
   "absences.create": MockFeature.Absences,
   "absences.listMine": MockFeature.Absences,
   "admin.audit.list": MockFeature.AdminSystem,
+  "admin.timetable.get": MockFeature.Timetable,
+  "admin.timetable.return": MockFeature.Timetable,
   "admin.users.create": MockFeature.AdminSystem,
   "admin.users.list": MockFeature.AdminSystem,
   "admin.users.update": MockFeature.AdminSystem,

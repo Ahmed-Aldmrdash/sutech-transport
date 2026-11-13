@@ -52,23 +52,24 @@ const MOCK_ANNOUNCEMENTS = [
     id: "ann_return_times",
     kind: AnnouncementKind.ServiceChange,
     publishedAt: "2026-11-02T08:00:00Z",
-    titleAr: "مواعيد العودة هتتعلن قريب",
-    titleEn: "Return times coming soon",
-    bodyAr: "إدارة النقل بتجهز مواعيد خروج الباصات من الجامعة لكل خط، وهتظهر هنا أول ما تتعلن.",
+    titleAr: "العودة من الجامعة 4:30",
+    titleEn: "Buses leave campus at 4:30 PM",
+    bodyAr:
+      "كل الباصات بتطلع من الجامعة الساعة 4:30 العصر. لو ميعاد خطك اتغير هتلاقيه في صفحة الخط.",
     bodyEn:
-      "The Transportation office is preparing each line's afternoon departure times. They will " +
-      "appear here as soon as they are published.",
+      "Every bus leaves campus at 4:30 PM. If your line's time changes, you'll see it on the " +
+      "line's page.",
   },
   {
     id: "ann_arrival_window",
     kind: AnnouncementKind.Official,
     publishedAt: "2026-11-01T09:00:00Z",
-    titleAr: "الوصول للجامعة من 8:45 لـ 9:00",
-    titleEn: "Buses reach campus 8:45 to 9:00",
-    bodyAr: "كل الخطوط بتوصل الجامعة الصبح ما بين 8:45 و9:00. الباص بيستنى في المحطة دقيقتين بس.",
+    titleAr: "الوصول للجامعة 8:30",
+    titleEn: "Buses reach campus at 8:30",
+    bodyAr: "كل الخطوط بتوصل الجامعة الصبح الساعة 8:30. الباص بيستنى في المحطة دقيقتين بس.",
     bodyEn:
-      "Every line reaches campus between 8:45 and 9:00 in the morning. The bus waits at each stop " +
-      "for two minutes only.",
+      "Every line reaches campus at 8:30 in the morning. The bus waits at each stop for two " +
+      "minutes only.",
   },
   {
     id: "ann_payment_methods",

@@ -1,5 +1,5 @@
 import {
-  Armchair,
+  Clock,
   BadgeAlert,
   Bell,
   Building2,
@@ -65,7 +65,7 @@ export type NavItemKey =
   | "attendance"
   | "busesDrivers"
   | "students"
-  | "departures"
+  | "returnTimes"
   | "payments"
   | "refunds"
   | "reports"
@@ -204,6 +204,7 @@ const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
   "liveTracking",
   "attendance",
   "lineDirectory",
+  "returnTimes",
   "busesDrivers",
   "students",
   "emergencies",
@@ -253,7 +254,7 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
       { key: "lineDirectory", icon: Route, segment: "lines", roles: [Transport] },
       { key: "busesDrivers", icon: Bus, segment: "buses", roles: [Transport] },
       { key: "students", icon: UsersRound, segment: "students", roles: [Transport] },
-      { key: "departures", icon: Armchair, segment: "departures", roles: [Transport] },
+      { key: "returnTimes", icon: Clock, segment: "return-times", roles: [Transport] },
     ],
   },
   {
