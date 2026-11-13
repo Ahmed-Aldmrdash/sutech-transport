@@ -96,7 +96,12 @@ function LiveBusRow({
         {bus.replaced ? ` · ${t("replaced")}` : ""}
       </span>
       <span className="text-caption text-ink-muted">
-        {[where, t("rode", { rode: number(bus.rode), subscribers: number(bus.subscribers) })]
+        {[
+          where,
+          bus.subscribers
+            ? t("rode", { rode: number(bus.rode), subscribers: number(bus.subscribers) })
+            : null,
+        ]
           .filter(Boolean)
           .join(" · ")}
       </span>

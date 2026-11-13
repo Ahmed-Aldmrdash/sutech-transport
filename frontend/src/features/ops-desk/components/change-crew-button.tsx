@@ -26,12 +26,7 @@ export function ChangeCrewButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button
-        variant="secondary"
-        size={size}
-        iconStart={<Repeat />}
-        onClick={() => setOpen(true)}
-      >
+      <Button variant="secondary" size={size} iconStart={<Repeat />} onClick={() => setOpen(true)}>
         {t("desk.ops.changeCrew")}
       </Button>
       <ReplacementDialog

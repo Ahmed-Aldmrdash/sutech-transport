@@ -69,6 +69,7 @@
     "items": {
       "home": "Home",
       "lines": "Lines & booking",
+      "lineDirectory": "Lines",
       "card": "My card",
       "tracking": "Track my bus",
       "announcements": "Announcements",
@@ -2364,6 +2365,193 @@
         "network": "No connection. Try again.",
         "invalid": "Some details aren't right. Check them and try again.",
         "generic": "Something went wrong. Try again."
+      }
+    },
+    "ops": {
+      "changeCrew": "Change bus or driver",
+      "overview": {
+        "title": "Overview",
+        "lead": "What waits for the office, and every line's morning today or a past day.",
+        "liveLink": "Live map",
+        "queues": {
+          "title": "Waiting for you",
+          "emergencies_open": {
+            "label": "Open emergencies",
+            "waiting": "Open the emergencies desk now",
+            "none": "No open alerts"
+          },
+          "requests_new": {
+            "label": "New requests",
+            "waiting": "Line changes and model permits to open",
+            "none": "Nothing new"
+          },
+          "complaints_new": {
+            "label": "New complaints",
+            "waiting": "Complaints to answer",
+            "none": "Nothing new"
+          },
+          "events_waiting": {
+            "label": "Events waiting",
+            "waiting": "Abu El Hol hasn't answered yet",
+            "none": "All answered"
+          }
+        }
+      },
+      "live": {
+        "title": "Live tracking",
+        "lead": "Every bus this morning on one map, from the GPS device in each bus. Pick a bus to see it and call its driver.",
+        "mapLabel": "Map of every bus on the road",
+        "campus": "Campus",
+        "pinLabel": "Line {code}, bus {plate}",
+        "listLabel": "Buses",
+        "filters": {
+          "label": "Show",
+          "all": "All ({count})",
+          "road": "On the road ({count})",
+          "late": "Late ({count})",
+          "alerts": "SOS ({count})"
+        },
+        "updatedAt": "Updated at {time}. Updates on its own every 10 seconds.",
+        "noneShown": "No bus matches this filter.",
+        "lineValue": "Line {code} · {name}",
+        "statuses": {
+          "not_started": "Not started",
+          "on_the_road": "On the road",
+          "arrived": "Reached campus",
+          "no_service": "No service"
+        },
+        "sos": "SOS open",
+        "late": "{minutes} min late",
+        "replaced": "replacement",
+        "near": "Near {stop}",
+        "leftFirstStop": "Left the first stop",
+        "leavesAt": "Leaves at {time}",
+        "rode": "{rode} of {subscribers} on board",
+        "closeCard": "Close",
+        "driver": "Driver",
+        "bus": "Bus",
+        "where": "Where",
+        "progress": "Trip",
+        "progressValue": "{percent}% done · {speed} km/h",
+        "riders": "Riders",
+        "whoRode": "Who rode",
+        "noServiceTitle": "No buses today",
+        "noServiceBody": "Buses run Sunday to Thursday. The map fills in once the morning trips start.",
+        "noneOnRoadTitle": "No bus is on the road right now",
+        "noneOnRoadBody": "Morning trips start at the first stop of each line (from 6:00). Buses show here as soon as they leave."
+      },
+      "lines": {
+        "title": "Lines",
+        "lead": "Every line with its bus, driver, stops and seats. Open a line for its stops and students.",
+        "total": "Lines",
+        "seats": "Seats",
+        "subscribers": "Subscribers",
+        "free": "Free seats",
+        "search": "Find a line",
+        "noMatch": "No line matches.",
+        "line": "Line",
+        "lineValue": "Line {code} · {name}",
+        "bus": "Bus",
+        "driver": "Driver",
+        "stops": "Stops",
+        "stopsValue": "{count} stops · first at {time}",
+        "riders": "Subscribers",
+        "freeValue": "{free} free · {held} held",
+        "full": "Full",
+        "back": "All lines",
+        "whoRode": "Who rode today",
+        "ridersValue": "{subscribers} of {seats} seats · {free} free",
+        "stopsTitle": "Stops",
+        "stop": "Stop",
+        "pickup": "Pick-up",
+        "ridersAtStop": "Subscribers",
+        "studentsTitle": "Students ({count})",
+        "searchStudent": "Find a student (name or university ID)",
+        "studentsCaption": "The line's students",
+        "noStudentMatch": "No student matches.",
+        "student": "Student",
+        "universityId": "University ID",
+        "stopValue": "{stop} · {time}"
+      },
+      "attendance": {
+        "title": "Attendance",
+        "lead": "Who rode a line's morning trip on a day: on board, left early, not going or absent.",
+        "line": "Line",
+        "lineValue": "Line {code} · {name}",
+        "loadingLines": "Loading lines…",
+        "day": "Day",
+        "noService": "No buses this day",
+        "noServiceBody": "Buses run Sunday to Thursday. Pick another day.",
+        "tripOn": "{date} · the trip: {status}",
+        "tripStatus": {
+          "not_started": "not started",
+          "in_progress": "on the road",
+          "ended": "reached campus"
+        },
+        "boarded": "Rode",
+        "ofTotal": "of {count} subscribers",
+        "leftEarly": "Left early",
+        "notGoing": "Not going",
+        "absent": "Absent",
+        "stillWaiting": "{count} not on yet",
+        "filterLabel": "Show",
+        "all": "All ({count})",
+        "states": {
+          "waiting": "Not yet ({count})",
+          "boarded": "On board ({count})",
+          "checked_out": "Left early ({count})",
+          "not_going": "Not going ({count})",
+          "absent": "Absent ({count})"
+        },
+        "rosterCaption": "The line's riders",
+        "noneInFilter": "No student in this list.",
+        "student": "Student",
+        "stop": "Stop",
+        "stopValue": "{stop} · {time}",
+        "state": "Trip",
+        "leftAt": "Left at {time}: {reason}",
+        "boardedAt": "Got on at {time}"
+      },
+      "students": {
+        "title": "Students",
+        "lead": "Every student with a seat or a booking this term. Open one to call them or their guardian.",
+        "searchHint": "University ID or part of the name",
+        "line": "Line",
+        "allLines": "All lines",
+        "lineValue": "Line {code} · {name}",
+        "caption": "Students",
+        "empty": "No student matches.",
+        "student": "Student",
+        "noLine": "No seat",
+        "subscription": "Subscription",
+        "statuses": {
+          "none": "No booking",
+          "reserved": "Waiting for payment",
+          "payment_review": "Receipt under review",
+          "active": "Active",
+          "expired": "Expired",
+          "cancelled": "Cancelled"
+        },
+        "back": "All students",
+        "seat": "Seat",
+        "faculty": "Program",
+        "facultyLevel": "{faculty} · level {level}",
+        "phone": "Student's mobile",
+        "guardian": "Guardian",
+        "hasApp": "Uses the app",
+        "noApp": "No app account",
+        "tripsTitle": "This term's morning trips (last 31 days)",
+        "rode": "Rode",
+        "notGoing": "Not going",
+        "absent": "Absent",
+        "requestsTitle": "Requests and complaints",
+        "noRequests": "No requests yet.",
+        "financeHandles": "Finance handles it"
+      },
+      "buses": {
+        "title": "Buses & drivers",
+        "lead": "Every Abu El Hol bus and driver working for the university, and what each does today. Send another bus or driver to a line's trip from here.",
+        "today": "Today's trip"
       }
     }
   }

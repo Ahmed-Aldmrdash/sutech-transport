@@ -69,6 +69,7 @@
     "items": {
       "home": "الرئيسية",
       "lines": "الخطوط والحجز",
+      "lineDirectory": "الخطوط",
       "card": "الكارنيه",
       "tracking": "تتبع الباص",
       "announcements": "الإعلانات",
@@ -2364,6 +2365,193 @@
         "network": "مفيش اتصال. جرّب تاني.",
         "invalid": "فيه بيانات مش مظبوطة. راجعها وجرّب تاني.",
         "generic": "حصلت مشكلة. جرّب تاني."
+      }
+    },
+    "ops": {
+      "changeCrew": "غيّر الباص أو السواق",
+      "overview": {
+        "title": "نظرة عامة",
+        "lead": "اللي مستني المكتب، وصباحية كل خط النهارده أو يوم فات.",
+        "liveLink": "الخريطة لايف",
+        "queues": {
+          "title": "مستنيينك",
+          "emergencies_open": {
+            "label": "طوارئ مفتوحة",
+            "waiting": "افتح مكتب الطوارئ دلوقتي",
+            "none": "مفيش بلاغات مفتوحة"
+          },
+          "requests_new": {
+            "label": "طلبات جديدة",
+            "waiting": "تغيير خط وتصاريح مجسمات محتاجة تتفتح",
+            "none": "مفيش جديد"
+          },
+          "complaints_new": {
+            "label": "شكاوى جديدة",
+            "waiting": "شكاوى محتاجة رد",
+            "none": "مفيش جديد"
+          },
+          "events_waiting": {
+            "label": "فعاليات مستنية",
+            "waiting": "أبو الهول لسه مردش",
+            "none": "كله اترد عليه"
+          }
+        }
+      },
+      "live": {
+        "title": "التتبع لايف",
+        "lead": "كل الباصات الصبح على خريطة واحدة، من جهاز الـ GPS اللي في كل باص. اختار باص تشوفه وتكلم سواقه.",
+        "mapLabel": "خريطة كل الباصات اللي في الطريق",
+        "campus": "الجامعة",
+        "pinLabel": "خط {code}، باص {plate}",
+        "listLabel": "الباصات",
+        "filters": {
+          "label": "اعرض",
+          "all": "الكل ({count})",
+          "road": "في الطريق ({count})",
+          "late": "متأخرة ({count})",
+          "alerts": "طوارئ ({count})"
+        },
+        "updatedAt": "اتحدثت الساعة {time}. بتتحدث لوحدها كل 10 ثواني.",
+        "noneShown": "مفيش باص بالفلتر ده.",
+        "lineValue": "خط {code} · {name}",
+        "statuses": {
+          "not_started": "لسه ماتحركش",
+          "on_the_road": "في الطريق",
+          "arrived": "وصل الجامعة",
+          "no_service": "مفيش رحلة"
+        },
+        "sos": "طوارئ مفتوحة",
+        "late": "متأخر {minutes} دقيقة",
+        "replaced": "باص بديل",
+        "near": "قريب من {stop}",
+        "leftFirstStop": "اتحرك من أول محطة",
+        "leavesAt": "بيتحرك الساعة {time}",
+        "rode": "{rode} من {subscribers} ركبوا",
+        "closeCard": "اقفل",
+        "driver": "السواق",
+        "bus": "الباص",
+        "where": "فين",
+        "progress": "الرحلة",
+        "progressValue": "خلص {percent}% · {speed} كم/س",
+        "riders": "الركاب",
+        "whoRode": "مين ركب",
+        "noServiceTitle": "مفيش باصات النهارده",
+        "noServiceBody": "الباصات شغالة من الحد للخميس. الخريطة هتتملى أول ما رحلات الصبح تبدأ.",
+        "noneOnRoadTitle": "مفيش باص في الطريق دلوقتي",
+        "noneOnRoadBody": "رحلات الصبح بتبدأ من أول محطة في كل خط (من الساعة 6:00). الباصات بتظهر هنا أول ما تتحرك."
+      },
+      "lines": {
+        "title": "الخطوط",
+        "lead": "كل خط بباصه وسواقه ومحطاته وكراسيه. افتح الخط تشوف محطاته وطلابه.",
+        "total": "الخطوط",
+        "seats": "الكراسي",
+        "subscribers": "المشتركين",
+        "free": "كراسي فاضية",
+        "search": "دوّر على خط",
+        "noMatch": "مفيش خط بالاسم ده.",
+        "line": "الخط",
+        "lineValue": "خط {code} · {name}",
+        "bus": "الباص",
+        "driver": "السواق",
+        "stops": "المحطات",
+        "stopsValue": "{count} محطة · أولها {time}",
+        "riders": "المشتركين",
+        "freeValue": "{free} فاضي · {held} محجوز",
+        "full": "كامل",
+        "back": "كل الخطوط",
+        "whoRode": "مين ركب النهارده",
+        "ridersValue": "{subscribers} من {seats} كرسي · {free} فاضي",
+        "stopsTitle": "المحطات",
+        "stop": "المحطة",
+        "pickup": "ميعاد الركوب",
+        "ridersAtStop": "المشتركين",
+        "studentsTitle": "الطلاب ({count})",
+        "searchStudent": "دوّر على طالب (بالاسم أو الرقم الجامعي)",
+        "studentsCaption": "طلاب الخط",
+        "noStudentMatch": "مفيش طالب كده.",
+        "student": "الطالب",
+        "universityId": "الرقم الجامعي",
+        "stopValue": "{stop} · {time}"
+      },
+      "attendance": {
+        "title": "الحضور والغياب",
+        "lead": "مين ركب رحلة الصبح لخط في يوم: ركب، نزل في السكة، مش رايح، أو غايب.",
+        "line": "الخط",
+        "lineValue": "خط {code} · {name}",
+        "loadingLines": "بنحمّل الخطوط…",
+        "day": "اليوم",
+        "noService": "مفيش باصات اليوم ده",
+        "noServiceBody": "الباصات شغالة من الحد للخميس. اختار يوم تاني.",
+        "tripOn": "{date} · الرحلة: {status}",
+        "tripStatus": {
+          "not_started": "لسه ماتحركتش",
+          "in_progress": "في الطريق",
+          "ended": "وصلت الجامعة"
+        },
+        "boarded": "ركبوا",
+        "ofTotal": "من {count} مشترك",
+        "leftEarly": "نزلوا في السكة",
+        "notGoing": "مش رايحين",
+        "absent": "غايبين",
+        "stillWaiting": "{count} لسه ماركبوش",
+        "filterLabel": "اعرض",
+        "all": "الكل ({count})",
+        "states": {
+          "waiting": "لسه ({count})",
+          "boarded": "راكبين ({count})",
+          "checked_out": "نزلوا بدري ({count})",
+          "not_going": "مش رايحين ({count})",
+          "absent": "غايبين ({count})"
+        },
+        "rosterCaption": "ركاب الخط",
+        "noneInFilter": "مفيش طالب في القايمة دي.",
+        "student": "الطالب",
+        "stop": "المحطة",
+        "stopValue": "{stop} · {time}",
+        "state": "الرحلة",
+        "leftAt": "نزل الساعة {time}: {reason}",
+        "boardedAt": "ركب الساعة {time}"
+      },
+      "students": {
+        "title": "الطلاب",
+        "lead": "كل طالب ليه كرسي أو حجز الترم ده. افتح أي طالب تكلمه أو تكلم ولي أمره.",
+        "searchHint": "الرقم الجامعي أو جزء من الاسم",
+        "line": "الخط",
+        "allLines": "كل الخطوط",
+        "lineValue": "خط {code} · {name}",
+        "caption": "الطلاب",
+        "empty": "مفيش طالب كده.",
+        "student": "الطالب",
+        "noLine": "مالوش كرسي",
+        "subscription": "الاشتراك",
+        "statuses": {
+          "none": "مفيش حجز",
+          "reserved": "مستني الدفع",
+          "payment_review": "الإيصال بيتراجع",
+          "active": "ساري",
+          "expired": "انتهى",
+          "cancelled": "اتلغى"
+        },
+        "back": "كل الطلاب",
+        "seat": "الكرسي",
+        "faculty": "البرنامج",
+        "facultyLevel": "{faculty} · المستوى {level}",
+        "phone": "موبايل الطالب",
+        "guardian": "ولي الأمر",
+        "hasApp": "بيستخدم التطبيق",
+        "noApp": "مالوش حساب على التطبيق",
+        "tripsTitle": "رحلات الصبح الترم ده (آخر 31 يوم)",
+        "rode": "ركب",
+        "notGoing": "مش رايح",
+        "absent": "غايب",
+        "requestsTitle": "الطلبات والشكاوى",
+        "noRequests": "مفيش طلبات لسه.",
+        "financeHandles": "المالية هي اللي بتتابعه"
+      },
+      "buses": {
+        "title": "الباصات والسواقين",
+        "lead": "كل باصات وسواقين أبو الهول اللي شغالين مع الجامعة، وكل واحد بيعمل إيه النهارده. ابعت باص أو سواق تاني لرحلة خط من هنا.",
+        "today": "رحلة النهارده"
       }
     }
   }

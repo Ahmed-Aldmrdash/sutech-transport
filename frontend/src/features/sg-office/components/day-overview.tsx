@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TextField } from "@/components/ui/input";
 import { StatTile } from "@/components/ui/stat-tile";
 import { Tone } from "@/components/ui/tone";
+import { TestDayButton } from "@/features/crew/components/test-day-button";
 import { DeskListState } from "@/features/desk-kit/components/desk-list-state";
 import type { Locale } from "@/i18n/routing";
 import {
@@ -103,7 +104,21 @@ export function DayOverview<T extends SgOverview>({
                 title={t("noService")}
                 description={t("noServiceBody")}
                 action={
-                  day.previous_service_day ? (
+                  day.is_today ? (
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {day.previous_service_day ? (
+                        <Button
+                          variant="secondary"
+                          onClick={() => onDateChange(day.previous_service_day ?? today)}
+                        >
+                          {t("showDay", {
+                            date: formatServiceDay(day.previous_service_day, locale),
+                          })}
+                        </Button>
+                      ) : null}
+                      <TestDayButton onStarted={state.reload} />
+                    </div>
+                  ) : day.previous_service_day ? (
                     <Button
                       variant="secondary"
                       onClick={() => onDateChange(day.previous_service_day ?? today)}

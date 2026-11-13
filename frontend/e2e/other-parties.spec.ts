@@ -20,7 +20,7 @@ test("transport asks for event buses, Abu El Hol confirms, transport sees them",
 }) => {
   const errors = watchForErrors(page);
   await signIn(page, "TRN-1001");
-  await page.waitForURL(/\/en\/admin\/emergencies$/);
+  await page.waitForURL(/\/en\/admin$/);
   await page.goto("/en/admin/events");
   await expect(page.getByRole("heading", { level: 1, name: "Event buses" })).toBeVisible();
   await expectNoSidewaysScroll(page);
@@ -52,7 +52,7 @@ test("transport asks for event buses, Abu El Hol confirms, transport sees them",
   await expectNoSidewaysScroll(page);
 
   await switchTo(page, "TRN-1001");
-  await page.waitForURL(/\/en\/admin\/emergencies$/);
+  await page.waitForURL(/\/en\/admin$/);
   await page.goto("/en/admin/events");
   await page.getByRole("link", { name: /Robotics fair visit/ }).click();
   await expect(page.getByText("Abu El Hol confirmed the buses")).toBeVisible();

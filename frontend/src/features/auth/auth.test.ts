@@ -57,8 +57,8 @@ describe("role access", () => {
     expect(homePathFor(Role.Parent)).toBe("/parent");
     expect(homePathFor(Role.Driver)).toBe("/driver");
     expect(homePathFor(Role.Supervisor)).toBe("/driver");
-    expect(homePathFor(Role.Transport)).toBe("/admin/emergencies");
-    expect(homePathFor(Role.SuperAdmin)).toBe("/admin/emergencies");
+    expect(homePathFor(Role.Transport)).toBe("/admin");
+    expect(homePathFor(Role.SuperAdmin)).toBe("/admin");
     expect(homePathFor(Role.Finance)).toBe("/admin/payments");
     expect(homePathFor(Role.StudentAffairs)).toBe("/admin/violations");
     expect(homePathFor(Role.SecretaryGeneral)).toBe("/admin/secretary-general");
@@ -96,7 +96,11 @@ describe("role access", () => {
     expect(canOpen(Role.Transport, "/admin/bus-company")).toBe(false);
     expect(canOpen(Role.SecretaryGeneral, "/admin/secretary-general")).toBe(true);
     expect(canOpen(Role.SecretaryGeneral, "/admin/events")).toBe(false);
-    expect(canOpen(Role.Transport, "/admin")).toBe(false);
+    // The overview is the Transportation office's home; other offices have none there.
+    expect(canOpen(Role.Transport, "/admin")).toBe(true);
+    expect(canOpen(Role.Transport, "/admin/students/usr_student_2")).toBe(true);
+    expect(canOpen(Role.Finance, "/admin/students")).toBe(false);
+    expect(canOpen(Role.SecretaryGeneral, "/admin/tracking")).toBe(false);
     expect(canOpen(Role.Transport, "/admin/emergencies/sos_1")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/clinic")).toBe(true);
     expect(canOpen(Role.Clinic, "/admin/payments")).toBe(false);

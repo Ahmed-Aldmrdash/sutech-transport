@@ -49,8 +49,10 @@ test.describe("emergencies", () => {
     await driverRaisesSos(page);
 
     await switchTo(page, TRANSPORT);
-    await page.waitForURL(/\/en\/admin\/emergencies$/);
-    // The office lands on the emergencies desk, where the new alert heads the list.
+    await page.waitForURL(/\/en\/admin$/);
+    // The overview shows the open alert first; its desk lists it at the top.
+    await expect(page.getByRole("link", { name: /Open emergencies/ })).toContainText("1");
+    await page.goto("/en/admin/emergencies");
     await page
       .getByRole("link", { name: /Bus problem Not taken Line 7/ })
       .first()

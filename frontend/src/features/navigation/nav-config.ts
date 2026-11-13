@@ -39,6 +39,7 @@ import { Role } from "@/lib/auth/roles";
 export type NavItemKey =
   | "home"
   | "lines"
+  | "lineDirectory"
   | "payment"
   | "card"
   | "tracking"
@@ -196,6 +197,12 @@ const { Transport, Finance, Clinic, StudentAffairs, SecretaryGeneral, BusCompany
 
 /** Office pages that are built. Every other office page shows as "coming soon". */
 const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
+  "overview",
+  "liveTracking",
+  "attendance",
+  "lineDirectory",
+  "busesDrivers",
+  "students",
   "emergencies",
   "clinic",
   "announcements",
@@ -240,7 +247,7 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
       },
       { key: "attendance", icon: UserCheck, segment: "attendance", roles: [Transport] },
       { key: "announcements", icon: Megaphone, segment: "announcements", roles: [Transport] },
-      { key: "lines", icon: Route, segment: "lines", roles: [Transport] },
+      { key: "lineDirectory", icon: Route, segment: "lines", roles: [Transport] },
       { key: "busesDrivers", icon: Bus, segment: "buses", roles: [Transport] },
       { key: "students", icon: UsersRound, segment: "students", roles: [Transport] },
       { key: "departures", icon: Armchair, segment: "departures", roles: [Transport] },

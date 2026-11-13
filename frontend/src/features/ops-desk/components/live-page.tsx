@@ -2,7 +2,10 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { Alert } from "@/components/ui/alert";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { Tone } from "@/components/ui/tone";
+import { TestDayButton } from "@/features/crew/components/test-day-button";
 import { PageHeader } from "@/components/ui/page-header";
 import { DeskListState } from "@/features/desk-kit/components/desk-list-state";
 import type { Locale } from "@/i18n/routing";
@@ -100,6 +103,7 @@ function LiveView({
       ),
     [shown, t],
   );
+  const allIdle = live.items.every((bus) => bus.status === LiveBusStatus.NoService);
   const counts = {
     road: live.items.filter(KEEP[Filter.Road]).length,
     late: live.items.filter(KEEP[Filter.Late]).length,
@@ -124,6 +128,15 @@ function LiveView({
           {t("updatedAt", { time: updatedAt })}
         </p>
       </div>
+      {counts.road === 0 ? (
+        <Alert
+          tone={Tone.Info}
+          title={allIdle ? t("noServiceTitle") : t("noneOnRoadTitle")}
+          action={allIdle ? <TestDayButton onStarted={onChanged} /> : undefined}
+        >
+          {allIdle ? t("noServiceBody") : t("noneOnRoadBody")}
+        </Alert>
+      ) : null}
       <div className="grid items-start gap-4 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-4">
           <FleetMap

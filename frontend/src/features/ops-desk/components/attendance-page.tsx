@@ -12,6 +12,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { StatTile } from "@/components/ui/stat-tile";
 import { DataTable } from "@/components/ui/table";
 import { RiderStateBadge } from "@/features/crew/components/rider-state-badge";
+import { TestDayButton } from "@/features/crew/components/test-day-button";
 import { RiderState, type Rider } from "@/features/crew/schema";
 import { DeskListState } from "@/features/desk-kit/components/desk-list-state";
 import { SG_DAYS_BACK_MAX } from "@/features/sg-office/schema";
@@ -91,13 +92,15 @@ export function AttendancePage() {
         />
       </div>
       <DeskListState state={state}>
-        {(attendance: LineAttendance) => <Roster attendance={attendance} />}
+        {(attendance: LineAttendance) => (
+          <Roster attendance={attendance} onTestDay={state.reload} />
+        )}
       </DeskListState>
     </div>
   );
 }
 
-function Roster({ attendance }: { attendance: LineAttendance }) {
+function Roster({ attendance, onTestDay }: { attendance: LineAttendance; onTestDay: () => void }) {
   const t = useTranslations("desk.ops.attendance");
   const locale = useLocale() as Locale;
   const [filter, setFilter] = useState<StateFilter>("all");
@@ -106,7 +109,12 @@ function Roster({ attendance }: { attendance: LineAttendance }) {
 
   if (!attendance.is_service_day) {
     return (
-      <EmptyState icon={<CalendarX />} title={t("noService")} description={t("noServiceBody")} />
+      <EmptyState
+        icon={<CalendarX />}
+        title={t("noService")}
+        description={t("noServiceBody")}
+        action={attendance.date === todayInCairo() ? <TestDayButton onStarted={onTestDay} /> : null}
+      />
     );
   }
   const rows = attendance.riders.filter((rider) => filter === "all" || rider.state === filter);
@@ -161,9 +169,7 @@ function RiderTable({ rows }: { rows: Rider[] }) {
     if (rider.state === RiderState.CheckedOut && rider.checked_out_at) {
       return t("leftAt", {
         time: formatTime(rider.checked_out_at, locale),
-        reason: rider.checkout_reason
-          ? tAll(`crew.checkout.reasons.${rider.checkout_reason}`)
-          : "",
+        reason: rider.checkout_reason ? tAll(`crew.checkout.reasons.${rider.checkout_reason}`) : "",
       });
     }
     if (rider.boarded_at) return t("boardedAt", { time: formatTime(rider.boarded_at, locale) });

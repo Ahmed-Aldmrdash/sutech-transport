@@ -87,7 +87,8 @@ describe("findActiveItem", () => {
   it("never matches a page that isn't built yet", () => {
     expect(findActiveItem(navigation, "/student", "/student/assistant")).toBeUndefined();
     const office = navigationFor(Role.Transport);
-    expect(findActiveItem(office, "/admin", "/admin/lines")).toBeUndefined();
+    expect(findActiveItem(office, "/admin", "/admin/departures")).toBeUndefined();
+    expect(findActiveItem(office, "/admin", "/admin/lines/ln_07")?.key).toBe("lineDirectory");
     expect(findActiveItem(office, "/admin", "/admin/emergencies/sos_1")?.key).toBe("emergencies");
   });
 });
@@ -118,7 +119,7 @@ describe("roleHomeHref", () => {
     expect(roleHomeHref(navigationFor(Role.StudentAffairs))).toBe("/admin/violations");
     expect(roleHomeHref(navigationFor(Role.SecretaryGeneral))).toBe("/admin/secretary-general");
     expect(roleHomeHref(navigationFor(Role.BusCompany))).toBe("/admin/bus-company");
-    expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin/emergencies");
+    expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin");
     expect(roleHomeHref(navigationFor(Role.Clinic))).toBe("/admin/emergencies");
     expect(roleHomeHref(navigationFor(Role.Student))).toBe("/student");
   });

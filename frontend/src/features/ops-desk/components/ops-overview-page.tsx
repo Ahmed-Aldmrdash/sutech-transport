@@ -1,6 +1,12 @@
 "use client";
 
-import { CalendarDays, ClipboardList, MessageSquareWarning, Siren, type LucideIcon } from "lucide-react";
+import {
+  CalendarDays,
+  ClipboardList,
+  MessageSquareWarning,
+  Siren,
+  type LucideIcon,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { ButtonLink } from "@/components/ui/button";
@@ -23,7 +29,7 @@ export function OpsOverviewPage() {
         title={t("title")}
         description={t("lead")}
         actions={
-          <ButtonLink href="/admin/live" variant="secondary">
+          <ButtonLink href="/admin/tracking" variant="secondary">
             {t("liveLink")}
           </ButtonLink>
         }
