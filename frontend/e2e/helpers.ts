@@ -52,6 +52,8 @@ export async function signIn(page: Page, identifier: string, path = "/en/login")
 
 /** The mock keeps its data in this browser, so the next role signs in on the same page. */
 export async function switchTo(page: Page, identifier: string) {
+  // A /me check still in flight would save the session again after it is removed.
+  await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.evaluate(() => localStorage.removeItem("sut.session"));
   await page.context().clearCookies();
   await signIn(page, identifier);

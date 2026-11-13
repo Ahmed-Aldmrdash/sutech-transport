@@ -51,6 +51,7 @@ test("only the super admin opens the system pages", async ({ page }) => {
   for (const path of ["/en/admin/users", "/en/admin/audit-log"]) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/en\/admin$/);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   }
   await switchTo(page, "ADM-1001");
   await page.waitForURL(/\/en\/admin$/);
