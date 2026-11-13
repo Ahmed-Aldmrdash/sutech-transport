@@ -61,7 +61,7 @@ function weekdayOf(date: string): number {
 }
 
 /** Today, or a day up to a month back. */
-function dayOf(date: string | undefined, now: number): string {
+export function dayOf(date: string | undefined, now: number): string {
   const today = dateOf(now);
   const day = date ?? today;
   if (day > today || day < addDays(today, -SG_DAYS_BACK_MAX)) {
@@ -86,14 +86,14 @@ function previousServiceDay(date: string, now: number): string | null {
 // ---------------------------------------------------------------------------------------------
 // A line's morning
 
-interface LineMorning {
+export interface LineMorning {
   line: MockLineSource;
   status: LineDayStatus;
   riders: { rider: MockRider; state: ReturnType<typeof riderStateOf> }[];
   delayMinutes: number | null;
 }
 
-function lineMorning(line: MockLineSource, date: string, now: number): LineMorning {
+export function lineMorning(line: MockLineSource, date: string, now: number): LineMorning {
   if (!isMockServiceDay(date, weekdayOf(date))) {
     return { line, status: LineDayStatus.NoService, riders: [], delayMinutes: null };
   }
@@ -144,7 +144,7 @@ function toSgLine(morning: LineMorning, date: string, language: string): SgLine 
   };
 }
 
-function overviewOf(date: string, now: number, language: string): SgOverview {
+export function overviewOf(date: string, now: number, language: string): SgOverview {
   const isServiceDay = isMockServiceDay(date, weekdayOf(date));
   const lines = MOCK_LINES.map((line) => toSgLine(lineMorning(line, date, now), date, language));
   const sum = (pick: (line: SgLine) => number) => lines.reduce((total, l) => total + pick(l), 0);

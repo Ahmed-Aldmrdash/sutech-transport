@@ -2,6 +2,7 @@
 
 import { Armchair, Bus, Route, Warehouse } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { BackLink } from "@/components/ui/back-link";
 import { PageHeader } from "@/components/ui/page-header";
@@ -54,7 +55,14 @@ export function FleetPage() {
   );
 }
 
-function FleetTable({ items }: { items: FleetBus[] }) {
+/** Every bus with its driver and its day. `action` adds a last column (the office's buttons). */
+export function FleetTable({
+  items,
+  action,
+}: {
+  items: FleetBus[];
+  action?: { header: string; cell: (bus: FleetBus) => ReactNode };
+}) {
   const t = useTranslations();
   const locale = useLocale() as Locale;
   return (
@@ -108,6 +116,7 @@ function FleetTable({ items }: { items: FleetBus[] }) {
             </div>
           ),
         },
+        ...(action ? [{ key: "action", header: action.header, cell: action.cell }] : []),
       ]}
     />
   );

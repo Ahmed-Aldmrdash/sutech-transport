@@ -48,6 +48,7 @@ import {
   type EventBus,
   type EventList,
   type EventListQuery,
+  type Fleet,
   type FleetBus,
 } from "./schema";
 
@@ -361,9 +362,8 @@ registerMock(replyToRequestEndpoint, ({ params, body }, { token, language }) => 
   return toBusEvent(updated, Side.Company, language, now);
 });
 
-registerMock(getFleetEndpoint, (_input, { token, language }) => {
-  requireMockOffice(token, COMPANY);
-  const now = Date.now();
+/** Every company bus and what it does today; the Transportation office's fleet page too. */
+export function fleetToday(now: number, language: string): Fleet {
   const today = todayOf(now);
   const covering = new Map<string, string>();
   for (const { lineId, replacement } of allReplacements()) {
@@ -398,4 +398,9 @@ registerMock(getFleetEndpoint, (_input, { token, language }) => {
       seats: items.reduce((sum, item) => sum + item.seats, 0),
     },
   };
+}
+
+registerMock(getFleetEndpoint, (_input, { token, language }) => {
+  requireMockOffice(token, COMPANY);
+  return fleetToday(Date.now(), language);
 });

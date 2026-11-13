@@ -371,3 +371,12 @@ registerMock(actOnDeskRequestEndpoint, ({ params, body }, { token, language }) =
   );
   return toDeskRequest(findOwned(officer.user.role, request.requestId, now), language, now);
 });
+
+/** How many requests and complaints wait for the office to open them (the home page's queues). */
+export function newDeskCounts(role: Role, now: number): { requests: number; complaints: number } {
+  const fresh = visibleRequests(role, now).filter(
+    ({ request }) => stageOf(statusAt(request, now)) === DeskStage.New,
+  );
+  const complaints = fresh.filter(({ request }) => request.payload.kind === RequestKind.Complaint);
+  return { requests: fresh.length - complaints.length, complaints: complaints.length };
+}

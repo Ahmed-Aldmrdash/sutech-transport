@@ -27617,6 +27617,2030 @@
           }
         ]
       }
+    },
+    "/api/v1/admin/overview": {
+      "get": {
+        "operationId": "ops.overview",
+        "summary": "The Transportation office's home: the same day view as the Secretary General's (riding per line, delays, SOS, event buses) plus `queues`, what waits for the office now. `date` defaults to today; up to 31 days back. Errors: DATE_INVALID (422).",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                    },
+                    "is_today": {
+                      "type": "boolean"
+                    },
+                    "is_service_day": {
+                      "type": "boolean"
+                    },
+                    "previous_service_day": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "generated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "lines": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "lines_running": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "lines_delayed": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "subscribers": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "rode": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "not_going": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "absent": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "lines",
+                        "lines_running",
+                        "lines_delayed",
+                        "subscribers",
+                        "rode",
+                        "not_going",
+                        "absent"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "lines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "object",
+                            "properties": {
+                              "line_id": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "line_id",
+                              "code",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bus": {
+                            "type": "object",
+                            "properties": {
+                              "plate": {
+                                "type": "string"
+                              },
+                              "bus_type": {
+                                "type": "string",
+                                "enum": [
+                                  "minibus",
+                                  "coaster",
+                                  "midibus",
+                                  "large_bus"
+                                ]
+                              },
+                              "driver_name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "plate",
+                              "bus_type",
+                              "driver_name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "replaced": {
+                            "type": "boolean"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "no_service",
+                              "not_started",
+                              "in_progress",
+                              "ended"
+                            ]
+                          },
+                          "subscribers": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "rode": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "not_going": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "absent": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "delay_minutes": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "bus",
+                          "replaced",
+                          "status",
+                          "subscribers",
+                          "rode",
+                          "not_going",
+                          "absent",
+                          "delay_minutes"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "emergencies": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "sos_id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "medical",
+                              "breakdown",
+                              "accident"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "open",
+                              "acknowledged",
+                              "closed"
+                            ]
+                          },
+                          "line": {
+                            "type": "object",
+                            "properties": {
+                              "line_id": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "line_id",
+                              "code",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "raised_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "sos_id",
+                          "type",
+                          "status",
+                          "line",
+                          "raised_at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "event_id": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "military_education",
+                              "open_day",
+                              "competition",
+                              "field_trip",
+                              "sports",
+                              "other"
+                            ]
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "waiting_company",
+                              "confirmed",
+                              "declined",
+                              "cancelled"
+                            ]
+                          },
+                          "departs_at": {
+                            "type": "string",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                          },
+                          "destination": {
+                            "type": "string"
+                          },
+                          "students_count": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "buses": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "event_id",
+                          "reference",
+                          "kind",
+                          "title",
+                          "status",
+                          "departs_at",
+                          "destination",
+                          "students_count",
+                          "buses"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "violations_new": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "queues": {
+                      "type": "object",
+                      "properties": {
+                        "emergencies_open": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "requests_new": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "complaints_new": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "events_waiting": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "emergencies_open",
+                        "requests_new",
+                        "complaints_new",
+                        "events_waiting"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "date",
+                    "is_today",
+                    "is_service_day",
+                    "previous_service_day",
+                    "generated_at",
+                    "totals",
+                    "lines",
+                    "emergencies",
+                    "events",
+                    "violations_new",
+                    "queues"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/live": {
+      "get": {
+        "operationId": "ops.live",
+        "summary": "Every line's bus this morning on one map: latest GPS fix, the last stop passed, share of the trip done, riders scanned, the crew's delay and any open SOS. After the first read, follow `bus.location` on the WebSocket (the app re-reads every 10 s until then).",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "generated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "campus_location": {
+                      "type": "object",
+                      "properties": {
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "lat",
+                        "lng"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "object",
+                            "properties": {
+                              "line_id": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "line_id",
+                              "code",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "trip_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "bus": {
+                            "type": "object",
+                            "properties": {
+                              "plate": {
+                                "type": "string"
+                              },
+                              "bus_type": {
+                                "type": "string",
+                                "enum": [
+                                  "minibus",
+                                  "coaster",
+                                  "midibus",
+                                  "large_bus"
+                                ]
+                              },
+                              "driver_name": {
+                                "type": "string"
+                              },
+                              "driver_phone": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "plate",
+                              "bus_type",
+                              "driver_name",
+                              "driver_phone"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "replaced": {
+                            "type": "boolean"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "not_started",
+                              "on_the_road",
+                              "arrived",
+                              "no_service"
+                            ]
+                          },
+                          "position": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "lat": {
+                                    "type": "number"
+                                  },
+                                  "lng": {
+                                    "type": "number"
+                                  },
+                                  "heading": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 360
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "speed_kmh": {
+                                    "type": "number",
+                                    "minimum": 0
+                                  },
+                                  "recorded_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  }
+                                },
+                                "required": [
+                                  "lat",
+                                  "lng",
+                                  "heading",
+                                  "speed_kmh",
+                                  "recorded_at"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "near_stop": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "progress": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "leaves_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "subscribers": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "rode": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "delay_minutes": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "sos_open": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "trip_id",
+                          "bus",
+                          "replaced",
+                          "status",
+                          "position",
+                          "near_stop",
+                          "progress",
+                          "leaves_at",
+                          "subscribers",
+                          "rode",
+                          "delay_minutes",
+                          "sos_open"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "generated_at",
+                    "campus_location",
+                    "items"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/lines": {
+      "get": {
+        "operationId": "ops.lines",
+        "summary": "Every line with its own bus and driver, stops, subscribers, held seats and free seats, in the university's order.",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "line": {
+                            "type": "object",
+                            "properties": {
+                              "line_id": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "line_id",
+                              "code",
+                              "name"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "bus": {
+                            "type": "object",
+                            "properties": {
+                              "plate": {
+                                "type": "string"
+                              },
+                              "bus_type": {
+                                "type": "string",
+                                "enum": [
+                                  "minibus",
+                                  "coaster",
+                                  "midibus",
+                                  "large_bus"
+                                ]
+                              },
+                              "seats": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "driver_name": {
+                                "type": "string"
+                              },
+                              "driver_phone": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "plate",
+                              "bus_type",
+                              "seats",
+                              "driver_name",
+                              "driver_phone"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "stops": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "first_pickup": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "subscribers": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "reserved": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "seats_free": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "line",
+                          "bus",
+                          "stops",
+                          "first_pickup",
+                          "subscribers",
+                          "reserved",
+                          "seats_free"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "lines": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "seats": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "subscribers": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "seats_free": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "lines",
+                        "seats",
+                        "subscribers",
+                        "seats_free"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "totals"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/lines/{line_id}": {
+      "get": {
+        "operationId": "ops.line",
+        "summary": "One line: its stops with subscribers at each, its subscribers by stop, and today's morning trip id (for changing the bus or driver). Errors: LINE_NOT_FOUND (404).",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [
+          {
+            "name": "line_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "line": {
+                      "type": "object",
+                      "properties": {
+                        "line_id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "line_id",
+                        "code",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "bus": {
+                      "type": "object",
+                      "properties": {
+                        "plate": {
+                          "type": "string"
+                        },
+                        "bus_type": {
+                          "type": "string",
+                          "enum": [
+                            "minibus",
+                            "coaster",
+                            "midibus",
+                            "large_bus"
+                          ]
+                        },
+                        "seats": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "driver_name": {
+                          "type": "string"
+                        },
+                        "driver_phone": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "plate",
+                        "bus_type",
+                        "seats",
+                        "driver_name",
+                        "driver_phone"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "stops": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "first_pickup": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "subscribers": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "reserved": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "seats_free": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "stops_list": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "order": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "pickup_time": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "subscribers": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "order",
+                          "name",
+                          "pickup_time",
+                          "subscribers"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "students": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "student_id": {
+                            "type": "string"
+                          },
+                          "identifier": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "stop_order": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "stop_name": {
+                            "type": "string"
+                          },
+                          "pickup_time": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "student_id",
+                          "identifier",
+                          "name",
+                          "stop_order",
+                          "stop_name",
+                          "pickup_time"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "today_trip_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "line",
+                    "bus",
+                    "stops",
+                    "first_pickup",
+                    "subscribers",
+                    "reserved",
+                    "seats_free",
+                    "stops_list",
+                    "students",
+                    "today_trip_id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/attendance": {
+      "get": {
+        "operationId": "ops.attendance",
+        "summary": "Who rode one line's morning trip on one day: every subscriber with boarded, left on the way (with the reason), not going (with the reason) or absent. `date` defaults to today; up to 31 days back. Errors: DATE_INVALID (422), LINE_NOT_FOUND (404).",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [
+          {
+            "name": "line_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                    },
+                    "line": {
+                      "type": "object",
+                      "properties": {
+                        "line_id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "line_id",
+                        "code",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "is_service_day": {
+                      "type": "boolean"
+                    },
+                    "trip_status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "not_started",
+                            "in_progress",
+                            "ended"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "counts": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "waiting": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "boarded": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "checked_out": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "not_going": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "absent": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "waiting",
+                        "boarded",
+                        "checked_out",
+                        "not_going",
+                        "absent"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "riders": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "student_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "identifier": {
+                            "type": "string"
+                          },
+                          "stop_order": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "stop_name": {
+                            "type": "string"
+                          },
+                          "pickup_time": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "waiting",
+                              "boarded",
+                              "checked_out",
+                              "not_going",
+                              "absent"
+                            ]
+                          },
+                          "boarded_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "checked_out_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "checkout_reason": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "unwell",
+                                  "guardian_pickup",
+                                  "personal",
+                                  "other"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "checkout_note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "scan_method": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "qr",
+                                  "manual"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "not_going_reason": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "sick",
+                                  "no_lectures",
+                                  "personal",
+                                  "other"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "student_id",
+                          "name",
+                          "identifier",
+                          "stop_order",
+                          "stop_name",
+                          "pickup_time",
+                          "state",
+                          "boarded_at",
+                          "checked_out_at",
+                          "checkout_reason",
+                          "checkout_note",
+                          "scan_method",
+                          "not_going_reason"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "date",
+                    "line",
+                    "is_service_day",
+                    "trip_status",
+                    "counts",
+                    "riders"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/students": {
+      "get": {
+        "operationId": "ops.students",
+        "summary": "Students with a subscription this term. `q`: university ID or part of the name; `line_id`. 25 a page, by name.",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "line_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "student_id": {
+                            "type": "string"
+                          },
+                          "identifier": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "line_id": {
+                                    "type": "string"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "line_id",
+                                  "code",
+                                  "name"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "stop_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "subscription_status": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "reserved",
+                                  "payment_review",
+                                  "active",
+                                  "expired",
+                                  "cancelled"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "student_id",
+                          "identifier",
+                          "name",
+                          "line",
+                          "stop_name",
+                          "subscription_status"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "page": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "page_size": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "page_size"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/students/{student_id}": {
+      "get": {
+        "operationId": "ops.student",
+        "summary": "One student for the office: contact, guardian, seat, this term's morning trips so far and their requests. Errors: STUDENT_NOT_FOUND (404).",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "student_id": {
+                      "type": "string"
+                    },
+                    "identifier": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "line_id": {
+                              "type": "string"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "line_id",
+                            "code",
+                            "name"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "stop_name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "subscription_status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "reserved",
+                            "payment_review",
+                            "active",
+                            "expired",
+                            "cancelled"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "faculty": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "level": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "phone": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "pickup_time": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "guardian": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "phone": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "has_account": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "phone",
+                            "has_account"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "trips": {
+                      "type": "object",
+                      "properties": {
+                        "rode": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "not_going": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "absent": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "rode",
+                        "not_going",
+                        "absent"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "requests": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "line_change",
+                              "refund",
+                              "complaint",
+                              "model_permit"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "awaiting_guardian",
+                              "submitted",
+                              "in_review",
+                              "approved",
+                              "rejected",
+                              "resolved",
+                              "withdrawn"
+                            ]
+                          },
+                          "received_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "handled_here": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "request_id",
+                          "reference",
+                          "kind",
+                          "status",
+                          "received_at",
+                          "handled_here"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "student_id",
+                    "identifier",
+                    "name",
+                    "line",
+                    "stop_name",
+                    "subscription_status",
+                    "faculty",
+                    "level",
+                    "phone",
+                    "pickup_time",
+                    "guardian",
+                    "trips",
+                    "requests"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/buses": {
+      "get": {
+        "operationId": "ops.fleet",
+        "summary": "Every bus with its driver and what it does today (the same shape as Abu El Hol's fleet), plus today's morning trip per line for changing a line's bus or driver.",
+        "tags": [
+          "operations"
+        ],
+        "x-roles": [
+          "super_admin",
+          "transport_admin"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bus_id": {
+                            "type": "string"
+                          },
+                          "plate": {
+                            "type": "string"
+                          },
+                          "bus_type": {
+                            "type": "string",
+                            "enum": [
+                              "minibus",
+                              "coaster",
+                              "midibus",
+                              "large_bus"
+                            ]
+                          },
+                          "seats": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "driver_name": {
+                            "type": "string"
+                          },
+                          "driver_phone": {
+                            "type": "string"
+                          },
+                          "line": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "line_id": {
+                                    "type": "string"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "line_id",
+                                  "code",
+                                  "name"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "today": {
+                            "type": "string",
+                            "enum": [
+                              "on_line",
+                              "replacement",
+                              "spare"
+                            ]
+                          },
+                          "covering_line": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "line_id": {
+                                    "type": "string"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "line_id",
+                                  "code",
+                                  "name"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "event_today": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "event_id": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "event_id",
+                                  "title"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "bus_id",
+                          "plate",
+                          "bus_type",
+                          "seats",
+                          "driver_name",
+                          "driver_phone",
+                          "line",
+                          "today",
+                          "covering_line",
+                          "event_today"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "on_line": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "spare": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "seats": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "on_line",
+                        "spare",
+                        "seats"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "trips": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "line_id": {
+                            "type": "string"
+                          },
+                          "trip_id": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "line_id",
+                          "trip_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "counts",
+                    "trips"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
     }
   }
 }

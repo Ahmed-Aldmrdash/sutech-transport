@@ -12,6 +12,7 @@ export const MockFeature = {
   FinanceDesk: "finance-desk",
   Lines: "lines",
   Notifications: "notifications",
+  OpsDesk: "ops-desk",
   Payments: "payments",
   Reports: "reports",
   SgOffice: "sg-office",

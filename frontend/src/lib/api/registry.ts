@@ -12,6 +12,7 @@ import { requestsEndpoints } from "@/features/requests/api";
 import { emergenciesEndpoints } from "@/features/emergencies/api";
 import { eventBusesEndpoints } from "@/features/event-buses/api";
 import { financeDeskEndpoints } from "@/features/finance-desk/api";
+import { opsDeskEndpoints } from "@/features/ops-desk/api";
 import { reportsEndpoints } from "@/features/reports/api";
 import { requestDeskEndpoints } from "@/features/request-desk/api";
 import { sgOfficeEndpoints } from "@/features/sg-office/api";
@@ -53,4 +54,5 @@ export const allEndpoints: readonly Endpoint[] = [
   ...reportsEndpoints,
   ...eventBusesEndpoints,
   ...sgOfficeEndpoints,
+  ...opsDeskEndpoints,
 ];

@@ -330,7 +330,8 @@ function hashOf(text: string): number {
 
 /**
  * Everyone subscribed on the line. Ahmed: every bus is full, so the demo accounts with an
- * active booking on it are joined by made-up students up to the bus's seats.
+ * active booking on it are joined by made-up students up to the bus's seats (less the few
+ * seats some lines still offer).
  */
 export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockRider[] {
   const riders: MockRider[] = [];
@@ -361,7 +362,8 @@ export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockR
       isAccount: false,
     });
   }
-  const seats = MOCK_SEATS_BY_BUS[line.busType];
+  // The seats the line still offers this term stay empty.
+  const seats = MOCK_SEATS_BY_BUS[line.busType] - line.seatsAvailable;
   const stopCount = Math.max(1, line.stops.length);
   for (let seat = 0; riders.length < seats; seat += 1) {
     const seed = hashOf(`${line.lineId}-${seat}`);

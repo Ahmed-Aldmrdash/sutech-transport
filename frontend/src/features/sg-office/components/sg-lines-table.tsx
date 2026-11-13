@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
 import { DataTable } from "@/components/ui/table";
 import { Tone } from "@/components/ui/tone";
 import type { Locale } from "@/i18n/routing";
@@ -18,7 +19,14 @@ const STATUS_TONE: Record<LineDayStatus, Tone> = {
 const PERCENT = 100;
 
 /** Every line's morning: the bus, how far it got, and who rode. */
-export function SgLinesTable({ lines }: { lines: SgLine[] }) {
+export function SgLinesTable({
+  lines,
+  lineHref,
+}: {
+  lines: SgLine[];
+  /** Where a line's name links to (the Transportation office opens the line's riders). */
+  lineHref?: (lineId: string) => string;
+}) {
   const t = useTranslations("desk.sg.lines");
   const tAll = useTranslations();
   const locale = useLocale() as Locale;
@@ -38,9 +46,18 @@ export function SgLinesTable({ lines }: { lines: SgLine[] }) {
             header: t("line"),
             cell: (line) => (
               <div className="flex flex-col">
-                <span className="font-bold text-ink-strong">
-                  {t("lineValue", { code: line.line.code, name: line.line.name })}
-                </span>
+                {lineHref ? (
+                  <Link
+                    href={lineHref(line.line.line_id)}
+                    className="font-bold text-ink-strong underline-offset-4 hover:underline"
+                  >
+                    {t("lineValue", { code: line.line.code, name: line.line.name })}
+                  </Link>
+                ) : (
+                  <span className="font-bold text-ink-strong">
+                    {t("lineValue", { code: line.line.code, name: line.line.name })}
+                  </span>
+                )}
                 <span className="text-caption text-ink-muted">
                   <bdi>{line.bus.plate}</bdi> · {line.bus.driver_name}
                   {line.replaced ? ` · ${t("replaced")}` : ""}

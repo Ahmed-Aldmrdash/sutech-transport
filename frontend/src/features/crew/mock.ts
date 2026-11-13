@@ -57,7 +57,7 @@ function conflict(code: string, message: string): never {
   throw new MockHttpError(HTTP.Conflict, code, message);
 }
 
-function toRider(
+export function toRider(
   trip: MockCrewTrip,
   line: MockLineSource,
   rider: MockRider,
@@ -84,7 +84,7 @@ function toRider(
   };
 }
 
-function countsOf(riders: readonly Rider[]): RiderCounts {
+export function countsOf(riders: readonly Rider[]): RiderCounts {
   const count = (state: RiderState) => riders.filter((rider) => rider.state === state).length;
   return {
     total: riders.length,
