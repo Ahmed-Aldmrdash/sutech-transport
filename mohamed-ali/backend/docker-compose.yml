@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sutech_transport}
+      POSTGRES_USER: ${POSTGRES_USER:-sutech}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sutech}
+    ports:
+      - "5432:5432"
+    volumes:
+      - sutech_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sutech} -d ${POSTGRES_DB:-sutech_transport}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sutech_postgres_data:
