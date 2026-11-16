@@ -1,3 +1,4 @@
+import { TripDirection } from "@/features/trips/schema";
 import { APP_TIME_ZONE } from "@/lib/format";
 import {
   CrewTripStatus,
@@ -57,16 +58,50 @@ export function startTimeGap(trip: Pick<CrewTrip, "departure_time">, now: Date):
 }
 
 /**
- * The trip the crew is working on: the one running, else the first not ended yet, else the
- * last one (to show its summary). null on a day without trips.
+ * The trip the crew is working on: the one running, else the return if the morning trip never
+ * ran and the return may start, else the first not started yet, else the last one (to show its
+ * summary). null on a day without trips.
  */
-export function currentTrip(today: CrewToday): CrewTrip | null {
+export function currentTrip(today: CrewToday, now: Date = new Date()): CrewTrip | null {
+  const notStarted = today.trips.filter((trip) => trip.status === CrewTripStatus.NotStarted);
+  // A morning that never ran: once the return may start, it is the trip to work on.
+  const returnReady = notStarted.find(
+    (trip) =>
+      trip.direction === TripDirection.Return &&
+      !waitsForOutbound(outboundStatusOf(today), trip, now),
+  );
   return (
     today.trips.find((trip) => trip.status === CrewTripStatus.InProgress) ??
-    today.trips.find((trip) => trip.status === CrewTripStatus.NotStarted) ??
+    returnReady ??
+    notStarted[0] ??
     today.trips.at(-1) ??
     null
   );
+}
+
+/** The return trip may start this long before its time when the morning trip never ran. */
+const RETURN_EARLY_MINUTES = 60;
+
+/**
+ * The return trip waits for the morning trip to end. Only if the morning trip never ran (a
+ * day the bus didn't go out) may the return start on its own, from an hour before its time.
+ * The outbound trip has no such rule. The server checks the same (OUTBOUND_NOT_ENDED).
+ */
+export function waitsForOutbound(
+  outboundStatus: CrewTripStatus | null,
+  trip: Pick<CrewTrip, "direction" | "departure_time">,
+  now: Date,
+): boolean {
+  if (trip.direction !== TripDirection.Return) return false;
+  if (outboundStatus === null || outboundStatus === CrewTripStatus.Ended) return false;
+  if (outboundStatus === CrewTripStatus.InProgress) return true;
+  if (trip.departure_time === null) return true;
+  return cairoMinuteOfDay(now) < minuteOfDay(trip.departure_time) - RETURN_EARLY_MINUTES;
+}
+
+/** The status of the day's outbound trip, if there is one. */
+export function outboundStatusOf(today: CrewToday): CrewTripStatus | null {
+  return today.trips.find((item) => item.direction === TripDirection.Outbound)?.status ?? null;
 }
 
 /** Another trip is running, so this one can't start yet. */

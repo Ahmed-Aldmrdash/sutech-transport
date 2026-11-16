@@ -1184,7 +1184,7 @@
     "/api/v1/subscriptions": {
       "post": {
         "operationId": "subscriptions.create",
-        "summary": "Books a seat on a line at one stop and holds it for 24 hours until a receipt arrives. The price is fixed now. Errors: SEAT_UNAVAILABLE (409), ALREADY_SUBSCRIBED (409), LINE_NOT_FOUND (404), STOP_NOT_ON_LINE (422).",
+        "summary": "Books a seat on a line at one stop and holds it for 24 hours until a receipt arrives. The price is fixed now. Only while the booking window is open (GET /booking-window). Errors: BOOKING_CLOSED (409), STUDENT_BANNED (403), SEAT_UNAVAILABLE (409), ALREADY_SUBSCRIBED (409), LINE_NOT_FOUND (404), STOP_NOT_ON_LINE (422).",
         "tags": [
           "subscriptions"
         ],
@@ -12417,7 +12417,11 @@
                               "child_not_going",
                               "approval_needed",
                               "child_checked_out",
-                              "violation_decision"
+                              "violation_decision",
+                              "crew_assignment",
+                              "trip_started",
+                              "discipline",
+                              "booking_window"
                             ]
                           },
                           "title": {
@@ -12459,7 +12463,8 @@
                                       "complaint",
                                       "announcements",
                                       "child_day",
-                                      "approvals"
+                                      "approvals",
+                                      "lines"
                                     ]
                                   },
                                   "id": {
@@ -13044,7 +13049,8 @@
                 "rode",
                 "absent",
                 "not_going",
-                "checked_out"
+                "checked_out",
+                "suspended"
               ]
             }
           },
@@ -13127,7 +13133,8 @@
                               "rode",
                               "absent",
                               "not_going",
-                              "checked_out"
+                              "checked_out",
+                              "suspended"
                             ]
                           },
                           "boarded_at": {
@@ -14390,7 +14397,8 @@
                               "rode",
                               "absent",
                               "not_going",
-                              "checked_out"
+                              "checked_out",
+                              "suspended"
                             ]
                           },
                           "boarded_at": {
@@ -14714,6 +14722,60 @@
                               }
                             ]
                           },
+                          "started_by": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "role": {
+                                    "type": "string",
+                                    "enum": [
+                                      "driver",
+                                      "supervisor"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "role"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "ended_by": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "role": {
+                                    "type": "string",
+                                    "enum": [
+                                      "driver",
+                                      "supervisor"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "role"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "riders": {
                             "type": "array",
                             "items": {
@@ -14754,6 +14816,7 @@
                                     "boarded",
                                     "checked_out",
                                     "not_going",
+                                    "suspended",
                                     "absent"
                                   ]
                                 },
@@ -14880,6 +14943,11 @@
                                 "minimum": 0,
                                 "maximum": 9007199254740991
                               },
+                              "suspended": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
                               "absent": {
                                 "type": "integer",
                                 "minimum": 0,
@@ -14892,6 +14960,7 @@
                               "boarded",
                               "checked_out",
                               "not_going",
+                              "suspended",
                               "absent"
                             ],
                             "additionalProperties": false
@@ -15035,6 +15104,8 @@
                           "departure_time",
                           "started_at",
                           "ended_at",
+                          "started_by",
+                          "ended_by",
                           "riders",
                           "counts",
                           "delays",
@@ -15072,6 +15143,55 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "assigned": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "home_line": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "line_id": {
+                                      "type": "string"
+                                    },
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "line_id",
+                                    "code",
+                                    "name"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                            }
+                          },
+                          "required": [
+                            "home_line",
+                            "at"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -15083,7 +15203,8 @@
                     "stops",
                     "campus_arrival",
                     "trips",
-                    "relieved"
+                    "relieved",
+                    "assigned"
                   ],
                   "additionalProperties": false
                 }
@@ -15194,6 +15315,60 @@
                         }
                       ]
                     },
+                    "started_by": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "driver",
+                                "supervisor"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "role"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ended_by": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "driver",
+                                "supervisor"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "role"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "riders": {
                       "type": "array",
                       "items": {
@@ -15234,6 +15409,7 @@
                               "boarded",
                               "checked_out",
                               "not_going",
+                              "suspended",
                               "absent"
                             ]
                           },
@@ -15360,6 +15536,11 @@
                           "minimum": 0,
                           "maximum": 9007199254740991
                         },
+                        "suspended": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
                         "absent": {
                           "type": "integer",
                           "minimum": 0,
@@ -15372,6 +15553,7 @@
                         "boarded",
                         "checked_out",
                         "not_going",
+                        "suspended",
                         "absent"
                       ],
                       "additionalProperties": false
@@ -15515,6 +15697,8 @@
                     "departure_time",
                     "started_at",
                     "ended_at",
+                    "started_by",
+                    "ended_by",
                     "riders",
                     "counts",
                     "delays",
@@ -15630,6 +15814,60 @@
                         }
                       ]
                     },
+                    "started_by": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "driver",
+                                "supervisor"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "role"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ended_by": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "driver",
+                                "supervisor"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "role"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "riders": {
                       "type": "array",
                       "items": {
@@ -15670,6 +15908,7 @@
                               "boarded",
                               "checked_out",
                               "not_going",
+                              "suspended",
                               "absent"
                             ]
                           },
@@ -15796,6 +16035,11 @@
                           "minimum": 0,
                           "maximum": 9007199254740991
                         },
+                        "suspended": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
                         "absent": {
                           "type": "integer",
                           "minimum": 0,
@@ -15808,6 +16052,7 @@
                         "boarded",
                         "checked_out",
                         "not_going",
+                        "suspended",
                         "absent"
                       ],
                       "additionalProperties": false
@@ -15951,6 +16196,8 @@
                     "departure_time",
                     "started_at",
                     "ended_at",
+                    "started_by",
+                    "ended_by",
                     "riders",
                     "counts",
                     "delays",
@@ -16051,6 +16298,7 @@
                             "boarded",
                             "checked_out",
                             "not_going",
+                            "suspended",
                             "absent"
                           ]
                         },
@@ -16176,6 +16424,11 @@
                           "minimum": 0,
                           "maximum": 9007199254740991
                         },
+                        "suspended": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
                         "absent": {
                           "type": "integer",
                           "minimum": 0,
@@ -16188,6 +16441,7 @@
                         "boarded",
                         "checked_out",
                         "not_going",
+                        "suspended",
                         "absent"
                       ],
                       "additionalProperties": false
@@ -27144,6 +27398,7 @@
                               "on_bus",
                               "arrived",
                               "checked_out",
+                              "suspended",
                               "not_going",
                               "absent"
                             ]
@@ -27337,6 +27592,7 @@
                               "on_bus",
                               "arrived",
                               "checked_out",
+                              "suspended",
                               "not_going",
                               "absent"
                             ]
@@ -27562,6 +27818,7 @@
                               "on_bus",
                               "arrived",
                               "checked_out",
+                              "suspended",
                               "not_going",
                               "absent"
                             ]
@@ -28831,6 +29088,11 @@
                           "minimum": 0,
                           "maximum": 9007199254740991
                         },
+                        "suspended": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
                         "absent": {
                           "type": "integer",
                           "minimum": 0,
@@ -28843,6 +29105,7 @@
                         "boarded",
                         "checked_out",
                         "not_going",
+                        "suspended",
                         "absent"
                       ],
                       "additionalProperties": false
@@ -28887,6 +29150,7 @@
                               "boarded",
                               "checked_out",
                               "not_going",
+                              "suspended",
                               "absent"
                             ]
                           },
@@ -29013,13 +29277,14 @@
     "/api/v1/admin/students": {
       "get": {
         "operationId": "ops.students",
-        "summary": "Students with a subscription this term. `q`: university ID or part of the name; `line_id`. 25 a page, by name.",
+        "summary": "Students with a subscription this term. `q`: university ID or part of the name; `line_id`; `standing` (good, warned, suspended, banned). 25 a page, by name. Student Affairs opens it too, to warn, suspend or ban.",
         "tags": [
           "operations"
         ],
         "x-roles": [
-          "super_admin",
-          "transport_admin"
+          "transport_admin",
+          "student_affairs",
+          "super_admin"
         ],
         "parameters": [
           {
@@ -29037,6 +29302,20 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "standing",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "good",
+                "warned",
+                "suspended",
+                "banned"
+              ]
             }
           },
           {
@@ -29122,6 +29401,15 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "standing": {
+                            "type": "string",
+                            "enum": [
+                              "good",
+                              "warned",
+                              "suspended",
+                              "banned"
+                            ]
                           }
                         },
                         "required": [
@@ -29130,7 +29418,8 @@
                           "name",
                           "line",
                           "stop_name",
-                          "subscription_status"
+                          "subscription_status",
+                          "standing"
                         ],
                         "additionalProperties": false
                       }
@@ -29176,13 +29465,14 @@
     "/api/v1/admin/students/{student_id}": {
       "get": {
         "operationId": "ops.student",
-        "summary": "One student for the office: contact, guardian, seat, this term's morning trips so far and their requests. Errors: STUDENT_NOT_FOUND (404).",
+        "summary": "One student for the office: contact, guardian, seat, this term's morning trips so far and their requests, with their standing. Errors: STUDENT_NOT_FOUND (404).",
         "tags": [
           "operations"
         ],
         "x-roles": [
-          "super_admin",
-          "transport_admin"
+          "transport_admin",
+          "student_affairs",
+          "super_admin"
         ],
         "parameters": [
           {
@@ -29261,6 +29551,15 @@
                         {
                           "type": "null"
                         }
+                      ]
+                    },
+                    "standing": {
+                      "type": "string",
+                      "enum": [
+                        "good",
+                        "warned",
+                        "suspended",
+                        "banned"
                       ]
                     },
                     "faculty": {
@@ -29414,6 +29713,7 @@
                     "line",
                     "stop_name",
                     "subscription_status",
+                    "standing",
                     "faculty",
                     "level",
                     "phone",
@@ -30430,7 +30730,9 @@
                 "emergencies",
                 "events",
                 "users",
-                "timetable"
+                "timetable",
+                "booking",
+                "discipline"
               ]
             }
           },
@@ -30532,7 +30834,14 @@
                               "user_stopped",
                               "user_activated",
                               "user_role_changed",
-                              "return_time_changed"
+                              "return_time_changed",
+                              "booking_opened",
+                              "booking_extended",
+                              "booking_closed",
+                              "student_warned",
+                              "student_suspended",
+                              "student_banned",
+                              "discipline_lifted"
                             ]
                           },
                           "area": {
@@ -30545,7 +30854,9 @@
                               "emergencies",
                               "events",
                               "users",
-                              "timetable"
+                              "timetable",
+                              "booking",
+                              "discipline"
                             ]
                           },
                           "target": {
@@ -30606,6 +30917,1209 @@
             "sessionCookie": []
           }
         ]
+      }
+    },
+    "/api/v1/assistant/ask": {
+      "post": {
+        "operationId": "assistant.ask",
+        "summary": "The students' assistant (floating button on every student page). Answers from the university's transport documents only (price, payment, refunds, conduct rules, timetable, requests), in the question's language, with its sources. The AI team's service behind one ask_llm layer; the student's own line and subscription may be used as context. needs_office=true when it has no answer. Rate limit: 20 questions a minute per student (429 RATE_LIMITED).",
+        "tags": [
+          "assistant"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "answer": {
+                      "type": "string"
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "needs_office": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "answer",
+                    "sources",
+                    "needs_office"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  "history": {
+                    "maxItems": 6,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "assistant"
+                          ]
+                        },
+                        "text": {
+                          "type": "string",
+                          "maxLength": 4000
+                        }
+                      },
+                      "required": [
+                        "role",
+                        "text"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "question",
+                  "history"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/booking-window": {
+      "get": {
+        "operationId": "bookingWindow.get",
+        "summary": "The term's booking window: not_open, open (until closes_at) or closed. Students see it on the lines page; the Transportation office also gets the history of its changes.",
+        "tags": [
+          "booking-window"
+        ],
+        "x-roles": [
+          "student",
+          "transport_admin",
+          "super_admin"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "term_name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "not_open",
+                        "open",
+                        "closed"
+                      ]
+                    },
+                    "opens_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "closes_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "history": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "open",
+                              "extend",
+                              "close"
+                            ]
+                          },
+                          "opens_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "closes_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "by_name": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          }
+                        },
+                        "required": [
+                          "action",
+                          "opens_at",
+                          "closes_at",
+                          "note",
+                          "by_name",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "term_name",
+                    "status",
+                    "opens_at",
+                    "closes_at",
+                    "history"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/booking-window": {
+      "put": {
+        "operationId": "bookingWindow.update",
+        "summary": "Opens booking (now or at opens_at, until closes_at), extends it (a later closes_at; a closed window opens again) or closes it now. While it isn't open, POST /subscriptions answers BOOKING_CLOSED (409) whatever the seats; reservations already made can still be paid. Students without an active subscription are notified when booking opens or is extended. Logged in the audit log. Errors: INVALID_WINDOW (422), EXTEND_MUST_BE_LATER (422), NEVER_OPENED (409), ALREADY_CLOSED (409).",
+        "tags": [
+          "booking-window"
+        ],
+        "x-roles": [
+          "transport_admin",
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "term_name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "not_open",
+                        "open",
+                        "closed"
+                      ]
+                    },
+                    "opens_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "closes_at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "history": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "open",
+                              "extend",
+                              "close"
+                            ]
+                          },
+                          "opens_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "closes_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "by_name": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          }
+                        },
+                        "required": [
+                          "action",
+                          "opens_at",
+                          "closes_at",
+                          "note",
+                          "by_name",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "term_name",
+                    "status",
+                    "opens_at",
+                    "closes_at",
+                    "history"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "open",
+                      "extend",
+                      "close"
+                    ]
+                  },
+                  "opens_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "closes_at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "note": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "action",
+                  "opens_at",
+                  "closes_at",
+                  "note"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/discipline/me": {
+      "get": {
+        "operationId": "discipline.mine",
+        "summary": "The student's own standing (good, warned, suspended, banned) with their warnings, suspensions and bans, newest first. Shown on the home page.",
+        "tags": [
+          "discipline"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "standing": {
+                      "type": "string",
+                      "enum": [
+                        "good",
+                        "warned",
+                        "suspended",
+                        "banned"
+                      ]
+                    },
+                    "warnings": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "suspended_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "record_id": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "suspension",
+                              "ban"
+                            ]
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "starts_on": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "ends_on": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "in_force": {
+                            "type": "boolean"
+                          },
+                          "by_name": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          "lifted_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "lifted_by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "lift_note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "record_id",
+                          "action",
+                          "reason",
+                          "starts_on",
+                          "ends_on",
+                          "in_force",
+                          "by_name",
+                          "created_at",
+                          "lifted_at",
+                          "lifted_by_name",
+                          "lift_note"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "standing",
+                    "warnings",
+                    "suspended_until",
+                    "records"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/students/{student_id}/discipline": {
+      "get": {
+        "operationId": "discipline.list",
+        "summary": "A student's standing and every warning, suspension and ban on file, newest first.",
+        "tags": [
+          "discipline"
+        ],
+        "x-roles": [
+          "transport_admin",
+          "student_affairs",
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "standing": {
+                      "type": "string",
+                      "enum": [
+                        "good",
+                        "warned",
+                        "suspended",
+                        "banned"
+                      ]
+                    },
+                    "warnings": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "suspended_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "record_id": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "suspension",
+                              "ban"
+                            ]
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "starts_on": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "ends_on": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "in_force": {
+                            "type": "boolean"
+                          },
+                          "by_name": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          "lifted_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "lifted_by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "lift_note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "record_id",
+                          "action",
+                          "reason",
+                          "starts_on",
+                          "ends_on",
+                          "in_force",
+                          "by_name",
+                          "created_at",
+                          "lifted_at",
+                          "lifted_by_name",
+                          "lift_note"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "standing",
+                    "warnings",
+                    "suspended_until",
+                    "records"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "discipline.create",
+        "summary": "Warns, suspends (until ends_on) or bans a student, with a reason the student and their guardians are notified of. A suspension or ban takes effect today: the crew's scan answers STUDENT_SUSPENDED / STUDENT_BANNED and the student shows as suspended on the trip (never absent); a banned student can't book (STUDENT_BANNED on POST /subscriptions). Their seat is kept. Logged in the audit log. Errors: STUDENT_NOT_FOUND (404), INVALID_SUSPENSION (422), ALREADY_BANNED (409).",
+        "tags": [
+          "discipline"
+        ],
+        "x-roles": [
+          "transport_admin",
+          "student_affairs",
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "standing": {
+                      "type": "string",
+                      "enum": [
+                        "good",
+                        "warned",
+                        "suspended",
+                        "banned"
+                      ]
+                    },
+                    "warnings": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "suspended_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "record_id": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "suspension",
+                              "ban"
+                            ]
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "starts_on": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "ends_on": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "in_force": {
+                            "type": "boolean"
+                          },
+                          "by_name": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          "lifted_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "lifted_by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "lift_note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "record_id",
+                          "action",
+                          "reason",
+                          "starts_on",
+                          "ends_on",
+                          "in_force",
+                          "by_name",
+                          "created_at",
+                          "lifted_at",
+                          "lifted_by_name",
+                          "lift_note"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "standing",
+                    "warnings",
+                    "suspended_until",
+                    "records"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "warning",
+                      "suspension",
+                      "ban"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 300
+                  },
+                  "ends_on": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "action",
+                  "reason",
+                  "ends_on"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/discipline/{record_id}/lift": {
+      "post": {
+        "operationId": "discipline.lift",
+        "summary": "Ends a suspension or a ban early, with a note. The student and guardians are told. Errors: NOT_LIFTABLE (409, a warning), ALREADY_LIFTED (409).",
+        "tags": [
+          "discipline"
+        ],
+        "x-roles": [
+          "transport_admin",
+          "student_affairs",
+          "super_admin"
+        ],
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "description": "A unique key per action; a repeated request with the same key runs once.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "standing": {
+                      "type": "string",
+                      "enum": [
+                        "good",
+                        "warned",
+                        "suspended",
+                        "banned"
+                      ]
+                    },
+                    "warnings": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "suspended_until": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "record_id": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "warning",
+                              "suspension",
+                              "ban"
+                            ]
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "starts_on": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "ends_on": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "in_force": {
+                            "type": "boolean"
+                          },
+                          "by_name": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          "lifted_at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "lifted_by_name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "lift_note": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "record_id",
+                          "action",
+                          "reason",
+                          "starts_on",
+                          "ends_on",
+                          "in_force",
+                          "by_name",
+                          "created_at",
+                          "lifted_at",
+                          "lifted_by_name",
+                          "lift_note"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "standing",
+                    "warnings",
+                    "suspended_until",
+                    "records"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "note"
+                ]
+              }
+            }
+          }
+        }
       }
     }
   }

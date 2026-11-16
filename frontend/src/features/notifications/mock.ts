@@ -33,6 +33,12 @@ import {
   markNotificationReadEndpoint,
 } from "./api";
 import { guardianViolationNotifications, studentViolationNotifications } from "./mock-violations";
+import {
+  bookingWindowNotifications,
+  crewNotifications,
+  guardianDisciplineNotifications,
+  studentDisciplineNotifications,
+} from "./mock-new-events";
 import { NotificationKind, NotificationTarget, type AppNotification } from "./schema";
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -367,8 +373,8 @@ function daysOffNotifications(guardianId: string, language: string, now: number)
           ),
           body: localized(
             language,
-            `البلاغ من التطبيق: ${detail}`,
-            `They said so in the app: ${detail}`,
+            `البلاغ من التطبيق: ${detail}. للعلم بس، مش محتاج موافقتك.`,
+            `They said so in the app: ${detail}. Just so you know: no approval needed.`,
           ),
           created_at: new Date(item.createdAt).toISOString(),
           link: { target: NotificationTarget.ChildDay, id: user.id },
@@ -414,6 +420,8 @@ function notificationsFor(userId: string, role: Role, language: string): AppNoti
           ...requestNotifications(userId, language),
           ...busNearNotifications(userId, language, now),
           ...studentViolationNotifications(userId, language),
+          ...studentDisciplineNotifications(userId, language),
+          ...bookingWindowNotifications(userId, language),
         ]
       : []),
     ...(role === Role.Parent
@@ -422,7 +430,11 @@ function notificationsFor(userId: string, role: Role, language: string): AppNoti
           ...daysOffNotifications(userId, language, now),
           ...approvalNotifications(userId, language, now),
           ...guardianViolationNotifications(userId, language),
+          ...guardianDisciplineNotifications(userId, language),
         ]
+      : []),
+    ...(role === Role.Driver || role === Role.Supervisor
+      ? crewNotifications(userId, language, now)
       : []),
   ];
   const read = readStateOf(userId);

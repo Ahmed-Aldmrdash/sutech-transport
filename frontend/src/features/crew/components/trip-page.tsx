@@ -53,6 +53,20 @@ function TripView({ today, refresh }: { today: CrewToday; refresh: () => void })
           {t(`sosOpenBody.${trip.sos.status}`)}
         </Alert>
       ) : null}
+      {today.assigned ? (
+        <Alert tone={Tone.Info} title={t("assignedTitle", { code: today.line.code })}>
+          {today.assigned.home_line
+            ? t("assignedBodyHome", {
+                time: formatTime(today.assigned.at, locale),
+                plate: today.bus.plate,
+                home: today.assigned.home_line.code,
+              })
+            : t("assignedBody", {
+                time: formatTime(today.assigned.at, locale),
+                plate: today.bus.plate,
+              })}
+        </Alert>
+      ) : null}
       {today.relieved ? (
         <Alert tone={Tone.Warning} title={t("relievedTitle")}>
           {t("relievedBody", {
@@ -78,7 +92,7 @@ function TripView({ today, refresh }: { today: CrewToday; refresh: () => void })
               <CardHeader title={t("otherTrips")} headingLevel={2} />
               <CardBody className="flex flex-col gap-3">
                 {others.map((item) => (
-                  <OtherTripRow key={item.trip_id} today={today} trip={item} onChanged={refresh} />
+                  <OtherTripRow key={item.trip_id} trip={item} />
                 ))}
               </CardBody>
             </Card>

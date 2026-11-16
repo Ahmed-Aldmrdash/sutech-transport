@@ -110,6 +110,8 @@ export const AuditArea = {
   Events: "events",
   Users: "users",
   Timetable: "timetable",
+  Booking: "booking",
+  Discipline: "discipline",
 } as const;
 export type AuditArea = (typeof AuditArea)[keyof typeof AuditArea];
 export const AUDIT_AREAS = Object.values(AuditArea) as [AuditArea, ...AuditArea[]];
@@ -136,6 +138,13 @@ export const AuditAction = {
   UserActivated: "user_activated",
   UserRoleChanged: "user_role_changed",
   ReturnTimeChanged: "return_time_changed",
+  BookingOpened: "booking_opened",
+  BookingExtended: "booking_extended",
+  BookingClosed: "booking_closed",
+  StudentWarned: "student_warned",
+  StudentSuspended: "student_suspended",
+  StudentBanned: "student_banned",
+  DisciplineLifted: "discipline_lifted",
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
 const AUDIT_ACTIONS = Object.values(AuditAction) as [AuditAction, ...AuditAction[]];
@@ -162,6 +171,13 @@ export const AUDIT_AREA_OF: Record<AuditAction, AuditArea> = {
   [AuditAction.UserActivated]: AuditArea.Users,
   [AuditAction.UserRoleChanged]: AuditArea.Users,
   [AuditAction.ReturnTimeChanged]: AuditArea.Timetable,
+  [AuditAction.BookingOpened]: AuditArea.Booking,
+  [AuditAction.BookingExtended]: AuditArea.Booking,
+  [AuditAction.BookingClosed]: AuditArea.Booking,
+  [AuditAction.StudentWarned]: AuditArea.Discipline,
+  [AuditAction.StudentSuspended]: AuditArea.Discipline,
+  [AuditAction.StudentBanned]: AuditArea.Discipline,
+  [AuditAction.DisciplineLifted]: AuditArea.Discipline,
 };
 
 export const auditQuerySchema = z.object({

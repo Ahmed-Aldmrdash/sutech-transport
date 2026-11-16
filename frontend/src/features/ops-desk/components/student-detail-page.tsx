@@ -9,6 +9,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatTile } from "@/components/ui/stat-tile";
 import { DeskListState } from "@/features/desk-kit/components/desk-list-state";
 import { DeskRow } from "@/features/desk-kit/components/desk-row";
+import { DisciplineCard } from "@/features/discipline/components/discipline-card";
+import { StandingBadge } from "@/features/discipline/components/standing-badge";
 import { CallLink, Fact } from "@/features/emergencies/components/sos-facts";
 import { RequestKind } from "@/features/requests/schema";
 import type { Locale } from "@/i18n/routing";
@@ -18,7 +20,10 @@ import { getOpsStudent } from "../api";
 import type { OpsStudentDetail } from "../schema";
 import { SubscriptionBadge } from "./subscription-badge";
 
-/** One student for the Transportation office: who to call, their seat, trips and requests. */
+/**
+ * One student for the Transportation office and Student Affairs: who to call, their seat,
+ * warnings and suspensions, trips and requests.
+ */
 export function StudentDetailPage({ studentId }: { studentId: string }) {
   const t = useTranslations("desk.ops.students");
   const state = useAsync((signal) => getOpsStudent(studentId, { signal }), [studentId]);
@@ -44,6 +49,7 @@ function StudentDetail({ student }: { student: OpsStudentDetail }) {
           <span className="flex flex-wrap items-center gap-2">
             <bdi className="tabular-nums">{student.identifier}</bdi>
             <SubscriptionBadge status={student.subscription_status} />
+            <StandingBadge standing={student.standing} />
           </span>
         }
       />
@@ -88,6 +94,7 @@ function StudentDetail({ student }: { student: OpsStudentDetail }) {
           </dl>
         </CardBody>
       </Card>
+      <DisciplineCard studentId={student.student_id} studentName={student.name} />
       <section aria-labelledby="student-trips" className="flex flex-col gap-3">
         <h2 id="student-trips" className="text-h3 text-ink-strong">
           {t("tripsTitle")}

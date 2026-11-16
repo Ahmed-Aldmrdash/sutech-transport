@@ -10,6 +10,9 @@ import { MOCK_FEATURE_OF } from "./mock-routing";
 const LOADERS: Record<MockFeatureName, () => Promise<unknown>> = {
   [MockFeature.Absences]: () => import("@/features/absences/mock"),
   [MockFeature.AdminSystem]: () => import("@/features/admin-system/mock"),
+  [MockFeature.Assistant]: () => import("@/features/assistant/mock"),
+  [MockFeature.BookingWindow]: () => import("@/features/booking-window/mock"),
+  [MockFeature.Discipline]: () => import("@/features/discipline/mock"),
   [MockFeature.Announcements]: () => import("@/features/announcements/mock"),
   [MockFeature.Attendance]: () => import("@/features/attendance/mock"),
   [MockFeature.Auth]: () => import("@/features/auth/mock"),

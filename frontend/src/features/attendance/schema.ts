@@ -14,6 +14,8 @@ export const TripOutcome = {
   Absent: "absent",
   NotGoing: "not_going",
   CheckedOut: "checked_out",
+  /** The office suspended or banned the student that day: not allowed to ride. */
+  Suspended: "suspended",
 } as const;
 export type TripOutcome = (typeof TripOutcome)[keyof typeof TripOutcome];
 export const TRIP_OUTCOMES = [
@@ -21,6 +23,7 @@ export const TRIP_OUTCOMES = [
   TripOutcome.Absent,
   TripOutcome.NotGoing,
   TripOutcome.CheckedOut,
+  TripOutcome.Suspended,
 ] as const;
 
 export const tripRecordSchema = z.object({

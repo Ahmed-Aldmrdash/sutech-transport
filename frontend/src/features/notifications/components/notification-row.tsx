@@ -14,6 +14,10 @@ import {
   Timer,
   UserX,
   type LucideIcon,
+  Ban,
+  CalendarClock,
+  Play,
+  Repeat,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -41,6 +45,10 @@ const KIND_ICON: Record<NotificationKind, LucideIcon> = {
   [NotificationKind.ChildCheckedOut]: LogOut,
   [NotificationKind.ApprovalNeeded]: ListChecks,
   [NotificationKind.ViolationDecision]: ShieldAlert,
+  [NotificationKind.CrewAssignment]: Repeat,
+  [NotificationKind.TripStarted]: Play,
+  [NotificationKind.Discipline]: Ban,
+  [NotificationKind.BookingWindow]: CalendarClock,
 };
 
 const KIND_STYLE: Record<NotificationKind, string> = {
@@ -57,6 +65,10 @@ const KIND_STYLE: Record<NotificationKind, string> = {
   [NotificationKind.ChildCheckedOut]: "bg-warning-soft text-warning-text",
   [NotificationKind.ApprovalNeeded]: "bg-warning-soft text-warning-text",
   [NotificationKind.ViolationDecision]: "bg-warning-soft text-warning-text",
+  [NotificationKind.CrewAssignment]: "bg-brand-soft text-brand",
+  [NotificationKind.TripStarted]: "bg-teal-soft text-teal-text",
+  [NotificationKind.Discipline]: "bg-danger-soft text-danger-text",
+  [NotificationKind.BookingWindow]: "bg-teal-soft text-teal-text",
 };
 
 export function NotificationRow({ item, onRead }: { item: AppNotification; onRead: () => void }) {

@@ -54,10 +54,10 @@ describe("role navigation", () => {
 
   it("keeps offices apart", () => {
     expect(itemKeys(Role.Finance)).toEqual(["payments", "refunds", "complaints", "reports"]);
-    expect(itemKeys(Role.StudentAffairs)).toEqual(["violations"]);
+    expect(itemKeys(Role.StudentAffairs)).toEqual(["students", "violations"]);
     expect(itemKeys(Role.Clinic)).toEqual(["emergencies", "clinic"]);
     expect(itemKeys(Role.BusCompany)).toEqual(["busCompany"]);
-    expect(itemKeys(Role.SecretaryGeneral)).toEqual(["reports", "secretaryGeneral"]);
+    expect(itemKeys(Role.SecretaryGeneral)).toEqual(["secretaryGeneral", "reports"]);
     expect(itemKeys(Role.Transport)).toContain("events");
     expect(itemKeys(Role.Finance)).not.toContain("events");
     expect(itemKeys(Role.Finance)).not.toContain("liveTracking");
@@ -116,7 +116,7 @@ describe("coming soon pages", () => {
 describe("roleHomeHref", () => {
   it("lands each role on its first built page", () => {
     expect(roleHomeHref(navigationFor(Role.Finance))).toBe("/admin/payments");
-    expect(roleHomeHref(navigationFor(Role.StudentAffairs))).toBe("/admin/violations");
+    expect(roleHomeHref(navigationFor(Role.StudentAffairs))).toBe("/admin/students");
     expect(roleHomeHref(navigationFor(Role.SecretaryGeneral))).toBe("/admin/secretary-general");
     expect(roleHomeHref(navigationFor(Role.BusCompany))).toBe("/admin/bus-company");
     expect(roleHomeHref(navigationFor(Role.Transport))).toBe("/admin");

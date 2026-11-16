@@ -11,6 +11,7 @@ import {
   type MockRider,
 } from "@/features/crew/mock-state";
 import { RiderState } from "@/features/crew/schema";
+import { standingOn } from "@/features/discipline/mock-state";
 import { fleetToday } from "@/features/event-buses/mock";
 import { allMockEvents } from "@/features/event-buses/mock-state";
 import { EventStatus } from "@/features/event-buses/schema";
@@ -59,6 +60,7 @@ import {
 
 const HTTP_NOT_FOUND = 404;
 const TRANSPORT = [Role.Transport];
+const STUDENT_DESKS = [Role.Transport, Role.StudentAffairs];
 const GPS_LAG_MS = 3000;
 
 const iso = (time: number) => new Date(time).toISOString();
@@ -313,6 +315,7 @@ function allStudents(language: string, now: number): OpsStudent[] {
       line: seat ? toLineSummary(seat.line, language) : null,
       stop_name: seat ? stopName(seat, language) : null,
       subscription_status: seat ? SubscriptionStatus.Active : (booking?.status ?? null),
+      standing: standingOn(record.id, today),
     };
   });
   const knownIds = new Set(known.map((student) => student.student_id));
@@ -325,6 +328,7 @@ function allStudents(language: string, now: number): OpsStudent[] {
       line: toLineSummary(seat.line, language),
       stop_name: stopName(seat, language),
       subscription_status: SubscriptionStatus.Active,
+      standing: standingOn(seat.rider.studentId, today),
     }));
   return [...known, ...riders];
 }
@@ -336,11 +340,12 @@ function matches(student: OpsStudent, q: string | undefined): boolean {
 }
 
 registerMock(listOpsStudentsEndpoint, ({ query }, { token, language }) => {
-  requireMockOffice(token, TRANSPORT);
+  requireMockOffice(token, STUDENT_DESKS);
   const page = query.page ?? 1;
   const found = allStudents(language, Date.now())
     .filter((student) => matches(student, query.q))
     .filter((student) => !query.line_id || student.line?.line_id === query.line_id)
+    .filter((student) => !query.standing || student.standing === query.standing)
     .sort((a, b) => a.name.localeCompare(b.name, language));
   return {
     items: found.slice((page - 1) * STUDENTS_PAGE_SIZE, page * STUDENTS_PAGE_SIZE),
@@ -388,7 +393,9 @@ function deskGuardianOf(
 }
 
 registerMock(getOpsStudentEndpoint, ({ params }, { token, language }) => {
-  requireMockOffice(token, TRANSPORT);
+  const viewer = requireMockOffice(token, STUDENT_DESKS);
+  // Student Affairs sees the student's requests but works none of them.
+  const viewerHandlesRequests = viewer.user.role !== Role.StudentAffairs;
   const now = Date.now();
   const student = allStudents(language, now).find((item) => item.student_id === params.student_id);
   if (!student) {
@@ -428,7 +435,8 @@ registerMock(getOpsStudentEndpoint, ({ params }, { token, language }) => {
         kind: request.payload.kind,
         status: statusAt(request, now),
         received_at: iso(request.submittedAt),
-        handled_here: officeActorOf(request.payload) !== RequestActor.Finance,
+        handled_here:
+          viewerHandlesRequests && officeActorOf(request.payload) !== RequestActor.Finance,
       })),
   };
   return detail;

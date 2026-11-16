@@ -30,7 +30,9 @@ export const createSubscriptionEndpoint = defineEndpoint({
   path: "/subscriptions",
   summary:
     "Books a seat on a line at one stop and holds it for 24 hours until a receipt arrives. " +
-    "The price is fixed now. Errors: SEAT_UNAVAILABLE (409), ALREADY_SUBSCRIBED (409), " +
+    "The price is fixed now. Only while the booking window is open (GET /booking-window). " +
+    "Errors: BOOKING_CLOSED (409), STUDENT_BANNED (403), SEAT_UNAVAILABLE (409), " +
+    "ALREADY_SUBSCRIBED (409), " +
     "LINE_NOT_FOUND (404), STOP_NOT_ON_LINE (422).",
   tag: TAG,
   access: [Role.Student],

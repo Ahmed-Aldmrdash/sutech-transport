@@ -8,7 +8,6 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import type { Locale } from "@/i18n/routing";
 import { formatArrival, formatClockTime, formatNumber, formatTime } from "@/lib/format";
 import { CrewTripStatus, type CrewToday, type CrewTrip } from "../schema";
-import { StartButton } from "./trip-buttons";
 import { STATUS_TONE, directionTitle } from "./current-trip-card";
 
 export function QuickActions() {
@@ -45,15 +44,7 @@ export function QuickActions() {
   );
 }
 
-export function OtherTripRow({
-  today,
-  trip,
-  onChanged,
-}: {
-  today: CrewToday;
-  trip: CrewTrip;
-  onChanged: () => void;
-}) {
+export function OtherTripRow({ trip }: { trip: CrewTrip }) {
   const t = useTranslations("crew.trip");
   const locale = useLocale() as Locale;
   let detail = "";
@@ -70,11 +61,8 @@ export function OtherTripRow({
         <p className="text-body font-bold text-ink-strong">{directionTitle(t, trip)}</p>
         <p className="text-body-sm text-ink-muted">{detail}</p>
       </div>
-      {trip.status === CrewTripStatus.NotStarted && today.relieved === null ? (
-        <StartButton today={today} trip={trip} onChanged={onChanged} compact />
-      ) : (
-        <Badge tone={STATUS_TONE[trip.status]}>{t(`status.${trip.status}`)}</Badge>
-      )}
+      {/* Only the trip in the main card starts: the return waits for the morning trip. */}
+      <Badge tone={STATUS_TONE[trip.status]}>{t(`status.${trip.status}`)}</Badge>
     </div>
   );
 }

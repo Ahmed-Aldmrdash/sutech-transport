@@ -1,6 +1,9 @@
 import { absencesEndpoints } from "@/features/absences/api";
 import { adminSystemEndpoints } from "@/features/admin-system/api";
 import { announcementsEndpoints } from "@/features/announcements/api";
+import { assistantEndpoints } from "@/features/assistant/api";
+import { bookingWindowEndpoints } from "@/features/booking-window/api";
+import { disciplineEndpoints } from "@/features/discipline/api";
 import { attendanceEndpoints } from "@/features/attendance/api";
 import { authEndpoints } from "@/features/auth/api";
 import { cardEndpoints } from "@/features/card/api";
@@ -59,4 +62,7 @@ export const allEndpoints: readonly Endpoint[] = [
   ...opsDeskEndpoints,
   ...timetableEndpoints,
   ...adminSystemEndpoints,
+  ...assistantEndpoints,
+  ...bookingWindowEndpoints,
+  ...disciplineEndpoints,
 ];

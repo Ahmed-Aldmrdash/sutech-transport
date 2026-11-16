@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectNoSidewaysScroll, isPhone, signIn } from "./helpers";
+import { expectNoSidewaysScroll, isPhone, signIn, unfoldMenu } from "./helpers";
 
 /**
  * Every link in every role's menu opens a real page (a heading, no "page not found"), and on
@@ -26,6 +26,7 @@ for (const identifier of ACCOUNTS) {
     await page.waitForURL((url) => !url.pathname.endsWith("/login"));
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     if (isPhone(page)) await page.getByRole("button", { name: "Menu" }).first().click();
+    await unfoldMenu(page);
     const links = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link");
     const hrefs = [
       ...new Set(

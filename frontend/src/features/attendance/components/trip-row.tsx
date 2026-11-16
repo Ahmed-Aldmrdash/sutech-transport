@@ -12,6 +12,7 @@ const OUTCOME_TONE: Record<TripOutcome, Tone> = {
   [TripOutcome.Absent]: Tone.Danger,
   [TripOutcome.NotGoing]: Tone.Neutral,
   [TripOutcome.CheckedOut]: Tone.Warning,
+  [TripOutcome.Suspended]: Tone.Danger,
 };
 
 /** One trip with its scans; also used on the guardian's day page. */

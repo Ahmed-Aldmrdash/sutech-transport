@@ -17,6 +17,8 @@ import { BOOKABLE_STATUSES } from "@/features/subscriptions/schema";
 import type { Locale } from "@/i18n/routing";
 import { formatArrival, formatMoney } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
+import { BookingWindowNotice } from "@/features/booking-window/components/booking-window-notice";
+import { useBookingWindow } from "@/features/booking-window/components/use-booking-window";
 import { listLines } from "../api";
 import type { Line } from "../schema";
 import { LineCard, lineHref } from "./line-card";
@@ -31,6 +33,7 @@ export function LinesPage() {
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const lines = useAsync((signal) => listLines({ signal }), []);
   const mine = useAsync((signal) => getMySubscription({ signal }), []);
+  const bookingWindow = useBookingWindow();
 
   const visible = useMemo(
     () =>
@@ -78,6 +81,8 @@ export function LinesPage() {
             </ButtonLink>
           }
         />
+      ) : bookingWindow.status === AsyncStatus.Success ? (
+        <BookingWindowNotice window={bookingWindow.data} />
       ) : null}
       <div className="flex flex-col gap-3 desktop:flex-row desktop:items-end">
         <TextField
