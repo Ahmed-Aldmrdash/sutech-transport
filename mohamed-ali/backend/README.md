@@ -10,7 +10,7 @@ Initial FastAPI foundation for the SUtech Transport API. This folder contains on
 ## Local setup
 
 ```powershell
-cd backend
+cd mohamed-ali/backend
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
