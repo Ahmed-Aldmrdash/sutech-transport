@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarX2, CircleCheck, Clock, Flag, LogOut, UserX } from "lucide-react";
+import { Ban, CalendarX2, CircleCheck, Clock, Flag, LogOut, UserX } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Badge, LiveDot } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -34,6 +34,7 @@ export function CurrentTripCard({
   onChanged: () => void;
 }) {
   const t = useTranslations("crew.trip");
+  const tRoot = useTranslations();
   const locale = useLocale() as Locale;
   // A relieved driver still sees the trip, but the new driver or the supervisor runs it.
   const canRun = today.relieved === null;
@@ -68,6 +69,14 @@ export function CurrentTripCard({
               <LiveDot />
               {t("onTheRoad", { time: formatTime(trip.started_at, locale) })}
             </p>
+            {trip.started_by ? (
+              <p className="text-body-sm text-ink-muted">
+                {t("startedBy", {
+                  role: tRoot(`roles.${trip.started_by.role}`),
+                  name: trip.started_by.name,
+                })}
+              </p>
+            ) : null}
             <Counts trip={trip} />
             {canRun ? (
               <>
@@ -84,6 +93,14 @@ export function CurrentTripCard({
               <Flag aria-hidden="true" className="size-5 shrink-0" />
               {t("endedAt", { time: formatTime(trip.ended_at, locale) })}
             </p>
+            {trip.ended_by ? (
+              <p className="text-body-sm text-ink-muted">
+                {t("endedBy", {
+                  role: tRoot(`roles.${trip.ended_by.role}`),
+                  name: trip.ended_by.name,
+                })}
+              </p>
+            ) : null}
             <Counts trip={trip} />
             <ButtonLink href="/driver/passengers" variant="secondary" className="self-start">
               {t("seeList")}
@@ -120,20 +137,36 @@ function Counts({ trip }: { trip: CrewTrip }) {
   const ended = trip.status === CrewTripStatus.Ended;
   const number = (value: number) => formatNumber(value, locale);
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <StatTile
-        label={t("countBoarded")}
-        value={number(counts.boarded)}
-        caption={t("ofTotal", { total: number(counts.total) })}
-        icon={<CircleCheck />}
-      />
-      {ended ? (
-        <StatTile label={t("countAbsent")} value={number(counts.absent)} icon={<UserX />} />
-      ) : (
-        <StatTile label={t("countWaiting")} value={number(counts.waiting)} icon={<Clock />} />
-      )}
-      <StatTile label={t("countNotGoing")} value={number(counts.not_going)} icon={<CalendarX2 />} />
-      <StatTile label={t("countCheckedOut")} value={number(counts.checked_out)} icon={<LogOut />} />
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatTile
+          label={t("countBoarded")}
+          value={number(counts.boarded)}
+          caption={t("ofTotal", { total: number(counts.total) })}
+          icon={<CircleCheck />}
+        />
+        {ended ? (
+          <StatTile label={t("countAbsent")} value={number(counts.absent)} icon={<UserX />} />
+        ) : (
+          <StatTile label={t("countWaiting")} value={number(counts.waiting)} icon={<Clock />} />
+        )}
+        <StatTile
+          label={t("countNotGoing")}
+          value={number(counts.not_going)}
+          icon={<CalendarX2 />}
+        />
+        <StatTile
+          label={t("countCheckedOut")}
+          value={number(counts.checked_out)}
+          icon={<LogOut />}
+        />
+      </div>
+      {counts.suspended > 0 ? (
+        <p className="flex items-center gap-2 text-body-sm font-bold text-danger-text">
+          <Ban aria-hidden="true" className="size-4 shrink-0" />
+          {t("countSuspended", { count: counts.suspended, number: number(counts.suspended) })}
+        </p>
+      ) : null}
     </div>
   );
 }

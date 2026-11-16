@@ -33,6 +33,9 @@ export const SCAN_ERRORS = [
   CrewErrorCode.ReasonRequired,
   CrewErrorCode.TripNotStarted,
   CrewErrorCode.TripAlreadyEnded,
+  CrewErrorCode.StudentSuspended,
+  CrewErrorCode.StudentBanned,
+  CrewErrorCode.DriverRelieved,
 ] as const;
 
 /** One pass waiting to be sent: from the camera, or typed. */

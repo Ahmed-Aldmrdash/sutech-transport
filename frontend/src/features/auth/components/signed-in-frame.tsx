@@ -9,6 +9,7 @@ import { navigationFor } from "@/features/navigation/nav-config";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { NotificationsWatcher } from "@/features/notifications/components/notifications-watcher";
 import { useUnreadCount } from "@/features/notifications/unread-store";
+import { AssistantFab } from "@/features/assistant/components/assistant-fab";
 import { SosAlarm } from "@/features/emergencies/components/sos-alarm";
 import { useAwaitingApprovals } from "@/features/requests/awaiting-approvals";
 import { Role } from "@/lib/auth/roles";
@@ -26,6 +27,8 @@ const SOS_DESK_ROLES: readonly Role[] = [Role.SuperAdmin, Role.Transport, Role.C
 const NOTIFICATIONS_PATH: Partial<Record<Role, string>> = {
   [Role.Student]: "/student/notifications",
   [Role.Parent]: "/parent/notifications",
+  [Role.Driver]: "/driver/notifications",
+  [Role.Supervisor]: "/driver/notifications",
 };
 
 /**
@@ -88,6 +91,7 @@ export function SignedInFrame({ children }: { children: ReactNode }) {
       <SessionWatcher userId={session.user.id} expiresAt={session.expires_at} />
       {notificationsPath ? <NotificationsWatcher /> : null}
       {SOS_DESK_ROLES.includes(session.user.role) ? <SosAlarm /> : null}
+      {session.user.role === Role.Student ? <AssistantFab /> : null}
       {children}
     </AppShell>
   );

@@ -8,6 +8,10 @@ import {
   MOCK_TERM_PRICE_PIASTERS,
 } from "@/features/lines/mock-builders";
 import { LineErrorCode } from "@/features/lines/schema";
+import { isBookingOpen } from "@/features/booking-window/mock-state";
+import { BookingWindowErrorCode } from "@/features/booking-window/schema";
+import { isBannedNow } from "@/features/discipline/mock-state";
+import { DisciplineErrorCode } from "@/features/discipline/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { Role } from "@/lib/auth/roles";
@@ -103,6 +107,17 @@ registerMock(createSubscriptionEndpoint, ({ body }, { token, language }) => {
       HTTP.Conflict,
       SubscriptionErrorCode.AlreadySubscribed,
       "You already have a booking this term.",
+    );
+  }
+  if (isBannedNow(user.id)) {
+    throw new MockHttpError(HTTP.Forbidden, DisciplineErrorCode.StudentBanned, "Banned.");
+  }
+  // Booking closed: nobody books, even on a line with free seats (Ahmed, 2026-11-16).
+  if (!isBookingOpen()) {
+    throw new MockHttpError(
+      HTTP.Conflict,
+      BookingWindowErrorCode.BookingClosed,
+      "Booking is closed.",
     );
   }
   const line = findMockLine(body.line_id);

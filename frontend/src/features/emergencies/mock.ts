@@ -7,6 +7,7 @@ import {
   crewTripsOn,
   findCrewTrip,
   mockRidersOf,
+  relievedLineDriverIds,
   riderStateOf,
   saveCrewTrip,
   type MockCrewTrip,
@@ -227,6 +228,14 @@ function busyFleet(date: string, exceptTripId: string) {
   return busy;
 }
 
+/**
+ * Drivers the office can send without a bus: the spare drivers, and line drivers it took off
+ * their own line today (e.g. DRV-1001 moved to another line's bus).
+ */
+function freeDriverIds(date: string): string[] {
+  return [...MOCK_SPARE_DRIVER_IDS, ...relievedLineDriverIds(date)];
+}
+
 function requireTodayTrip(tripId: string, now: number) {
   const trip = findCrewTrip(tripId);
   const line = trip ? findMockLine(trip.lineId) : undefined;
@@ -242,9 +251,10 @@ registerMock(getReplacementOptionsEndpoint, ({ params }, { token, language }) =>
   const { trip, line } = requireTodayTrip(params.trip_id, now);
   const fleet = crewFleetOf(trip, line);
   const busy = busyFleet(trip.date, trip.tripId);
-  const riders = mockRidersOf(line).filter(
-    (rider) => riderStateOf(trip, line, rider, now).state !== RiderState.NotGoing,
-  ).length;
+  const riders = mockRidersOf(line).filter((rider) => {
+    const { state } = riderStateOf(trip, line, rider, now);
+    return state !== RiderState.NotGoing && state !== RiderState.Suspended;
+  }).length;
   const buses = MOCK_SPARE_BUSES.filter(
     (bus) =>
       bus.busId !== fleet.bus.busId &&
@@ -254,12 +264,12 @@ registerMock(getReplacementOptionsEndpoint, ({ params }, { token, language }) =>
     const driver = mockFleetDriver(bus.driverId);
     return driver ? [{ ...toFleetBus(bus), driver: toFleetDriver(driver, language) }] : [];
   });
-  const drivers = MOCK_SPARE_DRIVER_IDS.filter(
-    (id) => id !== fleet.driver.driverId && !busy.drivers.has(id),
-  ).flatMap((id) => {
-    const driver = mockFleetDriver(id);
-    return driver ? [toFleetDriver(driver, language)] : [];
-  });
+  const drivers = freeDriverIds(trip.date)
+    .filter((id) => id !== fleet.driver.driverId && !busy.drivers.has(id))
+    .flatMap((id) => {
+      const driver = mockFleetDriver(id);
+      return driver ? [toFleetDriver(driver, language)] : [];
+    });
   return {
     trip_id: trip.tripId,
     line: toLineSummary(line, language),
@@ -294,7 +304,10 @@ registerMock(sendReplacementEndpoint, ({ params, body }, { token, language }) =>
   }
   const busId = spareBus?.busId ?? current.bus.busId;
   const driverId = body.driver_id ?? spareBus?.driverId ?? current.driver.driverId;
-  const spareDrivers = [...MOCK_SPARE_DRIVER_IDS, ...MOCK_SPARE_BUSES.map((bus) => bus.driverId)];
+  const spareDrivers = [
+    ...freeDriverIds(trip.date),
+    ...MOCK_SPARE_BUSES.map((bus) => bus.driverId),
+  ];
   if (
     body.driver_id &&
     (!spareDrivers.includes(body.driver_id) || busy.drivers.has(body.driver_id))

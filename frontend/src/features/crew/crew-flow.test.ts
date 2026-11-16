@@ -5,7 +5,11 @@ import { getMyCard } from "@/features/card/api";
 import { listAnnouncements } from "@/features/announcements/api";
 import { getMyAttendance } from "@/features/attendance/api";
 import { createSos, getSos } from "@/features/sos/api";
-import { addSosAction } from "@/features/emergencies/api";
+import { addSosAction, getReplacementOptions, sendReplacement } from "@/features/emergencies/api";
+import { ReplacementReason } from "@/features/emergencies/schema";
+import { listNotifications } from "@/features/notifications/api";
+import { NotificationKind } from "@/features/notifications/schema";
+import { Role } from "@/lib/auth/roles";
 import { resetSosMock } from "@/features/sos/mock-state";
 import { SosStatus, SosType } from "@/features/sos/schema";
 import { resetStudentMock } from "@/features/subscriptions/mock-state";
@@ -30,6 +34,9 @@ import {
 } from "./schema";
 
 const DRIVER = "DRV-1001";
+const SPARE_DRIVER = "DRV-1002";
+const SUPERVISOR = "SUP-1001";
+const TRANSPORT = "TRN-1001";
 const OMAR = "240100102"; // active on line 7, stop 2
 const OMAR_ID = "usr_student_2";
 const AHMED = "240100101"; // no booking
@@ -265,6 +272,52 @@ describe("driver and supervisor (mock server)", () => {
     expect(items[0]?.student?.student_id).toBe(OMAR_ID);
     // It waits for Student Affairs to open it.
     expect(items[0]?.status).toBe("submitted");
+  });
+
+  it("shows the driver a trip the supervisor started, with no start button left to press", async () => {
+    await signIn(SUPERVISOR);
+    await startTrip((await outbound()).trip_id);
+    await signIn(DRIVER);
+    const trip = await outbound();
+    expect(trip.status).toBe(CrewTripStatus.InProgress);
+    expect(trip.started_by?.role).toBe(Role.Supervisor);
+    expect((await errorOf(startTrip(trip.trip_id))).code).toBe(CrewErrorCode.TripAlreadyStarted);
+  });
+
+  it("holds the return trip while the morning trip could still run", async () => {
+    vi.setSystemTime(Date.parse("2026-11-08T11:00:00Z")); // 1 PM, the morning trip never ran
+    const back = (await getCrewToday()).trips.find(
+      (item) => item.direction === TripDirection.Return,
+    );
+    if (!back) throw new Error("no return trip");
+    expect((await errorOf(startTrip(back.trip_id))).code).toBe(CrewErrorCode.OutboundNotEnded);
+    vi.setSystemTime(Date.parse("2026-11-08T14:00:00Z")); // 4 PM, half an hour before leaving
+    expect((await startTrip(back.trip_id)).status).toBe(CrewTripStatus.InProgress);
+  });
+
+  it("moves a spare driver onto line 7: they get the trip and a notice, the old driver is relieved", async () => {
+    const tripId = (await outbound()).trip_id;
+    await signIn(TRANSPORT);
+    const options = await getReplacementOptions(tripId);
+    const spare = options.drivers.find((driver) => driver.driver_id === "drv_spare_4");
+    if (!spare) throw new Error("no spare driver");
+    await sendReplacement(tripId, {
+      bus_id: null,
+      driver_id: spare.driver_id,
+      reason: ReplacementReason.DriverUnavailable,
+      note: null,
+      sos_id: null,
+    });
+
+    await signIn(SPARE_DRIVER);
+    const moved = await getCrewToday();
+    expect(moved.assigned).not.toBeNull();
+    expect(moved.trips.find((item) => item.trip_id === tripId)).toBeDefined();
+    const notices = await listNotifications();
+    expect(notices.items.some((item) => item.kind === NotificationKind.CrewAssignment)).toBe(true);
+
+    await signIn(DRIVER);
+    expect((await getCrewToday()).relieved).not.toBeNull();
   });
 
   it("keeps other roles out", async () => {

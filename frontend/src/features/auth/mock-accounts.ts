@@ -231,6 +231,17 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
   ),
   account(
     {
+      id: "usr_driver_2",
+      role: Role.Driver,
+      name: "Hany Fawzy",
+      name_ar: "هاني فوزي",
+      identifier: "DRV-1002",
+    },
+    // A spare driver at the garage: no line until the office sends him to one.
+    "01000005004",
+  ),
+  account(
+    {
       id: "usr_supervisor_1",
       role: Role.Supervisor,
       name: "Mona Adel",

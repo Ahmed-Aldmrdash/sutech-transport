@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoSidewaysScroll, isPhone, signIn, switchTo } from "./helpers";
+import { atSchoolMorning, expectNoSidewaysScroll, isPhone, signIn, switchTo } from "./helpers";
 
 const DRIVER = "DRV-1001"; // Kamal Ezzat, line 7
 const TRANSPORT = "TRN-1001"; // Karim Fathy, Transportation office
@@ -19,6 +19,7 @@ function watchForAppErrors(page: Page): string[] {
 }
 
 async function driverRaisesSos(page: Page, type: RegExp = /Bus problem/) {
+  await atSchoolMorning(page);
   await signIn(page, DRIVER);
   await page.waitForURL(/\/en\/driver$/);
   const testDay = page.getByRole("button", { name: "Try a test day" });

@@ -5,6 +5,7 @@ import {
   Building2,
   Bus,
   CalendarCheck,
+  CalendarClock,
   CalendarDays,
   ClipboardList,
   CreditCard,
@@ -18,7 +19,6 @@ import {
   ListChecks,
   MapPinned,
   Megaphone,
-  MessageCircleQuestion,
   MessageSquareWarning,
   Receipt,
   Route,
@@ -49,7 +49,6 @@ export type NavItemKey =
   | "attendanceHistory"
   | "requests"
   | "complaints"
-  | "assistant"
   | "settings"
   | "childDay"
   | "approvals"
@@ -74,11 +73,19 @@ export type NavItemKey =
   | "secretaryGeneral"
   | "events"
   | "busCompany"
-  | "users";
+  | "users"
+  | "bookingWindow";
 
 /** Keys under `nav.groups`. */
 type NavGroupKey =
-  "main" | "account" | "operations" | "finance" | "followUp" | "otherParties" | "system";
+  | "main"
+  | "account"
+  | "operations"
+  | "studentsGroup"
+  | "fleet"
+  | "finance"
+  | "otherParties"
+  | "system";
 
 export interface NavItem {
   key: NavItemKey;
@@ -117,6 +124,19 @@ export interface RoleNavigation {
   groups: readonly NavGroup[];
   /** The page the role lands on after sign-in, when it isn't the first one in the menu. */
   landing?: NavItemKey;
+  /**
+   * Pages every role can open that aren't listed in the menu: settings, reached from the gear
+   * at the top of the sidebar (and of the phone menu).
+   */
+  extras: readonly NavItem[];
+}
+
+/** Settings is not a menu row any more: a gear at the top of the sidebar opens it. */
+const SETTINGS_ITEM: NavItem = { key: "settings", icon: Settings, segment: "settings" };
+
+/** The settings page of a role (the gear's link). */
+export function settingsHref(navigation: RoleNavigation): string {
+  return itemHref(navigation.basePath, SETTINGS_ITEM);
 }
 
 export const MAX_PRIMARY_ITEMS = 4;
@@ -143,12 +163,11 @@ const STUDENT_NAV: RoleNavigation = {
       items: [
         { key: "requests", icon: ClipboardList, segment: "requests" },
         { key: "complaints", icon: MessageSquareWarning, segment: "complaints" },
-        // The AI team's assistant: not part of the front end phases yet.
-        { key: "assistant", icon: MessageCircleQuestion, segment: "assistant", soon: true },
-        { key: "settings", icon: Settings, segment: "settings" },
       ],
     },
   ],
+  // The assistant is a floating button on every student page, not a menu row.
+  extras: [SETTINGS_ITEM],
 };
 
 const PARENT_NAV: RoleNavigation = {
@@ -163,8 +182,8 @@ const PARENT_NAV: RoleNavigation = {
         { key: "approvals", icon: ListChecks, segment: "approvals", primary: true },
       ],
     },
-    { key: "account", items: [{ key: "settings", icon: Settings, segment: "settings" }] },
   ],
+  extras: [SETTINGS_ITEM],
 };
 
 const CREW_NAV: RoleNavigation = {
@@ -177,11 +196,13 @@ const CREW_NAV: RoleNavigation = {
         { key: "scan", icon: ScanLine, segment: "scan", primary: true },
         { key: "passengers", icon: Users, segment: "passengers", primary: true },
         { key: "sos", icon: Siren, segment: "sos", primary: true },
+        { key: "notifications", icon: Bell, segment: "notifications" },
         { key: "reportDelay", icon: Timer, segment: "delay" },
         { key: "violations", icon: BadgeAlert, segment: "violations" },
       ],
     },
   ],
+  extras: [SETTINGS_ITEM],
 };
 
 interface OfficeNavItem extends NavItem {
@@ -219,17 +240,23 @@ const READY_OFFICE_PAGES: ReadonlySet<NavItemKey> = new Set([
   "secretaryGeneral",
   "events",
   "busCompany",
+  "bookingWindow",
 ]);
 
 /** Offices whose own page isn't the first in their menu: they land on it after sign-in. */
 const OFFICE_LANDING: Partial<Record<Role, NavItemKey>> = {
   [SecretaryGeneral]: "secretaryGeneral",
+  [Finance]: "payments",
 };
 
 /** For an office with no built page yet: its home, which lists what is coming. */
 const OFFICE_WELCOME: NavItem = { key: "home", icon: House, segment: "", primary: true };
 
-/** The 21 office pages from the agreed plan, each with the offices that own it. */
+/**
+ * The office pages from the agreed plan, each with the offices that own it, grouped by what
+ * the office is doing: today's operation, students, lines and buses, money, the other
+ * offices, and the system.
+ */
 const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
   {
     key: "operations",
@@ -251,29 +278,18 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
       },
       { key: "attendance", icon: UserCheck, segment: "attendance", roles: [Transport] },
       { key: "announcements", icon: Megaphone, segment: "announcements", roles: [Transport] },
-      { key: "lineDirectory", icon: Route, segment: "lines", roles: [Transport] },
-      { key: "busesDrivers", icon: Bus, segment: "buses", roles: [Transport] },
-      { key: "students", icon: UsersRound, segment: "students", roles: [Transport] },
-      { key: "returnTimes", icon: Clock, segment: "return-times", roles: [Transport] },
     ],
   },
   {
-    key: "finance",
-    items: [
-      { key: "payments", icon: CreditCard, segment: "payments", roles: [Finance], primary: true },
-      { key: "refunds", icon: Receipt, segment: "refunds", roles: [Finance], primary: true },
-    ],
-  },
-  {
-    key: "followUp",
+    key: "studentsGroup",
     items: [
       {
-        key: "violations",
-        icon: ShieldAlert,
-        segment: "violations",
+        key: "students",
+        icon: UsersRound,
+        segment: "students",
         roles: [Transport, StudentAffairs],
-        primary: true,
       },
+      { key: "bookingWindow", icon: CalendarClock, segment: "booking", roles: [Transport] },
       { key: "requests", icon: ClipboardList, segment: "requests", roles: [Transport] },
       {
         key: "complaints",
@@ -282,13 +298,28 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
         roles: [Transport, Finance],
       },
       {
-        key: "reports",
-        icon: FileBarChart,
-        segment: "reports",
-        roles: [Transport, Finance, SecretaryGeneral],
+        key: "violations",
+        icon: ShieldAlert,
+        segment: "violations",
+        roles: [Transport, StudentAffairs],
         primary: true,
       },
-      { key: "auditLog", icon: FileClock, segment: "audit-log", roles: [] },
+    ],
+  },
+  {
+    key: "fleet",
+    items: [
+      { key: "lineDirectory", icon: Route, segment: "lines", roles: [Transport] },
+      { key: "busesDrivers", icon: Bus, segment: "buses", roles: [Transport] },
+      { key: "returnTimes", icon: Clock, segment: "return-times", roles: [Transport] },
+      { key: "events", icon: CalendarDays, segment: "events", roles: [Transport] },
+    ],
+  },
+  {
+    key: "finance",
+    items: [
+      { key: "payments", icon: CreditCard, segment: "payments", roles: [Finance], primary: true },
+      { key: "refunds", icon: Receipt, segment: "refunds", roles: [Finance], primary: true },
     ],
   },
   {
@@ -302,7 +333,6 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
         roles: [SecretaryGeneral],
         primary: true,
       },
-      { key: "events", icon: CalendarDays, segment: "events", roles: [Transport] },
       {
         key: "busCompany",
         icon: Building2,
@@ -314,7 +344,17 @@ const OFFICE_GROUPS: readonly OfficeNavGroup[] = [
   },
   {
     key: "system",
-    items: [{ key: "users", icon: Users, segment: "users", roles: [] }],
+    items: [
+      {
+        key: "reports",
+        icon: FileBarChart,
+        segment: "reports",
+        roles: [Transport, Finance, SecretaryGeneral],
+        primary: true,
+      },
+      { key: "auditLog", icon: FileClock, segment: "audit-log", roles: [] },
+      { key: "users", icon: Users, segment: "users", roles: [] },
+    ],
   },
 ];
 
@@ -330,14 +370,27 @@ function officeNavigationFor(role: Role): RoleNavigation {
     key: group.key,
     items: group.items.filter(canSee).map(toNavItem),
   })).filter((group) => group.items.length > 0);
-  const navigation: RoleNavigation = { basePath: "/admin", groups, landing: OFFICE_LANDING[role] };
-  if (readyItems(navigation).length > 0) return navigation;
-  return { basePath: "/admin", groups: [{ key: "main", items: [OFFICE_WELCOME] }, ...groups] };
+  // The office's own work comes first in its menu (Finance: money before complaints).
+  const landing = OFFICE_LANDING[role];
+  const isLandingGroup = (group: NavGroup) => group.items.some((item) => item.key === landing);
+  groups.sort((a, b) => Number(isLandingGroup(b)) - Number(isLandingGroup(a)));
+  const navigation: RoleNavigation = {
+    basePath: "/admin",
+    groups,
+    landing,
+    extras: [SETTINGS_ITEM],
+  };
+  if (menuItems(navigation).some((item) => !item.soon)) return navigation;
+  return { ...navigation, groups: [{ key: "main", items: [OFFICE_WELCOME] }, ...groups] };
 }
 
-/** The pages a role can open today (everything but "coming soon"). */
+function menuItems(navigation: RoleNavigation): NavItem[] {
+  return navigation.groups.flatMap((group) => group.items);
+}
+
+/** The pages a role can open today (everything but "coming soon"), settings included. */
 export function readyItems(navigation: RoleNavigation): NavItem[] {
-  return navigation.groups.flatMap((group) => group.items).filter((item) => !item.soon);
+  return [...menuItems(navigation), ...navigation.extras].filter((item) => !item.soon);
 }
 
 /**
@@ -372,7 +425,8 @@ export function navigationFor(role: Role): RoleNavigation {
 
 /** Items for the phone's bottom bar: the role's primary items, capped. */
 export function primaryItems(navigation: RoleNavigation): NavItem[] {
-  return readyItems(navigation)
+  return menuItems(navigation)
+    .filter((item) => !item.soon)
     .filter((item) => item.primary)
     .slice(0, MAX_PRIMARY_ITEMS);
 }
@@ -406,7 +460,7 @@ export function findActiveItem(
  * its first built page.
  */
 export function roleHomeHref(navigation: RoleNavigation): string {
-  const items = readyItems(navigation);
+  const items = menuItems(navigation).filter((item) => !item.soon);
   const home =
     items.find((item) => item.key === navigation.landing) ??
     items.find((item) => item.segment === "") ??

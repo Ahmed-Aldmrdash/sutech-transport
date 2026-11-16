@@ -148,6 +148,7 @@ function crewRecord(
     [RiderState.CheckedOut]: TripOutcome.CheckedOut,
     [RiderState.NotGoing]: TripOutcome.NotGoing,
     [RiderState.Absent]: TripOutcome.Absent,
+    [RiderState.Suspended]: TripOutcome.Suspended,
     [RiderState.Waiting]: TripOutcome.Absent,
   };
   const reason = rider.reason ? CHECKOUT_REASON_TEXT[rider.reason] : null;

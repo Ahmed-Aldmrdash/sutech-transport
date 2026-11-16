@@ -41,7 +41,7 @@ export function MobileDrawer({ open, onClose, header, children }: MobileDrawerPr
     >
       <div className="flex h-full flex-col">
         <div className="flex h-app-bar shrink-0 items-center justify-between gap-2 border-b border-line ps-4 pe-2">
-          {header}
+          <div className="min-w-0">{header}</div>
           <IconButton label={t("closeMenu")} icon={<X />} size="sm" onClick={onClose} />
         </div>
         <nav aria-label={t("mainNavigation")} className="flex-1 overflow-y-auto p-3">

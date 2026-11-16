@@ -30,6 +30,7 @@ const STATUS_TONE: Record<WatchedStatus, Tone> = {
   [WatchedStatus.CheckedOut]: Tone.Warning,
   [WatchedStatus.NotGoing]: Tone.Neutral,
   [WatchedStatus.Absent]: Tone.Danger,
+  [WatchedStatus.Suspended]: Tone.Danger,
 };
 
 /** A short list of students the office follows by name: did they get on the bus today? */

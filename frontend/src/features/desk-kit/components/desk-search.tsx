@@ -7,7 +7,10 @@ import { TextField } from "@/components/ui/input";
 
 const SEARCH_DELAY_MS = 300;
 
-/** A search box that tells the page what to look for once the office stops typing. */
+/**
+ * A search box that tells the page what to look for once the office stops typing. What it
+ * searches is its placeholder, so it lines up with the filters beside it.
+ */
 export function DeskSearch({
   hint,
   onSearch,
@@ -28,7 +31,8 @@ export function DeskSearch({
     <TextField
       type="search"
       label={t("search")}
-      hint={hint}
+      placeholder={hint}
+      title={hint}
       icon={<Search />}
       value={text}
       onChange={(event) => setText(event.target.value)}

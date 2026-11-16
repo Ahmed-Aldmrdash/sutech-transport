@@ -30,6 +30,8 @@ import {
 
 const TAG = "operations";
 const TRANSPORT = [Role.SuperAdmin, Role.Transport];
+/** The students pages: Transportation, and Student Affairs for discipline. */
+const STUDENT_DESKS = [Role.Transport, Role.StudentAffairs, Role.SuperAdmin];
 
 export const getOpsOverviewEndpoint = defineEndpoint({
   id: "ops.overview",
@@ -103,9 +105,10 @@ export const listOpsStudentsEndpoint = defineEndpoint({
   path: "/admin/students",
   summary:
     "Students with a subscription this term. `q`: university ID or part of the name; " +
-    "`line_id`. 25 a page, by name.",
+    "`line_id`; `standing` (good, warned, suspended, banned). 25 a page, by name. Student " +
+    "Affairs opens it too, to warn, suspend or ban.",
   tag: TAG,
-  access: TRANSPORT,
+  access: STUDENT_DESKS,
   query: studentsQuerySchema,
   response: opsStudentsSchema,
 });
@@ -116,9 +119,9 @@ export const getOpsStudentEndpoint = defineEndpoint({
   path: "/admin/students/{student_id}",
   summary:
     "One student for the office: contact, guardian, seat, this term's morning trips so far " +
-    "and their requests. Errors: STUDENT_NOT_FOUND (404).",
+    "and their requests, with their standing. Errors: STUDENT_NOT_FOUND (404).",
   tag: TAG,
-  access: TRANSPORT,
+  access: STUDENT_DESKS,
   params: opsStudentParamsSchema,
   response: opsStudentDetailSchema,
 });

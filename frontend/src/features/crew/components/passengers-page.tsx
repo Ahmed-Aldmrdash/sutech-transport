@@ -43,10 +43,12 @@ function PassengersView({ today, refresh }: { today: CrewToday; refresh: () => v
   const shown = trip.riders.filter(
     (rider) => (filter === ALL || rider.state === filter) && matchesSearch(rider, search),
   );
-  const states: RiderState[] =
+  const base: RiderState[] =
     trip.status === CrewTripStatus.Ended
       ? [RiderState.Boarded, RiderState.Absent, RiderState.CheckedOut, RiderState.NotGoing]
       : [RiderState.Waiting, RiderState.Boarded, RiderState.NotGoing, RiderState.CheckedOut];
+  // The suspended filter shows only on a day someone is suspended.
+  const states = trip.counts.suspended > 0 ? [...base, RiderState.Suspended] : base;
   const countOf = (state: RiderState) =>
     trip.riders.filter((rider) => rider.state === state).length;
 

@@ -10,6 +10,11 @@ import { ConfirmDialog } from "@/components/ui/dialog";
 import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
 import { createSubscription } from "@/features/subscriptions/api";
+import { BookingWindowNotice } from "@/features/booking-window/components/booking-window-notice";
+import { useBookingWindow } from "@/features/booking-window/components/use-booking-window";
+import { BookingWindowErrorCode, BookingWindowStatus } from "@/features/booking-window/schema";
+import { DisciplineErrorCode } from "@/features/discipline/schema";
+import { AsyncStatus } from "@/lib/hooks/use-async";
 import { SubscriptionStatusBadge } from "@/features/subscriptions/components/subscription-status-badge";
 import {
   BOOKABLE_STATUSES,
@@ -23,6 +28,8 @@ import { formatClockTime, formatMoney } from "@/lib/format";
 import { LineErrorCode, type LineDetail } from "../schema";
 
 const BOOKING_ERROR_CODES = [
+  BookingWindowErrorCode.BookingClosed,
+  DisciplineErrorCode.StudentBanned,
   SubscriptionErrorCode.SeatUnavailable,
   SubscriptionErrorCode.AlreadySubscribed,
   SubscriptionErrorCode.StopNotOnLine,
@@ -47,6 +54,7 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
   const [isConfirming, setIsConfirming] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [errorKey, setErrorKey] = useState<BookingErrorKey | null>(null);
+  const bookingWindow = useBookingWindow();
 
   const selectedStop = line.stops.find((stop) => stop.stop_id === selectedStopId) ?? null;
   const price = formatMoney(line.price_piasters, locale);
@@ -68,6 +76,7 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
     } catch (error) {
       setIsConfirming(false);
       setErrorKey(errorMessageKey(error, BOOKING_ERROR_CODES));
+      bookingWindow.refresh();
     } finally {
       setIsBooking(false);
     }
@@ -97,6 +106,14 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
         </CardBody>
       </Card>
     );
+  }
+
+  // Closed booking: nobody books, whatever the seats (the office may extend it).
+  if (
+    bookingWindow.status === AsyncStatus.Success &&
+    bookingWindow.data.status !== BookingWindowStatus.Open
+  ) {
+    return <BookingWindowNotice window={bookingWindow.data} />;
   }
 
   if (line.seats_available <= 0) {

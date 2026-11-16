@@ -60,7 +60,7 @@ describe("role access", () => {
     expect(homePathFor(Role.Transport)).toBe("/admin");
     expect(homePathFor(Role.SuperAdmin)).toBe("/admin");
     expect(homePathFor(Role.Finance)).toBe("/admin/payments");
-    expect(homePathFor(Role.StudentAffairs)).toBe("/admin/violations");
+    expect(homePathFor(Role.StudentAffairs)).toBe("/admin/students");
     expect(homePathFor(Role.SecretaryGeneral)).toBe("/admin/secretary-general");
     expect(homePathFor(Role.Clinic)).toBe("/admin/emergencies");
     expect(homePathFor(Role.BusCompany)).toBe("/admin/bus-company");
