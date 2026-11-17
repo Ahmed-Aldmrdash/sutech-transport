@@ -194,6 +194,6 @@ that drifts from the schema fails loudly instead of showing wrong data.
 
 ## Brand assets
 
-`public/brand/` and `public/icons/` are the official files from the team's
-`05 - Design System/assets` folder (SUTech Brand Manual 2025). Fonts are Montserrat and Tajawal,
+`public/brand/`, `public/icons/` and `public/splash/` use the project logo from the team's
+`08 - Logo` folder (the "S" road with a stop and a location pin). Fonts are Montserrat and Tajawal,
 free stand-ins for Gilroy and AbdoMaster until the university provides the licensed files.
