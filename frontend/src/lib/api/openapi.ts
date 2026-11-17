@@ -102,7 +102,7 @@ export function buildOpenApiDocument(
   return {
     openapi: "3.1.0",
     info: {
-      title: "SUtech Transport API",
+      title: "SUTech Transport API",
       version: "0.1.0",
       description:
         "Generated from the front end's Zod schemas (npm run openapi). Fields are snake_case, " +

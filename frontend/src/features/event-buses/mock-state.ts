@@ -87,7 +87,7 @@ function seedEvents(today: string): MockBusEvent[] {
       departsAt: "08:00",
       returnsAt: "14:00",
       pickup: { ar: "ميدان رمسيس", en: "Ramses Square" },
-      destination: { ar: "حرم الجامعة", en: "SUtech campus" },
+      destination: { ar: "حرم الجامعة", en: "SUTech campus" },
       studentsCount: 90,
       busType: BusType.LargeBus,
       busesRequested: 2,

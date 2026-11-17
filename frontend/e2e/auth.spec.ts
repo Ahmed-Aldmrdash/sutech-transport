@@ -5,6 +5,7 @@ import {
   requestCode,
   shownCode,
   signIn,
+  unfoldMenu,
   watchForErrors,
   wrongCodeFor,
 } from "./helpers";
@@ -142,7 +143,7 @@ test.describe("each role goes to its own home", () => {
     { id: "TRN-1001", path: "/en/admin" },
     { id: "FIN-1001", path: "/en/admin/payments" },
     { id: "CLN-1001", path: "/en/admin/emergencies" },
-    { id: "STA-1001", path: "/en/admin/violations" },
+    { id: "STA-1001", path: "/en/admin/students" },
     { id: "SGO-1001", path: "/en/admin/secretary-general" },
     { id: "BUS-1001", path: "/en/admin/bus-company" },
     { id: "ADM-1001", path: "/en/admin" },
@@ -183,6 +184,7 @@ test.describe("strict separation", () => {
     await signIn(page, "TRN-1001");
     await page.waitForURL(/\/en\/admin$/);
     if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
+    await unfoldMenu(page);
     await page
       .getByRole("link", { name: /^Return times/ })
       .filter({ visible: true })

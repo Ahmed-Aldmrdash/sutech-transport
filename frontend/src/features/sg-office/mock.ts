@@ -248,6 +248,7 @@ const WATCHED_OF: Record<RiderState, WatchedStatus> = {
   [RiderState.CheckedOut]: WatchedStatus.CheckedOut,
   [RiderState.NotGoing]: WatchedStatus.NotGoing,
   [RiderState.Absent]: WatchedStatus.Absent,
+  [RiderState.Suspended]: WatchedStatus.Suspended,
 };
 
 function toWatched(

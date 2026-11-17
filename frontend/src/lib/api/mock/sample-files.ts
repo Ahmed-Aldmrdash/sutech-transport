@@ -38,7 +38,7 @@ export function sampleReceiptImage(receipt: SampleReceipt): string {
     ["Amount · المبلغ", receipt.amount],
     ["Depositor · اسم المودع", receipt.payer],
     ["Date · التاريخ", receipt.paidOn],
-    ["Account · الحساب", "SUtech transport fees"],
+    ["Account · الحساب", "SUTech transport fees"],
   ];
   const body = rows
     .map(

@@ -1,6 +1,6 @@
 "use client";
 
-import { Ambulance, Phone } from "lucide-react";
+import { Ambulance, Phone, ShieldAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { buttonStyles } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -21,7 +21,8 @@ export function Contacts() {
             aria-label={t("call", { name: t(contact.key) })}
             className={cn(
               buttonStyles({
-                variant: contact.key === "ambulance" ? "danger" : "secondary",
+                variant:
+                  contact.key === "ambulance" || contact.key === "police" ? "danger" : "secondary",
                 fullWidth: true,
               }),
               "justify-between",
@@ -30,6 +31,8 @@ export function Contacts() {
             <span className="inline-flex items-center gap-2">
               {contact.key === "ambulance" ? (
                 <Ambulance aria-hidden="true" className="size-5" />
+              ) : contact.key === "police" ? (
+                <ShieldAlert aria-hidden="true" className="size-5" />
               ) : (
                 <Phone aria-hidden="true" className="size-5" />
               )}

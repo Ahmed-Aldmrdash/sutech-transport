@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { STANDINGS } from "@/features/discipline/schema";
 import { isoDateTime } from "@/lib/api/iso-datetime";
 import { riderCountsSchema, riderSchema } from "@/features/crew/schema";
 import { fleetSchema } from "@/features/event-buses/schema";
@@ -187,6 +188,7 @@ const SUBSCRIPTION_STATUSES = Object.values(SubscriptionStatus) as [
 export const studentsQuerySchema = z.object({
   q: z.string().trim().max(60).optional(),
   line_id: z.string().optional(),
+  standing: z.enum(STANDINGS).optional(),
   page: z.coerce.number().int().positive().optional(),
 });
 export type StudentsQuery = z.input<typeof studentsQuerySchema>;
@@ -198,6 +200,8 @@ export const opsStudentSchema = z.object({
   line: lineSummarySchema.nullable(),
   stop_name: z.string().nullable(),
   subscription_status: z.enum(SUBSCRIPTION_STATUSES).nullable(),
+  /** Warnings, suspensions and bans (see discipline). */
+  standing: z.enum(STANDINGS),
 });
 export type OpsStudent = z.infer<typeof opsStudentSchema>;
 
@@ -232,7 +236,7 @@ export const opsStudentDetailSchema = opsStudentSchema.extend({
       kind: z.enum(REQUEST_KIND_VALUES),
       status: requestStatusSchema,
       received_at: isoDateTime(),
-      /** The Transportation office handles it, so the link opens its desk. */
+      /** The viewer's office handles it (Transportation, not Finance), so the link opens its desk. */
       handled_here: z.boolean(),
     }),
   ),

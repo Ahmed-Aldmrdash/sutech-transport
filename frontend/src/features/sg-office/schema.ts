@@ -33,6 +33,8 @@ export const WatchedStatus = {
   Arrived: "arrived",
   /** Left the bus on the way, with a reason. */
   CheckedOut: "checked_out",
+  /** Suspended or banned by the office: may not ride. */
+  Suspended: "suspended",
   /** Said "not going today". */
   NotGoing: "not_going",
   /** Not scanned when the trip ended. */

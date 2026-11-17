@@ -75,7 +75,8 @@ test.describe("requests and violations", () => {
   });
 
   test("student affairs closes a violation with a decision", async ({ page }) => {
-    await landOn(page, "STA-1001", /\/en\/admin\/violations$/);
+    await landOn(page, "STA-1001", /\/en\/admin\/students$/);
+    await page.goto("/en/admin/violations");
     await page.getByRole("link", { name: /Habiba Ashraf Kamal/ }).click();
     await expect(page.getByRole("img", { name: "The photo the crew took" })).toBeVisible();
     await page.getByRole("button", { name: "Close with a decision" }).click();

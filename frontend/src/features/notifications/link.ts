@@ -11,6 +11,7 @@ const STUDENT_PATHS: Paths = {
   [NotificationTarget.Request]: "/student/requests",
   [NotificationTarget.Complaint]: "/student/complaints",
   [NotificationTarget.Announcements]: "/student/announcements",
+  [NotificationTarget.Lines]: "/student/lines",
 };
 
 /** Guardians have no announcements page: those notifications only inform. */
@@ -21,13 +22,26 @@ const PARENT_PATHS: Paths = {
   [NotificationTarget.Approvals]: "/parent/approvals",
 };
 
+/** The bus crew: the trip page. */
+const CREW_PATHS: Paths = {
+  [NotificationTarget.Home]: "/driver",
+  [NotificationTarget.Tracking]: "/driver",
+};
+
 /** Targets whose id is a query (which child) rather than a page of its own. */
 const QUERY_ID_TARGETS: readonly NotificationTarget[] = [NotificationTarget.ChildDay];
 
 /** The page a notification opens for this role, or null when it only informs. */
 export function notificationHref(link: NotificationLink | null, role: Role): string | null {
   if (!link) return null;
-  const paths = role === Role.Parent ? PARENT_PATHS : role === Role.Student ? STUDENT_PATHS : {};
+  const paths =
+    role === Role.Parent
+      ? PARENT_PATHS
+      : role === Role.Student
+        ? STUDENT_PATHS
+        : role === Role.Driver || role === Role.Supervisor
+          ? CREW_PATHS
+          : {};
   const base = paths[link.target];
   if (!base) return null;
   if (!link.id) return base;

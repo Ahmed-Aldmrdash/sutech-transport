@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoSidewaysScroll, signIn, switchTo } from "./helpers";
+import { atSchoolMorning, expectNoSidewaysScroll, signIn, switchTo } from "./helpers";
 
 /**
  * Whole stories across roles, as they happen on a real morning: what one role does shows up
@@ -30,6 +30,7 @@ test("a morning on line 7: the driver scans Seif, his father and the office see 
   page,
 }) => {
   test.setTimeout(120_000);
+  await atSchoolMorning(page);
   await signIn(page, "DRV-1001");
   await page.waitForURL(/\/en\/driver$/);
   await startTrip(page);

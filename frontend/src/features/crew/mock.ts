@@ -9,7 +9,14 @@ import type { MockLineSource } from "@/features/lines/mock-lines";
 import { findSos, sosStatusOf } from "@/features/sos/mock-state";
 import { bookingOf, newMockId } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
-import { MOCK_ACCOUNTS, type MockAccount } from "@/features/auth/mock-accounts";
+import {
+  MOCK_ACCOUNTS,
+  findMockAccountById,
+  type MockAccount,
+} from "@/features/auth/mock-accounts";
+import { isBlockedFromRiding, standingOn } from "@/features/discipline/mock-state";
+import { Standing } from "@/features/discipline/schema";
+import { findMockLine } from "@/features/lines/mock-builders";
 import { TripDirection } from "@/features/trips/schema";
 import { cairoNow } from "@/lib/api/mock/cairo-clock";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
@@ -21,8 +28,11 @@ import {
   scanEndpoint,
   startTripEndpoint,
 } from "./api";
-import { canReportDelay } from "./trip-rules";
+import { canReportDelay, waitsForOutbound } from "./trip-rules";
 import {
+  assignmentOf,
+  crewDriverIdOf,
+  homeLineIdOf,
   crewTripOf,
   crewFleetOf,
   crewTripStatus,
@@ -93,6 +103,7 @@ export function countsOf(riders: readonly Rider[]): RiderCounts {
     boarded: count(RiderState.Boarded),
     checked_out: count(RiderState.CheckedOut),
     not_going: count(RiderState.NotGoing),
+    suspended: count(RiderState.Suspended),
     absent: count(RiderState.Absent),
   };
 }
@@ -118,6 +129,13 @@ function departureTimeOf(trip: MockCrewTrip, line: MockLineSource): string | nul
     : mockReturnTime(line.lineId);
 }
 
+/** The crew member who pressed a button, as the other one sees it. */
+function crewActor(userId: string | null | undefined, language: string) {
+  const user = userId ? findMockAccountById(userId)?.user : undefined;
+  if (!user || (user.role !== Role.Driver && user.role !== Role.Supervisor)) return null;
+  return { name: localized(language, user.name_ar ?? user.name, user.name), role: user.role };
+}
+
 function toCrewTrip(
   trip: MockCrewTrip,
   line: MockLineSource,
@@ -137,6 +155,8 @@ function toCrewTrip(
     departure_time: departureTimeOf(trip, line),
     started_at: iso(trip.startedAt),
     ended_at: iso(trip.endedAt),
+    started_by: crewActor(trip.startedBy, language),
+    ended_by: crewActor(trip.endedBy, language),
     riders,
     counts: countsOf(riders),
     delays: trip.delays.map((delay) => ({
@@ -170,6 +190,19 @@ function relievedNotice(account: MockAccount, line: MockLineSource, language: st
   };
 }
 
+/** The office moved this driver to another line's bus today. */
+function assignedNotice(account: MockAccount, language: string, date: string) {
+  const driverId = crewDriverIdOf(account.user.id);
+  const assignment = driverId ? assignmentOf(driverId, date) : null;
+  if (!driverId || !assignment) return null;
+  const homeId = homeLineIdOf(driverId);
+  const home = homeId ? findMockLine(homeId) : undefined;
+  return {
+    home_line: home ? toLineSummary(home, language) : null,
+    at: new Date(assignment.at).toISOString(),
+  };
+}
+
 registerMock(getCrewTodayEndpoint, (_input, { token, language }) => {
   const { account, line } = requireMockCrew(token);
   const now = Date.now();
@@ -195,6 +228,7 @@ registerMock(getCrewTodayEndpoint, (_input, { token, language }) => {
     })),
     campus_arrival: MOCK_CAMPUS_ARRIVAL,
     relieved: relievedNotice(account, line, language, now),
+    assigned: assignedNotice(account, language, cairo.date),
     trips: directions.map((direction) =>
       toCrewTrip(crewTripOf(line.lineId, cairo.date, direction), line, language, now),
     ),
@@ -218,7 +252,12 @@ registerMock(startTripEndpoint, ({ params }, { token, language }) => {
   if (crewTripStatus(other) === CrewTripStatus.InProgress) {
     conflict(CrewErrorCode.OtherTripInProgress, "End the other trip first.");
   }
-  const started = { ...trip, startedAt: now };
+  // The return waits for the morning trip to end (unless the morning never ran).
+  const returnView = { direction: trip.direction, departure_time: departureTimeOf(trip, line) };
+  if (waitsForOutbound(crewTripStatus(other), returnView, new Date(now))) {
+    conflict(CrewErrorCode.OutboundNotEnded, "End the morning trip first.");
+  }
+  const started = { ...trip, startedAt: now, startedBy: account.user.id };
   saveCrewTrip(started);
   return toCrewTrip(started, line, language, now);
 });
@@ -246,7 +285,7 @@ registerMock(endTripEndpoint, ({ params }, { token, language }) => {
       };
     }
   }
-  const ended = { ...trip, scans, endedAt: now };
+  const ended = { ...trip, scans, endedAt: now, endedBy: account.user.id };
   saveCrewTrip(ended);
   return toCrewTrip(ended, line, language, now);
 });
@@ -262,7 +301,7 @@ function studentFromQr(token: string, now: number): string {
     card = undefined;
   }
   if (prefix !== "SUT1" || !signature || typeof card !== "string" || typeof exp !== "number") {
-    throw new MockHttpError(HTTP.Unprocessable, CrewErrorCode.CardInvalid, "Not a SUtech pass.");
+    throw new MockHttpError(HTTP.Unprocessable, CrewErrorCode.CardInvalid, "Not a SUTech pass.");
   }
   if (exp * MS_PER_SECOND + QR_GRACE_MS < now) {
     throw new MockHttpError(HTTP.Unprocessable, CrewErrorCode.CardExpired, "Pass expired.");
@@ -316,6 +355,13 @@ registerMock(scanEndpoint, ({ params, body }, { token, language }) => {
   const current = riderStateOf(trip, line, rider, now);
 
   let scan = trip.scans[studentId];
+  if (body.action === ScanAction.Board && isBlockedFromRiding(studentId, trip.date)) {
+    const banned = standingOn(studentId, trip.date) === Standing.Banned;
+    conflict(
+      banned ? CrewErrorCode.StudentBanned : CrewErrorCode.StudentSuspended,
+      banned ? "Banned from the buses." : "Suspended today.",
+    );
+  }
   if (body.action === ScanAction.Board) {
     if (current.state === RiderState.Boarded) {
       conflict(CrewErrorCode.AlreadyBoarded, "Already on board.");

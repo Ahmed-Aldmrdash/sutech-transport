@@ -1,14 +1,18 @@
 # Frontend–Backend Agreement – SUtech Transport
 
-Nov 8, 2026 · Ahmed Aldmrdash
+Nov 16, 2026 · Ahmed Aldmrdash
 
 The frontend (PWA) is being built from scratch on mock data. The backend (Python + FastAPI) will implement the same requests in exactly the same shape. **This document is the source of truth**: if the frontend and this document disagree, the document wins until we agree on a change and record it here.
+
+**Nov 16 update (after Ahmed's review):** a booking window the Transportation office opens, extends and closes (`BOOKING_CLOSED`), warnings, suspensions and bans for students (new `discipline` endpoints, rider state `suspended`), the driver sees a trip the supervisor started (`started_by`/`ended_by`), a moved driver gets the trip and a `crew_assignment` notification, a return-trip rule (`OUTBOUND_NOT_ENDED`), and the assistant endpoint `/assistant/ask`. Details are in "Review fixes update (2026-11-16)".
 
 **New in the Nov 1 version:** login is now two steps (`/auth/otp`, then `/auth/login`) for every role, the full SOS flow, and report export to Excel and PDF. The Transportation Department asked for all three officially.
 
 **Nov 1 update (after frontend phase 1):** extra fields in the login responses (`code_length`, `resend_after_seconds`, `expires_at`), a new `OTP_EXPIRED` error, each new code cancels the previous one, and general error codes are now upper case. Details are in "Two-step login".
 
 **Nov 2 update (after frontend phase 3):** student requests (line change on the university form, refund under the refund policy, complaints) with status tracking, notifications with an unread count, an announcements page, and settings. 10 new requests; the old `/requests` and `/complaints` rows are replaced. Details are in "Student: requests, notifications and settings".
+
+**Nov 13 update (after the audit fixes):** the session cookie is named `sut_session`, the super admin gets 403 on SOS actions, the replacement bus and Abu El Hol's reply, dates may end in `Z` or `±HH:MM` (with seconds), return time only 12:00–20:00, a new `reply_language` field and `violation_decision` notification, and a guardian with no account sends the line change straight to the office. Details are in "Audit-fix update (2026-11-13)".
 
 **Nov 2 update (after frontend phase 2, the student pages):** booking, payment and the digital card, built on the real university data (23 lines, EGP 15,000 per term, the NBE account). **Fawry and InstaPay are removed**: payment is only a bank deposit/transfer with a receipt upload, or a Visa card at the Accounting office. New requests: cancel a booking, payment instructions, my payments, and the next trip. Details are in "Student: booking, payment and the card".
 
@@ -35,12 +39,12 @@ Note: the bus location comes from a GPS device installed in the bus and goes str
 | Endpoints | REST + JSON, all starting with `/api/v1/` |
 | Field names | `snake_case` (e.g. `student_id`) |
 | IDs | Strings; the university ID is 9 digits (e.g. `240100101`) |
-| Dates | ISO 8601 in UTC (e.g. `2026-10-29T06:30:00Z`); the frontend converts to Egypt time |
+| Dates | ISO 8601 with seconds and an offset, `Z` or `±HH:MM` (e.g. `2026-10-29T06:30:00Z`; UTC preferred); the frontend converts to Egypt time. Updated Nov 13 |
 | Money | Integer in piastres (e.g. `150000` = EGP 1,500) |
 | Statuses | Fixed English values (e.g. subscription: `reserved` / `payment_review` / `active` / `expired` / `cancelled`) |
 | Timetable times | Times of day on the timetable (pickup, campus arrival, return) are `"HH:MM"` in Egypt time, not UTC (e.g. `"07:40"`). Calendar dates are `"YYYY-MM-DD"` (e.g. `"2026-11-01"`) |
 | Errors | Correct HTTP status + `{ "code": "SEAT_UNAVAILABLE", "message": "..." }`; the frontend translates the `code`. Codes are always UPPER_SNAKE_CASE; the general ones are `UNAUTHORIZED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `CONFLICT` (409), `VALIDATION_ERROR` (422), `RATE_LIMITED` (429), `INTERNAL_ERROR` (500) |
-| Auth | An **HttpOnly, Secure, SameSite=Lax session cookie** set by `/auth/login` and sent with every request (the frontend uses `credentials: "include"`); the page never sees the token. Updated Nov 8 (security audit) |
+| Auth | An **HttpOnly, Secure, SameSite=Lax session cookie** named `sut_session` (to be confirmed) set by `/auth/login` and sent with every request (the frontend uses `credentials: "include"`); the page never sees the token. Updated Nov 8 (security audit) |
 | Long lists | `?page=1&page_size=20`, response `{ items, total }`. Exceptions (short lists, no paging): `GET /lines`, `/payments/me`, `/requests/me` return an array; `GET /admin/sos` and `/violations/mine` return `{ items }` |
 | Language | The frontend sends `Accept-Language: ar` or `en` |
 | Duplicate prevention | Every request that changes something (booking, cancel, receipt, SOS) carries an `Idempotency-Key` header (a UUID), so if it is sent twice it runs once and the second call gets the same response |
@@ -51,7 +55,7 @@ The frontend hides pages, but **the server must reject** any request outside the
 
 | Role (`role`) | Allowed to |
 | --- | --- |
-| `super_admin` | Sees everything; the only role that creates accounts and assigns permissions. **View only** on the SOS/clinic desk and the bus company's portal: the offices that own them act there. |
+| `super_admin` | Sees everything; the only role that creates accounts and assigns permissions. **View only** on the SOS/clinic desk, the replacement bus (including changing a line's bus or driver) and the bus company's portal: the server returns 403 to its actions there. |
 | `transport_admin` | Operations (tracking, emergencies, attendance, lines, buses, announcements), violations, complaints, events, and operations reports |
 | `finance` | Payments, refunds, and financial reports |
 | `clinic` | The clinic and medical emergencies only |
@@ -349,6 +353,7 @@ Data: bus plates, drivers and their mobiles come from the Abu El Hol drivers lis
 Decided by Ahmed: **a line change needs the guardian's approval in the app; the model permit does not** (refund and complaint unchanged).
 
 - New request status `awaiting_guardian`, before `submitted`. A line change starts there; it reaches the Transportation office only after the guardian approves. The office never sees a refused one.
+- **If the guardian has no app account** (updated Nov 13): the request starts as `submitted` straight away and goes to the office, which calls the guardian. See "Audit-fix update".
 - New actor `guardian` in the request timeline (`by`).
 - The line change body no longer has `guardian_consent` (the guardian's name and phone stay, as on the paper form). The guardian who answers is the account whose phone is on the student's file.
 - The student can withdraw while `awaiting_guardian` or `submitted`.
@@ -627,9 +632,113 @@ Changing a trip's bus or driver from the live map, a line or the buses page reus
 | Method | Path | Who | What |
 |---|---|---|---|
 | GET | `/admin/timetable` | transport_admin, super_admin | `{default_return_time, items[]}`; each item: `line`, `stop_count`, `first_pickup_time`, `campus_arrival`, `return_departure_time`, `changed_by_name`, `changed_at` (null while the line has the default). |
-| PUT | `/admin/timetable/return-time` | transport_admin, super_admin | `{line_ids[], return_departure_time}`. Empty `line_ids` = every line (overrides earlier per-line times). Students and crews see the new time at once. Logged in the audit log (`return_time_changed`, new area `timetable`). Error: `LINE_NOT_FOUND` (404). Idempotent. |
+| PUT | `/admin/timetable/return-time` | transport_admin, super_admin | `{line_ids[], return_departure_time}`. Empty `line_ids` = every line (overrides earlier per-line times). Students and crews see the new time at once. Logged in the audit log (`return_time_changed`, new area `timetable`). Allowed 12:00–20:00 only. Errors: `LINE_NOT_FOUND` (404), `RETURN_TIME_OUT_OF_RANGE` (422). Also posts a `service_change` announcement and notifies the line's students and guardians. Idempotent. |
 
 The office menu item "Departure trips" (`/admin/departures`) is now **Return times** (`/admin/return-times`).
+
+## Audit-fix update (2026-11-13)
+
+A second full audit of the front end found 4 high and 10 medium problems; all are fixed in the app, and `frontend/openapi.json` is updated to match. These are the points the backend must follow. Where this section and an older one disagree, this one wins.
+
+**1. Session cookie name.** The cookie is called **`sut_session`** in `openapi.json` (security scheme `cookieAuth`, HttpOnly, Secure, SameSite=Lax). Please confirm this name or tell us yours. The old Bearer scheme is removed from `openapi.json`.
+
+**2. Super admin is view only on three desks.** The server returns `FORBIDDEN` (403) to `super_admin` on:
+- `POST /admin/sos/{sos_id}/actions`
+- `GET /admin/trips/{trip_id}/replacement-options` and `POST /admin/trips/{trip_id}/replacement`
+- `POST /bus-company/requests/{event_id}/reply`
+
+Changing a line's bus or driver (from the live map, a line page or the buses page) is **Transportation office only** (`transport_admin`). The super admin sees these pages but no action buttons.
+
+**3. Dates and times.** Every date-time field is ISO 8601 **with seconds** and an offset: `Z` or `±HH:MM` (e.g. `2026-11-13T06:30:00Z` or `2026-11-13T08:30:00+02:00`). The app accepts both and turns them into `Z` inside. A value without seconds or without an offset is refused by the app's checks. Timetable times (`"HH:MM"`) and calendar dates (`"YYYY-MM-DD"`) don't change.
+
+**4. Files (receipts and documents).** The app's security policy (CSP) only shows images from the API's own origin and from storage domains listed in `NEXT_PUBLIC_FILE_ORIGINS`. Please tell us the storage domain your signed file links will use (e.g. an S3 or MinIO bucket), so we add it before going live.
+
+**5. Return time limits.** `PUT /admin/timetable/return-time` accepts `return_departure_time` from **12:00 to 20:00** only (Egypt time); anything else returns `RETURN_TIME_OUT_OF_RANGE` (422). Ahmed confirmed these limits (2026-11-13). Every change also:
+- publishes a `service_change` announcement on each changed line (all lines when `line_ids` is empty), and
+- sends a notification to the line's students and their guardians with the new time.
+
+**6. Reply language for the office.** `GET /admin/requests/{request_id}` gets a new field **`reply_language`** (`ar` or `en`): the language the student was using when they sent the request. The server saves it with the request and writes `suggested_replies` in that language, whatever language the office user's own screen is in. The app tells the office which language to reply in.
+
+**7. New notification `violation_decision`.** When Student Affairs closes a violation with outcome `warning` or `investigation`, the student and their guardians get a notification of kind `violation_decision`. A `dismissed` violation sends nothing to anyone.
+
+**8. Guardian without an account.** If the guardian on the student's file has no app account, a line change goes **straight to `submitted`** (no `awaiting_guardian`, no timer) and reaches the Transportation office at once. In `GET /admin/requests/{request_id}` the office sees that the guardian has no account, and the app shows "call the guardian to confirm". (This replaces the 20-second auto-approval the old demo had; see "Guardian approval for a line change".)
+
+**Also already in the app (no backend change):** delay minutes are only 5/10/15/20/30/45/60, as in "Driver and supervisor"; a live build stops if the API address isn't set; large uploads wait up to 2 minutes before a timeout.
+
+**Still open from the audit (please answer or agree):**
+- [ ] `GET /me` should return `expires_at` too, so a session renewed while the app is used (sliding session) shows the new end time.
+- [ ] One naming style for paths: `/trips` vs `/crew/trips`, `/driver/trip/today` vs `/crew/today`, and `kind` vs `kind[]` in query strings. We propose `/crew/...` and `kind[]`; tell us if you prefer the other.
+- [ ] `Idempotency-Key` on `POST /auth/logout`, `POST /notifications/{id}/read` and `POST /notifications/read-all` too.
+- [ ] Paging (`page`, `page_size`, `{items, total}`) for `GET /admin/users` and `GET /admin/lines`.
+- [ ] Model permit: the full fields, and how long its QR stays valid after the permit ends.
+- [ ] Uploads: base64 inside the JSON (as now) or `multipart/form-data`?
+- [ ] Office decisions: allow `approve` or `reject` straight away without `open` first (fewer steps for the office).
+- [ ] `GET /card/me`: a field for a temporary line change, so the card shows the temporary line and stop between its dates.
+
+## Review fixes update (2026-11-16)
+
+Ahmed's review of the front end asked for these changes. They are all in the app on mock data, and `frontend/openapi.json` is updated. Where this section and an older one disagree, this one wins.
+
+**1. Booking window (new).** The Transportation office opens booking for the term for a set time. Once it closes, **nobody can book, even on a line with free seats**. The office can extend it (or reopen it after it closed) or close it early.
+
+| Method | Path | Who | What |
+|---|---|---|---|
+| GET | `/booking-window` | student, transport_admin, super_admin | `{term_name, status, opens_at, closes_at, history[]}`. `status` is `not_open`, `open` or `closed`, worked out from the times on the server. `history` (newest first: `at`, `action`, `opens_at`, `closes_at`, `by_name`, `note`) is empty for students. |
+| PUT | `/admin/booking-window` | transport_admin, super_admin | `{action, opens_at, closes_at, note}`. `open`: from `opens_at` (null = now) until `closes_at`. `extend`: a later `closes_at`; a closed window opens again. `close`: ends it now. Errors: `INVALID_WINDOW` (422), `EXTEND_MUST_BE_LATER` (422), `NEVER_OPENED` (409), `ALREADY_CLOSED` (409). Idempotent. Audit log: `booking_opened`, `booking_extended`, `booking_closed` (area `booking`). |
+
+- While the window isn't open, `POST /subscriptions` answers **`BOOKING_CLOSED` (409)** whatever the seats. A reservation made before it closed can still be paid.
+- When booking opens or is extended, students with no active subscription get a notification of kind **`booking_window`** (target `lines`).
+- The app sends times from a `datetime-local` field as Egypt time converted to UTC (`Z`).
+
+**2. "Not going today" needs no guardian approval.** The student just tells the bus. The guardian gets a `child_not_going` notification only (no approval step). A **line change still needs the guardian's approval**, as in "Guardian approval for a line change".
+
+**3. Warnings, suspensions and bans (new).** The Transportation office and Student Affairs can act on a student's behaviour, beyond a single bus violation.
+
+| Method | Path | Who | What |
+|---|---|---|---|
+| GET | `/discipline/me` | student | The student's own standing: `{standing, warnings, suspended_until, records[]}`. `standing` is `good`, `warned`, `suspended` or `banned` (the worst in force today). |
+| GET | `/admin/students/{student_id}/discipline` | transport_admin, student_affairs, super_admin | Same shape for one student. |
+| POST | `/admin/students/{student_id}/discipline` | transport_admin, student_affairs, super_admin | `{action, reason, ends_on}`. `action`: `warning`, `suspension` or `ban`. `reason` 5–300 characters (the student and guardians see it). `ends_on` only for a suspension: from tomorrow, at most 90 days ahead. Errors: `STUDENT_NOT_FOUND` (404), `INVALID_SUSPENSION` (422), `ALREADY_BANNED` (409). Idempotent. |
+| POST | `/admin/discipline/{record_id}/lift` | transport_admin, student_affairs, super_admin | `{note}` (5–300). Ends a suspension or ban early. Errors: `NOT_LIFTABLE` (409, a warning stays on file), `ALREADY_LIFTED` (409). |
+
+Each record: `record_id`, `action`, `reason`, `starts_on`, `ends_on`, `in_force`, `by_name`, `created_at`, `lifted_at`, `lifted_by_name`, `lift_note`.
+
+What the server must enforce:
+- A **suspended** or **banned** student can't be boarded: the crew's scan answers `STUDENT_SUSPENDED` / `STUDENT_BANNED` (409). On the trip they show with the new rider state **`suspended`** (never `absent`), and the trip's `counts` get a new `suspended` field.
+- A **banned** student can't book: `POST /subscriptions` answers `STUDENT_BANNED` (403). Their existing seat is kept.
+- The student and their guardians get a notification of kind **`discipline`** for each new record and each lift.
+- `GET /admin/students` gets a `standing` filter and every row has `standing`. Student Affairs can now open `GET /admin/students` and `GET /admin/students/{student_id}` (read only; a request in the student's list has `handled_here: false` for them).
+- New attendance outcome `suspended` on the student's trips, the office's attendance and the Secretary General's watch list.
+- Audit log: `student_warned`, `student_suspended`, `student_banned`, `discipline_lifted` (area `discipline`).
+
+**4. Driver and supervisor run one trip together.**
+- Each trip in `GET /crew/today` gets **`started_by`** and **`ended_by`**: `{name, role}` (`driver` or `supervisor`), or null. When the supervisor starts the trip, the driver's app shows "started by the supervisor" and no start button (a second start answers `TRIP_ALREADY_STARTED`).
+- The other crew member gets a notification of kind **`trip_started`** when the trip starts or ends.
+- **Return trip rule:** the return trip can't start while the morning trip is still on the road (`OTHER_TRIP_IN_PROGRESS`), or while the morning trip never started and the return is more than 60 minutes away (new error **`OUTBOUND_NOT_ENDED`**, 409).
+
+**5. Moving a driver to another bus.** When the office sends another driver to a trip (`POST /admin/trips/{trip_id}/replacement` with `driver_id`):
+- The new driver's `GET /crew/today` shows that line's trips at once, with a new field **`assigned`**: `{home_line, at}` (null on their own line).
+- The relieved driver keeps seeing the trip (`relieved` is set) but can't run it.
+- A return trip follows the morning trip's replacement unless the office changes it again.
+- Both drivers get a notification of kind **`crew_assignment`**. Crew accounts now have a notifications page (target paths under `/driver`).
+- Relieved line drivers count as free drivers in `replacement-options`.
+
+**6. Assistant (new).** The students' chat assistant moved from a menu page to a floating button on every student page.
+
+| Method | Path | Who | What |
+|---|---|---|---|
+| POST | `/assistant/ask` | student | `{question, history[]}` (question up to 500 characters; up to the last 6 turns `{role, text}`, role `user` or `assistant`) → `{answer, sources[], needs_office}`. Answers only from the university's transport documents, in the question's language. `needs_office: true` when it has no answer (the app shows the office's phone). Rate limit 20 a minute (429 `RATE_LIMITED`). This is the AI team's service behind the one `ask_llm` layer. |
+
+**7. Police number.** The SOS contacts now include the police (Al Najda) **122**. It's a fixed number in the app; nothing for the backend.
+
+**8. Other changes.**
+- The Finance office lands on Payments; Student Affairs lands on Students.
+- Settings moved out of the menus to the top of the sidebar for every role (`/driver/settings` and `/admin/settings` are new routes; no API change).
+
+**Open questions from this update:**
+- [ ] Booking window: one per term for every line, as built, or per line or per level?
+- [ ] Does a warning expire at the end of the term, or stay on file for good?
+- [ ] Should a ban also cancel an unpaid reservation (and free the seat)?
 
 ## We need your answers on
 
@@ -642,7 +751,9 @@ The office menu item "Departure trips" (`/admin/departures`) is now **Return tim
 - [ ] Which library for Arabic PDF (WeasyPrint or another), and are big reports built immediately or in the background?
 - [ ] Is the supervisor a separate account from the driver? (The app treats them as two accounts with the same pages; tell us if one shared account is planned.)
 - [ ] Is a 24-hour hold enough? The offices work Sunday to Thursday only, so a booking on Thursday evening ends before the bank or office opens. Should the hold count working days, or be 48 hours?
-- [ ] Receipt upload: base64 inside the JSON (as now), or `multipart/form-data`? And where are the files stored?
+- [ ] Receipt upload: base64 inside the JSON (as now), or `multipart/form-data`? And which storage domain will the signed file links use?
+- [x] Return time limits 12:00–20:00: confirmed by Ahmed (2026-11-13).
+- [ ] Session cookie name `sut_session`: confirm or change.
 - [ ] Still needed from the Transportation office: stop locations, and the real seat count of each bus (the seat counts are estimates for now).
 - [ ] How will we connect to the admissions database (student data and parent phone numbers)? We're waiting for Mr. Amr's reply.
 - [ ] Your notes on the endpoint list: is anything missing, or is there something better done differently?

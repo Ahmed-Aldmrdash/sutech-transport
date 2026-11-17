@@ -10,23 +10,33 @@ import { DataTable } from "@/components/ui/table";
 import { DeskListState } from "@/features/desk-kit/components/desk-list-state";
 import { DeskPager } from "@/features/desk-kit/components/desk-pager";
 import { DeskSearch } from "@/features/desk-kit/components/desk-search";
+import { StandingBadge } from "@/features/discipline/components/standing-badge";
+import { STANDINGS, type Standing } from "@/features/discipline/schema";
 import { Link } from "@/i18n/navigation";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { listOpsLines, listOpsStudents } from "../api";
 import type { OpsStudents } from "../schema";
 import { SubscriptionBadge } from "./subscription-badge";
 
-/** Every student with a seat this term (or a booking), searchable by ID or name. */
+/**
+ * Every student with a seat this term (or a booking): search by ID or name, filter by line or
+ * by standing (warned, suspended, banned).
+ */
 export function StudentsPage() {
   const t = useTranslations("desk.ops.students");
+  const tStanding = useTranslations("discipline.standing");
   const [q, setQ] = useState("");
   const [lineId, setLineId] = useState("");
+  const [standing, setStanding] = useState<Standing | "">("");
   const [page, setPage] = useState(1);
   const lines = useAsync((signal) => listOpsLines({ signal }), []);
   const state = useAsync(
     (signal) =>
-      listOpsStudents({ q: q || undefined, line_id: lineId || undefined, page }, { signal }),
-    [q, lineId, page],
+      listOpsStudents(
+        { q: q || undefined, line_id: lineId || undefined, standing: standing || undefined, page },
+        { signal },
+      ),
+    [q, lineId, standing, page],
   );
   const onSearch = useCallback((value: string) => {
     setQ(value);
@@ -36,12 +46,12 @@ export function StudentsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("lead")} />
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 desktop:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
         <DeskSearch hint={t("searchHint")} onSearch={onSearch} />
         <SelectField
           label={t("line")}
           value={lineId}
-          containerClassName="w-full max-w-xs"
+          containerClassName="w-full"
           onChange={(event) => {
             setLineId(event.target.value);
             setPage(1);
@@ -54,6 +64,19 @@ export function StudentsPage() {
                   label: t("lineValue", { code: item.line.code, name: item.line.name }),
                 }))
               : []),
+          ]}
+        />
+        <SelectField
+          label={t("standing")}
+          value={standing}
+          containerClassName="w-full"
+          onChange={(event) => {
+            setStanding(event.target.value as Standing | "");
+            setPage(1);
+          }}
+          options={[
+            { value: "", label: t("allStandings") },
+            ...STANDINGS.map((value) => ({ value, label: tStanding(value) })),
           ]}
         />
       </div>
@@ -82,9 +105,12 @@ export function StudentsPage() {
                       >
                         {student.name}
                       </Link>
-                      <bdi className="text-caption text-ink-muted tabular-nums">
-                        {student.identifier}
-                      </bdi>
+                      <span className="flex flex-wrap items-center gap-2">
+                        <bdi className="text-caption text-ink-muted tabular-nums">
+                          {student.identifier}
+                        </bdi>
+                        <StandingBadge standing={student.standing} />
+                      </span>
                     </span>
                   ),
                 },
