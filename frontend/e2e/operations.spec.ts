@@ -57,7 +57,7 @@ test("attendance, the live map and the buses open", async ({ page }) => {
   await expect(page.getByText("Something went wrong")).toHaveCount(0);
   await page.goto("/en/admin/attendance?line=ln_07");
   await expect(page.getByRole("heading", { level: 1, name: "Attendance" })).toBeVisible();
-  await expect(page.getByLabel("Line")).toHaveValue("ln_07");
+  await expect(page.getByLabel("Line", { exact: true })).toHaveValue("ln_07");
   await page.goto("/en/admin/tracking");
   await expect(page.getByRole("region", { name: "Map of every bus on the road" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Line 7 · El Shorouk/ })).toBeVisible();

@@ -328,7 +328,7 @@ function drawPage(
   context.font = `14px ${font}`;
   context.textAlign = "center";
   context.fillText(
-    `${TEXT[language].page} ${options.pageNumber} / ${options.pages} · SUtech`,
+    `${TEXT[language].page} ${options.pageNumber} / ${options.pages} · SUTech`,
     PAGE.width / 2,
     PAGE.height - FOOTER_HEIGHT / 2,
   );
@@ -379,7 +379,7 @@ async function toPdf(report: Report, language: Language): Promise<Blob> {
     if (index > 0) pdf.addPage();
     pdf.addImage(canvas.toDataURL("image/jpeg", JPEG_QUALITY), "JPEG", 0, 0, pageWidth, pageHeight);
   });
-  pdf.setProperties({ title: report.title, creator: "SUtech Transport" });
+  pdf.setProperties({ title: report.title, creator: "SUTech Transport" });
   return pdf.output("blob");
 }
 

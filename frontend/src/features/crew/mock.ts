@@ -301,7 +301,7 @@ function studentFromQr(token: string, now: number): string {
     card = undefined;
   }
   if (prefix !== "SUT1" || !signature || typeof card !== "string" || typeof exp !== "number") {
-    throw new MockHttpError(HTTP.Unprocessable, CrewErrorCode.CardInvalid, "Not a SUtech pass.");
+    throw new MockHttpError(HTTP.Unprocessable, CrewErrorCode.CardInvalid, "Not a SUTech pass.");
   }
   if (exp * MS_PER_SECOND + QR_GRACE_MS < now) {
     throw new MockHttpError(HTTP.Unprocessable, CrewErrorCode.CardExpired, "Pass expired.");
