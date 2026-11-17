@@ -29,6 +29,14 @@ export const NotificationKind = {
    * student with a warning or an investigation (not when it was dismissed).
    */
   ViolationDecision: "violation_decision",
+  /** To a driver: the office moved them to another line's bus, or gave their bus to another. */
+  CrewAssignment: "crew_assignment",
+  /** To the bus crew: the other crew member started or ended the trip. */
+  TripStarted: "trip_started",
+  /** To the student and guardians: a warning, a suspension or a ban, or one lifted. */
+  Discipline: "discipline",
+  /** To students without a seat: booking opened or was extended. */
+  BookingWindow: "booking_window",
 } as const;
 export type NotificationKind = (typeof NotificationKind)[keyof typeof NotificationKind];
 const NOTIFICATION_KINDS = Object.values(NotificationKind) as [
@@ -52,6 +60,8 @@ export const NotificationTarget = {
   ChildDay: "child_day",
   /** A guardian's approvals page. */
   Approvals: "approvals",
+  /** The student's lines & booking page. */
+  Lines: "lines",
 } as const;
 export type NotificationTarget = (typeof NotificationTarget)[keyof typeof NotificationTarget];
 

@@ -1,9 +1,9 @@
 {
   "app": {
-    "name": "SUtech Transportation",
-    "shortName": "SUtech Transport",
+    "name": "SUTech Transportation",
+    "shortName": "SUTech Transport",
     "tagline": "Transportation",
-    "description": "Book your seat, pay, track your bus and follow every trip at SUtech.",
+    "description": "Book your seat, pay, track your bus and follow every trip at SUTech.",
     "slogan": "Access the Future"
   },
   "common": {
@@ -60,11 +60,12 @@
     "groups": {
       "main": "Main",
       "account": "My account",
-      "operations": "Operations",
+      "operations": "Today",
       "finance": "Finance",
-      "followUp": "Follow-up",
       "otherParties": "Other offices",
-      "system": "System"
+      "system": "Reports & system",
+      "studentsGroup": "Students",
+      "fleet": "Lines & buses"
     },
     "items": {
       "home": "Home",
@@ -78,7 +79,6 @@
       "attendanceHistory": "My trips",
       "requests": "Requests",
       "complaints": "Complaints",
-      "assistant": "Assistant",
       "settings": "Settings",
       "childDay": "Today's trip",
       "approvals": "Approvals",
@@ -104,7 +104,8 @@
       "busCompany": "Bus company portal",
       "users": "Users & permissions",
       "payment": "Payment",
-      "sos": "SOS"
+      "sos": "SOS",
+      "bookingWindow": "Booking window"
     },
     "short": {
       "notifications": "Inbox",
@@ -504,7 +505,9 @@
         "LINE_NOT_FOUND": "This line was removed. Choose another one.",
         "network": "No connection. Your seat wasn't booked; try again.",
         "invalid": "Some details aren't right. Check the form and try again.",
-        "generic": "We couldn't book the seat. Try again."
+        "generic": "We couldn't book the seat. Try again.",
+        "BOOKING_CLOSED": "Booking is closed, so no seat can be booked now, even if seats are free.",
+        "STUDENT_BANNED": "You are banned from the buses, so you can't book. Contact the Transportation office."
       }
     },
     "booking": {
@@ -965,7 +968,7 @@
       "note": "Note for the office",
       "noteHint": "Short, up to 200 characters.",
       "whoKnowsTitle": "Who is told",
-      "whoKnowsBody": "Your driver and bus supervisor, your guardian and the Transportation office. That day counts as \"not going\", not absent.",
+      "whoKnowsBody": "Your driver and bus supervisor, your guardian and the Transportation office. Your guardian only gets a notification: no approval is needed. That day counts as \"not going\", not absent.",
       "submit": "Report the day",
       "confirmTitle": "Not going {day}?",
       "confirmBody": "The driver won't wait for you at your stop. You can take it back until the bus leaves.",
@@ -1009,7 +1012,8 @@
         "rode": "Rode",
         "absent": "Absent",
         "not_going": "Not going",
-        "checked_out": "Left early"
+        "checked_out": "Left early",
+        "suspended": "Suspended"
       },
       "noneForFilter": "No trips of this kind.",
       "loadMore": "Show more",
@@ -1023,13 +1027,6 @@
       "checkedOutAt": "Left the bus {time}",
       "reason": "Reason: {reason}",
       "returnNote": "Return trips will show here once the Transportation office publishes return times."
-    },
-    "assistant": {
-      "title": "Assistant",
-      "lead": "Ask about your line, times and the bus rules, in English or Arabic.",
-      "soonTitle": "The assistant is coming soon",
-      "soonBody": "It is being built and will open here. Until then, your line, times and announcements are in the app, and the Transportation office (A039) answers anything else.",
-      "lines": "See the lines"
     }
   },
   "notifications": {
@@ -1110,7 +1107,7 @@
     "map": {
       "label": "Live map of the bus",
       "bus": "The bus",
-      "campus": "SUtech campus",
+      "campus": "SUTech campus",
       "stop": "Your stop",
       "followBus": "Follow the bus",
       "following": "Following the bus",
@@ -1252,7 +1249,8 @@
       "boarded": "On board",
       "checked_out": "Left early",
       "not_going": "Not going",
-      "absent": "Absent"
+      "absent": "Absent",
+      "suspended": "Suspended"
     },
     "checkout": {
       "title": "Check out a student",
@@ -1321,7 +1319,8 @@
         "network": "No connection. Check your internet and try again.",
         "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again.",
-        "DRIVER_RELIEVED": "The Transportation office handed this trip to another driver, so you can't run it."
+        "DRIVER_RELIEVED": "The Transportation office handed this trip to another driver, so you can't run it.",
+        "OUTBOUND_NOT_ENDED": "End the morning trip before starting the return."
       },
       "startOutboundConfirm": "Start the outbound trip now?",
       "startReturnConfirm": "Start the return trip now?",
@@ -1349,7 +1348,14 @@
       "replacedTitle": "The office changed today's bus",
       "replacedBody": "Now {plate} with driver {name} ({phone}).",
       "relievedTitle": "The office handed your bus to another driver",
-      "relievedBody": "Since {time}, {name} ({phone}) is driving. You can't start or end the trip or scan passes any more. Call the Transportation office if anything is wrong."
+      "relievedBody": "Since {time}, {name} ({phone}) is driving. You can't start or end the trip or scan passes any more. Call the Transportation office if anything is wrong.",
+      "waitsForOutbound": "Starts once the morning trip ends.",
+      "startedBy": "Started by {name} ({role}).",
+      "endedBy": "Ended by {name} ({role}).",
+      "assignedTitle": "You're on line {code} today",
+      "assignedBody": "The Transportation office sent you to this line's bus ({plate}) at {time}. Run its trips from here.",
+      "assignedBodyHome": "The Transportation office moved you from line {home} to this line's bus ({plate}) at {time}. Run its trips from here.",
+      "countSuspended": "{count, plural, one {# student is suspended today: don't let them on.} other {{number} students are suspended today: don't let them on.}}"
     },
     "scan": {
       "title": "Scan cards",
@@ -1371,7 +1377,7 @@
       "boardedResult": "{name} is on board",
       "checkedOutResult": "{name} left the bus",
       "errors": {
-        "CARD_INVALID": "This isn't a SUtech bus pass.",
+        "CARD_INVALID": "This isn't a SUTech bus pass.",
         "CARD_EXPIRED": "The pass expired. Ask the student to open it again (no screenshots).",
         "STUDENT_NOT_FOUND": "No student with this university ID.",
         "NOT_ON_THIS_TRIP": "Not subscribed on this line. Send them to the Transportation office.",
@@ -1383,7 +1389,9 @@
         "network": "No connection. Check your internet and try again.",
         "invalid": "Some details aren't right. Check the form and try again.",
         "generic": "Something went wrong. Try again.",
-        "DRIVER_RELIEVED": "The Transportation office handed this trip to another driver, so you can't scan."
+        "DRIVER_RELIEVED": "The Transportation office handed this trip to another driver, so you can't scan.",
+        "STUDENT_SUSPENDED": "This student is suspended today and may not ride. Don't let them on.",
+        "STUDENT_BANNED": "This student is banned from the buses. Don't let them on."
       },
       "camera": {
         "turnOn": "Turn on the camera",
@@ -1492,7 +1500,8 @@
       "call": "Call {name}",
       "transport": "Transportation office",
       "ambulance": "Ambulance",
-      "hotline": "University hotline"
+      "hotline": "University hotline",
+      "police": "Police (Al Najda)"
     },
     "log": {
       "title": "What the office did",
@@ -2356,7 +2365,11 @@
         "rode": "Rode",
         "notGoing": "Not going",
         "absent": "Absent",
-        "rodeLabel": "{rode} of {subscribers} rode"
+        "rodeLabel": "{rode} of {subscribers} rode",
+        "filterLabel": "Which lines",
+        "attention": "Need attention ({count})",
+        "all": "All lines ({count})",
+        "allGood": "Every line is on time, with its own bus and driver."
       },
       "emergencies": {
         "title": "Emergencies",
@@ -2387,7 +2400,8 @@
           "arrived": "Reached campus",
           "checked_out": "Left on the way",
           "not_going": "Not going today",
-          "absent": "Absent"
+          "absent": "Absent",
+          "suspended": "Suspended"
         }
       },
       "errors": {
@@ -2534,7 +2548,8 @@
           "boarded": "On board ({count})",
           "checked_out": "Left early ({count})",
           "not_going": "Not going ({count})",
-          "absent": "Absent ({count})"
+          "absent": "Absent ({count})",
+          "suspended": "Suspended ({count})"
         },
         "rosterCaption": "The line's riders",
         "noneInFilter": "No student in this list.",
@@ -2579,7 +2594,9 @@
         "absent": "Absent",
         "requestsTitle": "Requests and complaints",
         "noRequests": "No requests yet.",
-        "financeHandles": "Finance handles it"
+        "financeHandles": "Finance handles it",
+        "standing": "Standing",
+        "allStandings": "Any standing"
       },
       "buses": {
         "title": "Buses & drivers",
@@ -2697,7 +2714,9 @@
           "emergencies": "Emergencies",
           "events": "Event buses",
           "users": "Accounts",
-          "timetable": "Timetable"
+          "timetable": "Timetable",
+          "booking": "Booking",
+          "discipline": "Discipline"
         },
         "actions": {
           "payment_approved": "Approved a receipt",
@@ -2720,8 +2739,197 @@
           "user_stopped": "Stopped an account",
           "user_activated": "Allowed an account again",
           "user_role_changed": "Changed an account's office",
-          "return_time_changed": "Changed the return time"
+          "return_time_changed": "Changed the return time",
+          "booking_opened": "opened booking",
+          "booking_extended": "extended booking",
+          "booking_closed": "closed booking",
+          "student_warned": "warned a student",
+          "student_suspended": "suspended a student",
+          "student_banned": "banned a student",
+          "discipline_lifted": "lifted a penalty"
         }
+      }
+    }
+  },
+  "assistant": {
+    "open": "Ask the assistant",
+    "close": "Close the assistant",
+    "title": "SUTech assistant",
+    "subtitle": "Answers from the university's transport rules",
+    "welcome": "Hi! Ask me about booking, payment, refunds, the rules or bus times.",
+    "you": "You",
+    "suggestions": {
+      "price": "How much is the subscription?",
+      "pay": "How do I pay?",
+      "notGoing": "I'm not going today, what do I do?",
+      "returnTime": "When does the bus leave campus?"
+    },
+    "sources": "Source: {list}",
+    "callOffice": "Call the Transportation office",
+    "thinking": "Looking it up…",
+    "error": "I couldn't answer right now. Check your connection and try again.",
+    "inputLabel": "Your question",
+    "placeholder": "Type your question…",
+    "send": "Send"
+  },
+  "bookingWindow": {
+    "student": {
+      "openTitle": "Booking is open",
+      "openBody": "Book your seat before {until}. After that booking closes, even if seats are left.",
+      "soonTitle": "Booking hasn't opened yet",
+      "soonBody": "The Transportation office opens booking on {from}.",
+      "closedTitle": "Booking is closed",
+      "closedBody": "Nobody can book a seat now, even on lines with free seats. Watch the announcements: the office may extend it."
+    },
+    "office": {
+      "title": "Booking window",
+      "lead": "Open booking for a set time. Once it closes nobody can book a seat, even on lines with free seats, until you extend it.",
+      "status": {
+        "open": "Open",
+        "not_open": "Not open",
+        "closed": "Closed"
+      },
+      "explain": {
+        "open": "Students can book seats until the closing time.",
+        "not_open": "Booking isn't open. Students see when it opens.",
+        "closed": "Booking is closed. Students can still pay for seats they already booked, but nobody can book a new one."
+      },
+      "opensAt": "Opens",
+      "closesAt": "Closes",
+      "extend": "Extend booking",
+      "reopen": "Extend and reopen",
+      "open": "Open booking",
+      "reschedule": "Change the dates",
+      "closeNow": "Close booking now",
+      "cancelPlan": "Cancel the planned opening",
+      "dialog": {
+        "open": {
+          "title": "Open booking",
+          "body": "Students without a seat are notified.",
+          "confirm": "Open booking"
+        },
+        "extend": {
+          "title": "Extend booking",
+          "body": "Pick a later closing time. A closed window opens again until then, and students without a seat are notified.",
+          "confirm": "Extend"
+        },
+        "close": {
+          "title": "Close booking now?",
+          "body": "Nobody will be able to book a seat, even on lines with free seats. Seats already booked can still be paid.",
+          "confirm": "Close booking"
+        },
+        "opensLabel": "Opens at (Cairo time)",
+        "opensHint": "Leave empty to open now.",
+        "closesLabel": "Closes at (Cairo time)",
+        "closesHint": "After this time nobody can book.",
+        "noteLabel": "Note",
+        "noteHint": "Optional, for the activity log (e.g. the dean's decision)."
+      },
+      "saved": {
+        "open": "Booking is open",
+        "extend": "Booking extended",
+        "close": "Booking closed"
+      },
+      "history": {
+        "title": "Changes this term",
+        "empty": "No changes yet.",
+        "at": "When",
+        "action": "What",
+        "by": "By",
+        "note": "Note",
+        "actions": {
+          "open": "Opened",
+          "extend": "Extended",
+          "close": "Closed"
+        }
+      },
+      "errors": {
+        "closesRequired": "Pick when booking closes.",
+        "BOOKING_CLOSED": "Booking is closed.",
+        "INVALID_WINDOW": "The closing time must be in the future and after the opening.",
+        "EXTEND_MUST_BE_LATER": "Pick a time later than the current closing time.",
+        "NEVER_OPENED": "Booking was never opened. Open it first.",
+        "ALREADY_CLOSED": "Booking is already closed.",
+        "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    }
+  },
+  "discipline": {
+    "standing": {
+      "good": "Good standing",
+      "warned": "Warned",
+      "suspended": "Suspended",
+      "banned": "Banned"
+    },
+    "student": {
+      "warnedTitle": "You have a warning from the Transportation office",
+      "suspendedTitle": "You're suspended from the bus until {day}",
+      "bannedTitle": "You're banned from the university buses",
+      "reason": "Reason: {reason}",
+      "contact": "Talk to the Transportation office if you think this is a mistake."
+    },
+    "office": {
+      "title": "Warnings and suspensions",
+      "lead": "A warning goes on file. A suspension stops the student riding until a set day. A ban stops riding and booking until you lift it. The student and guardian are told each time.",
+      "warn": "Warn",
+      "suspend": "Suspend",
+      "ban": "Ban",
+      "empty": "No warnings, suspensions or bans.",
+      "actions": {
+        "warning": "Warning",
+        "suspension": "Suspension",
+        "ban": "Ban"
+      },
+      "until": "until {day}",
+      "lifted": "Lifted",
+      "inForce": "In force",
+      "byAt": "By {name} · {at}",
+      "liftedByAt": "Lifted by {name} · {at} · {note}",
+      "lift": "Lift",
+      "liftTitle": "Lift this {what}?",
+      "liftBody": "The student can ride (and book) again right away. Say why; it stays on file.",
+      "liftNote": "Why are you lifting it?",
+      "liftedToast": "Lifted. The student and guardian were told.",
+      "saved": {
+        "warning": "{name} was warned.",
+        "suspension": "{name} is suspended.",
+        "ban": "{name} is banned."
+      },
+      "dialog": {
+        "warning": {
+          "title": "Warn {name}",
+          "body": "The warning goes on file and the student and guardian get a notification. It doesn't stop them riding.",
+          "confirm": "Send warning"
+        },
+        "suspension": {
+          "title": "Suspend {name}",
+          "body": "From today the crew can't board the student until the last day you pick. Their seat is kept.",
+          "confirm": "Suspend"
+        },
+        "ban": {
+          "title": "Ban {name}",
+          "body": "The student can't ride or book a seat until you lift the ban.",
+          "confirm": "Ban student"
+        },
+        "reason": "Reason",
+        "reasonHint": "The student and guardian see this.",
+        "endsOn": "Last day of the suspension",
+        "endsOnHint": "From tomorrow, at most {days} days."
+      },
+      "errors": {
+        "reasonShort": "Write at least {min} characters.",
+        "STUDENT_BANNED": "This student is banned.",
+        "STUDENT_SUSPENDED": "This student is suspended.",
+        "INVALID_SUSPENSION": "Pick a last day from tomorrow, at most 90 days ahead.",
+        "ALREADY_BANNED": "This student is already banned.",
+        "NOT_LIFTABLE": "A warning stays on file and can't be lifted.",
+        "ALREADY_LIFTED": "This was already lifted.",
+        "STUDENT_NOT_FOUND": "We couldn't find this student.",
+        "network": "No connection. Check your internet and try again.",
+        "invalid": "Some details aren't right. Check the form and try again.",
+        "generic": "Something went wrong. Try again."
       }
     }
   }

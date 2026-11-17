@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Settings } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Logo } from "@/components/brand/logo";
@@ -11,6 +11,7 @@ import {
   findActiveItem,
   primaryItems,
   roleHomeHref,
+  settingsHref,
   type NavBadges,
   type RoleNavigation,
 } from "@/features/navigation/nav-config";
@@ -54,7 +55,8 @@ export function AppShell({
   const activeItem = findActiveItem(navigation, navigation.basePath, pathname);
   const bottomItems = primaryItems(navigation);
   const totalItems = navigation.groups.reduce((count, group) => count + group.items.length, 0);
-  const hasOverflow = totalItems > bottomItems.length;
+  // Settings lives in the menu, so a role always has one.
+  const hasOverflow = totalItems + navigation.extras.length > bottomItems.length;
   const logo = <Logo name={t("app.shortName")} tagline={t("app.tagline")} />;
   // Phones under ~400px: the name alone, on one line, so the top bar never wraps.
   const barLogo = (
@@ -63,6 +65,27 @@ export function AppShell({
       tagline={t("app.tagline")}
       taglineClassName="max-[25rem]:hidden"
     />
+  );
+
+  const isOnSettings = activeItem?.key === "settings";
+  // Settings sits at the top of the menu, apart from the role's pages.
+  const settingsLink = (onNavigate?: () => void) => (
+    <div className="mb-3 border-b border-line pb-3">
+      <Link
+        href={settingsHref(navigation)}
+        onClick={onNavigate}
+        aria-current={isOnSettings ? "page" : undefined}
+        className={cn(
+          "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-body-sm font-bold focus-ring transition-colors",
+          isOnSettings
+            ? "bg-brand-soft text-brand"
+            : "text-ink hover:bg-surface-alt hover:text-ink-strong",
+        )}
+      >
+        <Settings aria-hidden="true" className="size-5 shrink-0" />
+        {t("nav.items.settings")}
+      </Link>
+    </div>
   );
 
   const signOut = onSignOut ? (
@@ -86,12 +109,13 @@ export function AppShell({
       </a>
 
       <aside className="fixed inset-y-0 start-0 z-nav hidden w-sidebar flex-col border-e border-line bg-surface-raised desktop:flex">
-        <div className="flex h-app-bar shrink-0 items-center border-b border-line px-5">
-          <Link href={homeHref} className="rounded-sm focus-ring">
+        <div className="flex h-app-bar shrink-0 items-center justify-between gap-2 border-b border-line ps-5 pe-3">
+          <Link href={homeHref} className="min-w-0 rounded-sm focus-ring">
             {logo}
           </Link>
         </div>
         <nav aria-label={t("common.mainNavigation")} className="flex-1 overflow-y-auto p-3">
+          {settingsLink()}
           <NavLinks navigation={navigation} activeItem={activeItem} badges={badges} />
         </nav>
         <div className="flex flex-col gap-2 border-t border-line p-3">
@@ -150,6 +174,7 @@ export function AppShell({
       ) : null}
 
       <MobileDrawer open={isMenuOpen} onClose={() => setIsMenuOpen(false)} header={logo}>
+        {settingsLink(() => setIsMenuOpen(false))}
         <NavLinks
           navigation={navigation}
           activeItem={activeItem}

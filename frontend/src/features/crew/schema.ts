@@ -30,13 +30,15 @@ const CREW_TRIP_STATUSES = Object.values(CrewTripStatus) as [CrewTripStatus, ...
 /**
  * One subscriber on this trip.
  * waiting: not scanned yet · boarded: scanned on board · checked_out: left mid-trip with a
- * reason · not_going: reported the day off · absent: not scanned when the trip ended.
+ * reason · not_going: reported the day off · suspended: the office suspended or banned them,
+ * so they may not ride (never counted absent) · absent: not scanned when the trip ended.
  */
 export const RiderState = {
   Waiting: "waiting",
   Boarded: "boarded",
   CheckedOut: "checked_out",
   NotGoing: "not_going",
+  Suspended: "suspended",
   Absent: "absent",
 } as const;
 export type RiderState = (typeof RiderState)[keyof typeof RiderState];
@@ -100,6 +102,11 @@ export const CrewErrorCode = {
   CardExpired: "CARD_EXPIRED",
   /** No student with that university ID. */
   StudentNotFound: "STUDENT_NOT_FOUND",
+  /** Suspended by the office today (or banned): may not board. */
+  StudentSuspended: "STUDENT_SUSPENDED",
+  StudentBanned: "STUDENT_BANNED",
+  /** The return trip waits for the outbound trip to end (or for its own time to come). */
+  OutboundNotEnded: "OUTBOUND_NOT_ENDED",
   /** Not an active subscriber of this line. */
   NotOnThisTrip: "NOT_ON_THIS_TRIP",
   AlreadyBoarded: "ALREADY_BOARDED",
@@ -139,6 +146,8 @@ export const riderCountsSchema = z.object({
   boarded: z.number().int().nonnegative(),
   checked_out: z.number().int().nonnegative(),
   not_going: z.number().int().nonnegative(),
+  /** Suspended or banned by the office: not allowed on the bus. */
+  suspended: z.number().int().nonnegative(),
   absent: z.number().int().nonnegative(),
 });
 export type RiderCounts = z.infer<typeof riderCountsSchema>;
@@ -152,6 +161,12 @@ export const tripDelaySchema = z.object({
 });
 export type TripDelay = z.infer<typeof tripDelaySchema>;
 
+/** A crew member who pressed start or end. */
+const crewActorSchema = z.object({
+  name: z.string(),
+  role: z.enum([Role.Driver, Role.Supervisor]),
+});
+
 export const crewTripSchema = z.object({
   trip_id: z.string(),
   direction: z.enum([TripDirection.Outbound, TripDirection.Return]),
@@ -160,6 +175,9 @@ export const crewTripSchema = z.object({
   departure_time: clockTimeSchema.nullable(),
   started_at: isoDateTime().nullable(),
   ended_at: isoDateTime().nullable(),
+  /** Who pressed start (the driver or the supervisor): the other one sees it at once. */
+  started_by: crewActorSchema.nullable(),
+  ended_by: crewActorSchema.nullable(),
   /** Everyone subscribed on the line, in stop order. */
   riders: z.array(riderSchema),
   counts: riderCountsSchema,
@@ -210,6 +228,17 @@ export const crewTodaySchema = z.object({
     .object({
       driver_name: z.string(),
       driver_phone: z.string(),
+      at: isoDateTime(),
+    })
+    .nullable(),
+  /**
+   * Set when the office moved this driver to another line's bus for today: the trips above are
+   * that line's. Always null for supervisors and for a driver on their own line.
+   */
+  assigned: z
+    .object({
+      /** The driver's usual line, if they have one. */
+      home_line: lineSummarySchema.nullable(),
       at: isoDateTime(),
     })
     .nullable(),

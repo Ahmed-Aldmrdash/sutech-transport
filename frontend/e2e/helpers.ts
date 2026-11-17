@@ -63,3 +63,19 @@ export async function switchTo(page: Page, identifier: string) {
   await page.context().clearCookies();
   await signIn(page, identifier);
 }
+
+/** Opens every folded group of the main menu (an office's long menu folds its groups). */
+export async function unfoldMenu(page: Page) {
+  const menu = page.getByRole("navigation", { name: "Main navigation" }).filter({ visible: true });
+  const folded = menu.locator('button[aria-expanded="false"]');
+  while ((await folded.count()) > 0) await folded.first().click();
+}
+
+/**
+ * Sunday 15 Nov 2026, 07:30 in Cairo: a school morning with line 7 about to leave. The mock
+ * server runs in the page, so pinning the page's clock makes the crew's trips the same at
+ * whatever hour the tests run (the return trip takes over in the afternoon).
+ */
+export async function atSchoolMorning(page: Page) {
+  await page.clock.setSystemTime(new Date("2026-11-15T05:30:00Z"));
+}

@@ -1,5 +1,6 @@
 import { MOCK_DESK_STUDENTS } from "@/features/subscriptions/mock-desk-students";
 import { absencesOf } from "@/features/absences/mock-state";
+import { isBlockedFromRiding } from "@/features/discipline/mock-state";
 import type { AbsenceReason } from "@/features/absences/schema";
 import { MOCK_ACCOUNTS, type MockAccount } from "@/features/auth/mock-accounts";
 import { requireMockAccount } from "@/features/auth/mock-token";
@@ -8,7 +9,7 @@ import {
   MOCK_SEATS_BY_BUS,
   findMockLine,
 } from "@/features/lines/mock-builders";
-import type { MockLineSource } from "@/features/lines/mock-lines";
+import { MOCK_LINES, type MockLineSource } from "@/features/lines/mock-lines";
 import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { DEMO_TRIP_MS } from "@/features/tracking/demo-trip";
@@ -52,11 +53,30 @@ import {
  * too, so a scan on the driver's phone shows up on theirs, as it would with the real server.
  */
 
-/** Which bus each crew account runs. Both demo accounts are on line 7, Seif's bus. */
-const MOCK_CREW_LINES: Readonly<Record<string, string>> = {
-  usr_driver_1: "ln_07",
+/**
+ * Who each crew account is in the Abu El Hol fleet. A driver is one of the fleet's drivers:
+ * DRV-1001 drives line 7's own bus (Seif's), DRV-1002 is a spare driver at the garage with no
+ * line of his own until the office sends him to one. The supervisor rides line 7's bus.
+ */
+const MOCK_CREW_DRIVERS: Readonly<Record<string, string>> = {
+  usr_driver_1: "drv_ln_07",
+  usr_driver_2: "drv_spare_4",
+};
+const MOCK_CREW_SUPERVISOR_LINES: Readonly<Record<string, string>> = {
   usr_supervisor_1: "ln_07",
 };
+
+/** The fleet driver behind a driver account, if any. */
+export function crewDriverIdOf(userId: string): string | null {
+  return MOCK_CREW_DRIVERS[userId] ?? null;
+}
+
+/** The supervisor accounts riding a line. */
+export function supervisorIdsOf(lineId: string): string[] {
+  return Object.entries(MOCK_CREW_SUPERVISOR_LINES)
+    .filter(([, id]) => id === lineId)
+    .map(([userId]) => userId);
+}
 
 const CREW_ROLES: readonly Role[] = [Role.Driver, Role.Supervisor];
 
@@ -96,6 +116,9 @@ export interface MockCrewTrip {
   sosIds: string[];
   /** The office sent another bus or driver. Oldest first; the last one is the trip's crew now. */
   replacements?: MockReplacement[];
+  /** Which crew account pressed start and end (driver or supervisor). */
+  startedBy?: string | null;
+  endedBy?: string | null;
 }
 
 export interface MockReplacement {
@@ -154,7 +177,12 @@ export function crewFleetOf(
   trip: MockCrewTrip,
   line: MockLineSource,
 ): { bus: MockFleetBus; driver: MockFleetDriver } {
-  const last = trip.replacements?.at(-1);
+  // A change made on the morning trip carries on to the return trip that day.
+  const last =
+    trip.replacements?.at(-1) ??
+    (trip.direction === TripDirection.Return
+      ? trips.get(tripIdOf(trip.lineId, trip.date, TripDirection.Outbound))?.replacements?.at(-1)
+      : undefined);
   const bus = mockFleetBus(last?.busId ?? lineBusId(line.lineId));
   const driver = mockFleetDriver(last?.driverId ?? lineDriverId(line.lineId));
   if (!bus || !driver) throw new Error(`No fleet for ${trip.tripId}`);
@@ -291,23 +319,51 @@ const FIRST_NAMES: readonly (readonly [string, string])[] = [
   ["شهد", "Shahd"],
 ];
 
+/** Father's names and family names, mixed so ~700 riders rarely share a full name. */
+const FATHER_NAMES: readonly (readonly [string, string])[] = [
+  ["محمود", "Mahmoud"],
+  ["أحمد", "Ahmed"],
+  ["حسن", "Hassan"],
+  ["إبراهيم", "Ibrahim"],
+  ["طارق", "Tarek"],
+  ["عادل", "Adel"],
+  ["سامي", "Samy"],
+  ["وليد", "Walid"],
+  ["أشرف", "Ashraf"],
+  ["هشام", "Hesham"],
+  ["جمال", "Gamal"],
+  ["ممدوح", "Mamdouh"],
+  ["رأفت", "Raafat"],
+  ["شريف", "Sherif"],
+  ["عاطف", "Atef"],
+  ["مجدي", "Magdy"],
+  ["عمر", "Omar"],
+  ["ياسر", "Yasser"],
+  ["هاني", "Hany"],
+  ["تامر", "Tamer"],
+];
+
 const FAMILY_NAMES: readonly (readonly [string, string])[] = [
-  ["محمود السيد", "Mahmoud El Sayed"],
-  ["أحمد عبد العزيز", "Ahmed Abdelaziz"],
-  ["حسن مصطفى", "Hassan Mostafa"],
-  ["إبراهيم فاروق", "Ibrahim Farouk"],
-  ["طارق سليمان", "Tarek Soliman"],
-  ["عادل منصور", "Adel Mansour"],
-  ["سامي الشربيني", "Samy El Sherbiny"],
-  ["وليد عثمان", "Walid Osman"],
-  ["أشرف النجار", "Ashraf El Naggar"],
-  ["هشام بدوي", "Hesham Badawy"],
-  ["جمال رضوان", "Gamal Radwan"],
-  ["ممدوح زكي", "Mamdouh Zaki"],
-  ["رأفت حمدي", "Raafat Hamdy"],
-  ["شريف لطفي", "Sherif Lotfy"],
-  ["عاطف يونس", "Atef Younes"],
-  ["مجدي الحسيني", "Magdy El Husseiny"],
+  ["السيد", "El Sayed"],
+  ["عبد العزيز", "Abdelaziz"],
+  ["مصطفى", "Mostafa"],
+  ["فاروق", "Farouk"],
+  ["سليمان", "Soliman"],
+  ["منصور", "Mansour"],
+  ["الشربيني", "El Sherbiny"],
+  ["عثمان", "Osman"],
+  ["النجار", "El Naggar"],
+  ["بدوي", "Badawy"],
+  ["رضوان", "Radwan"],
+  ["زكي", "Zaki"],
+  ["حمدي", "Hamdy"],
+  ["لطفي", "Lotfy"],
+  ["يونس", "Younes"],
+  ["الحسيني", "El Husseiny"],
+  ["عبد الله", "Abdallah"],
+  ["الشافعي", "El Shafei"],
+  ["قاسم", "Kassem"],
+  ["الجندي", "El Gendy"],
 ];
 
 const NOT_GOING_FILLER_REASONS: readonly AbsenceReason[] = ["sick", "no_lectures", "personal"];
@@ -368,12 +424,14 @@ export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockR
   for (let seat = 0; riders.length < seats; seat += 1) {
     const seed = hashOf(`${line.lineId}-${seat}`);
     const [firstAr, firstEn] = FIRST_NAMES[seed % FIRST_NAMES.length] ?? ["", ""];
+    const father = hashOf(`${line.lineId}-father-${seat}`);
+    const [fatherAr, fatherEn] = FATHER_NAMES[father % FATHER_NAMES.length] ?? ["", ""];
     const family = hashOf(`${line.lineId}-family-${seat}`);
     const [familyAr, familyEn] = FAMILY_NAMES[family % FAMILY_NAMES.length] ?? ["", ""];
     riders.push({
       studentId: `usr_filler_${line.lineId}_${seat}`,
-      nameAr: `${firstAr} ${familyAr}`,
-      nameEn: `${firstEn} ${familyEn}`,
+      nameAr: `${firstAr} ${fatherAr} ${familyAr}`,
+      nameEn: `${firstEn} ${fatherEn} ${familyEn}`,
       identifier: `2${4 + (seed % 3)}01${String(10000 + (seed % 89999)).slice(-5)}`,
       stopOrder: 1 + (seat % stopCount),
       isAccount: false,
@@ -416,6 +474,7 @@ function fillerScan(
 ): MockScan | null {
   if (rider.isAccount || trip.startedAt === null) return null;
   if (notGoingReasonOf(rider, trip.date)) return null;
+  if (isBlockedFromRiding(rider.studentId, trip.date)) return null;
   if (hashOf(`${rider.studentId}${trip.date}a`) % FILLER_ABSENT_ONE_IN === 0) return null;
   const share = trip.direction === TripDirection.Outbound ? stopShare(line, rider.stopOrder) : 0;
   if (crewProgress(trip, line, now) < share) return null;
@@ -450,6 +509,10 @@ export function riderStateOf(
     };
   }
   if (notGoing) return { ...base, state: RiderState.NotGoing, method: null };
+  // Suspended or banned: not on the bus, and never counted absent.
+  if (isBlockedFromRiding(rider.studentId, trip.date)) {
+    return { ...base, state: RiderState.Suspended, method: null };
+  }
   if (trip.endedAt !== null) return { ...base, state: RiderState.Absent, method: null };
   return { ...base, state: RiderState.Waiting, method: null };
 }
@@ -476,7 +539,7 @@ export function crewOutcomeFor(studentId: string, lineId: string, date: string, 
   const trip = startedOutboundTrip(lineId, date);
   const line = findMockLine(lineId);
   if (!trip || !line) return null;
-  const rider = mockRidersOf(line).find((item) => item.studentId === studentId);
+  const rider = mockRidersOf(line, date).find((item) => item.studentId === studentId);
   if (!rider) return null;
   return { trip, rider: riderStateOf(trip, line, rider, now) } satisfies MockCrewOutcome;
 }
@@ -490,9 +553,15 @@ export function crewLiveClock(lineId: string, now: number) {
   return { date, ...crewTripClock(trip, line), endedAt: trip.endedAt };
 }
 
-/** A line a demo crew account runs: only the crew's own presses start and end its trips. */
-function isDemoCrewLine(lineId: string): boolean {
-  return Object.values(MOCK_CREW_LINES).includes(lineId);
+/**
+ * A line a demo crew account runs today: only the crew's own presses start and end its trips.
+ * The supervisor's line, the demo drivers' own lines, and any line the office sent them to.
+ */
+function isDemoCrewLine(lineId: string, date: string): boolean {
+  if (Object.values(MOCK_CREW_SUPERVISOR_LINES).includes(lineId)) return true;
+  return Object.values(MOCK_CREW_DRIVERS).some(
+    (driverId) => driverLineOn(driverId, date)?.lineId === lineId,
+  );
 }
 
 interface MockOfficeTrip {
@@ -514,7 +583,7 @@ export function officeOutboundTrip(
 ): MockOfficeTrip {
   const stored = crewTripOf(line.lineId, date, TripDirection.Outbound);
   // Today the demo crew's line waits for the crew; an earlier day it ran on its timetable.
-  const crewDrivesIt = isDemoCrewLine(line.lineId) && date === cairoNow(new Date(now)).date;
+  const crewDrivesIt = date === cairoNow(new Date(now)).date && isDemoCrewLine(line.lineId, date);
   if (stored.startedAt !== null || crewDrivesIt) {
     return { trip: stored, simulated: false };
   }
@@ -545,13 +614,63 @@ export function resetCrewMock(): void {
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
 
-/** The signed-in driver or supervisor and their line, or the server's 403 / 404. */
+/** The office's latest change on a line's trips that day, if any. */
+function lastReplacementOn(lineId: string, date: string): MockReplacement | null {
+  return (
+    [TripDirection.Outbound, TripDirection.Return]
+      .flatMap((direction) => trips.get(tripIdOf(lineId, date, direction))?.replacements ?? [])
+      .sort((a, b) => a.at - b.at)
+      .at(-1) ?? null
+  );
+}
+
+/** The driver running a line that day: the office's latest choice, else the line's own. */
+function lineDriverOn(lineId: string, date: string): string {
+  return lastReplacementOn(lineId, date)?.driverId ?? lineDriverId(lineId);
+}
+
+/**
+ * The line a fleet driver works that day: the line the office sent them to (the latest such
+ * change), else their own line (even if they were relieved there, so they see what happened),
+ * else none (a spare driver nobody sent anywhere).
+ */
+function driverLineOn(driverId: string, date: string): MockLineSource | null {
+  const sentTo = MOCK_LINES.flatMap((line) => {
+    const last = lastReplacementOn(line.lineId, date);
+    return last && last.driverId === driverId && line.lineId !== homeLineIdOf(driverId)
+      ? [{ line, at: last.at }]
+      : [];
+  })
+    .sort((a, b) => a.at - b.at)
+    .at(-1);
+  if (sentTo) return sentTo.line;
+  const home = homeLineIdOf(driverId);
+  return home ? (findMockLine(home) ?? null) : null;
+}
+
+/** The line whose own driver this is, if any (a spare driver has none). */
+export function homeLineIdOf(driverId: string): string | null {
+  return MOCK_LINES.find((line) => lineDriverId(line.lineId) === driverId)?.lineId ?? null;
+}
+
+/** The office sent this driver to a line that isn't their own today. */
+export function assignmentOf(driverId: string, date: string): MockReplacement | null {
+  const line = driverLineOn(driverId, date);
+  if (!line || line.lineId === homeLineIdOf(driverId)) return null;
+  return lastReplacementOn(line.lineId, date);
+}
+
+/** The signed-in driver or supervisor and the line they work today, or 403 / 404. */
 export function requireMockCrew(token: string | null) {
   const account = requireMockAccount(token);
   if (!CREW_ROLES.includes(account.user.role)) {
     throw new MockHttpError(HTTP_FORBIDDEN, ServerErrorCode.Forbidden, "Bus crew only.");
   }
-  const line = findMockLine(MOCK_CREW_LINES[account.user.id] ?? "");
+  const driverId = crewDriverIdOf(account.user.id);
+  const date = cairoNow(new Date()).date;
+  const line = driverId
+    ? driverLineOn(driverId, date)
+    : findMockLine(MOCK_CREW_SUPERVISOR_LINES[account.user.id] ?? "");
   if (!line) {
     throw new MockHttpError(HTTP_NOT_FOUND, CrewErrorCode.NoAssignment, "Not on a bus today.");
   }
@@ -559,22 +678,30 @@ export function requireMockCrew(token: string | null) {
 }
 
 /**
- * The office's latest change of driver on today's trips, if it took the bus away from this
- * driver account: they are relieved and can't run the trip any more (the supervisor still
- * can). A change of bus that keeps the same driver relieves nobody.
+ * The office's latest change of driver on today's trips of this line, if it took the bus away
+ * from this driver account: they are relieved and can't run the trip any more (the supervisor
+ * still can). A change of bus that keeps the same driver relieves nobody.
  */
 export function relievedBy(
   account: MockAccount,
   line: MockLineSource,
   now: number,
 ): MockReplacement | null {
-  if (account.user.role !== Role.Driver) return null;
+  const driverId = crewDriverIdOf(account.user.id);
+  if (account.user.role !== Role.Driver || !driverId) return null;
   const date = cairoNow(new Date(now)).date;
-  const last = [TripDirection.Outbound, TripDirection.Return]
-    .flatMap((direction) => trips.get(tripIdOf(line.lineId, date, direction))?.replacements ?? [])
-    .sort((a, b) => a.at - b.at)
-    .at(-1);
-  return last && last.driverId !== lineDriverId(line.lineId) ? last : null;
+  const last = lastReplacementOn(line.lineId, date);
+  return last && lineDriverOn(line.lineId, date) !== driverId ? last : null;
+}
+
+/**
+ * Line drivers the office took off their own line today: free to be sent to another line
+ * (unless already sent somewhere).
+ */
+export function relievedLineDriverIds(date: string): string[] {
+  return MOCK_LINES.filter(
+    (line) => lineDriverOn(line.lineId, date) !== lineDriverId(line.lineId),
+  ).map((line) => lineDriverId(line.lineId));
 }
 
 /** Like requireOwnTrip, for running it (start, scan, end, delay): a relieved driver can't. */

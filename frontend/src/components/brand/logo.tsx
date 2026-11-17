@@ -1,17 +1,27 @@
 import { cn } from "@/lib/cn";
-import { MARK_PATHS, MARK_VIEWBOX } from "./mark-paths";
 
-/** Official colours on light grounds; the official all-white mark in dark theme. */
-const COLOR_MARK_CLASSES = {
-  purple: "fill-[#58286e] dark:fill-white",
-  coral: "fill-[#cf644b] dark:fill-white",
-  teal: "fill-[#257988] dark:fill-white",
+/**
+ * The project's mark (the "S road", chosen 2026-11-16): a teal road shaped like an S with a
+ * dashed centre line, the coral stop where it starts and the purple pin where it ends. The
+ * same shapes as public/brand/sutech-transport-mark.svg (viewBox 0 0 512 512).
+ */
+const ROAD = "M372,104 H216 A80,80 0 0 0 216,264 H296 A80,80 0 0 1 296,424 H232";
+const CENTRE_LINE = "M352,104 H216 A80,80 0 0 0 216,264 H296 A80,80 0 0 1 296,424 H250";
+/** Every white mark on a page draws the same cut-outs, so they can share one mask. */
+const WHITE_MASK_ID = "sut-mark-cutouts";
+const PIN = "M171.9,399.3 A60,60 0 1 0 72.1,399.3 L111.0,457.6 Q122,474 133.0,457.6 Z";
+
+/** Official colours; in dark theme the purple pin takes the official light tint to stay seen. */
+const COLOR_CLASSES = {
+  road: "stroke-[#257988]",
+  stop: "fill-[#cf644b]",
+  pin: "fill-[#58286e] dark:fill-[#bfa1ce]",
+  hole: "fill-white",
 } as const;
 
 interface LogoMarkProps {
   /**
-   * "color": the official colours on light grounds, switching to the white mark in dark theme
-   * (the purple shape would disappear into the dark background).
+   * "color": the official colours (the pin lightens in dark theme).
    * "white": all-white mark for purple or photo grounds.
    */
   variant?: "color" | "white";
@@ -21,19 +31,59 @@ interface LogoMarkProps {
 }
 
 export function LogoMark({ variant = "color", className, title }: LogoMarkProps) {
-  const shapeClass = (shape: keyof typeof COLOR_MARK_CLASSES) =>
-    variant === "white" ? "fill-white" : COLOR_MARK_CLASSES[shape];
+  const common = {
+    viewBox: "0 0 512 512",
+    role: title ? "img" : undefined,
+    "aria-hidden": title ? undefined : true,
+    "aria-label": title,
+    className: cn("size-8 shrink-0", className),
+  } as const;
+  if (variant === "white") {
+    // All white, with the centre line and the holes cut out so the ground shows through.
+    return (
+      <svg {...common}>
+        <mask id={WHITE_MASK_ID}>
+          <rect width={512} height={512} fill="white" />
+          <path
+            d={CENTRE_LINE}
+            fill="none"
+            stroke="black"
+            strokeWidth={7}
+            strokeDasharray="20 17.23"
+            strokeLinecap="round"
+          />
+          <circle cx={398} cy={104} r={23.2} fill="black" />
+          <circle cx={122} cy={366} r={24} fill="black" />
+        </mask>
+        <g mask={`url(#${WHITE_MASK_ID})`} className="fill-white stroke-white">
+          <path d={ROAD} fill="none" strokeWidth={76} strokeLinecap="round" />
+          <circle cx={398} cy={104} r={58} stroke="none" />
+          <path d={PIN} stroke="none" />
+        </g>
+      </svg>
+    );
+  }
   return (
-    <svg
-      viewBox={MARK_VIEWBOX}
-      role={title ? "img" : undefined}
-      aria-hidden={title ? undefined : true}
-      aria-label={title}
-      className={cn("size-8 shrink-0", className)}
-    >
-      <path d={MARK_PATHS.purple} className={shapeClass("purple")} />
-      <path d={MARK_PATHS.coral} className={shapeClass("coral")} />
-      <path d={MARK_PATHS.teal} className={shapeClass("teal")} />
+    <svg {...common}>
+      <path
+        d={ROAD}
+        fill="none"
+        strokeWidth={76}
+        strokeLinecap="round"
+        className={COLOR_CLASSES.road}
+      />
+      <path
+        d={CENTRE_LINE}
+        fill="none"
+        strokeWidth={7}
+        strokeDasharray="20 17.23"
+        strokeLinecap="round"
+        className="stroke-white"
+      />
+      <circle cx={398} cy={104} r={58} className={COLOR_CLASSES.stop} />
+      <circle cx={398} cy={104} r={23.2} className="fill-white" />
+      <path d={PIN} className={COLOR_CLASSES.pin} />
+      <circle cx={122} cy={366} r={24} className={COLOR_CLASSES.hole} />
     </svg>
   );
 }

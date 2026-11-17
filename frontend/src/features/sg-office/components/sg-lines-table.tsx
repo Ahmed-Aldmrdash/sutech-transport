@@ -1,9 +1,12 @@
 "use client";
 
+import { CircleCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "@/i18n/navigation";
+import { FilterChips } from "@/components/ui/filter-chips";
 import { DataTable } from "@/components/ui/table";
+import { Link } from "@/i18n/navigation";
 import { Tone } from "@/components/ui/tone";
 import type { Locale } from "@/i18n/routing";
 import { formatNumber } from "@/lib/format";
@@ -18,7 +21,18 @@ const STATUS_TONE: Record<LineDayStatus, Tone> = {
 
 const PERCENT = 100;
 
-/** Every line's morning: the bus, how far it got, and who rode. */
+const LinesFilter = { Attention: "attention", All: "all" } as const;
+type LinesFilter = (typeof LinesFilter)[keyof typeof LinesFilter];
+
+/** Late, or given another bus or driver. */
+function needsAttention(line: SgLine): boolean {
+  return line.delay_minutes !== null || line.replaced;
+}
+
+/**
+ * Every line's morning: the bus, how far it got, and who rode. With 20+ lines the table opens
+ * on the lines that need attention; "All lines" shows the rest.
+ */
 export function SgLinesTable({
   lines,
   lineHref,
@@ -31,14 +45,37 @@ export function SgLinesTable({
   const tAll = useTranslations();
   const locale = useLocale() as Locale;
   const number = (value: number) => formatNumber(value, locale);
+  const [filter, setFilter] = useState<LinesFilter>(LinesFilter.Attention);
+  const flagged = lines.filter(needsAttention);
+  const rows = filter === LinesFilter.All ? lines : flagged;
   return (
     <section aria-labelledby="sg-lines" className="flex flex-col gap-3">
-      <h2 id="sg-lines" className="text-h3 text-ink-strong">
-        {t("title")}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="sg-lines" className="text-h3 text-ink-strong">
+          {t("title")}
+        </h2>
+        <FilterChips
+          label={t("filterLabel")}
+          value={filter}
+          onChange={setFilter}
+          options={[
+            {
+              value: LinesFilter.Attention,
+              label: t("attention", { count: number(flagged.length) }),
+            },
+            { value: LinesFilter.All, label: t("all", { count: number(lines.length) }) },
+          ]}
+        />
+      </div>
       <DataTable
         caption={t("title")}
-        rows={lines}
+        rows={rows}
+        empty={
+          <p className="flex items-center gap-2 text-body text-success-text">
+            <CircleCheck aria-hidden="true" className="size-5" />
+            {t("allGood")}
+          </p>
+        }
         getRowKey={(line) => line.line.line_id}
         columns={[
           {

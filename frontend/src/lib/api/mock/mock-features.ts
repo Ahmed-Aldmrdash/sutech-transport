@@ -2,6 +2,9 @@
 export const MockFeature = {
   Absences: "absences",
   AdminSystem: "admin-system",
+  Assistant: "assistant",
+  BookingWindow: "booking-window",
+  Discipline: "discipline",
   Announcements: "announcements",
   Attendance: "attendance",
   Auth: "auth",

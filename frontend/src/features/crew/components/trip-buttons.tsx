@@ -14,7 +14,13 @@ import { formatClockTime, formatNumber } from "@/lib/format";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { endTrip, startTrip } from "../api";
 import { CrewErrorCode, type CrewToday, type CrewTrip } from "../schema";
-import { isBlockedByOtherTrip, startTimeGap, waitingRiders } from "../trip-rules";
+import {
+  isBlockedByOtherTrip,
+  outboundStatusOf,
+  startTimeGap,
+  waitingRiders,
+  waitsForOutbound,
+} from "../trip-rules";
 
 const TRIP_ERRORS = [
   CrewErrorCode.TripAlreadyStarted,
@@ -22,6 +28,7 @@ const TRIP_ERRORS = [
   CrewErrorCode.TripNotStarted,
   CrewErrorCode.OtherTripInProgress,
   CrewErrorCode.DriverRelieved,
+  CrewErrorCode.OutboundNotEnded,
 ] as const;
 
 export function StartButton({
@@ -41,7 +48,9 @@ export function StartButton({
   const [confirming, setConfirming] = useState(false);
   const [gap, setGap] = useState<number | null>(null);
   const { submit, isSending, serverError } = useSubmit(TRIP_ERRORS);
-  const blocked = isBlockedByOtherTrip(today, trip);
+  const busy = isBlockedByOtherTrip(today, trip);
+  const waits = !busy && waitsForOutbound(outboundStatusOf(today), trip, new Date());
+  const blocked = busy || waits;
   const hours = gap === null ? 0 : Math.max(1, Math.round(Math.abs(gap) / 60));
 
   async function start() {
@@ -69,7 +78,8 @@ export function StartButton({
       >
         {trip.direction === TripDirection.Outbound ? t("startOutbound") : t("startReturn")}
       </Button>
-      {blocked ? <p className="text-caption text-ink-muted">{t("blocked")}</p> : null}
+      {busy ? <p className="text-caption text-ink-muted">{t("blocked")}</p> : null}
+      {waits ? <p className="text-caption text-ink-muted">{t("waitsForOutbound")}</p> : null}
       {serverError ? <Alert tone={Tone.Danger} title={t(`errors.${serverError}`)} /> : null}
       <ConfirmDialog
         open={confirming}

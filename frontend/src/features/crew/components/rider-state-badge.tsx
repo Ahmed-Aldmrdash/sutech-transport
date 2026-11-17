@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarX2, CircleCheck, Clock, LogOut, UserX, type LucideIcon } from "lucide-react";
+import { Ban, CalendarX2, CircleCheck, Clock, LogOut, UserX, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Tone } from "@/components/ui/tone";
@@ -12,6 +12,7 @@ const STATE_TONE: Record<RiderState, Tone> = {
   [RiderState.CheckedOut]: Tone.Warning,
   [RiderState.NotGoing]: Tone.Info,
   [RiderState.Absent]: Tone.Danger,
+  [RiderState.Suspended]: Tone.Danger,
 };
 
 const RIDER_STATE_ICON: Record<RiderState, LucideIcon> = {
@@ -20,6 +21,7 @@ const RIDER_STATE_ICON: Record<RiderState, LucideIcon> = {
   [RiderState.CheckedOut]: LogOut,
   [RiderState.NotGoing]: CalendarX2,
   [RiderState.Absent]: UserX,
+  [RiderState.Suspended]: Ban,
 };
 
 /** Where one rider stands on this trip; the word always says it, the colour helps. */

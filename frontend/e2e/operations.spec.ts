@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectNoSidewaysScroll, isPhone, signIn, watchForErrors } from "./helpers";
+import { expectNoSidewaysScroll, isPhone, signIn, unfoldMenu, watchForErrors } from "./helpers";
 
 /** Phase 8: the Transportation office's operations pages. */
 
@@ -21,6 +21,7 @@ test("the overview shows what waits for the office", async ({ page }) => {
 test("a line opens its students, and a student their guardian", async ({ page }) => {
   const errors = watchForErrors(page);
   if (isPhone(page)) await page.getByRole("button", { name: "Open menu" }).click();
+  await unfoldMenu(page);
   await page
     .getByRole("link", { name: /^Lines$/ })
     .filter({ visible: true })
@@ -49,14 +50,14 @@ test("attendance, the live map and the buses open", async ({ page }) => {
   const errors = watchForErrors(page);
   // From the menu (no line in the address) it opens on the first line, not on an error.
   await page.goto("/en/admin/attendance");
-  await expect(page.getByLabel("Line")).toHaveValue("ln_01_1");
+  await expect(page.getByLabel("Line", { exact: true })).toHaveValue("ln_01_1");
   await expect(
     page.getByText("No buses this day").or(page.locator("main tbody tr, main li").first()),
   ).toBeVisible();
   await expect(page.getByText("Something went wrong")).toHaveCount(0);
   await page.goto("/en/admin/attendance?line=ln_07");
   await expect(page.getByRole("heading", { level: 1, name: "Attendance" })).toBeVisible();
-  await expect(page.getByLabel("Line")).toHaveValue("ln_07");
+  await expect(page.getByLabel("Line", { exact: true })).toHaveValue("ln_07");
   await page.goto("/en/admin/tracking");
   await expect(page.getByRole("region", { name: "Map of every bus on the road" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Line 7 · El Shorouk/ })).toBeVisible();

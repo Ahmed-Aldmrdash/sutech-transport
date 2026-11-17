@@ -5,7 +5,7 @@ import { routing } from "./routing";
 
 /**
  * `generateMetadata` for a page whose tab title is one message, e.g. `pageTitle("nav.items.card")`.
- * The locale layout adds " · SUtech Transport", so every tab and history entry says which page
+ * The locale layout adds " · SUTech Transport", so every tab and history entry says which page
  * it is (WCAG 2.4.2).
  */
 export function pageTitle(messageKey: string) {
