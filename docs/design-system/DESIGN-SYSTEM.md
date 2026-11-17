@@ -7,7 +7,7 @@
 | `tokens.css` | CSS variables (follows the app's `frontend/design/tokens.json`, the source of truth): brand scales, semantic roles, type, radius, shadow, space, motion. Light + dark, EN + AR. |
 | `tailwind.preset.js` | Tailwind preset that maps every token, for the Next.js PWA. |
 | `style-guide.html` | Live preview of everything. Open it in a browser and use the **عربي** and **Dark mode** buttons. |
-| `assets/` | `sutech-mark.svg` (official 3-shape mark), `sutech-mark-white.svg` (for purple/dark backgrounds), `sutech-logo.svg` (full colored logo), `pattern.svg` (brand tile pattern), `pwa/` (app icons, favicon, splash) |
+| `assets/` | `sutech-transport-mark.svg` (the project mark: an "S" road with a stop and a location pin, from `08 - Logo`), `sutech-transport-mark-white.svg` (for purple/dark backgrounds), `sutech-transport-logo.svg` (full colored logo), `pattern.svg` (brand tile pattern), `pwa/` (app icons, favicon, splash) |
 | `previews/` | Screenshots: style guide EN light, AR dark, mobile AR; admin dashboard light + dark |
 | `DESIGN-SYSTEM.ar.md` | This document in Arabic (for the team) |
 | `research/` | Website analysis + the official SUTech Brand Manual 2025 PDF |
@@ -74,8 +74,8 @@ Headings use negative tracking in English (from sut.edu.eg). Arabic always uses 
 - **Transport pass:** `--grad-brand` with `pattern.svg` overlay, radius 20, `--shadow-md`, QR in a white frame.
 - **Map:** your route = `--map-route` (purple, 7px); other lines = teal dotted; live bus = coral pin. Overlays use `--glass` with `--blur-glass`.
 - **Bottom nav:** 4 items max. The active item gets a brand-soft pill behind its icon.
-- **Pattern:** use `assets/pattern.svg` (the 3 logo shapes at 8 % white) only on brand-coloured surfaces: splash, pass, headers, empty states. Never on white.
-- **Logo:** follow the manual. Never rotate, flip, recolour or stretch it, or change the symbol-to-wordmark spacing. Use the colour mark on white or light surfaces, and `sutech-mark-white.svg` on purple, teal, dark-mode or photo backgrounds (the purple shape disappears on purple and dark backgrounds otherwise).
+- **Pattern:** use `assets/pattern.svg` (the project S-road mark at 8 % white) only on brand-coloured surfaces: splash, pass, headers, empty states. Never on white.
+- **Logo:** follow the manual. Never rotate, flip, recolour or stretch it, or change the symbol-to-wordmark spacing. Use the colour mark on white or light surfaces, and `sutech-transport-mark-white.svg` on purple, teal, dark-mode or photo backgrounds (in the app's dark theme the colour mark lightens its pin instead).
 
 ### More components (v1.1)
 - **App bar:** height 56 (`--appbar-h`). Inner screens use a `--surface` bar with back + title + up to 2 icon buttons (44px, round hover). Home uses `--grad-brand` with the **white** mark.
@@ -115,7 +115,7 @@ Headings use negative tracking in English (from sut.edu.eg). Arabic always uses 
 | `favicon.svg`, `favicon-32.png` | vector, 32 | browser tab |
 | `splash-light-1170x2532.png`, `splash-dark-1170x2532.png` | 1170×2532 | iOS startup image / in-app splash: mark + "SUtech Transport" + "Access the Future" |
 
-Other mark files: `assets/sutech-mark.svg` (colour, for white or light backgrounds) and `assets/sutech-mark-white.svg` (for purple, teal, dark or photo backgrounds).
+Other mark files: `sutech-transport-mark.svg` (colour, for white or light backgrounds) and `sutech-transport-mark-white.svg` (for purple, teal, dark or photo backgrounds).
 ```json
 { "name": "SUtech Transport", "short_name": "SUtech Bus", "display": "standalone",
   "background_color": "#F7F7F7", "theme_color": "#58286E",
