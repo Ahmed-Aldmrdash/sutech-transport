@@ -1,3 +1,4 @@
 .env
 .venv/
-data/index.npz
+data/index.npz__pycache__/
+*.pyc
