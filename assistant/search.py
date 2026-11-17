@@ -1,8 +1,8 @@
 """Ask a question (Arabic or English) and get a short answer grounded in the knowledge base.
 
-  python search.py            ask questions, get answers
-  python search.py --debug    also show which chunks were found (and their scores)
-  python search.py --models   list the Gemini models your key can use
+    python search.py            ask questions, get answers
+    python search.py --debug    also show which chunks were found (and their scores)
+    python search.py --models   list the Gemini models your key can use
 """
 import json
 import os
