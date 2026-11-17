@@ -1,9 +1,9 @@
 {
   "app": {
-    "name": "SUtech Transportation",
-    "shortName": "SUtech Transport",
+    "name": "SUTech Transportation",
+    "shortName": "SUTech Transport",
     "tagline": "Transportation",
-    "description": "Book your seat, pay, track your bus and follow every trip at SUtech.",
+    "description": "Book your seat, pay, track your bus and follow every trip at SUTech.",
     "slogan": "Access the Future"
   },
   "common": {
@@ -1107,7 +1107,7 @@
     "map": {
       "label": "Live map of the bus",
       "bus": "The bus",
-      "campus": "SUtech campus",
+      "campus": "SUTech campus",
       "stop": "Your stop",
       "followBus": "Follow the bus",
       "following": "Following the bus",
@@ -1377,7 +1377,7 @@
       "boardedResult": "{name} is on board",
       "checkedOutResult": "{name} left the bus",
       "errors": {
-        "CARD_INVALID": "This isn't a SUtech bus pass.",
+        "CARD_INVALID": "This isn't a SUTech bus pass.",
         "CARD_EXPIRED": "The pass expired. Ask the student to open it again (no screenshots).",
         "STUDENT_NOT_FOUND": "No student with this university ID.",
         "NOT_ON_THIS_TRIP": "Not subscribed on this line. Send them to the Transportation office.",
@@ -2754,7 +2754,7 @@
   "assistant": {
     "open": "Ask the assistant",
     "close": "Close the assistant",
-    "title": "SUtech assistant",
+    "title": "SUTech assistant",
     "subtitle": "Answers from the university's transport rules",
     "welcome": "Hi! Ask me about booking, payment, refunds, the rules or bus times.",
     "you": "You",

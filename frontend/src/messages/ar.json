@@ -1,9 +1,9 @@
 {
   "app": {
-    "name": "مواصلات SUtech",
-    "shortName": "مواصلات SUtech",
+    "name": "مواصلات SUTech",
+    "shortName": "مواصلات SUTech",
     "tagline": "النقل الجامعي",
-    "description": "احجز مكانك، وادفع، وتابع الباص، واعرف كل رحلة في جامعة SUtech.",
+    "description": "احجز مكانك، وادفع، وتابع الباص، واعرف كل رحلة في جامعة SUTech.",
     "slogan": "Access the Future"
   },
   "common": {
@@ -1377,7 +1377,7 @@
       "boardedResult": "{name} ركب",
       "checkedOutResult": "{name} نزل من الباص",
       "errors": {
-        "CARD_INVALID": "ده مش كارنيه باص SUtech.",
+        "CARD_INVALID": "ده مش كارنيه باص SUTech.",
         "CARD_EXPIRED": "الكارنيه انتهى. خلّي الطالب يفتحه تاني (من غير سكرين شوت).",
         "STUDENT_NOT_FOUND": "مفيش طالب بالرقم الجامعي ده.",
         "NOT_ON_THIS_TRIP": "مش مشترك على الخط ده. وجّهه لإدارة النقل.",
@@ -2754,7 +2754,7 @@
   "assistant": {
     "open": "اسأل المساعد",
     "close": "اقفل المساعد",
-    "title": "مساعد SUtech",
+    "title": "مساعد SUTech",
     "subtitle": "إجابات من لوائح النقل بالجامعة",
     "welcome": "أهلاً! اسألني عن الحجز أو الدفع أو الاسترداد أو القواعد أو مواعيد الباص.",
     "you": "إنت",

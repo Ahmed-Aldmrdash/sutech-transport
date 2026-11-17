@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SUtech Transport API",
+    "title": "SUTech Transport API",
     "version": "0.1.0",
     "description": "Generated from the front end's Zod schemas (npm run openapi). Fields are snake_case, times are ISO 8601 UTC (`Z`; the app also accepts `+00:00`), money is integer piasters, errors are { code, message }. Sign-in sets an HttpOnly session cookie (no bearer token). `x-roles` lists the only roles allowed; any other role gets 403 FORBIDDEN."
   },

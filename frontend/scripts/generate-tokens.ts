@@ -1,5 +1,5 @@
 /**
- * Turns design/tokens.json (exported from the SUtech design system) into
+ * Turns design/tokens.json (exported from the SUTech design system) into
  * src/styles/tokens.css: one CSS custom property per token, with a light block
  * and a dark block. Run with `npm run tokens`. Never edit tokens.css by hand.
  */
