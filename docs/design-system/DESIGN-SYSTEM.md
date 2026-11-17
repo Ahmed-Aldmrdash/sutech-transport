@@ -74,7 +74,7 @@ Headings use negative tracking in English (from sut.edu.eg). Arabic always uses 
 - **Transport pass:** `--grad-brand` with `pattern.svg` overlay, radius 20, `--shadow-md`, QR in a white frame.
 - **Map:** your route = `--map-route` (purple, 7px); other lines = teal dotted; live bus = coral pin. Overlays use `--glass` with `--blur-glass`.
 - **Bottom nav:** 4 items max. The active item gets a brand-soft pill behind its icon.
-- **Pattern:** use `assets/pattern.svg` (the 3 logo shapes at 8 % white) only on brand-coloured surfaces: splash, pass, headers, empty states. Never on white.
+- **Pattern:** use `assets/pattern.svg` (the project S-road mark at 8 % white) only on brand-coloured surfaces: splash, pass, headers, empty states. Never on white.
 - **Logo:** follow the manual. Never rotate, flip, recolour or stretch it, or change the symbol-to-wordmark spacing. Use the colour mark on white or light surfaces, and `sutech-transport-mark-white.svg` on purple, teal, dark-mode or photo backgrounds (in the app's dark theme the colour mark lightens its pin instead).
 
 ### More components (v1.1)

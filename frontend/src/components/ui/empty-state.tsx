@@ -7,7 +7,7 @@ interface EmptyStateProps {
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
-  /** Shows the logo's three-shape pattern behind the content, as the brand book asks. */
+  /** Shows the project mark's pattern behind the content. */
   withPattern?: boolean;
   /** 1 when the state is the whole page (nothing else gives the page its heading). */
   headingLevel?: 1 | 2;

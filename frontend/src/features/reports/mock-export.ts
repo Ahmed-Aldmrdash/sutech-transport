@@ -163,7 +163,9 @@ const HEADER_HEIGHT = 40;
 const FOOTER_HEIGHT = 48;
 const CELL_PADDING = 10;
 const JPEG_QUALITY = 0.92;
-const LOGO_HEIGHT = 72;
+const LOGO_HEIGHT = 110;
+/** The project mark beside the page number on every page. */
+const FOOTER_MARK_SIZE = 28;
 
 function cellText(column: ReportColumn, row: ReportRow, language: Language): string {
   const value = row[column.key];
@@ -186,13 +188,21 @@ function fit(context: CanvasRenderingContext2D, text: string, width: number): st
   return `${cut}…`;
 }
 
-function loadLogo(): Promise<HTMLImageElement | null> {
+function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const image = new Image();
     image.onload = () => resolve(image);
     image.onerror = () => resolve(null);
-    image.src = "/brand/sutech-transport-logo.svg";
+    image.src = src;
   });
+}
+
+/** The full project logo (first page) and its mark (every page's footer). */
+function loadBrand() {
+  return Promise.all([
+    loadImage("/brand/sutech-transport-logo.svg"),
+    loadImage("/brand/sutech-transport-mark.svg"),
+  ]);
 }
 
 interface Layout {
@@ -246,7 +256,13 @@ function drawPage(
   language: Language,
   layout: Layout,
   rows: ReportRow[],
-  options: { first: boolean; logo: HTMLImageElement | null; pageNumber: number; pages: number },
+  options: {
+    first: boolean;
+    logo: HTMLImageElement | null;
+    mark: HTMLImageElement | null;
+    pageNumber: number;
+    pages: number;
+  },
 ): number {
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas is not available.");
@@ -327,11 +343,19 @@ function drawPage(
   context.fillStyle = BRAND.ink;
   context.font = `14px ${font}`;
   context.textAlign = "center";
-  context.fillText(
-    `${TEXT[language].page} ${options.pageNumber} / ${options.pages} · SUTech`,
-    PAGE.width / 2,
-    PAGE.height - FOOTER_HEIGHT / 2,
-  );
+  const footer = `${TEXT[language].page} ${options.pageNumber} / ${options.pages} · SUTech Transport`;
+  const footerY = PAGE.height - FOOTER_HEIGHT / 2;
+  context.fillText(footer, PAGE.width / 2, footerY);
+  if (options.mark) {
+    const textWidth = context.measureText(footer).width;
+    context.drawImage(
+      options.mark,
+      PAGE.width / 2 - textWidth / 2 - FOOTER_MARK_SIZE - 8,
+      footerY - FOOTER_MARK_SIZE / 2,
+      FOOTER_MARK_SIZE,
+      FOOTER_MARK_SIZE,
+    );
+  }
   return y;
 }
 
@@ -349,7 +373,7 @@ async function toPdf(report: Report, language: Language): Promise<Blob> {
       "Too many rows for a PDF. Pick one line or a shorter period, or use Excel.",
     );
   }
-  const [{ jsPDF }, logo] = await Promise.all([import("jspdf"), loadLogo()]);
+  const [{ jsPDF }, [logo, mark]] = await Promise.all([import("jspdf"), loadBrand()]);
   await document.fonts.ready;
   const canvas = document.createElement("canvas");
   canvas.width = PAGE.width;
@@ -373,6 +397,7 @@ async function toPdf(report: Report, language: Language): Promise<Blob> {
     drawPage(canvas, report, language, layout, rows, {
       first: index === 0,
       logo,
+      mark,
       pageNumber: index + 1,
       pages: chunks.length,
     });
