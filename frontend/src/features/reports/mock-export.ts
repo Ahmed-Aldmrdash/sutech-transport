@@ -191,7 +191,7 @@ function loadLogo(): Promise<HTMLImageElement | null> {
     const image = new Image();
     image.onload = () => resolve(image);
     image.onerror = () => resolve(null);
-    image.src = "/brand/sutech-logo.svg";
+    image.src = "/brand/sutech-transport-logo.svg";
   });
 }
 
