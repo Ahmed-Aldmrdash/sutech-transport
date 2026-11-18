@@ -2,7 +2,7 @@
 
 The chat assistant that answers students' questions about the university buses: lines, stops,
 times, prices, booking, refunds and the rules. Built by the **Data & AI team**
-(Omar Ahmed Ramadan, Abanoub Reda).
+([**Omar Ahmed Ramadan**](https://github.com/OmarAhmedRamadan07), **Abanoub Reda**).
 
 It answers only from the university's own transport information, so it does not make things up:
 
