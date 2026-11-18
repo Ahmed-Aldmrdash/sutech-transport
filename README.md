@@ -226,7 +226,7 @@ A student project of the **Data Science & AI Technology** program at
 | --- | --- |
 | 🎨 **Front End** | [**Ahmed Aldmrdash**](https://github.com/Ahmed-Aldmrdash) (team leader), **Shimaa Hussien, Moaaz Abd Aljawwad** |
 | ⚙️ **Back End** | **Abdullah Mohammed Ahmed, Mohamed Ali Mohamed Ali, Ahmed Shafiq Ragab, Mohamed Nabile Arafa** |
-| 🤖 **Data & AI** | **Omar Ahmed Ramadan, Abanoub Reda** |
+| 🤖 **Data & AI** | [**Omar Ahmed Ramadan**](https://github.com/OmarAhmedRamadan07), **Abanoub Reda** |
 | 🔐 **Cyber Security** | **Mahmoud Hamada** |
 
 ## 📚 Documentation
