@@ -5,7 +5,7 @@ import json
 import os
 from datetime import UTC, datetime, timedelta
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -70,8 +70,14 @@ async def _post_sms(url: str, token: str, phone: str, message: str) -> None:
         method="POST",
     )
 
+    class _RejectRedirects(HTTPRedirectHandler):
+        """Do not forward the bearer token to a redirect target."""
+
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
     def send() -> None:
-        with urlopen(request, timeout=8) as response:
+        with build_opener(_RejectRedirects).open(request, timeout=8) as response:
             if not 200 <= response.status < 300:
                 raise RuntimeError("SMS gateway rejected the message")
 

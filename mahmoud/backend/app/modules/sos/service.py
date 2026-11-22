@@ -201,7 +201,6 @@ async def create_sos(
 
 async def get_crew_sos(
     session: AsyncSession,
-    gateway: SOSGateway,
     *,
     actor: Account,
     sos_id: str,
@@ -211,10 +210,17 @@ async def get_crew_sos(
     report = await _load_report(session, sos_id)
     if report is None:
         raise _http_error(404, "NOT_FOUND", "SOS was not found")
-    is_crew = report.raised_by_id == str(actor.id) or await gateway.is_crew_for_bus(
-        session, bus_id=report.bus_id, actor=actor
-    )
-    if not is_crew:
+    try:
+        authorize_sos_visibility(
+            role=actor.role,
+            sos_type=report.type,
+            is_trip_crew=report.raised_by_id == str(actor.id),
+        )
+    except HiddenSOS as exc:
+        raise _http_error(404, "NOT_FOUND", "SOS was not found") from exc
+    except ForbiddenRole as exc:
+        raise _http_error(403, "FORBIDDEN", "Crew access is required") from exc
+    if report.raised_by_id != str(actor.id):
         raise _http_error(404, "NOT_FOUND", "SOS was not found")
     return serialize_sos(report)
 

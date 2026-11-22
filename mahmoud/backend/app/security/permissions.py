@@ -103,7 +103,7 @@ def authorize_sos_action(
     if sos_type not in SOS_TYPES:
         raise ValueError("Unknown SOS type")
     if role == "clinic" and sos_type not in SOS_CLINIC_TYPES:
-        raise ForbiddenRole("Clinic cannot access breakdown alerts")
+        raise HiddenSOS("SOS was not found")
     if action not in SOS_ACTIONS:
         raise ValueError("Unknown SOS action")
     if current_status == "closed":

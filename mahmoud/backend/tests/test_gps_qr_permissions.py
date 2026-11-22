@@ -32,6 +32,14 @@ class PermissionTests(unittest.TestCase):
             authorize_sos_visibility(role="clinic", sos_type="breakdown")
         with self.assertRaises(HiddenSOS):
             authorize_sos_visibility(role="driver", sos_type="medical")
+        with self.assertRaises(HiddenSOS):
+            authorize_sos_action(
+                role="clinic",
+                sos_type="breakdown",
+                current_status="open",
+                action="acknowledge",
+                note=None,
+            )
         self.assertEqual(
             authorize_sos_action(
                 role="transport_admin",

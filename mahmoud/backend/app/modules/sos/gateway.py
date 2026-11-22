@@ -35,10 +35,6 @@ class SOSGateway(Protocol):
         self, session: AsyncSession, *, trip_id: str, actor: Account
     ) -> TripSOSContext | None: ...
 
-    async def is_crew_for_bus(
-        self, session: AsyncSession, *, bus_id: str, actor: Account
-    ) -> bool: ...
-
     async def admin_details(
         self, session: AsyncSession, *, report: SOSReport
     ) -> dict[str, object]: ...

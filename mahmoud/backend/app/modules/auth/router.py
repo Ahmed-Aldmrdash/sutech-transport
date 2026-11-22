@@ -55,7 +55,7 @@ async def login(
         key=SESSION_COOKIE,
         value=token,
         httponly=True,
-        secure=settings.environment == "production",
+        secure=settings.environment not in {"development", "test"},
         samesite="lax",
         path="/",
         expires=expires_at,
@@ -75,7 +75,7 @@ async def logout(
         key=SESSION_COOKIE,
         path="/",
         httponly=True,
-        secure=settings.environment == "production",
+        secure=settings.environment not in {"development", "test"},
         samesite="lax",
     )
     return {"ok": True}

@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db_session
 from app.modules.auth.dependencies import require_operation, require_same_origin
 from app.modules.auth.models import Account
-from app.modules.sos.dependencies import get_sos_gateway
 from app.modules.sos.gateway import SOSGateway
 from app.modules.sos.schemas import SOSActionRequest, SOSCreateRequest
 from app.modules.sos.service import (
@@ -41,9 +40,8 @@ async def get_sos_endpoint(
     sos_id: str,
     session: Annotated[AsyncSession, Depends(get_db_session)],
     actor: Annotated[Account, Depends(require_operation("sos.get"))],
-    gateway: Annotated[SOSGateway, Depends(get_sos_gateway)],
 ) -> dict[str, object]:
-    return await get_crew_sos(session, gateway, actor=actor, sos_id=sos_id)
+    return await get_crew_sos(session, actor=actor, sos_id=sos_id)
 
 
 @router.get("/admin/sos", operation_id="emergencies.list")
