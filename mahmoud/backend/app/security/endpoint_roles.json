@@ -1,0 +1,442 @@
+{
+  "auth.requestOtp": [],
+  "auth.login": [],
+  "auth.logout": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "auth.getMe": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "system.getHealth": [],
+  "lines.list": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "lines.get": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "subscriptions.getMine": [
+    "student"
+  ],
+  "subscriptions.create": [
+    "student"
+  ],
+  "subscriptions.cancel": [
+    "student"
+  ],
+  "payments.getInstructions": [
+    "student"
+  ],
+  "payments.listMine": [
+    "student"
+  ],
+  "payments.submitReceipt": [
+    "student"
+  ],
+  "card.getMine": [
+    "student"
+  ],
+  "trips.getMyNext": [
+    "student"
+  ],
+  "announcements.list": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "announcements.create": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "requests.listMine": [
+    "student"
+  ],
+  "requests.getRefundPolicy": [
+    "student"
+  ],
+  "requests.get": [
+    "student"
+  ],
+  "requests.createLineChange": [
+    "student"
+  ],
+  "requests.createRefund": [
+    "student"
+  ],
+  "requests.createComplaint": [
+    "student"
+  ],
+  "requests.createModelPermit": [
+    "student"
+  ],
+  "requests.withdraw": [
+    "student"
+  ],
+  "parent.listApprovals": [
+    "parent"
+  ],
+  "parent.approveRequest": [
+    "parent"
+  ],
+  "parent.refuseRequest": [
+    "parent"
+  ],
+  "notifications.list": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "notifications.markAllRead": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "notifications.markRead": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "clinic",
+    "student_affairs",
+    "secretary_general",
+    "bus_company",
+    "driver",
+    "supervisor",
+    "student",
+    "parent"
+  ],
+  "absences.listMine": [
+    "student"
+  ],
+  "absences.create": [
+    "student"
+  ],
+  "absences.cancel": [
+    "student"
+  ],
+  "attendance.getMine": [
+    "student"
+  ],
+  "tracking.getMine": [
+    "student"
+  ],
+  "tracking.getChild": [
+    "parent"
+  ],
+  "parent.listChildren": [
+    "parent"
+  ],
+  "parent.getChildDay": [
+    "parent"
+  ],
+  "crew.getToday": [
+    "driver",
+    "supervisor"
+  ],
+  "crew.startTrip": [
+    "driver",
+    "supervisor"
+  ],
+  "crew.endTrip": [
+    "driver",
+    "supervisor"
+  ],
+  "crew.scan": [
+    "driver",
+    "supervisor"
+  ],
+  "crew.reportDelay": [
+    "driver",
+    "supervisor"
+  ],
+  "sos.create": [
+    "driver",
+    "supervisor"
+  ],
+  "sos.get": [
+    "driver",
+    "supervisor"
+  ],
+  "emergencies.list": [
+    "super_admin",
+    "transport_admin",
+    "clinic"
+  ],
+  "emergencies.get": [
+    "super_admin",
+    "transport_admin",
+    "clinic"
+  ],
+  "emergencies.addAction": [
+    "transport_admin",
+    "clinic"
+  ],
+  "emergencies.replacementOptions": [
+    "transport_admin"
+  ],
+  "emergencies.sendReplacement": [
+    "transport_admin"
+  ],
+  "violations.create": [
+    "driver",
+    "supervisor"
+  ],
+  "violations.listMine": [
+    "driver",
+    "supervisor"
+  ],
+  "finance.listPayments": [
+    "super_admin",
+    "finance"
+  ],
+  "finance.getPayment": [
+    "super_admin",
+    "finance"
+  ],
+  "finance.reviewPayment": [
+    "super_admin",
+    "finance"
+  ],
+  "finance.findAwaitingPayment": [
+    "super_admin",
+    "finance"
+  ],
+  "finance.recordOfficePayment": [
+    "super_admin",
+    "finance"
+  ],
+  "requestDesk.list": [
+    "super_admin",
+    "transport_admin",
+    "finance"
+  ],
+  "requestDesk.get": [
+    "super_admin",
+    "transport_admin",
+    "finance"
+  ],
+  "requestDesk.act": [
+    "super_admin",
+    "transport_admin",
+    "finance"
+  ],
+  "violationDesk.list": [
+    "super_admin",
+    "student_affairs",
+    "transport_admin"
+  ],
+  "violationDesk.get": [
+    "super_admin",
+    "student_affairs",
+    "transport_admin"
+  ],
+  "violationDesk.act": [
+    "super_admin",
+    "student_affairs"
+  ],
+  "reports.list": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "secretary_general"
+  ],
+  "reports.get": [
+    "super_admin",
+    "transport_admin",
+    "finance",
+    "secretary_general"
+  ],
+  "events.list": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "events.create": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "events.get": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "events.cancel": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "busCompany.listRequests": [
+    "super_admin",
+    "bus_company"
+  ],
+  "busCompany.getRequest": [
+    "super_admin",
+    "bus_company"
+  ],
+  "busCompany.reply": [
+    "bus_company"
+  ],
+  "busCompany.fleet": [
+    "super_admin",
+    "bus_company"
+  ],
+  "sg.overview": [
+    "super_admin",
+    "secretary_general"
+  ],
+  "sg.watchlist": [
+    "super_admin",
+    "secretary_general"
+  ],
+  "sg.watch": [
+    "super_admin",
+    "secretary_general"
+  ],
+  "sg.unwatch": [
+    "super_admin",
+    "secretary_general"
+  ],
+  "ops.overview": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "ops.live": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "ops.lines": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "ops.line": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "ops.attendance": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "ops.students": [
+    "transport_admin",
+    "student_affairs",
+    "super_admin"
+  ],
+  "ops.student": [
+    "transport_admin",
+    "student_affairs",
+    "super_admin"
+  ],
+  "ops.fleet": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "admin.timetable.get": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "admin.timetable.return": [
+    "super_admin",
+    "transport_admin"
+  ],
+  "admin.users.list": [
+    "super_admin"
+  ],
+  "admin.users.create": [
+    "super_admin"
+  ],
+  "admin.users.update": [
+    "super_admin"
+  ],
+  "admin.audit.list": [
+    "super_admin"
+  ],
+  "assistant.ask": [
+    "student"
+  ],
+  "bookingWindow.get": [
+    "student",
+    "transport_admin",
+    "super_admin"
+  ],
+  "bookingWindow.update": [
+    "transport_admin",
+    "super_admin"
+  ],
+  "discipline.mine": [
+    "student"
+  ],
+  "discipline.list": [
+    "transport_admin",
+    "student_affairs",
+    "super_admin"
+  ],
+  "discipline.create": [
+    "transport_admin",
+    "student_affairs",
+    "super_admin"
+  ],
+  "discipline.lift": [
+    "transport_admin",
+    "student_affairs",
+    "super_admin"
+  ]
+}
