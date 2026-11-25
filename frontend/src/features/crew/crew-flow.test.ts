@@ -40,7 +40,7 @@ const TRANSPORT = "TRN-1001";
 const OMAR = "240100102"; // active on line 7, stop 2
 const OMAR_ID = "usr_student_2";
 const AHMED = "240100101"; // no booking
-const COASTER_SEATS = 28;
+const COASTER_SEATS = 21;
 /** Sunday 8 Nov 2026, 07:30 in Cairo (UTC+2): the line 7 bus is about to leave. */
 const SUNDAY_MORNING = Date.parse("2026-11-08T05:30:00Z");
 const SATURDAY = Date.parse("2026-11-07T10:00:00Z");

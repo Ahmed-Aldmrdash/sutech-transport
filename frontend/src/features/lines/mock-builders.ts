@@ -21,8 +21,8 @@ export const MOCK_CAMPUS_ARRIVAL = { from: "08:30", to: "08:30" } as const;
 /** Seats by bus type. Estimates until the bus company sends the exact count per bus. */
 export const MOCK_SEATS_BY_BUS: Record<BusType, number> = {
   [BusType.Minibus]: 14,
-  [BusType.Coaster]: 28,
-  [BusType.Midibus]: 33,
+  [BusType.Coaster]: 21,
+  [BusType.Midibus]: 33, // TODO: confirm with the transport office (not mentioned in the 2026-11-22 meeting)
   [BusType.LargeBus]: 50,
 };
 

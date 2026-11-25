@@ -4,7 +4,7 @@ import { z } from "zod";
 export const BusType = {
   /** Toyota Hiace class, about 14 seats. */
   Minibus: "minibus",
-  /** Coaster class, about 28 seats. */
+  /** Coaster class, about 21 seats. */
   Coaster: "coaster",
   /** MCV mid-size, about 33 seats. */
   Midibus: "midibus",
