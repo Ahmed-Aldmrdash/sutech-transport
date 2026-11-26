@@ -11,9 +11,9 @@ import {
   saveCrewTrip,
 } from "@/features/crew/mock-state";
 import { CrewTripStatus, RiderState } from "@/features/crew/schema";
-import { localized } from "@/features/lines/mock-builders";
+import { findMockLine, localized } from "@/features/lines/mock-builders";
 import { mockFleetBus, mockFleetDriver } from "@/features/lines/mock-fleet";
-import { newMockId } from "@/features/subscriptions/mock-state";
+import { bookingOf, newMockId } from "@/features/subscriptions/mock-state";
 import { pointAlong } from "@/features/tracking/geo";
 import { mockPathOf } from "@/features/tracking/mock-geo";
 import { TripDirection } from "@/features/trips/schema";
@@ -22,7 +22,9 @@ import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { Role } from "@/lib/auth/roles";
 import { createSosEndpoint, getSosEndpoint } from "./api";
 import { actionsOf, findSos, saveSos, sosStatusOf, type MockSos } from "./mock-state";
-import { SosErrorCode, type Sos } from "./schema";
+import { SosErrorCode, SosStatus, type Sos } from "./schema";
+import { SubscriptionStatus } from "../subscriptions/schema";
+import { requireMockAccount } from "../auth/mock-token";
 
 const HTTP = { NotFound: 404, Conflict: 409 };
 /** The bus's GPS device reports every few seconds. */
@@ -63,8 +65,12 @@ export function toSos(sos: MockSos, language: string): Sos {
     bus_id: `bus_${sos.lineId}`,
     raised_by: {
       id: sos.raisedBy,
-      role: raiser?.role === Role.Supervisor ? Role.Supervisor : Role.Driver,
+      role:
+        raiser?.role === Role.Supervisor || raiser?.role === Role.Student
+          ? raiser.role
+          : Role.Driver,
       name: raiser ? localized(language, raiser.name_ar ?? raiser.name, raiser.name) : "",
+      phone: raiser?.phone ?? "",
     },
     location: sos.location
       ? {
@@ -88,18 +94,43 @@ export function toSos(sos: MockSos, language: string): Sos {
   };
 }
 
+/** Crew come in by their bus; a student comes in by the line of their active subscription. */
+function requireMockSosCaller(token: string | null, now: number) {
+  const account = requireMockAccount(token);
+  if (account.user.role !== Role.Student) return requireMockCrew(token);
+  const booking = bookingOf(account.user.id, now);
+  const line =
+    booking?.status === SubscriptionStatus.Active ? findMockLine(booking.lineId) : undefined;
+  if (!line) {
+    throw new MockHttpError(HTTP.Conflict, SosErrorCode.NotOnATrip, "You are not on a trip.");
+  }
+  return { account, line };
+}
+
 registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) => {
-  const { account, line } = requireMockCrew(token);
   const now = Date.now();
+  const { account, line } = requireMockSosCaller(token, now);
   const trip = requireOwnTrip(line, body.trip_id, now);
-  if (crewTripStatus(trip) === CrewTripStatus.Ended) {
+  const tripStatus = crewTripStatus(trip);
+  if (tripStatus === CrewTripStatus.Ended) {
     throw new MockHttpError(HTTP.Conflict, SosErrorCode.TripAlreadyEnded, "The trip ended.");
+  }
+  // A student can only raise an SOS while the trip is actually running.
+  if (account.user.role === Role.Student && tripStatus !== CrewTripStatus.InProgress) {
+    throw new MockHttpError(HTTP.Conflict, SosErrorCode.NotOnATrip, "The trip has not started.");
   }
   // Business rule 9: the same press arriving twice makes one SOS.
   const repeated = trip.sosIds
     .map(findSos)
     .find((item) => item && idempotencyKey && item.idempotencyKey === idempotencyKey);
   if (repeated) return toSos(repeated, language);
+  // A student follows the SOS already open on this trip instead of raising a second one.
+  if (account.user.role === Role.Student) {
+    const open = trip.sosIds
+      .map(findSos)
+      .find((item) => item && sosStatusOf(item) !== SosStatus.Closed);
+    if (open) return toSos(open, language);
+  }
 
   // The bus's own GPS device: where it is along the line's road path right now.
   const path = mockPathOf(line.lineId);
@@ -132,10 +163,13 @@ registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) 
 });
 
 registerMock(getSosEndpoint, ({ params }, { token, language }) => {
-  const { line } = requireMockCrew(token);
+  const now = Date.now();
+  const { account, line } = requireMockSosCaller(token, now);
   const sos = findSos(params.sos_id);
   if (!sos || sos.lineId !== line.lineId) {
     throw new MockHttpError(HTTP.NotFound, ServerErrorCode.NotFound, "No such SOS.");
   }
+  // A student only sees SOS of today's trips on their own line.
+  if (account.user.role === Role.Student) requireOwnTrip(line, sos.tripId, now);
   return toSos(sos, language);
 });

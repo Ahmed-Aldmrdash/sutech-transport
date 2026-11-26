@@ -42,6 +42,8 @@ const SOS_ACTIONS = Object.values(SosAction) as [SosAction, ...SosAction[]];
 export const SosErrorCode = {
   /** The trip isn't today's trip of the caller's bus. */
   NotYourTrip: "NOT_YOUR_TRIP",
+  /** The rider has no active subscription, or the line's trip has not started or already ended. */
+  NotOnATrip: "NOT_ON_A_TRIP",
   /** The trip ended; call the Transportation office. */
   TripAlreadyEnded: "TRIP_ALREADY_ENDED",
 } as const;
@@ -77,8 +79,9 @@ export const sosSchema = z.object({
   bus_id: z.string(),
   raised_by: z.object({
     id: z.string(),
-    role: z.enum([Role.Driver, Role.Supervisor]),
+    role: z.enum([Role.Driver, Role.Supervisor, Role.Student]),
     name: z.string(),
+    phone: z.string(),
   }),
   /** null if the bus's GPS device hasn't reported on this trip. */
   location: sosLocationSchema.nullable(),
