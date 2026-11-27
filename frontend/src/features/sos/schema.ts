@@ -108,3 +108,12 @@ export const sosSummarySchema = sosSchema.pick({
   status: true,
   created_at: true,
 });
+
+/** What a student's SOS page needs: the running trip of their line, and its latest alert. */
+export const riderSosStateSchema = z.object({
+  /** null when the student has no active subscription or no trip is running. */
+  trip_id: z.string().nullable(),
+  /** The latest SOS on that trip, whoever raised it. null if there is none. */
+  sos: sosSummarySchema.nullable(),
+});
+export type RiderSosState = z.infer<typeof riderSosStateSchema>;

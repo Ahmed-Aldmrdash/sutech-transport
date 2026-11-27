@@ -94,6 +94,7 @@ export const MOCK_FEATURE_OF: Readonly<Record<string, MockFeatureName>> = {
   "sg.watchlist": MockFeature.SgOffice,
   "sos.create": MockFeature.Sos,
   "sos.get": MockFeature.Sos,
+  "sos.getMine": MockFeature.Sos,
   "subscriptions.cancel": MockFeature.Subscriptions,
   "subscriptions.create": MockFeature.Subscriptions,
   "subscriptions.getMine": MockFeature.Subscriptions,

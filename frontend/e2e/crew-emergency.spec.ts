@@ -4,6 +4,7 @@ import { atSchoolMorning, expectNoSidewaysScroll, isPhone, signIn, switchTo } fr
 const DRIVER = "DRV-1001"; // Kamal Ezzat, line 7
 const TRANSPORT = "TRN-1001"; // Karim Fathy, Transportation office
 const CLINIC = "CLN-1001"; // Dr. Salma Nabil
+const STUDENT = "240100102"; // Seif, subscribed on line 7
 const TILE_HOST = "tile.openstreetmap.org";
 
 /** Map tiles need the internet; a tile that fails to load is not an app error. */
@@ -18,7 +19,7 @@ function watchForAppErrors(page: Page): string[] {
   return errors;
 }
 
-async function driverRaisesSos(page: Page, type: RegExp = /Bus problem/) {
+async function driverStartsTrip(page: Page) {
   await atSchoolMorning(page);
   await signIn(page, DRIVER);
   await page.waitForURL(/\/en\/driver$/);
@@ -36,6 +37,10 @@ async function driverRaisesSos(page: Page, type: RegExp = /Bus problem/) {
       .click();
     await expect(onTheRoad).toBeVisible();
   }
+}
+
+async function driverRaisesSos(page: Page, type: RegExp = /Bus problem/) {
+  await driverStartsTrip(page);
   await page.goto("/en/driver/sos");
   await page.getByRole("button", { name: type }).click();
   await page.getByRole("button", { name: "Send SOS now" }).click();
@@ -105,6 +110,28 @@ test.describe("emergencies", () => {
     await page.getByRole("button", { name: "Ambulance called" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Ambulance called" }).click();
     await expect(page.getByText("Called an ambulance")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("a student on the running trip raises an SOS; the office sees who did", async ({ page }) => {
+    const errors = watchForAppErrors(page);
+    await driverStartsTrip(page);
+
+    await switchTo(page, STUDENT);
+    await page.waitForURL(/\/en\/student$/);
+    await page.goto("/en/student/tracking");
+    await page.getByRole("main").getByRole("link", { name: "SOS", exact: true }).click();
+    await page.waitForURL(/\/en\/student\/sos$/);
+    await page.getByRole("button", { name: /^Medical/ }).click();
+    await page.getByRole("button", { name: "Send SOS now" }).click();
+    await expect(page.getByText(/Waiting for the Transportation office/)).toBeVisible();
+    await expectNoSidewaysScroll(page);
+
+    await switchTo(page, TRANSPORT);
+    await page.waitForURL(/\/en\/admin$/);
+    await page.goto("/en/admin/emergencies");
+    await expect(page.getByText(/Reported by: Student, Seif/).first()).toBeVisible();
+    await expectNoSidewaysScroll(page);
     expect(errors).toEqual([]);
   });
 

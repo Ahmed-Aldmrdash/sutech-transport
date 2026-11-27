@@ -152,6 +152,7 @@ const STUDENT_NAV: RoleNavigation = {
         { key: "card", icon: IdCard, segment: "card", primary: true },
         { key: "payment", icon: Wallet, segment: "payment" },
         { key: "tracking", icon: MapPinned, segment: "tracking" },
+        { key: "sos", icon: Siren, segment: "sos" },
         { key: "notifications", icon: Bell, segment: "notifications", primary: true },
         { key: "announcements", icon: Megaphone, segment: "announcements" },
         { key: "notGoingToday", icon: CalendarDays, segment: "not-going-today" },

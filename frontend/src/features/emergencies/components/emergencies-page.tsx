@@ -14,7 +14,7 @@ import { SosStatus } from "@/features/sos/schema";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
-import { formatDateTime, formatNumber } from "@/lib/format";
+import { formatDateTime, formatNumber, formatPhone } from "@/lib/format";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { listAdminSos } from "../api";
 import type { AdminSos } from "../schema";
@@ -134,6 +134,18 @@ function SosRow({ sos }: { sos: AdminSos }) {
           <p className="text-body-sm text-ink">
             {t("emergencies.lineName", { code: sos.line.code, name: sos.line.name })} ·{" "}
             <bdi>{sos.bus.plate}</bdi>
+          </p>
+          <p className="text-body-sm text-ink">
+            {t("emergencies.reportedBy", {
+              role: t(`roles.${sos.raised_by.role}`),
+              name: sos.raised_by.name,
+            })}
+            {sos.raised_by_phone ? (
+              <>
+                {" · "}
+                <bdi dir="ltr">{formatPhone(sos.raised_by_phone)}</bdi>
+              </>
+            ) : null}
           </p>
           <p className="text-caption text-ink-muted">
             {formatDateTime(sos.created_at, locale)} ·{" "}

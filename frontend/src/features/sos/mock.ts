@@ -3,6 +3,7 @@ import {
   crewFleetOf,
   crewProgress,
   crewTripStatus,
+  crewTripsOn,
   findCrewTrip,
   mockRidersOf,
   requireMockCrew,
@@ -18,15 +19,16 @@ import { pointAlong } from "@/features/tracking/geo";
 import { mockPathOf } from "@/features/tracking/mock-geo";
 import { TripDirection } from "@/features/trips/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
+import { cairoNow } from "@/lib/api/mock/cairo-clock";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
 import { Role } from "@/lib/auth/roles";
-import { createSosEndpoint, getSosEndpoint } from "./api";
+import { createSosEndpoint, getMyRiderSosEndpoint, getSosEndpoint } from "./api";
 import { actionsOf, findSos, saveSos, sosStatusOf, type MockSos } from "./mock-state";
 import { SosErrorCode, SosStatus, type Sos } from "./schema";
 import { SubscriptionStatus } from "../subscriptions/schema";
 import { requireMockAccount } from "../auth/mock-token";
 
-const HTTP = { NotFound: 404, Conflict: 409 };
+const HTTP = { Forbidden: 403, NotFound: 404, Conflict: 409 };
 /** The bus's GPS device reports every few seconds. */
 const GPS_LAG_MS = 3000;
 
@@ -94,13 +96,17 @@ export function toSos(sos: MockSos, language: string): Sos {
   };
 }
 
+/** The line of the student's active subscription, if any. */
+function activeLineOf(studentId: string, now: number) {
+  const booking = bookingOf(studentId, now);
+  return booking?.status === SubscriptionStatus.Active ? findMockLine(booking.lineId) : undefined;
+}
+
 /** Crew come in by their bus; a student comes in by the line of their active subscription. */
 function requireMockSosCaller(token: string | null, now: number) {
   const account = requireMockAccount(token);
   if (account.user.role !== Role.Student) return requireMockCrew(token);
-  const booking = bookingOf(account.user.id, now);
-  const line =
-    booking?.status === SubscriptionStatus.Active ? findMockLine(booking.lineId) : undefined;
+  const line = activeLineOf(account.user.id, now);
   if (!line) {
     throw new MockHttpError(HTTP.Conflict, SosErrorCode.NotOnATrip, "You are not on a trip.");
   }
@@ -172,4 +178,30 @@ registerMock(getSosEndpoint, ({ params }, { token, language }) => {
   // A student only sees SOS of today's trips on their own line.
   if (account.user.role === Role.Student) requireOwnTrip(line, sos.tripId, now);
   return toSos(sos, language);
+});
+
+registerMock(getMyRiderSosEndpoint, (_input, { token }) => {
+  const now = Date.now();
+  const { user } = requireMockAccount(token);
+  if (user.role !== Role.Student) {
+    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Students only.");
+  }
+  const line = activeLineOf(user.id, now);
+  const trip = line
+    ? crewTripsOn(cairoNow(new Date(now)).date).find(
+        (item) => item.lineId === line.lineId && crewTripStatus(item) === CrewTripStatus.InProgress,
+      )
+    : undefined;
+  const latest = trip?.sosIds.map(findSos).findLast((item) => item !== undefined);
+  return {
+    trip_id: trip?.tripId ?? null,
+    sos: latest
+      ? {
+          id: latest.id,
+          type: latest.type,
+          status: sosStatusOf(latest),
+          created_at: new Date(latest.createdAt).toISOString(),
+        }
+      : null,
+  };
 });

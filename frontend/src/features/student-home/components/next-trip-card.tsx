@@ -7,6 +7,7 @@ import { Badge, LiveDot } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { BusDriverDetails } from "@/features/lines/components/bus-driver-card";
+import { RiderSosButton } from "@/features/sos/components/rider-sos-button";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { Tone } from "@/components/ui/tone";
@@ -117,6 +118,7 @@ function TripDetails({ trip }: { trip: NextTrip }) {
       </dl>
 
       {trip.bus ? <BusDriverDetails bus={trip.bus} /> : null}
+      <RiderSosButton />
       <ButtonLink
         href="/student/tracking"
         variant="secondary"

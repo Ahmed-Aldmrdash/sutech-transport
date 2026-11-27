@@ -3,9 +3,11 @@ import { HttpMethod, defineEndpoint } from "@/lib/api/endpoint";
 import { Role } from "@/lib/auth/roles";
 import {
   createSosBodySchema,
+  riderSosStateSchema,
   sosParamsSchema,
   sosSchema,
   type CreateSosBody,
+  type RiderSosState,
   type Sos,
 } from "./schema";
 
@@ -47,6 +49,20 @@ export const getSosEndpoint = defineEndpoint({
   response: sosSchema,
 });
 
+export const getMyRiderSosEndpoint = defineEndpoint({
+  id: "sos.getMine",
+  method: HttpMethod.Get,
+  path: "/me/sos",
+  summary:
+    "For the student's SOS page and buttons: the trip of their line that has started and " +
+    "not ended (morning or return), and the latest SOS on it, whoever raised it, so an " +
+    "open alert is followed instead of raising a second one. Both are null without an " +
+    "active subscription or a running trip. The app re-reads it every 5 s.",
+  tag: TAG,
+  access: [Role.Student],
+  response: riderSosStateSchema,
+});
+
 export function createSos(body: CreateSosBody, options?: RequestOptions): Promise<Sos> {
   return callEndpoint(createSosEndpoint, { body }, options);
 }
@@ -55,4 +71,8 @@ export function getSos(sosId: string, options?: RequestOptions): Promise<Sos> {
   return callEndpoint(getSosEndpoint, { params: { sos_id: sosId } }, options);
 }
 
-export const sosEndpoints = [createSosEndpoint, getSosEndpoint];
+export function getMyRiderSos(options?: RequestOptions): Promise<RiderSosState> {
+  return callEndpoint(getMyRiderSosEndpoint, {}, options);
+}
+
+export const sosEndpoints = [createSosEndpoint, getSosEndpoint, getMyRiderSosEndpoint];

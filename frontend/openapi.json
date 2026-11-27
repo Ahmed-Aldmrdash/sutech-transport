@@ -17169,6 +17169,96 @@
         ]
       }
     },
+    "/api/v1/me/sos": {
+      "get": {
+        "operationId": "sos.getMine",
+        "summary": "For the student's SOS page and buttons: the trip of their line that has started and not ended (morning or return), and the latest SOS on it, whoever raised it, so an open alert is followed instead of raising a second one. Both are null without an active subscription or a running trip. The app re-reads it every 5 s.",
+        "tags": [
+          "sos"
+        ],
+        "x-roles": [
+          "student"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "trip_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "sos": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "medical",
+                                "breakdown",
+                                "accident"
+                              ]
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "open",
+                                "acknowledged",
+                                "closed"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "type",
+                            "status",
+                            "created_at"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "trip_id",
+                    "sos"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
     "/api/v1/admin/sos": {
       "get": {
         "operationId": "emergencies.list",

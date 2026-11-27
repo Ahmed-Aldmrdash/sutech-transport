@@ -85,7 +85,7 @@ export const adminSosSchema = sosSchema.extend({
   /** The bus and driver on the trip now (after any replacement). */
   bus: fleetBusSchema,
   driver: fleetDriverSchema,
-  /** The phone of whoever raised it (crew or rider), to call back. Same as raised_by.phone. */
+  /** The phone of the rider who raised it (see raised_by), to call back. */
   raised_by_phone: z.string().nullable(),
   /** Bus or driver changes on this trip, oldest first. */
   replacements: z.array(tripReplacementSchema),
