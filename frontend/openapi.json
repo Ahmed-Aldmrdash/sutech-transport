@@ -16699,13 +16699,14 @@
     "/api/v1/sos": {
       "post": {
         "operationId": "sos.create",
-        "summary": "Raises an emergency on today's trip of the caller's bus. The server adds the bus's latest position from its GPS device and the riders on board, sends sos.new to the Transportation office (and the clinic for medical and accident), and notifies the trip's students and guardians in calm words. The same Idempotency-Key never makes a second SOS (business rule 9). Errors: NOT_YOUR_TRIP (403), TRIP_ALREADY_ENDED (409).",
+        "summary": "Raises an emergency on today's trip of the caller's bus. Any rider on a trip that has started and not ended can raise it: the driver, the supervisor or a subscribed student (an employee is added with the employee role). The server adds the bus's latest position from its GPS device and the riders on board, records who raised it (role, name and phone), sends sos.new to the Transportation office (and the clinic for medical and accident), and notifies the trip's riders in calm words. Guardians are never notified, when it is raised or when it is closed. A rider who is not on a running trip cannot raise one. The same Idempotency-Key never makes a second SOS (business rule 9). Errors: NOT_YOUR_TRIP (403), NOT_ON_A_TRIP (409), TRIP_ALREADY_ENDED (409).",
         "tags": [
           "sos"
         ],
         "x-roles": [
           "driver",
-          "supervisor"
+          "supervisor",
+          "student"
         ],
         "parameters": [
           {
@@ -16771,17 +16772,22 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },
@@ -16950,13 +16956,14 @@
     "/api/v1/sos/{sos_id}": {
       "get": {
         "operationId": "sos.get",
-        "summary": "One SOS with its action log, for the crew member who raised it (or their bus's other crew member) to follow. Changes arrive on the WebSocket as sos.update; until then the app re-reads it every 5 s while it is open. Errors: NOT_FOUND (404).",
+        "summary": "One SOS with its action log, for the rider who raised it (or any rider on the same bus's trip) to follow. Only riders of that trip can read it; the guardian never can. Changes arrive on the WebSocket as sos.update; until then the app re-reads it every 5 s while it is open. Errors: NOT_FOUND (404).",
         "tags": [
           "sos"
         ],
         "x-roles": [
           "driver",
-          "supervisor"
+          "supervisor",
+          "student"
         ],
         "parameters": [
           {
@@ -17022,17 +17029,22 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },
@@ -17242,17 +17254,22 @@
                                 "type": "string",
                                 "enum": [
                                   "driver",
-                                  "supervisor"
+                                  "supervisor",
+                                  "student"
                                 ]
                               },
                               "name": {
+                                "type": "string"
+                              },
+                              "phone": {
                                 "type": "string"
                               }
                             },
                             "required": [
                               "id",
                               "role",
-                              "name"
+                              "name",
+                              "phone"
                             ],
                             "additionalProperties": false
                           },
@@ -17674,17 +17691,22 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },
@@ -18026,7 +18048,7 @@
     "/api/v1/admin/sos/{sos_id}/actions": {
       "post": {
         "operationId": "emergencies.addAction",
-        "summary": "Logs what the office did, with who and when (the log is never edited). `acknowledge` takes an open alert (the crew sees who took it); then `ambulance_called`, `note` (needs `note`) and `close` (needs the summary in `note`). Closing tells the trip's students and guardians it was handled. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED (409), NOTE_REQUIRED (422), FORBIDDEN (403, super_admin: view only).",
+        "summary": "Logs what the office did, with who and when (the log is never edited). `acknowledge` takes an open alert (the crew sees who took it); then `ambulance_called`, `note` (needs `note`) and `close` (needs the summary in `note`). Closing tells the trip's riders it was handled; guardians are never notified. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED (409), NOTE_REQUIRED (422), FORBIDDEN (403, super_admin: view only).",
         "tags": [
           "emergencies"
         ],
@@ -18107,17 +18129,22 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },

@@ -14,7 +14,7 @@ import { ChildErrorCode } from "./schema";
  */
 const GUARDIAN_CHILDREN: Readonly<Record<string, readonly string[]>> = {
   usr_parent_1: ["usr_student_1", "usr_student_11"],
-  // Seif's father: a guardian with a child on line 7, the demo driver's line (SOS → guardian).
+  // Seif's father: a guardian with a child on line 7, the demo driver's line.
   usr_parent_2: ["usr_student_2"],
 };
 
