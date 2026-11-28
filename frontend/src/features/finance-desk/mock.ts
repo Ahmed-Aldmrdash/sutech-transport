@@ -241,7 +241,9 @@ function requireAwaitingBooking(student: MockStudentRecord): MockBooking {
 registerMock(findAwaitingPaymentEndpoint, ({ query }, { token, language }) => {
   requireMockOffice(token, FINANCE);
   const typed = query.identifier.trim();
-  const student = mockStudentRecords().find((item) => item.identifier === typed);
+  const student = mockStudentRecords().find(
+    (item) => item.identifier === typed && item.riderType === "student",
+  );
   if (!student) {
     throw new MockHttpError(HTTP.NotFound, FinanceErrorCode.StudentNotFound, "No such student.");
   }

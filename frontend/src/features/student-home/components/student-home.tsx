@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession } from "@/features/auth/session/use-session";
 import { firstNameOf, userText } from "@/features/auth/user-text";
@@ -22,6 +23,7 @@ export function StudentHome() {
   const t = useTranslations();
   const locale = useLocale() as Locale;
   const session = useSession();
+  const isEmployee = useIsEmployee();
   const state = useAsync((signal) => getMySubscription({ signal }), []);
   const firstName =
     session.status === SessionStatus.SignedIn
@@ -38,7 +40,8 @@ export function StudentHome() {
         title={t("session.welcome", { name: firstName })}
         description={t("student.home.lead")}
       />
-      <MyStandingAlert />
+      {/* Warnings and bans are for students only. */}
+      {isEmployee ? null : <MyStandingAlert />}
       <div className="grid grid-cols-1 items-start gap-5 desktop:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-5">
           {isLoading ? <Skeleton className="h-72 w-full" /> : null}

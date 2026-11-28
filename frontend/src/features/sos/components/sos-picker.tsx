@@ -8,15 +8,18 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { TextField } from "@/components/ui/input";
 import { Tone } from "@/components/ui/tone";
-import { type CrewTrip } from "@/features/crew/schema";
 import { useSubmit } from "@/lib/hooks/use-submit";
 import { createSos } from "../api";
 import { SOS_TYPE_ICON } from "./sos-type";
 import { SOS_NOTE_MAX_LENGTH, SOS_TYPES, SosErrorCode, type SosType, type Sos } from "../schema";
 
-const SOS_ERRORS = [SosErrorCode.NotYourTrip, SosErrorCode.TripAlreadyEnded] as const;
+const SOS_ERRORS = [
+  SosErrorCode.NotYourTrip,
+  SosErrorCode.NotOnATrip,
+  SosErrorCode.TripAlreadyEnded,
+] as const;
 
-export function SosPicker({ trip, onSent }: { trip: CrewTrip; onSent: (sos: Sos) => void }) {
+export function SosPicker({ tripId, onSent }: { tripId: string; onSent: (sos: Sos) => void }) {
   const t = useTranslations("sos");
   const tCommon = useTranslations("common");
   const [type, setType] = useState<SosType | null>(null);
@@ -26,7 +29,7 @@ export function SosPicker({ trip, onSent }: { trip: CrewTrip; onSent: (sos: Sos)
   async function send() {
     if (!type) return;
     const sos = await submit((idempotencyKey) =>
-      createSos({ trip_id: trip.trip_id, type, note: note.trim() || null }, { idempotencyKey }),
+      createSos({ trip_id: tripId, type, note: note.trim() || null }, { idempotencyKey }),
     );
     if (sos) {
       setType(null);

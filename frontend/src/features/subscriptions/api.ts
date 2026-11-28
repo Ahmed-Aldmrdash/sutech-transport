@@ -20,7 +20,7 @@ export const getMySubscriptionEndpoint = defineEndpoint({
     "The student's subscription for the current term, or null if they have none. The server " +
     "moves an unpaid reservation to expired (and frees the seat) once hold_expires_at passes.",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   response: mySubscriptionSchema,
 });
 
@@ -35,7 +35,7 @@ export const createSubscriptionEndpoint = defineEndpoint({
     "ALREADY_SUBSCRIBED (409), " +
     "LINE_NOT_FOUND (404), STOP_NOT_ON_LINE (422).",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   idempotent: true,
   body: createSubscriptionBodySchema,
   response: subscriptionSchema,
@@ -49,7 +49,7 @@ export const cancelSubscriptionEndpoint = defineEndpoint({
     "Cancels a reservation that is not paid yet and frees the seat (to pick another line or " +
     "stop). Paid subscriptions go through a refund request instead. Errors: NOT_CANCELLABLE (409).",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   idempotent: true,
   params: subscriptionParamsSchema,
   response: subscriptionSchema,

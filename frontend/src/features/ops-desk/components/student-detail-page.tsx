@@ -22,7 +22,7 @@ import { SubscriptionBadge } from "./subscription-badge";
 
 /**
  * One student for the Transportation office and Student Affairs: who to call, their seat,
- * warnings and suspensions, trips and requests.
+ * warnings and suspensions, trips and requests. Staff have no guardian and no discipline.
  */
 export function StudentDetailPage({ studentId }: { studentId: string }) {
   const t = useTranslations("desk.ops.students");
@@ -41,6 +41,7 @@ function StudentDetail({ student }: { student: OpsStudentDetail }) {
   const t = useTranslations("desk.ops.students");
   const locale = useLocale() as Locale;
   const number = (value: number) => formatNumber(value, locale);
+  const isStaff = student.rider_type === "employee";
   return (
     <>
       <PageHeader
@@ -49,7 +50,11 @@ function StudentDetail({ student }: { student: OpsStudentDetail }) {
           <span className="flex flex-wrap items-center gap-2">
             <bdi className="tabular-nums">{student.identifier}</bdi>
             <SubscriptionBadge status={student.subscription_status} />
-            <StandingBadge standing={student.standing} />
+            {isStaff ? (
+              <Badge>{t("employee")}</Badge>
+            ) : (
+              <StandingBadge standing={student.standing} />
+            )}
           </span>
         }
       />
@@ -67,34 +72,38 @@ function StudentDetail({ student }: { student: OpsStudentDetail }) {
                     .join(" · ")
                 : t("noLine")}
             </Fact>
-            <Fact label={t("faculty")} icon={<GraduationCap />}>
+            <Fact label={t(isStaff ? "department" : "faculty")} icon={<GraduationCap />}>
               {student.faculty
                 ? student.level
                   ? t("facultyLevel", { faculty: student.faculty, level: number(student.level) })
                   : student.faculty
                 : "—"}
             </Fact>
-            <Fact label={t("phone")}>
+            <Fact label={t(isStaff ? "staffPhone" : "phone")}>
               {student.phone ? <CallLink name={student.name} phone={student.phone} /> : "—"}
             </Fact>
-            <Fact label={t("guardian")}>
-              {student.guardian ? (
-                <span className="flex flex-col items-start gap-1">
-                  {student.guardian.phone ? (
-                    <CallLink name={student.guardian.name} phone={student.guardian.phone} />
-                  ) : (
-                    student.guardian.name
-                  )}
-                  <Badge>{student.guardian.has_account ? t("hasApp") : t("noApp")}</Badge>
-                </span>
-              ) : (
-                "—"
-              )}
-            </Fact>
+            {isStaff ? null : (
+              <Fact label={t("guardian")}>
+                {student.guardian ? (
+                  <span className="flex flex-col items-start gap-1">
+                    {student.guardian.phone ? (
+                      <CallLink name={student.guardian.name} phone={student.guardian.phone} />
+                    ) : (
+                      student.guardian.name
+                    )}
+                    <Badge>{student.guardian.has_account ? t("hasApp") : t("noApp")}</Badge>
+                  </span>
+                ) : (
+                  "—"
+                )}
+              </Fact>
+            )}
           </dl>
         </CardBody>
       </Card>
-      <DisciplineCard studentId={student.student_id} studentName={student.name} />
+      {isStaff ? null : (
+        <DisciplineCard studentId={student.student_id} studentName={student.name} />
+      )}
       <section aria-labelledby="student-trips" className="flex flex-col gap-3">
         <h2 id="student-trips" className="text-h3 text-ink-strong">
           {t("tripsTitle")}

@@ -9,6 +9,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import type { Locale } from "@/i18n/routing";
 import { formatCalendarDate, todayInCairo } from "@/lib/format";
 import { useSubmit } from "@/lib/hooks/use-submit";
@@ -41,6 +42,7 @@ function UpcomingItem({ item, onChanged }: { item: Absence; onChanged: () => voi
   const t = useTranslations("student.notGoing");
   const locale = useLocale() as Locale;
   const toast = useToast();
+  const isEmployee = useIsEmployee();
   const [confirming, setConfirming] = useState(false);
   const { submit, isSending, serverError } = useSubmit(SERVER_ERRORS);
   // The list is re-read after each change; the server refuses a late cancel anyway.
@@ -90,7 +92,7 @@ function UpcomingItem({ item, onChanged }: { item: Absence; onChanged: () => voi
         onConfirm={() => void takeBack()}
         isConfirming={isSending}
         title={t("cancelConfirmTitle", { day })}
-        description={t("cancelConfirmBody")}
+        description={t(isEmployee ? "cancelConfirmBodyStaff" : "cancelConfirmBody")}
         confirmLabel={t("cancelConfirm")}
         cancelLabel={t("keep")}
       />

@@ -16,7 +16,7 @@ const LABEL_KEYS = {
  * the saved card; on the offline page it starts hidden and empty, and a tiny inline script
  * fills it (that page may have no other script cached).
  */
-export function SavedCardView({ card }: { card?: SavedCard }) {
+export function SavedCardView({ card, isStaff }: { card?: SavedCard; isStaff?: boolean }) {
   const t = useTranslations("student.card.offline");
   const tCard = useTranslations("student.card");
   const fromScript = card === undefined;
@@ -44,7 +44,9 @@ export function SavedCardView({ card }: { card?: SavedCard }) {
       <dl className="flex flex-col divide-y divide-line">
         {FIELDS.map((field) => (
           <div key={field} className="flex flex-wrap justify-between gap-2 py-2">
-            <dt className="text-body-sm text-ink-muted">{t(LABEL_KEYS[field])}</dt>
+            <dt className="text-body-sm text-ink-muted">
+              {field === "identifier" && isStaff ? tCard("identifierStaff") : t(LABEL_KEYS[field])}
+            </dt>
             <dd className="text-body-sm font-bold text-ink-strong" data-saved-card={field}>
               <bdi>{card?.[field] ?? ""}</bdi>
             </dd>

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/ui/page-header";
+import { RiderSosButton } from "@/features/sos/components/rider-sos-button";
 import { getMyTracking } from "../api";
 import { TrackingPanel } from "./tracking-panel";
 
@@ -11,6 +12,7 @@ export function StudentTrackingPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("studentTitle")} description={t("studentLead")} />
+      <RiderSosButton />
       <TrackingPanel
         load={(signal) => getMyTracking({ signal })}
         loadKey="me"

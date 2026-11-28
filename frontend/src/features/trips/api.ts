@@ -12,7 +12,7 @@ export const getMyNextTripEndpoint = defineEndpoint({
     "the bus is now (from its GPS device). trip is null for students without an active " +
     "subscription. Live changes arrive on the WebSocket as bus.location and trip.status.",
   tag: "trips",
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   response: myNextTripSchema,
 });
 

@@ -14,7 +14,7 @@ import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
 import { formatClockTime, formatPhone, todayInCairo } from "@/lib/format";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import { createAnnouncementEndpoint, listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
 import { requireMockOffice } from "@/features/auth/mock-token";
@@ -142,10 +142,11 @@ function crewDelayAnnouncements(language: string): Announcement[] {
 }
 
 /**
- * What the server tells a line's students and guardians when the office handles an emergency:
- * calm words with no medical details (agreement, "Emergencies (SOS)").
+ * What the server tells a line's riders (and, for a bus or driver change, their guardians)
+ * during an emergency: calm words with no medical details (agreement, "Emergencies (SOS)").
+ * Guardians never get the SOS notices themselves, raised or closed.
  */
-function emergencyAnnouncements(language: string): Announcement[] {
+function emergencyAnnouncements(language: string, withSos: boolean): Announcement[] {
   const notices: Announcement[] = [];
   const notice = (id: string, lineId: string, at: number, title: string, body: string) => {
     const line = findMockLine(lineId);
@@ -159,7 +160,7 @@ function emergencyAnnouncements(language: string): Announcement[] {
       published_at: new Date(at).toISOString(),
     });
   };
-  for (const sos of allSos()) {
+  for (const sos of withSos ? allSos() : []) {
     const code = findMockLine(sos.lineId)?.code ?? "";
     notice(
       `ann_${sos.id}`,
@@ -305,7 +306,7 @@ export function resetOfficeAnnouncementsMock(): void {
 }
 
 /** Every announcement, newest first. Also read by the notifications mock. */
-function mockAnnouncements(language: string): Announcement[] {
+function mockAnnouncements(language: string, withSos: boolean): Announcement[] {
   const fixed = MOCK_ANNOUNCEMENTS.map((item) => ({
     announcement_id: item.id,
     kind: item.kind,
@@ -317,7 +318,7 @@ function mockAnnouncements(language: string): Announcement[] {
   return [
     ...postedByOffice(language),
     ...crewDelayAnnouncements(language),
-    ...emergencyAnnouncements(language),
+    ...emergencyAnnouncements(language, withSos),
     ...returnTimeAnnouncements(language),
     ...fixed,
   ].sort((a, b) => b.published_at.localeCompare(a.published_at));
@@ -338,14 +339,14 @@ export function mockAnnouncementsFor(
   user: { id: string; role: Role },
   language: string,
 ): Announcement[] {
-  const all = mockAnnouncements(language);
+  const all = mockAnnouncements(language, user.role !== Role.Parent);
   const lineOf = (studentId: string) => {
     const booking = bookingOnDate(studentId, todayInCairo());
     return booking && SEAT_STATUSES.includes(booking.status) ? booking.lineId : null;
   };
-  // Students see their own line's news; guardians their children's lines only.
+  // Riders see their own line's news; guardians their children's lines only.
   let ownLines: (string | null)[];
-  if (user.role === Role.Student) ownLines = [lineOf(user.id)];
+  if (isRiderRole(user.role)) ownLines = [lineOf(user.id)];
   else if (user.role === Role.Parent) {
     ownLines = mockChildrenOf(user.id).map((child) => lineOf(child.user.id));
   } else return all;

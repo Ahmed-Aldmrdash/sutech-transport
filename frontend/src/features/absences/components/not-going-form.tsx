@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { TextField } from "@/components/ui/input";
 import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
 import { formatCalendarDate, formatServiceDay, formatTime, todayInCairo } from "@/lib/format";
@@ -30,6 +31,7 @@ export function ReportForm({ data, onDone }: { data: MyAbsences; onDone: () => v
   const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
   const toast = useToast();
+  const isEmployee = useIsEmployee();
   const today = todayInCairo();
   const firstDay = data.reportable_days[0]?.service_date ?? "";
   const [day, setDay] = useState(firstDay);
@@ -68,7 +70,9 @@ export function ReportForm({ data, onDone }: { data: MyAbsences; onDone: () => v
     if (created) {
       toast.show({
         title: t("sentTitle"),
-        description: t("sentBody", { day: dayLabel(created.service_date) }),
+        description: t(isEmployee ? "sentBodyStaff" : "sentBody", {
+          day: dayLabel(created.service_date),
+        }),
         tone: Tone.Success,
       });
       setNote("");
@@ -141,7 +145,7 @@ export function ReportForm({ data, onDone }: { data: MyAbsences; onDone: () => v
           />
 
           <Alert tone={Tone.Info} title={t("whoKnowsTitle")}>
-            {t("whoKnowsBody")}
+            {t(isEmployee ? "whoKnowsBodyStaff" : "whoKnowsBody")}
           </Alert>
 
           {serverError ? <Alert tone={Tone.Danger} title={t(`errors.${serverError}`)} /> : null}

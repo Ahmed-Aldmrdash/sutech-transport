@@ -3,6 +3,7 @@
 import { Armchair, Clock, Undo2, Wallet } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { StatTile } from "@/components/ui/stat-tile";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import type { Locale } from "@/i18n/routing";
 import { formatArrival, formatClockTime, formatMoneyParts, formatNumber } from "@/lib/format";
 import type { Line } from "../schema";
@@ -11,11 +12,12 @@ import type { Line } from "../schema";
 export function LineFacts({ line }: { line: Line }) {
   const t = useTranslations("student");
   const locale = useLocale() as Locale;
+  const isEmployee = useIsEmployee();
   return (
     <div className="grid grid-cols-2 gap-3 desktop:grid-cols-4">
       <StatTile
         label={t("line.price")}
-        value={<Price piasters={line.price_piasters} locale={locale} />}
+        value={isEmployee ? t("free") : <Price piasters={line.price_piasters} locale={locale} />}
         icon={<Wallet />}
       />
       <StatTile

@@ -3,6 +3,7 @@ import {
   crewFleetOf,
   crewProgress,
   crewTripStatus,
+  crewTripsOn,
   findCrewTrip,
   mockRidersOf,
   requireMockCrew,
@@ -11,20 +12,23 @@ import {
   saveCrewTrip,
 } from "@/features/crew/mock-state";
 import { CrewTripStatus, RiderState } from "@/features/crew/schema";
-import { localized } from "@/features/lines/mock-builders";
+import { findMockLine, localized } from "@/features/lines/mock-builders";
 import { mockFleetBus, mockFleetDriver } from "@/features/lines/mock-fleet";
-import { newMockId } from "@/features/subscriptions/mock-state";
+import { bookingOf, newMockId } from "@/features/subscriptions/mock-state";
 import { pointAlong } from "@/features/tracking/geo";
 import { mockPathOf } from "@/features/tracking/mock-geo";
 import { TripDirection } from "@/features/trips/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
+import { cairoNow } from "@/lib/api/mock/cairo-clock";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { Role } from "@/lib/auth/roles";
-import { createSosEndpoint, getSosEndpoint } from "./api";
+import { Role, isRiderRole } from "@/lib/auth/roles";
+import { createSosEndpoint, getMyRiderSosEndpoint, getSosEndpoint } from "./api";
 import { actionsOf, findSos, saveSos, sosStatusOf, type MockSos } from "./mock-state";
-import { SosErrorCode, type Sos } from "./schema";
+import { SosErrorCode, SosStatus, type Sos } from "./schema";
+import { SubscriptionStatus } from "../subscriptions/schema";
+import { requireMockAccount } from "../auth/mock-token";
 
-const HTTP = { NotFound: 404, Conflict: 409 };
+const HTTP = { Forbidden: 403, NotFound: 404, Conflict: 409 };
 /** The bus's GPS device reports every few seconds. */
 const GPS_LAG_MS = 3000;
 
@@ -63,8 +67,12 @@ export function toSos(sos: MockSos, language: string): Sos {
     bus_id: `bus_${sos.lineId}`,
     raised_by: {
       id: sos.raisedBy,
-      role: raiser?.role === Role.Supervisor ? Role.Supervisor : Role.Driver,
+      role:
+        raiser && (raiser.role === Role.Supervisor || isRiderRole(raiser.role))
+          ? (raiser.role as Sos["raised_by"]["role"])
+          : Role.Driver,
       name: raiser ? localized(language, raiser.name_ar ?? raiser.name, raiser.name) : "",
+      phone: raiser?.phone ?? "",
     },
     location: sos.location
       ? {
@@ -88,18 +96,47 @@ export function toSos(sos: MockSos, language: string): Sos {
   };
 }
 
+/** The line of the student's active subscription, if any. */
+function activeLineOf(studentId: string, now: number) {
+  const booking = bookingOf(studentId, now);
+  return booking?.status === SubscriptionStatus.Active ? findMockLine(booking.lineId) : undefined;
+}
+
+/** Crew come in by their bus; a student comes in by the line of their active subscription. */
+function requireMockSosCaller(token: string | null, now: number) {
+  const account = requireMockAccount(token);
+  if (!isRiderRole(account.user.role)) return requireMockCrew(token);
+  const line = activeLineOf(account.user.id, now);
+  if (!line) {
+    throw new MockHttpError(HTTP.Conflict, SosErrorCode.NotOnATrip, "You are not on a trip.");
+  }
+  return { account, line };
+}
+
 registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) => {
-  const { account, line } = requireMockCrew(token);
   const now = Date.now();
+  const { account, line } = requireMockSosCaller(token, now);
   const trip = requireOwnTrip(line, body.trip_id, now);
-  if (crewTripStatus(trip) === CrewTripStatus.Ended) {
+  const tripStatus = crewTripStatus(trip);
+  if (tripStatus === CrewTripStatus.Ended) {
     throw new MockHttpError(HTTP.Conflict, SosErrorCode.TripAlreadyEnded, "The trip ended.");
+  }
+  // A student can only raise an SOS while the trip is actually running.
+  if (isRiderRole(account.user.role) && tripStatus !== CrewTripStatus.InProgress) {
+    throw new MockHttpError(HTTP.Conflict, SosErrorCode.NotOnATrip, "The trip has not started.");
   }
   // Business rule 9: the same press arriving twice makes one SOS.
   const repeated = trip.sosIds
     .map(findSos)
     .find((item) => item && idempotencyKey && item.idempotencyKey === idempotencyKey);
   if (repeated) return toSos(repeated, language);
+  // A student follows the SOS already open on this trip instead of raising a second one.
+  if (isRiderRole(account.user.role)) {
+    const open = trip.sosIds
+      .map(findSos)
+      .find((item) => item && sosStatusOf(item) !== SosStatus.Closed);
+    if (open) return toSos(open, language);
+  }
 
   // The bus's own GPS device: where it is along the line's road path right now.
   const path = mockPathOf(line.lineId);
@@ -132,10 +169,39 @@ registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) 
 });
 
 registerMock(getSosEndpoint, ({ params }, { token, language }) => {
-  const { line } = requireMockCrew(token);
+  const now = Date.now();
+  const { account, line } = requireMockSosCaller(token, now);
   const sos = findSos(params.sos_id);
   if (!sos || sos.lineId !== line.lineId) {
     throw new MockHttpError(HTTP.NotFound, ServerErrorCode.NotFound, "No such SOS.");
   }
+  // A student only sees SOS of today's trips on their own line.
+  if (isRiderRole(account.user.role)) requireOwnTrip(line, sos.tripId, now);
   return toSos(sos, language);
+});
+
+registerMock(getMyRiderSosEndpoint, (_input, { token }) => {
+  const now = Date.now();
+  const { user } = requireMockAccount(token);
+  if (!isRiderRole(user.role)) {
+    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Riders only.");
+  }
+  const line = activeLineOf(user.id, now);
+  const trip = line
+    ? crewTripsOn(cairoNow(new Date(now)).date).find(
+        (item) => item.lineId === line.lineId && crewTripStatus(item) === CrewTripStatus.InProgress,
+      )
+    : undefined;
+  const latest = trip?.sosIds.map(findSos).findLast((item) => item !== undefined);
+  return {
+    trip_id: trip?.tripId ?? null,
+    sos: latest
+      ? {
+          id: latest.id,
+          type: latest.type,
+          status: sosStatusOf(latest),
+          created_at: new Date(latest.createdAt).toISOString(),
+        }
+      : null,
+  };
 });

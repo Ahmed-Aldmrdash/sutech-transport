@@ -23,7 +23,13 @@ export function SubscriptionFacts({ subscription }: { subscription: Subscription
         : tStudent("toBeAnnounced"),
     },
     { label: t("term"), value: subscription.term.name },
-    { label: t("price"), value: formatMoney(subscription.price_piasters, locale) },
+    {
+      label: t("price"),
+      value:
+        subscription.price_piasters === 0
+          ? tStudent("free")
+          : formatMoney(subscription.price_piasters, locale),
+    },
   ];
   return (
     <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">

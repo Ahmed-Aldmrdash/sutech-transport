@@ -10,6 +10,7 @@ import { TextAreaField, TextField } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import type { Line } from "@/features/lines/schema";
 import { RECEIPT_MAX_BYTES } from "@/features/payments/schema";
 import { SubscriptionStatus, type Subscription } from "@/features/subscriptions/schema";
@@ -41,7 +42,12 @@ export function ComplaintForm({
   const today = todayInCairo();
   // Before the subscription is active, only payment complaints are accepted.
   const isActive = subscription.status === SubscriptionStatus.Active;
-  const categories = isActive ? COMPLAINT_CATEGORIES : [ComplaintCategory.Payment];
+  const isEmployee = useIsEmployee();
+  // Staff pay nothing, so they have no payment to complain about.
+  const activeCategories = isEmployee
+    ? COMPLAINT_CATEGORIES.filter((category) => category !== ComplaintCategory.Payment)
+    : COMPLAINT_CATEGORIES;
+  const categories = isActive ? activeCategories : [ComplaintCategory.Payment];
   const { values, setErrors, update, fieldError, clearDraft } = useRequestForm<ComplaintValues>(
     "complaint",
     {

@@ -1,5 +1,5 @@
 import { findMockLine, localized, toLineSummary } from "@/features/lines/mock-builders";
-import { mockTerm, requireMockStudent } from "@/features/subscriptions/mock";
+import { mockTerm, requireMockRider } from "@/features/subscriptions/mock";
 import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { MOCK_TERM } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
@@ -21,7 +21,7 @@ function mockQrToken(cardId: string, expiresAt: number): string {
 }
 
 registerMock(getMyCardEndpoint, (_input, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   // Today's line: an approved temporary change shows on the card for its dates.
   const booking = bookingOnDate(user.id, todayInCairo());
   const line = booking && findMockLine(booking.lineId);

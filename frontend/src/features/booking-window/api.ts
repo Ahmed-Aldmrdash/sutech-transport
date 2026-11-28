@@ -18,7 +18,7 @@ export const getBookingWindowEndpoint = defineEndpoint({
     "The term's booking window: not_open, open (until closes_at) or closed. Students see it " +
     "on the lines page; the Transportation office also gets the history of its changes.",
   tag: TAG,
-  access: [Role.Student, Role.Transport, Role.SuperAdmin],
+  access: [Role.Student, Role.Employee, Role.Transport, Role.SuperAdmin],
   response: bookingWindowSchema,
 });
 

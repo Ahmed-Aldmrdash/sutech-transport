@@ -5,7 +5,7 @@ import { requireMockAccount, requireMockOffice } from "@/features/auth/mock-toke
 import { localized } from "@/features/lines/mock-builders";
 import { MOCK_TERM } from "@/features/subscriptions/mock-state";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import { formatDateTime } from "@/lib/format";
 import { getBookingWindowEndpoint, updateBookingWindowEndpoint } from "./api";
 import { bookingWindowOf, saveBookingWindow, type MockBookingWindow } from "./mock-state";
@@ -57,10 +57,10 @@ function invalid(code: string, message: string): never {
 
 registerMock(getBookingWindowEndpoint, (_input, { token, language }) => {
   const account = requireMockAccount(token);
-  const isStudent = account.user.role === Role.Student;
-  if (!isStudent) requireMockOffice(token, BOOKING_OFFICES);
+  const isRider = isRiderRole(account.user.role);
+  if (!isRider) requireMockOffice(token, BOOKING_OFFICES);
   const now = Date.now();
-  return toWindow(bookingWindowOf(now), language, !isStudent, now);
+  return toWindow(bookingWindowOf(now), language, !isRider, now);
 });
 
 registerMock(updateBookingWindowEndpoint, ({ body }, { token, language }) => {

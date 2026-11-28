@@ -13,9 +13,18 @@ export const Role = {
   Driver: "driver",
   Supervisor: "supervisor",
   Student: "student",
+  /** University staff and faculty: they ride for free and have no guardian. */
+  Employee: "employee",
   Parent: "parent",
 } as const;
 export type Role = (typeof Role)[keyof typeof Role];
+
+/** The accounts that ride the buses with a seat of their own. */
+const RIDER_ROLES: readonly Role[] = [Role.Student, Role.Employee];
+
+export function isRiderRole(role: Role): boolean {
+  return RIDER_ROLES.includes(role);
+}
 
 export const ALL_ROLES: readonly Role[] = Object.values(Role);
 

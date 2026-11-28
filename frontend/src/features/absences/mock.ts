@@ -1,5 +1,5 @@
 import { findMockLine } from "@/features/lines/mock-builders";
-import { requireMockStudent } from "@/features/subscriptions/mock";
+import { requireMockRider } from "@/features/subscriptions/mock";
 import { bookingOf, newMockId } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { SERVICE_DAYS, addDays, cairoInstant, cairoNow } from "@/lib/api/mock/cairo-clock";
@@ -79,12 +79,12 @@ function myAbsences(userId: string, firstDeparture: string): MyAbsences {
 }
 
 registerMock(listMyAbsencesEndpoint, (_input, { token }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   return myAbsences(user.id, activeLineOf(user.id).firstDeparture);
 });
 
 registerMock(createAbsenceEndpoint, ({ body }, { token }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const { firstDeparture } = activeLineOf(user.id);
   const now = Date.now();
   const list = absencesOf(user.id);
@@ -122,7 +122,7 @@ registerMock(createAbsenceEndpoint, ({ body }, { token }) => {
 });
 
 registerMock(cancelAbsenceEndpoint, ({ params }, { token }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const { firstDeparture } = activeLineOf(user.id);
   const now = Date.now();
   const list = absencesOf(user.id);

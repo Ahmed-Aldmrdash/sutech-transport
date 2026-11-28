@@ -14,6 +14,16 @@ const STUDENT_PATHS: Paths = {
   [NotificationTarget.Lines]: "/student/lines",
 };
 
+/** Staff have the rider pages only: no payment and no requests page. */
+const EMPLOYEE_PATHS: Paths = {
+  [NotificationTarget.Home]: "/student",
+  [NotificationTarget.Tracking]: "/student/tracking",
+  [NotificationTarget.Card]: "/student/card",
+  [NotificationTarget.Complaint]: "/student/complaints",
+  [NotificationTarget.Announcements]: "/student/announcements",
+  [NotificationTarget.Lines]: "/student/lines",
+};
+
 /** Guardians have no announcements page: those notifications only inform. */
 const PARENT_PATHS: Paths = {
   [NotificationTarget.Home]: "/parent",
@@ -39,9 +49,11 @@ export function notificationHref(link: NotificationLink | null, role: Role): str
       ? PARENT_PATHS
       : role === Role.Student
         ? STUDENT_PATHS
-        : role === Role.Driver || role === Role.Supervisor
-          ? CREW_PATHS
-          : {};
+        : role === Role.Employee
+          ? EMPLOYEE_PATHS
+          : role === Role.Driver || role === Role.Supervisor
+            ? CREW_PATHS
+            : {};
   const base = paths[link.target];
   if (!base) return null;
   if (!link.id) return base;

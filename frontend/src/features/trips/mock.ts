@@ -8,7 +8,7 @@ import {
 import { lineSourceOn } from "@/features/crew/mock-state";
 import { mockReturnTime } from "@/features/lines/mock-timetable";
 import { bookingOnDate } from "@/features/requests/mock-riding-line";
-import { requireMockStudent } from "@/features/subscriptions/mock";
+import { requireMockRider } from "@/features/subscriptions/mock";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import {
   MS_PER_MINUTE,
@@ -34,7 +34,7 @@ function nextServiceDate(date: string, weekday: number, runsToday: boolean): str
 }
 
 registerMock(getMyNextTripEndpoint, (_input, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const now = new Date();
   const cairo = cairoNow(now);
   const campusMinute = toMinutes(MOCK_CAMPUS_ARRIVAL.to);

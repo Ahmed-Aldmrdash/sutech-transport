@@ -52,7 +52,8 @@ export function ManualEntry({ action, isSending, onEntered, ref }: ManualEntryPr
         <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3">
           <TextField
             label={t("manualLabel")}
-            inputMode="numeric"
+            // A text keyboard: staff IDs have letters ("EMP-2001").
+            autoCapitalize="characters"
             autoComplete="off"
             ref={inputRef}
             required

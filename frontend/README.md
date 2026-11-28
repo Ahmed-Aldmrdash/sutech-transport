@@ -34,6 +34,8 @@ Open `/ar` and sign in with one of these mock accounts. Each request makes a new
 | ------------------------ | ----------------------- | -------------------------- |
 | Student (no booking)     | `240100101`             | `/student`                 |
 | Student (subscribed)     | `240100102`             | `/student`                 |
+| Staff (subscribed)       | `EMP-2001`              | `/student`                 |
+| Faculty (no booking)     | `EMP-2002`              | `/student`                 |
 | Parent                   | `01000002000`           | `/parent`                  |
 | Parent (line 7 child)    | `01000002001`           | `/parent`                  |
 | Driver / supervisor      | `DRV-1001` / `SUP-1001` | `/driver`                  |
@@ -51,6 +53,8 @@ page still marked "Coming soon" is the student's AI assistant (built by the AI t
 
 Student pages in mock mode:
 
+- Staff and faculty use the same pages with their own menu: booking is free and active at once,
+  and there is no payment, requests or guardian.
 - Bookings and receipts are kept in the browser (`localStorage`), so they survive a refresh.
 - The mock finance office approves a receipt 20 seconds after it arrives. A reference number
   ending in `0000` is rejected instead, so you can see the rejected state.

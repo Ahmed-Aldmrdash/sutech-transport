@@ -2,6 +2,7 @@
 
 import { Bus, ChevronRight, Clock, MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { formatClockTime, formatMoney } from "@/lib/format";
@@ -16,6 +17,7 @@ export function lineHref(lineId: string): string {
 export function LineCard({ line }: { line: Line }) {
   const t = useTranslations("student");
   const locale = useLocale() as Locale;
+  const isEmployee = useIsEmployee();
 
   return (
     <li>
@@ -36,7 +38,9 @@ export function LineCard({ line }: { line: Line }) {
               {line.name}
             </h2>
             <p className="text-body-sm text-ink-muted">
-              {t("lines.perTerm", { price: formatMoney(line.price_piasters, locale) })}
+              {isEmployee
+                ? t("free")
+                : t("lines.perTerm", { price: formatMoney(line.price_piasters, locale) })}
             </p>
           </div>
           <ChevronRight

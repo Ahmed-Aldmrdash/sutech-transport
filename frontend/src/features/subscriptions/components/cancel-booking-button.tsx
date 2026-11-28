@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/toast";
 import { cancelSubscription } from "../api";
 import type { Subscription } from "../schema";
 
-/** Frees an unpaid reservation so the student can pick another line or stop. */
+/** Frees an unpaid reservation (or a free staff booking) so another line or stop can be picked. */
 export function CancelBookingButton({
   subscription,
   onCancelled,

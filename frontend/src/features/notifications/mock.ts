@@ -424,6 +424,15 @@ function notificationsFor(userId: string, role: Role, language: string): AppNoti
           ...bookingWindowNotifications(userId, language),
         ]
       : []),
+    // Staff: the same bus and booking news, their complaint answers, and nothing about
+    // payments, violations or discipline.
+    ...(role === Role.Employee
+      ? [
+          ...requestNotifications(userId, language),
+          ...busNearNotifications(userId, language, now),
+          ...bookingWindowNotifications(userId, language),
+        ]
+      : []),
     ...(role === Role.Parent
       ? [
           ...childNotifications(userId, language, now),

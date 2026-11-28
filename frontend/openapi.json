@@ -178,6 +178,7 @@
                             "driver",
                             "supervisor",
                             "student",
+                            "employee",
                             "parent"
                           ]
                         },
@@ -310,6 +311,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -364,6 +366,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -392,6 +395,7 @@
                         "driver",
                         "supervisor",
                         "student",
+                        "employee",
                         "parent"
                       ]
                     },
@@ -546,6 +550,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -695,6 +700,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -960,7 +966,8 @@
           "subscriptions"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -1189,7 +1196,8 @@
           "subscriptions"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -1437,7 +1445,8 @@
           "subscriptions"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -2101,7 +2110,8 @@
           "card"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -2269,7 +2279,8 @@
           "trips"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -2529,6 +2540,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -2839,7 +2851,8 @@
           "requests"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -3859,7 +3872,8 @@
           "requests"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -6699,7 +6713,8 @@
           "requests"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -12353,6 +12368,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -12548,6 +12564,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -12603,6 +12620,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -12658,7 +12676,8 @@
           "absences"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -12772,7 +12791,8 @@
           "absences"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -12903,7 +12923,8 @@
           "absences"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -13036,7 +13057,8 @@
           "attendance"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -13262,7 +13284,8 @@
           "tracking"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -16699,13 +16722,15 @@
     "/api/v1/sos": {
       "post": {
         "operationId": "sos.create",
-        "summary": "Raises an emergency on today's trip of the caller's bus. The server adds the bus's latest position from its GPS device and the riders on board, sends sos.new to the Transportation office (and the clinic for medical and accident), and notifies the trip's students and guardians in calm words. The same Idempotency-Key never makes a second SOS (business rule 9). Errors: NOT_YOUR_TRIP (403), TRIP_ALREADY_ENDED (409).",
+        "summary": "Raises an emergency on today's trip of the caller's bus. Any rider on a trip that has started and not ended can raise it: the driver, the supervisor or a subscribed student (an employee is added with the employee role). The server adds the bus's latest position from its GPS device and the riders on board, records who raised it (role, name and phone), sends sos.new to the Transportation office (and the clinic for medical and accident), and notifies the trip's riders in calm words. Guardians are never notified, when it is raised or when it is closed. A rider who is not on a running trip cannot raise one. The same Idempotency-Key never makes a second SOS (business rule 9). Errors: NOT_YOUR_TRIP (403), NOT_ON_A_TRIP (409), TRIP_ALREADY_ENDED (409).",
         "tags": [
           "sos"
         ],
         "x-roles": [
           "driver",
-          "supervisor"
+          "supervisor",
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -16771,17 +16796,23 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },
@@ -16950,13 +16981,15 @@
     "/api/v1/sos/{sos_id}": {
       "get": {
         "operationId": "sos.get",
-        "summary": "One SOS with its action log, for the crew member who raised it (or their bus's other crew member) to follow. Changes arrive on the WebSocket as sos.update; until then the app re-reads it every 5 s while it is open. Errors: NOT_FOUND (404).",
+        "summary": "One SOS with its action log, for the rider who raised it (or any rider on the same bus's trip) to follow. Only riders of that trip can read it; the guardian never can. Changes arrive on the WebSocket as sos.update; until then the app re-reads it every 5 s while it is open. Errors: NOT_FOUND (404).",
         "tags": [
           "sos"
         ],
         "x-roles": [
           "driver",
-          "supervisor"
+          "supervisor",
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -17022,17 +17055,23 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },
@@ -17157,6 +17196,97 @@
         ]
       }
     },
+    "/api/v1/me/sos": {
+      "get": {
+        "operationId": "sos.getMine",
+        "summary": "For the student's SOS page and buttons: the trip of their line that has started and not ended (morning or return), and the latest SOS on it, whoever raised it, so an open alert is followed instead of raising a second one. Both are null without an active subscription or a running trip. The app re-reads it every 5 s.",
+        "tags": [
+          "sos"
+        ],
+        "x-roles": [
+          "student",
+          "employee"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "trip_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "sos": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "medical",
+                                "breakdown",
+                                "accident"
+                              ]
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "open",
+                                "acknowledged",
+                                "closed"
+                              ]
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "type",
+                            "status",
+                            "created_at"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "trip_id",
+                    "sos"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
     "/api/v1/admin/sos": {
       "get": {
         "operationId": "emergencies.list",
@@ -17242,17 +17372,23 @@
                                 "type": "string",
                                 "enum": [
                                   "driver",
-                                  "supervisor"
+                                  "supervisor",
+                                  "student",
+                                  "employee"
                                 ]
                               },
                               "name": {
+                                "type": "string"
+                              },
+                              "phone": {
                                 "type": "string"
                               }
                             },
                             "required": [
                               "id",
                               "role",
-                              "name"
+                              "name",
+                              "phone"
                             ],
                             "additionalProperties": false
                           },
@@ -17674,17 +17810,23 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },
@@ -18026,7 +18168,7 @@
     "/api/v1/admin/sos/{sos_id}/actions": {
       "post": {
         "operationId": "emergencies.addAction",
-        "summary": "Logs what the office did, with who and when (the log is never edited). `acknowledge` takes an open alert (the crew sees who took it); then `ambulance_called`, `note` (needs `note`) and `close` (needs the summary in `note`). Closing tells the trip's students and guardians it was handled. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED (409), NOTE_REQUIRED (422), FORBIDDEN (403, super_admin: view only).",
+        "summary": "Logs what the office did, with who and when (the log is never edited). `acknowledge` takes an open alert (the crew sees who took it); then `ambulance_called`, `note` (needs `note`) and `close` (needs the summary in `note`). Closing tells the trip's riders it was handled; guardians are never notified. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED (409), NOTE_REQUIRED (422), FORBIDDEN (403, super_admin: view only).",
         "tags": [
           "emergencies"
         ],
@@ -18107,17 +18249,23 @@
                           "type": "string",
                           "enum": [
                             "driver",
-                            "supervisor"
+                            "supervisor",
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
+                          "type": "string"
+                        },
+                        "phone": {
                           "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "role",
-                        "name"
+                        "name",
+                        "phone"
                       ],
                       "additionalProperties": false
                     },
@@ -29277,7 +29425,7 @@
     "/api/v1/admin/students": {
       "get": {
         "operationId": "ops.students",
-        "summary": "Students with a subscription this term. `q`: university ID or part of the name; `line_id`; `standing` (good, warned, suspended, banned). 25 a page, by name. Student Affairs opens it too, to warn, suspend or ban.",
+        "summary": "Students and staff with a subscription this term. `q`: university or staff ID, or part of the name; `line_id`; `standing` (good, warned, suspended, banned); `rider_type` (student, employee). 25 a page, by name. Student Affairs opens it too, to warn, suspend or ban students (never staff).",
         "tags": [
           "operations"
         ],
@@ -29319,6 +29467,18 @@
             }
           },
           {
+            "name": "rider_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "student",
+                "employee"
+              ]
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "required": false,
@@ -29345,6 +29505,13 @@
                         "properties": {
                           "student_id": {
                             "type": "string"
+                          },
+                          "rider_type": {
+                            "type": "string",
+                            "enum": [
+                              "student",
+                              "employee"
+                            ]
                           },
                           "identifier": {
                             "type": "string"
@@ -29414,6 +29581,7 @@
                         },
                         "required": [
                           "student_id",
+                          "rider_type",
                           "identifier",
                           "name",
                           "line",
@@ -29465,7 +29633,7 @@
     "/api/v1/admin/students/{student_id}": {
       "get": {
         "operationId": "ops.student",
-        "summary": "One student for the office: contact, guardian, seat, this term's morning trips so far and their requests, with their standing. Errors: STUDENT_NOT_FOUND (404).",
+        "summary": "One student or staff member for the office (`rider_type`): contact, guardian (null for staff), seat, this term's morning trips so far and their requests, with their standing. Errors: STUDENT_NOT_FOUND (404).",
         "tags": [
           "operations"
         ],
@@ -29496,6 +29664,13 @@
                   "properties": {
                     "student_id": {
                       "type": "string"
+                    },
+                    "rider_type": {
+                      "type": "string",
+                      "enum": [
+                        "student",
+                        "employee"
+                      ]
                     },
                     "identifier": {
                       "type": "string"
@@ -29708,6 +29883,7 @@
                   },
                   "required": [
                     "student_id",
+                    "rider_type",
                     "identifier",
                     "name",
                     "line",
@@ -30800,6 +30976,7 @@
                                   "driver",
                                   "supervisor",
                                   "student",
+                                  "employee",
                                   "parent"
                                 ]
                               }
@@ -31028,6 +31205,7 @@
         ],
         "x-roles": [
           "student",
+          "employee",
           "transport_admin",
           "super_admin"
         ],

@@ -198,6 +198,37 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     },
     "01000001011",
   ),
+  // Staff and faculty ride for free: no level and no guardian. `faculty` is the department.
+  account(
+    {
+      id: "usr_employee_1",
+      role: Role.Employee,
+      name: "Rania Sobhy Kamel",
+      name_ar: "رانيا صبحي كامل",
+      identifier: "EMP-2001",
+      faculty: "Student Services Department",
+      faculty_ar: "قسم خدمات الطلاب",
+      level: null,
+      guardian_name: null,
+      guardian_name_ar: null,
+    },
+    "01000008001",
+  ),
+  account(
+    {
+      id: "usr_employee_2",
+      role: Role.Employee,
+      name: "Dr. Wael Fahmy Zaki",
+      name_ar: "د. وائل فهمي زكي",
+      identifier: "EMP-2002",
+      faculty: "Mathematics and Basic Sciences Department",
+      faculty_ar: "قسم الرياضيات والعلوم الأساسية",
+      level: null,
+      guardian_name: null,
+      guardian_name_ar: null,
+    },
+    "01000008002",
+  ),
   account(
     {
       id: "usr_parent_1",

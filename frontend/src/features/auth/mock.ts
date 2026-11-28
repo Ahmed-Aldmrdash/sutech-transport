@@ -46,6 +46,7 @@ const lockedUntil = new StoredMap<number>("sut.mock.otp-locks", MockStorage.Loca
 
 const LONG_SESSION_ROLES: ReadonlySet<Role> = new Set([
   Role.Student,
+  Role.Employee,
   Role.Parent,
   Role.Driver,
   Role.Supervisor,

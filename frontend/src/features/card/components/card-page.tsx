@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { getMySubscription } from "@/features/subscriptions/api";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ClientErrorCode, isApiError } from "@/lib/api/errors";
@@ -48,6 +49,7 @@ export function CardPage() {
  */
 function LockedCard() {
   const t = useTranslations("student.card");
+  const isEmployee = useIsEmployee();
   const mine = useAsync((signal) => getMySubscription({ signal }), []);
   if (mine.status === AsyncStatus.Loading) {
     return <Skeleton className="mx-auto h-48 w-full max-w-md" />;
@@ -72,7 +74,7 @@ function LockedCard() {
     <EmptyState
       icon={<IdCard />}
       title={t("lockedTitle")}
-      description={t("lockedBody")}
+      description={t(isEmployee ? "lockedBodyStaff" : "lockedBody")}
       action={<ButtonLink href="/student/lines">{t("goToLines")}</ButtonLink>}
     />
   );
@@ -81,6 +83,7 @@ function LockedCard() {
 /** Without internet, the last card seen (details only: the code needs the server). */
 function CardError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   const t = useTranslations("errors");
+  const isEmployee = useIsEmployee();
   const offline =
     isApiError(error) &&
     (error.code === ClientErrorCode.Network || error.code === ClientErrorCode.Timeout);
@@ -88,7 +91,7 @@ function CardError({ error, onRetry }: { error: unknown; onRetry: () => void }) 
   if (!saved) return <ErrorState error={error} onRetry={onRetry} />;
   return (
     <div className="flex flex-col items-center gap-4">
-      <SavedCardView card={saved} />
+      <SavedCardView card={saved} isStaff={isEmployee} />
       <Button variant="secondary" iconStart={<RotateCw className="size-4" />} onClick={onRetry}>
         {t("retry")}
       </Button>

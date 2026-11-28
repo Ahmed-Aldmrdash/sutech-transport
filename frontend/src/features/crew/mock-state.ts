@@ -37,7 +37,7 @@ import {
 } from "@/features/lines/mock-fleet";
 import type { ReplacementReason } from "@/features/emergencies/schema";
 import { TEST_DAY_KEY, isTestDay } from "./test-day";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import {
   CrewErrorCode,
   CrewTripStatus,
@@ -392,7 +392,7 @@ function hashOf(text: string): number {
 export function mockRidersOf(line: MockLineSource, date = todayInCairo()): MockRider[] {
   const riders: MockRider[] = [];
   for (const { user } of MOCK_ACCOUNTS) {
-    if (user.role !== Role.Student) continue;
+    if (!isRiderRole(user.role)) continue;
     // The line they ride that day: an approved temporary change puts them on this roster.
     const booking = bookingOnDate(user.id, date);
     if (booking?.lineId !== line.lineId || booking.status !== SubscriptionStatus.Active) continue;

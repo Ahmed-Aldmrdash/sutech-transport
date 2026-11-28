@@ -40,7 +40,7 @@ function SosView({ today, refresh }: { today: CrewToday; refresh: () => void }) 
       <div className="flex flex-col gap-5">
         {canRaise ? (
           <SosPicker
-            trip={trip}
+            tripId={trip.trip_id}
             onSent={(sos) => {
               setSentId(sos.id);
               refresh();

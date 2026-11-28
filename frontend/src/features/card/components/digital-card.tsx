@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Logo } from "@/components/brand/logo";
 import { BrandPattern } from "@/components/brand/brand-pattern";
 import { Button } from "@/components/ui/button";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
 import { formatCalendarDate, formatClockTime } from "@/lib/format";
@@ -27,6 +28,7 @@ export function DigitalCard({ card, isRefreshing, onRefresh }: DigitalCardProps)
   const tApp = useTranslations("app");
   const locale = useLocale() as Locale;
   const now = useNow(TICK_MS);
+  const isEmployee = useIsEmployee();
   const secondsLeft = Math.ceil((Date.parse(card.qr.expires_at) - now) / MS_PER_SECOND);
   const isExpired = secondsLeft <= 0;
   const initials = card.student.name
@@ -58,12 +60,17 @@ export function DigitalCard({ card, isRefreshing, onRefresh }: DigitalCardProps)
         <div className="min-w-0">
           <h2 className="text-h3 text-ink-strong">{card.student.name}</h2>
           <p className="text-body-sm text-ink">
-            {t("card.identifier")}:{" "}
+            {t(isEmployee ? "card.identifierStaff" : "card.identifier")}:{" "}
             <bdi dir="ltr" className="font-bold">
               {card.student.identifier}
             </bdi>
           </p>
-          {card.student.faculty ? (
+          {isEmployee ? (
+            // Staff show their department where students show faculty and level.
+            <p className="text-caption text-ink-muted">
+              {[t("card.staff"), card.student.faculty].filter(Boolean).join(" · ")}
+            </p>
+          ) : card.student.faculty ? (
             <p className="text-caption text-ink-muted">
               {card.student.faculty}
               {card.student.level ? ` · ${t("card.level", { level: card.student.level })}` : ""}

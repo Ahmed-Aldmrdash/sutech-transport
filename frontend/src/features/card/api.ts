@@ -11,7 +11,7 @@ export const getMyCardEndpoint = defineEndpoint({
     "The active subscriber's digital pass with a fresh signed QR token (valid 30 seconds). " +
     "The app calls it again just before the token expires. Errors: NOT_SUBSCRIBED (403).",
   tag: "card",
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   response: studentCardSchema,
 });
 

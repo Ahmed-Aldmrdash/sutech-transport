@@ -65,8 +65,8 @@ export const addSosActionEndpoint = defineEndpoint({
   summary:
     "Logs what the office did, with who and when (the log is never edited). `acknowledge` " +
     "takes an open alert (the crew sees who took it); then `ambulance_called`, `note` (needs " +
-    "`note`) and `close` (needs the summary in `note`). Closing tells the trip's students and " +
-    "guardians it was handled. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED " +
+    "`note`) and `close` (needs the summary in `note`). Closing tells the trip's riders it was " +
+    "handled; guardians are never notified. Errors: ALREADY_ACKNOWLEDGED, SOS_NOT_ACKNOWLEDGED, SOS_CLOSED " +
     "(409), NOTE_REQUIRED (422), FORBIDDEN (403, super_admin: view only).",
   tag: TAG,
   access: SOS_ACTORS,

@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Tone } from "@/components/ui/tone";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
@@ -14,6 +15,7 @@ import { REQUEST_STATUS_TONE } from "./request-status-badge";
 /** The office's last word, on top where the student looks first. */
 export function LatestAnswer({ request }: { request: StudentRequest }) {
   const t = useTranslations("student.requests.detail");
+  const isEmployee = useIsEmployee();
   const last = request.timeline.at(-1);
   if (last?.status === RequestStatus.Withdrawn) {
     return <Alert tone={Tone.Info} title={t("answer.withdrawn")} />;
@@ -28,7 +30,7 @@ export function LatestAnswer({ request }: { request: StudentRequest }) {
   if (!last || last.by === RequestActor.Student || request.status === RequestStatus.Submitted) {
     return request.status === RequestStatus.Submitted ? (
       <Alert tone={Tone.Info} title={t("waitingTitle")}>
-        {t("waitingBody")}
+        {t(isEmployee ? "waitingBodyStaff" : "waitingBody")}
       </Alert>
     ) : null;
   }

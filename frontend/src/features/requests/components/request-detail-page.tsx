@@ -6,6 +6,7 @@ import { BackLink } from "@/components/ui/back-link";
 import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { getRequest } from "../api";
 import { OPEN_REQUEST_STATUSES, WITHDRAWABLE_REQUEST_STATUSES } from "../schema";
@@ -31,6 +32,7 @@ export function RequestDetailPage({
   const t = useTranslations("student.requests");
   const state = useAsync((signal) => getRequest(requestId, { signal }), [requestId]);
   const titleOf = useRequestTitle();
+  const isEmployee = useIsEmployee();
   const isOpen =
     state.status === AsyncStatus.Success && OPEN_REQUEST_STATUSES.includes(state.data.status);
   const { refresh } = state;
@@ -75,7 +77,8 @@ export function RequestDetailPage({
         <RequestDetails request={request} />
         <div className="flex flex-col gap-5">
           <Timeline events={request.timeline} />
-          {WITHDRAWABLE_REQUEST_STATUSES.includes(request.status) ? (
+          {/* Withdrawing is part of the student requests, which staff don't have. */}
+          {!isEmployee && WITHDRAWABLE_REQUEST_STATUSES.includes(request.status) ? (
             <WithdrawCard request={request} onWithdrawn={state.refresh} />
           ) : null}
         </div>

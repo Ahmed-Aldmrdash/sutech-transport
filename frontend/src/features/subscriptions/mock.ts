@@ -14,7 +14,7 @@ import { isBannedNow } from "@/features/discipline/mock-state";
 import { DisciplineErrorCode } from "@/features/discipline/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import {
   cancelSubscriptionEndpoint,
   createSubscriptionEndpoint,
@@ -44,6 +44,15 @@ export function requireMockStudent(token: string | null) {
   const account = requireMockAccount(token);
   if (account.user.role !== Role.Student) {
     throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Students only.");
+  }
+  return account;
+}
+
+/** A student or a staff member: the pages both riders share. */
+export function requireMockRider(token: string | null) {
+  const account = requireMockAccount(token);
+  if (!isRiderRole(account.user.role)) {
+    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Riders only.");
   }
   return account;
 }
@@ -94,13 +103,13 @@ function toSubscription(userId: string, booking: MockBooking, language: string):
 }
 
 registerMock(getMySubscriptionEndpoint, (_input, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const booking = bookingOf(user.id);
   return { subscription: booking ? toSubscription(user.id, booking, language) : null };
 });
 
 registerMock(createSubscriptionEndpoint, ({ body }, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const current = bookingOf(user.id);
   if (current && !BOOKABLE_STATUSES.includes(current.status)) {
     throw new MockHttpError(
@@ -140,27 +149,32 @@ registerMock(createSubscriptionEndpoint, ({ body }, { token, language }) => {
     );
   }
   const now = Date.now();
+  // Staff ride for free: the seat is theirs at once, with nothing to pay or review.
+  const isFree = user.role === Role.Employee;
   const booking: MockBooking = {
     subscriptionId: newMockId("sub"),
     lineId: line.lineId,
     stopOrder: stopOrder + 1,
-    status: SubscriptionStatus.Reserved,
-    pricePiasters: MOCK_TERM_PRICE_PIASTERS,
+    status: isFree ? SubscriptionStatus.Active : SubscriptionStatus.Reserved,
+    pricePiasters: isFree ? 0 : MOCK_TERM_PRICE_PIASTERS,
     reservedAt: now,
-    holdExpiresAt: now + MOCK_HOLD_MS,
-    activatedAt: null,
+    holdExpiresAt: isFree ? null : now + MOCK_HOLD_MS,
+    activatedAt: isFree ? now : null,
   };
   saveBooking(user.id, booking);
   return toSubscription(user.id, booking, language);
 });
 
 registerMock(cancelSubscriptionEndpoint, ({ params }, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const booking = bookingOf(user.id);
   if (!booking || booking.subscriptionId !== params.subscription_id) {
     throw new MockHttpError(HTTP.NotFound, ServerErrorCode.NotFound, "No such booking.");
   }
-  if (booking.status !== SubscriptionStatus.Reserved) {
+  // A free staff booking is active at once, and cancelling it is how they change line.
+  const cancellable =
+    user.role === Role.Employee ? SubscriptionStatus.Active : SubscriptionStatus.Reserved;
+  if (booking.status !== cancellable) {
     throw new MockHttpError(
       HTTP.Conflict,
       SubscriptionErrorCode.NotCancellable,
