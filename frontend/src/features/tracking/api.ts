@@ -19,7 +19,7 @@ export const getMyTrackingEndpoint = defineEndpoint({
     "Where the student's bus is now: latest GPS fix, the trail so far, ETA to their stop or " +
     `to campus, and the bus and driver. trip is null with a reason when there's nothing to follow. ${LIVE_NOTE}`,
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   response: trackingSchema,
 });
 

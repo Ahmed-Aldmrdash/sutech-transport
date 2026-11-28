@@ -104,9 +104,10 @@ export const listOpsStudentsEndpoint = defineEndpoint({
   method: HttpMethod.Get,
   path: "/admin/students",
   summary:
-    "Students with a subscription this term. `q`: university ID or part of the name; " +
-    "`line_id`; `standing` (good, warned, suspended, banned). 25 a page, by name. Student " +
-    "Affairs opens it too, to warn, suspend or ban.",
+    "Students and staff with a subscription this term. `q`: university or staff ID, or part " +
+    "of the name; `line_id`; `standing` (good, warned, suspended, banned); `rider_type` " +
+    "(student, employee). 25 a page, by name. Student Affairs opens it too, to warn, " +
+    "suspend or ban students (never staff).",
   tag: TAG,
   access: STUDENT_DESKS,
   query: studentsQuerySchema,
@@ -118,8 +119,9 @@ export const getOpsStudentEndpoint = defineEndpoint({
   method: HttpMethod.Get,
   path: "/admin/students/{student_id}",
   summary:
-    "One student for the office: contact, guardian, seat, this term's morning trips so far " +
-    "and their requests, with their standing. Errors: STUDENT_NOT_FOUND (404).",
+    "One student or staff member for the office (`rider_type`): contact, guardian (null for " +
+    "staff), seat, this term's morning trips so far and their requests, with their standing. " +
+    "Errors: STUDENT_NOT_FOUND (404).",
   tag: TAG,
   access: STUDENT_DESKS,
   params: opsStudentParamsSchema,

@@ -14,7 +14,7 @@ import { listMyAbsences } from "../api";
 import { ReportForm } from "./not-going-form";
 import { Upcoming } from "./not-going-upcoming";
 
-/** "Not going today": tells the driver, the supervisor and the guardian before the bus leaves. */
+/** "Not going today": tells the driver and supervisor (and a student's guardian) in time. */
 export function NotGoingPage() {
   const t = useTranslations("student.notGoing");
   const state = useAsync(async (signal) => {

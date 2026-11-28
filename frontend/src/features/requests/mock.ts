@@ -7,7 +7,8 @@ import {
 } from "@/features/children/mock-links";
 import { LineErrorCode } from "@/features/lines/schema";
 import { PaymentErrorCode, RECEIPT_MAX_BYTES, type ReceiptFile } from "@/features/payments/schema";
-import { mockTerm, requireMockStudent } from "@/features/subscriptions/mock";
+import { Role } from "@/lib/auth/roles";
+import { mockTerm, requireMockRider, requireMockStudent } from "@/features/subscriptions/mock";
 import {
   MOCK_TERM,
   MockPaymentStatus,
@@ -63,7 +64,7 @@ import {
   type StudentRequest,
 } from "./schema";
 
-const HTTP = { NotFound: 404, Conflict: 409, TooLarge: 413, Unprocessable: 422 };
+const HTTP = { Forbidden: 403, NotFound: 404, Conflict: 409, TooLarge: 413, Unprocessable: 422 };
 
 /** The Fall 2026 refund table (Refund Policy 2026-2027, first semester). */
 const MOCK_REFUND_WINDOWS: readonly RefundWindow[] = [
@@ -381,7 +382,7 @@ function paidThisTerm(userId: string, subscriptionId: string): number {
 }
 
 registerMock(listMyRequestsEndpoint, ({ query }, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const now = Date.now();
   return currentRequestsOf(user.id, now)
     .filter((request) => !query.kind || request.payload.kind === query.kind)
@@ -390,7 +391,7 @@ registerMock(listMyRequestsEndpoint, ({ query }, { token, language }) => {
 });
 
 registerMock(getRequestEndpoint, ({ params }, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const request = currentRequestsOf(user.id).find((item) => item.requestId === params.request_id);
   if (!request)
     throw new MockHttpError(HTTP.NotFound, ServerErrorCode.NotFound, "No such request.");
@@ -498,9 +499,12 @@ registerMock(createRefundEndpoint, ({ body }, { token, language }) => {
 });
 
 registerMock(createComplaintEndpoint, ({ body }, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const now = Date.now();
   const booking = bookingOf(user.id, now);
+  if (body.category === ComplaintCategory.Payment && user.role === Role.Employee) {
+    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Staff pay nothing.");
+  }
   if (body.category === ComplaintCategory.Payment) {
     if (!booking) {
       throw new MockHttpError(

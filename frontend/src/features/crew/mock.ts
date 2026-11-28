@@ -20,7 +20,7 @@ import { findMockLine } from "@/features/lines/mock-builders";
 import { TripDirection } from "@/features/trips/schema";
 import { cairoNow } from "@/lib/api/mock/cairo-clock";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import {
   endTripEndpoint,
   getCrewTodayEndpoint,
@@ -321,7 +321,7 @@ function studentFromIdentifier(identifier: string, riders: readonly MockRider[])
   const rider = riders.find((item) => item.identifier === typed);
   if (rider) return rider.studentId;
   const account = MOCK_ACCOUNTS.find(
-    ({ user }) => user.role === Role.Student && user.identifier === typed,
+    ({ user }) => isRiderRole(user.role) && user.identifier === typed,
   );
   if (!account) {
     throw new MockHttpError(HTTP.NotFound, CrewErrorCode.StudentNotFound, "No such student.");

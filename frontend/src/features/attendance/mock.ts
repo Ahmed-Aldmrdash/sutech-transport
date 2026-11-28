@@ -12,7 +12,7 @@ import {
   toLineSummary,
 } from "@/features/lines/mock-builders";
 import { bookingOnDate } from "@/features/requests/mock-riding-line";
-import { requireMockStudent } from "@/features/subscriptions/mock";
+import { requireMockRider } from "@/features/subscriptions/mock";
 import { bookingOf } from "@/features/subscriptions/mock-state";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { TripDirection } from "@/features/trips/schema";
@@ -179,7 +179,7 @@ function summarize(records: readonly TripRecord[]): AttendanceSummary {
 }
 
 registerMock(getMyAttendanceEndpoint, ({ query }, { token, language }) => {
-  const { user } = requireMockStudent(token);
+  const { user } = requireMockRider(token);
   const all = historyOf(user.id, language, Date.now());
   const listed = query.outcome ? all.filter((item) => item.outcome === query.outcome) : all;
   const page = query.page ?? 1;

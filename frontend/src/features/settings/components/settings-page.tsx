@@ -10,6 +10,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import type { User } from "@/features/auth/schema";
 import { userText } from "@/features/auth/user-text";
+import { Role } from "@/lib/auth/roles";
 import type { Locale } from "@/i18n/routing";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession, useSignOut } from "@/features/auth/session/use-session";
@@ -84,7 +85,11 @@ function AccountCard({ user }: { user: User }) {
   const rows: { label: string; value: ReactNode }[] = [
     { label: tSession("identifier"), value: <span dir="ltr">{user.identifier}</span> },
   ];
-  if (text.faculty) rows.push({ label: tSession("faculty"), value: text.faculty });
+  if (text.faculty) {
+    // For staff the same field holds their department.
+    const label = tSession(user.role === Role.Employee ? "department" : "faculty");
+    rows.push({ label, value: text.faculty });
+  }
   if (user.level) {
     rows.push({ label: tSession("level"), value: tSession("levelValue", { level: user.level }) });
   }

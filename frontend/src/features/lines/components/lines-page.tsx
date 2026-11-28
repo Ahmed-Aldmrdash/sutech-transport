@@ -12,6 +12,7 @@ import { TextField } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tone } from "@/components/ui/tone";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { getMySubscription } from "@/features/subscriptions/api";
 import { BOOKABLE_STATUSES } from "@/features/subscriptions/schema";
 import type { Locale } from "@/i18n/routing";
@@ -144,8 +145,10 @@ export function LinesPage() {
 function LinesLead({ lines }: { lines: Line[] }) {
   const t = useTranslations("student.lines");
   const locale = useLocale() as Locale;
+  const isEmployee = useIsEmployee();
   const sample = lines[0];
   if (!sample) return null;
+  if (isEmployee) return t("leadStaff", { arrival: formatArrival(sample.campus_arrival, locale) });
   return t("lead", {
     price: formatMoney(sample.price_piasters, locale),
     arrival: formatArrival(sample.campus_arrival, locale),

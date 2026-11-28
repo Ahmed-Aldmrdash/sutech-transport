@@ -9,6 +9,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { Tone } from "@/components/ui/tone";
 import { useToast } from "@/components/ui/toast";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { createSubscription } from "@/features/subscriptions/api";
 import { BookingWindowNotice } from "@/features/booking-window/components/booking-window-notice";
 import { useBookingWindow } from "@/features/booking-window/components/use-booking-window";
@@ -55,6 +56,7 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
   const [isBooking, setIsBooking] = useState(false);
   const [errorKey, setErrorKey] = useState<BookingErrorKey | null>(null);
   const bookingWindow = useBookingWindow();
+  const isEmployee = useIsEmployee();
 
   const selectedStop = line.stops.find((stop) => stop.stop_id === selectedStopId) ?? null;
   const price = formatMoney(line.price_piasters, locale);
@@ -68,11 +70,12 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
       await createSubscription(line.line_id, selectedStop.stop_id);
       toast.show({
         title: t("line.booked"),
-        description: t("line.bookedBody"),
+        description: t(isEmployee ? "line.bookedBodyStaff" : "line.bookedBody"),
         tone: Tone.Success,
       });
       onBooked();
-      router.push("/student/payment");
+      // Staff have nothing to pay: their booking is already active.
+      router.push(isEmployee ? "/student" : "/student/payment");
     } catch (error) {
       setIsConfirming(false);
       setErrorKey(errorMessageKey(error, BOOKING_ERROR_CODES));
@@ -94,7 +97,7 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
           <p className="text-body-sm text-ink">
             {isThisLine
               ? `${t("line.booking.yourStop")}: ${current.stop.name}`
-              : t("line.booking.alreadyBody")}
+              : t(isEmployee ? "line.booking.alreadyBodyStaff" : "line.booking.alreadyBody")}
           </p>
           <ButtonLink
             href="/student"
@@ -143,7 +146,7 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
         )}
         <p className="flex items-start gap-2 text-body-sm text-ink">
           <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-teal" />
-          {t("line.booking.hold")}
+          {t(isEmployee ? "line.booking.holdStaff" : "line.booking.hold")}
         </p>
         {errorKey ? <Alert tone={Tone.Danger} title={t(`line.errors.${errorKey}`)} /> : null}
         <Button fullWidth withArrow disabled={!selectedStop} onClick={() => setIsConfirming(true)}>
@@ -156,7 +159,7 @@ export function BookingPanel({ line, selectedStopId, current, onBooked }: Bookin
         onConfirm={book}
         isConfirming={isBooking}
         title={t("line.confirm.title", { line: line.name })}
-        description={t("line.confirm.body", {
+        description={t(isEmployee ? "line.confirm.bodyStaff" : "line.confirm.body", {
           stop: selectedStop?.name ?? "",
           time: selectedStop?.pickup_time ? formatClockTime(selectedStop.pickup_time, locale) : "",
           price,

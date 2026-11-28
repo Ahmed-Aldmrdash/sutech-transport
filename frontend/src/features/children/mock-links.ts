@@ -5,7 +5,7 @@ import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
 import { MockHttpError } from "@/lib/api/mock/mock-server";
 import { todayInCairo } from "@/lib/format";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import { ChildErrorCode } from "./schema";
 
 /**
@@ -44,7 +44,7 @@ function activeLineOf(studentId: string): string | null {
  * mobile. Everyone else sees the driver's name only.
  */
 export function mayCallDriverOf(account: MockAccount, lineId: string): boolean {
-  if (account.user.role === Role.Student) return activeLineOf(account.user.id) === lineId;
+  if (isRiderRole(account.user.role)) return activeLineOf(account.user.id) === lineId;
   if (account.user.role === Role.Parent) {
     return mockChildrenOf(account.user.id).some((child) => activeLineOf(child.user.id) === lineId);
   }

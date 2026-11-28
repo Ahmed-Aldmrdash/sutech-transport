@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { SelectField } from "@/components/ui/select-field";
+import { FilterChips } from "@/components/ui/filter-chips";
 import { DataTable } from "@/components/ui/table";
 import { DeskListState } from "@/features/desk-kit/components/desk-list-state";
 import { DeskPager } from "@/features/desk-kit/components/desk-pager";
@@ -15,12 +16,12 @@ import { STANDINGS, type Standing } from "@/features/discipline/schema";
 import { Link } from "@/i18n/navigation";
 import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { listOpsLines, listOpsStudents } from "../api";
-import type { OpsStudents } from "../schema";
+import { RIDER_TYPES, type OpsStudents, type RiderType } from "../schema";
 import { SubscriptionBadge } from "./subscription-badge";
 
 /**
- * Every student with a seat this term (or a booking): search by ID or name, filter by line or
- * by standing (warned, suspended, banned).
+ * Every student and staff member with a seat this term (or a booking): search by ID or name,
+ * filter by rider type, line or standing (warned, suspended, banned).
  */
 export function StudentsPage() {
   const t = useTranslations("desk.ops.students");
@@ -28,15 +29,22 @@ export function StudentsPage() {
   const [q, setQ] = useState("");
   const [lineId, setLineId] = useState("");
   const [standing, setStanding] = useState<Standing | "">("");
+  const [riderType, setRiderType] = useState<RiderType | "">("");
   const [page, setPage] = useState(1);
   const lines = useAsync((signal) => listOpsLines({ signal }), []);
   const state = useAsync(
     (signal) =>
       listOpsStudents(
-        { q: q || undefined, line_id: lineId || undefined, standing: standing || undefined, page },
+        {
+          q: q || undefined,
+          line_id: lineId || undefined,
+          standing: standing || undefined,
+          rider_type: riderType || undefined,
+          page,
+        },
         { signal },
       ),
-    [q, lineId, standing, page],
+    [q, lineId, standing, riderType, page],
   );
   const onSearch = useCallback((value: string) => {
     setQ(value);
@@ -80,6 +88,18 @@ export function StudentsPage() {
           ]}
         />
       </div>
+      <FilterChips<RiderType | "">
+        label={t("riderType")}
+        value={riderType}
+        onChange={(next) => {
+          setRiderType(next);
+          setPage(1);
+        }}
+        options={[
+          { value: "", label: t("allRiders") },
+          ...RIDER_TYPES.map((value) => ({ value, label: t(`riderTypes.${value}`) })),
+        ]}
+      />
       <DeskListState state={state}>
         {(list: OpsStudents) => (
           <div className="flex flex-col gap-4">
@@ -109,6 +129,7 @@ export function StudentsPage() {
                         <bdi className="text-caption text-ink-muted tabular-nums">
                           {student.identifier}
                         </bdi>
+                        {student.rider_type === "employee" ? <Badge>{t("employee")}</Badge> : null}
                         <StandingBadge standing={student.standing} />
                       </span>
                     </span>

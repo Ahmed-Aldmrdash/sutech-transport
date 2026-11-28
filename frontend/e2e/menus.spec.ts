@@ -9,6 +9,7 @@ import { expectNoSidewaysScroll, isPhone, signIn, unfoldMenu } from "./helpers";
 const ACCOUNTS = [
   "240100102",
   "01000002001",
+  "EMP-2001",
   "DRV-1001",
   "TRN-1001",
   "FIN-1001",

@@ -171,6 +171,36 @@ const STUDENT_NAV: RoleNavigation = {
   extras: [SETTINGS_ITEM],
 };
 
+/**
+ * Staff and faculty use the student pages with their own menu. A role may open only what its
+ * menu holds, so payment and requests are closed to them: they ride for free and have no
+ * guardian.
+ */
+const EMPLOYEE_NAV: RoleNavigation = {
+  basePath: "/student",
+  groups: [
+    {
+      key: "main",
+      items: [
+        { key: "home", icon: House, segment: "", primary: true },
+        { key: "lines", icon: Route, segment: "lines", primary: true },
+        { key: "card", icon: IdCard, segment: "card", primary: true },
+        { key: "tracking", icon: MapPinned, segment: "tracking" },
+        { key: "sos", icon: Siren, segment: "sos" },
+        { key: "notifications", icon: Bell, segment: "notifications", primary: true },
+        { key: "announcements", icon: Megaphone, segment: "announcements" },
+        { key: "notGoingToday", icon: CalendarDays, segment: "not-going-today" },
+        { key: "attendanceHistory", icon: CalendarCheck, segment: "attendance" },
+      ],
+    },
+    {
+      key: "account",
+      items: [{ key: "complaints", icon: MessageSquareWarning, segment: "complaints" }],
+    },
+  ],
+  extras: [SETTINGS_ITEM],
+};
+
 const PARENT_NAV: RoleNavigation = {
   basePath: "/parent",
   groups: [
@@ -414,6 +444,8 @@ export function navigationFor(role: Role): RoleNavigation {
   switch (role) {
     case Role.Student:
       return STUDENT_NAV;
+    case Role.Employee:
+      return EMPLOYEE_NAV;
     case Role.Parent:
       return PARENT_NAV;
     case Role.Driver:

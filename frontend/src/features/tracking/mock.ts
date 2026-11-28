@@ -9,7 +9,7 @@ import {
   toLineSummary,
 } from "@/features/lines/mock-builders";
 import type { MockLineSource } from "@/features/lines/mock-lines";
-import { requireMockStudent } from "@/features/subscriptions/mock";
+import { requireMockRider } from "@/features/subscriptions/mock";
 import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { TripDirection, TripStatus } from "@/features/trips/schema";
@@ -175,7 +175,7 @@ function trackingFor(student: MockAccount, viewerId: string, language: string): 
 }
 
 registerMock(getMyTrackingEndpoint, (_input, { token, language }) => {
-  const student = requireMockStudent(token);
+  const student = requireMockRider(token);
   return trackingFor(student, student.user.id, language);
 });
 

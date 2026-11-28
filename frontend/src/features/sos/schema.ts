@@ -79,7 +79,7 @@ export const sosSchema = z.object({
   bus_id: z.string(),
   raised_by: z.object({
     id: z.string(),
-    role: z.enum([Role.Driver, Role.Supervisor, Role.Student]),
+    role: z.enum([Role.Driver, Role.Supervisor, Role.Student, Role.Employee]),
     name: z.string(),
     phone: z.string(),
   }),

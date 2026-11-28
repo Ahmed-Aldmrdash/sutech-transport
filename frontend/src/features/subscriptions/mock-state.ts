@@ -82,6 +82,18 @@ const SEED_BOOKINGS: Record<string, MockBooking> = {
     activatedAt: SEED_ACTIVATED_AT,
     seeded: true,
   },
+  // The demo staff member rides line 5 (New Cairo) for free.
+  usr_employee_1: {
+    subscriptionId: "sub_seed_emp_1",
+    lineId: "ln_05",
+    stopOrder: 2,
+    status: SubscriptionStatus.Active,
+    pricePiasters: 0,
+    reservedAt: SEED_ACTIVATED_AT,
+    holdExpiresAt: null,
+    activatedAt: SEED_ACTIVATED_AT,
+    seeded: true,
+  },
   usr_student_11: {
     subscriptionId: "sub_seed_11",
     lineId: "ln_12",

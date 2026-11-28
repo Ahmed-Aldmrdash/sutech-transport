@@ -33,7 +33,7 @@ export const listMyRequestsEndpoint = defineEndpoint({
     "The student's line change, refund, complaint and model permit requests this term, newest first, each " +
     "with its status history. Office notes follow Accept-Language.",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   query: listMyRequestsQuerySchema,
   response: z.array(studentRequestSchema),
 });
@@ -44,7 +44,7 @@ export const getRequestEndpoint = defineEndpoint({
   path: "/requests/{request_id}",
   summary: "One of the student's own requests. Another student's request answers 404.",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   params: requestParamsSchema,
   response: studentRequestSchema,
 });
@@ -94,7 +94,7 @@ export const createComplaintEndpoint = defineEndpoint({
     "active subscription. Errors: NO_SUBSCRIPTION (409), NO_ACTIVE_SUBSCRIPTION (409), " +
     "LINE_NOT_FOUND (404), INVALID_DATES (422), RECEIPT_TOO_LARGE (413).",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   idempotent: true,
   body: createComplaintBodySchema,
   response: studentRequestSchema,

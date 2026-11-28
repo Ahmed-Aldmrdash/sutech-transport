@@ -1,5 +1,5 @@
 import { MOCK_ACCOUNTS } from "@/features/auth/mock-accounts";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 
 /**
  * Made-up students with no account in the demo, who give the office pages something to work
@@ -139,12 +139,14 @@ export interface MockStudentRecord {
   facultyEn: string | null;
   level: number | null;
   phone: string;
+  /** Staff are listed with the students, but finance and discipline skip them. */
+  riderType: "student" | "employee";
 }
 
-/** Every student the mock server knows: the demo accounts first, then the desk students. */
+/** Every rider the mock server knows: the demo accounts first, then the desk students. */
 export function mockStudentRecords(): MockStudentRecord[] {
   const accounts = MOCK_ACCOUNTS.filter(
-    ({ user, disabled }) => user.role === Role.Student && !disabled,
+    ({ user, disabled }) => isRiderRole(user.role) && !disabled,
   ).map(({ user, phone }) => ({
     id: user.id,
     nameAr: user.name_ar ?? user.name,
@@ -154,6 +156,7 @@ export function mockStudentRecords(): MockStudentRecord[] {
     facultyEn: user.faculty ?? null,
     level: user.level ?? null,
     phone,
+    riderType: user.role === Role.Employee ? ("employee" as const) : ("student" as const),
   }));
   const desk = MOCK_DESK_STUDENTS.map((student) => ({
     id: student.id,
@@ -164,6 +167,7 @@ export function mockStudentRecords(): MockStudentRecord[] {
     facultyEn: student.facultyEn,
     level: student.level,
     phone: student.phone,
+    riderType: "student" as const,
   }));
   return [...accounts, ...desk];
 }

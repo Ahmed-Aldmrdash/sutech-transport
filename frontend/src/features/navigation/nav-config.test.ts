@@ -68,6 +68,24 @@ describe("role navigation", () => {
   });
 });
 
+describe("the staff menu", () => {
+  const navigation = navigationFor(Role.Employee);
+  const keys = itemKeys(Role.Employee);
+
+  it("is the student menu without payment and requests", () => {
+    expect(keys).toEqual(
+      itemKeys(Role.Student).filter((key) => key !== "payment" && key !== "requests"),
+    );
+  });
+
+  it("closes the payment and requests pages", () => {
+    expect(findActiveItem(navigation, "/student", "/student/payment")).toBeUndefined();
+    expect(findActiveItem(navigation, "/student", "/student/requests")).toBeUndefined();
+    expect(findActiveItem(navigation, "/student", "/student/complaints")?.key).toBe("complaints");
+    expect(roleHomeHref(navigation)).toBe("/student");
+  });
+});
+
 describe("findActiveItem", () => {
   const navigation = navigationFor(Role.Student);
 

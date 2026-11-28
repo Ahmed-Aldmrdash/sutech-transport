@@ -185,16 +185,22 @@ const SUBSCRIPTION_STATUSES = Object.values(SubscriptionStatus) as [
   ...SubscriptionStatus[],
 ];
 
+/** Students and staff share the office's list; staff ride for free and have no guardian. */
+export const RIDER_TYPES = ["student", "employee"] as const;
+export type RiderType = (typeof RIDER_TYPES)[number];
+
 export const studentsQuerySchema = z.object({
   q: z.string().trim().max(60).optional(),
   line_id: z.string().optional(),
   standing: z.enum(STANDINGS).optional(),
+  rider_type: z.enum(RIDER_TYPES).optional(),
   page: z.coerce.number().int().positive().optional(),
 });
 export type StudentsQuery = z.input<typeof studentsQuerySchema>;
 
 export const opsStudentSchema = z.object({
   student_id: z.string(),
+  rider_type: z.enum(RIDER_TYPES),
   identifier: z.string(),
   name: z.string(),
   line: lineSummarySchema.nullable(),

@@ -98,7 +98,8 @@ registerMock(getMyStandingEndpoint, (_input, { token, language }) => {
 
 function requireStudent(studentId: string) {
   const student = findMockStudent(studentId);
-  if (!student) {
+  // Warnings, suspensions and bans are for students; staff are not under them.
+  if (!student || findMockAccountById(studentId)?.user.role === Role.Employee) {
     throw new MockHttpError(HTTP.NotFound, DisciplineErrorCode.StudentNotFound, "No student.");
   }
   return student;

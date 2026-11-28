@@ -14,7 +14,7 @@ import { bookingOnDate } from "@/features/requests/mock-riding-line";
 import { SubscriptionStatus } from "@/features/subscriptions/schema";
 import { registerMock } from "@/lib/api/mock/mock-server";
 import { formatClockTime, formatPhone, todayInCairo } from "@/lib/format";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import { createAnnouncementEndpoint, listAnnouncementsEndpoint } from "./api";
 import { AnnouncementKind, type Announcement } from "./schema";
 import { requireMockOffice } from "@/features/auth/mock-token";
@@ -344,9 +344,9 @@ export function mockAnnouncementsFor(
     const booking = bookingOnDate(studentId, todayInCairo());
     return booking && SEAT_STATUSES.includes(booking.status) ? booking.lineId : null;
   };
-  // Students see their own line's news; guardians their children's lines only.
+  // Riders see their own line's news; guardians their children's lines only.
   let ownLines: (string | null)[];
-  if (user.role === Role.Student) ownLines = [lineOf(user.id)];
+  if (isRiderRole(user.role)) ownLines = [lineOf(user.id)];
   else if (user.role === Role.Parent) {
     ownLines = mockChildrenOf(user.id).map((child) => lineOf(child.user.id));
   } else return all;

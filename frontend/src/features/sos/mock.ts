@@ -21,7 +21,7 @@ import { TripDirection } from "@/features/trips/schema";
 import { ServerErrorCode } from "@/lib/api/errors";
 import { cairoNow } from "@/lib/api/mock/cairo-clock";
 import { MockHttpError, registerMock } from "@/lib/api/mock/mock-server";
-import { Role } from "@/lib/auth/roles";
+import { Role, isRiderRole } from "@/lib/auth/roles";
 import { createSosEndpoint, getMyRiderSosEndpoint, getSosEndpoint } from "./api";
 import { actionsOf, findSos, saveSos, sosStatusOf, type MockSos } from "./mock-state";
 import { SosErrorCode, SosStatus, type Sos } from "./schema";
@@ -68,8 +68,8 @@ export function toSos(sos: MockSos, language: string): Sos {
     raised_by: {
       id: sos.raisedBy,
       role:
-        raiser?.role === Role.Supervisor || raiser?.role === Role.Student
-          ? raiser.role
+        raiser && (raiser.role === Role.Supervisor || isRiderRole(raiser.role))
+          ? (raiser.role as Sos["raised_by"]["role"])
           : Role.Driver,
       name: raiser ? localized(language, raiser.name_ar ?? raiser.name, raiser.name) : "",
       phone: raiser?.phone ?? "",
@@ -105,7 +105,7 @@ function activeLineOf(studentId: string, now: number) {
 /** Crew come in by their bus; a student comes in by the line of their active subscription. */
 function requireMockSosCaller(token: string | null, now: number) {
   const account = requireMockAccount(token);
-  if (account.user.role !== Role.Student) return requireMockCrew(token);
+  if (!isRiderRole(account.user.role)) return requireMockCrew(token);
   const line = activeLineOf(account.user.id, now);
   if (!line) {
     throw new MockHttpError(HTTP.Conflict, SosErrorCode.NotOnATrip, "You are not on a trip.");
@@ -122,7 +122,7 @@ registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) 
     throw new MockHttpError(HTTP.Conflict, SosErrorCode.TripAlreadyEnded, "The trip ended.");
   }
   // A student can only raise an SOS while the trip is actually running.
-  if (account.user.role === Role.Student && tripStatus !== CrewTripStatus.InProgress) {
+  if (isRiderRole(account.user.role) && tripStatus !== CrewTripStatus.InProgress) {
     throw new MockHttpError(HTTP.Conflict, SosErrorCode.NotOnATrip, "The trip has not started.");
   }
   // Business rule 9: the same press arriving twice makes one SOS.
@@ -131,7 +131,7 @@ registerMock(createSosEndpoint, ({ body }, { token, language, idempotencyKey }) 
     .find((item) => item && idempotencyKey && item.idempotencyKey === idempotencyKey);
   if (repeated) return toSos(repeated, language);
   // A student follows the SOS already open on this trip instead of raising a second one.
-  if (account.user.role === Role.Student) {
+  if (isRiderRole(account.user.role)) {
     const open = trip.sosIds
       .map(findSos)
       .find((item) => item && sosStatusOf(item) !== SosStatus.Closed);
@@ -176,15 +176,15 @@ registerMock(getSosEndpoint, ({ params }, { token, language }) => {
     throw new MockHttpError(HTTP.NotFound, ServerErrorCode.NotFound, "No such SOS.");
   }
   // A student only sees SOS of today's trips on their own line.
-  if (account.user.role === Role.Student) requireOwnTrip(line, sos.tripId, now);
+  if (isRiderRole(account.user.role)) requireOwnTrip(line, sos.tripId, now);
   return toSos(sos, language);
 });
 
 registerMock(getMyRiderSosEndpoint, (_input, { token }) => {
   const now = Date.now();
   const { user } = requireMockAccount(token);
-  if (user.role !== Role.Student) {
-    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Students only.");
+  if (!isRiderRole(user.role)) {
+    throw new MockHttpError(HTTP.Forbidden, ServerErrorCode.Forbidden, "Riders only.");
   }
   const line = activeLineOf(user.id, now);
   const trip = line

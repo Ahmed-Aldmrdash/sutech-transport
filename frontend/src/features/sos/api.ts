@@ -28,7 +28,7 @@ export const createSosEndpoint = defineEndpoint({
     "never makes a second SOS (business rule 9). Errors: NOT_YOUR_TRIP (403), " +
     "NOT_ON_A_TRIP (409), TRIP_ALREADY_ENDED (409).",
   tag: TAG,
-  access: [Role.Driver, Role.Supervisor, Role.Student],
+  access: [Role.Driver, Role.Supervisor, Role.Student, Role.Employee],
   idempotent: true,
   body: createSosBodySchema,
   response: sosSchema,
@@ -44,7 +44,7 @@ export const getSosEndpoint = defineEndpoint({
     "guardian never can. Changes arrive on the WebSocket as sos.update; until then " +
     "the app re-reads it every 5 s while it is open. Errors: NOT_FOUND (404).",
   tag: TAG,
-  access: [Role.Driver, Role.Supervisor, Role.Student],
+  access: [Role.Driver, Role.Supervisor, Role.Student, Role.Employee],
   params: sosParamsSchema,
   response: sosSchema,
 });
@@ -59,7 +59,7 @@ export const getMyRiderSosEndpoint = defineEndpoint({
     "open alert is followed instead of raising a second one. Both are null without an " +
     "active subscription or a running trip. The app re-reads it every 5 s.",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   response: riderSosStateSchema,
 });
 

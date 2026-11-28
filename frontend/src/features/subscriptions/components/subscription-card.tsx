@@ -4,6 +4,7 @@ import { ArrowRight, IdCard, Route, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardFooter, CardHeader } from "@/components/ui/card";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { SubscriptionStatus, type Subscription } from "../schema";
 import { CancelBookingButton } from "./cancel-booking-button";
 import { SubscriptionFacts } from "./subscription-facts";
@@ -25,6 +26,7 @@ export function SubscriptionCard({
   onChanged: () => void;
 }) {
   const t = useTranslations("student.home.subscription");
+  const isEmployee = useIsEmployee();
   const status = subscription?.status ?? "none";
 
   return (
@@ -41,7 +43,9 @@ export function SubscriptionCard({
         {!subscription ? (
           <div>
             <h3 className="text-h3 text-ink-strong">{t("noneTitle")}</h3>
-            <p className="mt-1 text-body text-ink-muted">{t("noneBody")}</p>
+            <p className="mt-1 text-body text-ink-muted">
+              {t(isEmployee ? "noneBodyStaff" : "noneBody")}
+            </p>
           </div>
         ) : null}
       </CardBody>
@@ -60,6 +64,7 @@ function NextAction({
   onChanged: () => void;
 }) {
   const t = useTranslations("student.home.subscription");
+  const isEmployee = useIsEmployee();
   const arrow = <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />;
 
   switch (subscription?.status) {
@@ -80,9 +85,15 @@ function NextAction({
       );
     case SubscriptionStatus.Active:
       return (
-        <ButtonLink href={STUDENT_PATHS.card} iconStart={<IdCard className="size-4" />}>
-          {t("showCard")}
-        </ButtonLink>
+        <>
+          <ButtonLink href={STUDENT_PATHS.card} iconStart={<IdCard className="size-4" />}>
+            {t("showCard")}
+          </ButtonLink>
+          {/* Staff change line by cancelling their free booking and booking again. */}
+          {isEmployee ? (
+            <CancelBookingButton subscription={subscription} onCancelled={onChanged} />
+          ) : null}
+        </>
       );
     case SubscriptionStatus.Expired:
     case SubscriptionStatus.Cancelled:

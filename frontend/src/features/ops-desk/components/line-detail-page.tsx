@@ -108,7 +108,9 @@ function Students({ line }: { line: OpsLineDetail }) {
   const needle = search.trim().toLowerCase();
   const shown = line.students.filter(
     (student) =>
-      !needle || student.identifier.includes(needle) || student.name.toLowerCase().includes(needle),
+      !needle ||
+      student.identifier.toLowerCase().includes(needle) ||
+      student.name.toLowerCase().includes(needle),
   );
   return (
     <Card>

@@ -178,6 +178,7 @@
                             "driver",
                             "supervisor",
                             "student",
+                            "employee",
                             "parent"
                           ]
                         },
@@ -310,6 +311,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -364,6 +366,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -392,6 +395,7 @@
                         "driver",
                         "supervisor",
                         "student",
+                        "employee",
                         "parent"
                       ]
                     },
@@ -546,6 +550,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -695,6 +700,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -960,7 +966,8 @@
           "subscriptions"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -1189,7 +1196,8 @@
           "subscriptions"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -1437,7 +1445,8 @@
           "subscriptions"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -2101,7 +2110,8 @@
           "card"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -2269,7 +2279,8 @@
           "trips"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -2529,6 +2540,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -2839,7 +2851,8 @@
           "requests"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -3859,7 +3872,8 @@
           "requests"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -6699,7 +6713,8 @@
           "requests"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -12353,6 +12368,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -12548,6 +12564,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [],
@@ -12603,6 +12620,7 @@
           "driver",
           "supervisor",
           "student",
+          "employee",
           "parent"
         ],
         "parameters": [
@@ -12658,7 +12676,8 @@
           "absences"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -12772,7 +12791,8 @@
           "absences"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -12903,7 +12923,8 @@
           "absences"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -13036,7 +13057,8 @@
           "attendance"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -13262,7 +13284,8 @@
           "tracking"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -16706,7 +16729,8 @@
         "x-roles": [
           "driver",
           "supervisor",
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -16773,7 +16797,8 @@
                           "enum": [
                             "driver",
                             "supervisor",
-                            "student"
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
@@ -16963,7 +16988,8 @@
         "x-roles": [
           "driver",
           "supervisor",
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [
           {
@@ -17030,7 +17056,8 @@
                           "enum": [
                             "driver",
                             "supervisor",
-                            "student"
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
@@ -17177,7 +17204,8 @@
           "sos"
         ],
         "x-roles": [
-          "student"
+          "student",
+          "employee"
         ],
         "parameters": [],
         "responses": {
@@ -17345,7 +17373,8 @@
                                 "enum": [
                                   "driver",
                                   "supervisor",
-                                  "student"
+                                  "student",
+                                  "employee"
                                 ]
                               },
                               "name": {
@@ -17782,7 +17811,8 @@
                           "enum": [
                             "driver",
                             "supervisor",
-                            "student"
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
@@ -18220,7 +18250,8 @@
                           "enum": [
                             "driver",
                             "supervisor",
-                            "student"
+                            "student",
+                            "employee"
                           ]
                         },
                         "name": {
@@ -29394,7 +29425,7 @@
     "/api/v1/admin/students": {
       "get": {
         "operationId": "ops.students",
-        "summary": "Students with a subscription this term. `q`: university ID or part of the name; `line_id`; `standing` (good, warned, suspended, banned). 25 a page, by name. Student Affairs opens it too, to warn, suspend or ban.",
+        "summary": "Students and staff with a subscription this term. `q`: university or staff ID, or part of the name; `line_id`; `standing` (good, warned, suspended, banned); `rider_type` (student, employee). 25 a page, by name. Student Affairs opens it too, to warn, suspend or ban students (never staff).",
         "tags": [
           "operations"
         ],
@@ -29436,6 +29467,18 @@
             }
           },
           {
+            "name": "rider_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "student",
+                "employee"
+              ]
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "required": false,
@@ -29462,6 +29505,13 @@
                         "properties": {
                           "student_id": {
                             "type": "string"
+                          },
+                          "rider_type": {
+                            "type": "string",
+                            "enum": [
+                              "student",
+                              "employee"
+                            ]
                           },
                           "identifier": {
                             "type": "string"
@@ -29531,6 +29581,7 @@
                         },
                         "required": [
                           "student_id",
+                          "rider_type",
                           "identifier",
                           "name",
                           "line",
@@ -29582,7 +29633,7 @@
     "/api/v1/admin/students/{student_id}": {
       "get": {
         "operationId": "ops.student",
-        "summary": "One student for the office: contact, guardian, seat, this term's morning trips so far and their requests, with their standing. Errors: STUDENT_NOT_FOUND (404).",
+        "summary": "One student or staff member for the office (`rider_type`): contact, guardian (null for staff), seat, this term's morning trips so far and their requests, with their standing. Errors: STUDENT_NOT_FOUND (404).",
         "tags": [
           "operations"
         ],
@@ -29613,6 +29664,13 @@
                   "properties": {
                     "student_id": {
                       "type": "string"
+                    },
+                    "rider_type": {
+                      "type": "string",
+                      "enum": [
+                        "student",
+                        "employee"
+                      ]
                     },
                     "identifier": {
                       "type": "string"
@@ -29825,6 +29883,7 @@
                   },
                   "required": [
                     "student_id",
+                    "rider_type",
                     "identifier",
                     "name",
                     "line",
@@ -30917,6 +30976,7 @@
                                   "driver",
                                   "supervisor",
                                   "student",
+                                  "employee",
                                   "parent"
                                 ]
                               }
@@ -31145,6 +31205,7 @@
         ],
         "x-roles": [
           "student",
+          "employee",
           "transport_admin",
           "super_admin"
         ],

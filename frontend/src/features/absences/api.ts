@@ -22,7 +22,7 @@ export const listMyAbsencesEndpoint = defineEndpoint({
     "days they can still report (7 days ahead, today until the bus leaves the line's first " +
     "stop). Errors: NO_ACTIVE_SUBSCRIPTION (409).",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   response: myAbsencesSchema,
 });
 
@@ -36,7 +36,7 @@ export const createAbsenceEndpoint = defineEndpoint({
     "Errors: NO_ACTIVE_SUBSCRIPTION (409), DATE_NOT_REPORTABLE (422), " +
     "ABSENCE_CUTOFF_PASSED (409), ALREADY_REPORTED (409).",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   idempotent: true,
   body: createAbsenceBodySchema,
   response: absenceSchema,
@@ -50,7 +50,7 @@ export const cancelAbsenceEndpoint = defineEndpoint({
     'Takes back a "not going" report before the bus leaves the line\'s first stop; the same ' +
     "people are told the student is riding after all. Errors: ABSENCE_CUTOFF_PASSED (409).",
   tag: TAG,
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   idempotent: true,
   params: absenceParamsSchema,
   response: myAbsencesSchema,

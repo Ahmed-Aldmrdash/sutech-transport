@@ -17,7 +17,7 @@ export const getMyAttendanceEndpoint = defineEndpoint({
     'going" days and check-outs with their reason, plus a count of each. Optional `outcome` ' +
     "filter. Text follows Accept-Language. Empty for a student who never rode.",
   tag: "attendance",
-  access: [Role.Student],
+  access: [Role.Student, Role.Employee],
   query: attendanceQuerySchema,
   response: myAttendanceSchema,
 });

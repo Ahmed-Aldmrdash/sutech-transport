@@ -26,6 +26,7 @@ const SOS_DESK_ROLES: readonly Role[] = [Role.SuperAdmin, Role.Transport, Role.C
 /** Roles with a notifications page, and where it is. */
 const NOTIFICATIONS_PATH: Partial<Record<Role, string>> = {
   [Role.Student]: "/student/notifications",
+  [Role.Employee]: "/student/notifications",
   [Role.Parent]: "/parent/notifications",
   [Role.Driver]: "/driver/notifications",
   [Role.Supervisor]: "/driver/notifications",

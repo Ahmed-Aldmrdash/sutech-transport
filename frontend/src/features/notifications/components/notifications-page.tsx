@@ -16,6 +16,7 @@ import { AsyncStatus, useAsync } from "@/lib/hooks/use-async";
 import { listNotifications, markAllNotificationsRead } from "../api";
 import { SessionStatus } from "@/features/auth/session/session-store";
 import { useSession } from "@/features/auth/session/use-session";
+import { useIsEmployee } from "@/features/auth/session/use-is-employee";
 import { unreadStore } from "../unread-store";
 import { NotificationRow } from "./notification-row";
 
@@ -35,6 +36,7 @@ export function NotificationsPage() {
   const [pages, setPages] = useState(1);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const session = useSession();
+  const isEmployee = useIsEmployee();
   const isParent =
     session.status === SessionStatus.SignedIn && session.session.user.role === Role.Parent;
   // Every page shown so far, re-read together so a refresh keeps the list in step.
@@ -80,7 +82,7 @@ export function NotificationsPage() {
   const header = (
     <PageHeader
       title={t("title")}
-      description={isParent ? t("leadParent") : t("lead")}
+      description={isParent ? t("leadParent") : t(isEmployee ? "leadStaff" : "lead")}
       actions={
         <Button
           variant="secondary"
@@ -123,7 +125,7 @@ export function NotificationsPage() {
         <EmptyState
           icon={<Bell />}
           title={filter === Filter.Unread ? t("emptyUnreadTitle") : t("emptyTitle")}
-          description={t("emptyBody")}
+          description={t(isEmployee ? "emptyBodyStaff" : "emptyBody")}
         />
       ) : null}
       {state.status === AsyncStatus.Success && state.data.items.length > 0 ? (

@@ -310,6 +310,7 @@ function allStudents(language: string, now: number): OpsStudent[] {
     const booking = bookingOnDate(record.id, today, now);
     return {
       student_id: record.id,
+      rider_type: record.riderType,
       identifier: record.identifier,
       name: localized(language, record.nameAr, record.nameEn),
       line: seat ? toLineSummary(seat.line, language) : null,
@@ -323,6 +324,7 @@ function allStudents(language: string, now: number): OpsStudent[] {
     .filter(({ rider }) => !knownIds.has(rider.studentId))
     .map((seat): OpsStudent => ({
       student_id: seat.rider.studentId,
+      rider_type: "student",
       identifier: seat.rider.identifier,
       name: localized(language, seat.rider.nameAr, seat.rider.nameEn),
       line: toLineSummary(seat.line, language),
@@ -336,7 +338,10 @@ function allStudents(language: string, now: number): OpsStudent[] {
 function matches(student: OpsStudent, q: string | undefined): boolean {
   if (!q) return true;
   const needle = q.toLowerCase();
-  return student.identifier.includes(needle) || student.name.toLowerCase().includes(needle);
+  // Staff IDs have letters ("EMP-2001"), so they match in either case too.
+  return (
+    student.identifier.toLowerCase().includes(needle) || student.name.toLowerCase().includes(needle)
+  );
 }
 
 registerMock(listOpsStudentsEndpoint, ({ query }, { token, language }) => {
@@ -346,6 +351,7 @@ registerMock(listOpsStudentsEndpoint, ({ query }, { token, language }) => {
     .filter((student) => matches(student, query.q))
     .filter((student) => !query.line_id || student.line?.line_id === query.line_id)
     .filter((student) => !query.standing || student.standing === query.standing)
+    .filter((student) => !query.rider_type || student.rider_type === query.rider_type)
     .sort((a, b) => a.name.localeCompare(b.name, language));
   return {
     items: found.slice((page - 1) * STUDENTS_PAGE_SIZE, page * STUDENTS_PAGE_SIZE),
@@ -403,8 +409,10 @@ registerMock(getOpsStudentEndpoint, ({ params }, { token, language }) => {
   }
   const record = mockStudentRecords().find((item) => item.id === student.student_id);
   const seat = seatsToday().get(student.student_id);
-  const guardianAccount = mockGuardianAccountOf(student.student_id);
-  const desk = deskGuardianOf(student.student_id);
+  // Staff have no guardian.
+  const isStaff = student.rider_type === "employee";
+  const guardianAccount = isStaff ? undefined : mockGuardianAccountOf(student.student_id);
+  const desk = isStaff ? undefined : deskGuardianOf(student.student_id);
   const detail: OpsStudentDetail = {
     ...student,
     faculty: record
