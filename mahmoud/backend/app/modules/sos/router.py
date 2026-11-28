@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db_session
 from app.modules.auth.dependencies import require_operation, require_same_origin
 from app.modules.auth.models import Account
+from app.modules.sos.dependencies import get_sos_gateway
 from app.modules.sos.gateway import SOSGateway
 from app.modules.sos.schemas import SOSActionRequest, SOSCreateRequest
 from app.modules.sos.service import (
